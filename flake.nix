@@ -3,33 +3,31 @@
 
   inputs = {
     nixpkgs = {
-      # url = "github:nixos/nixpkgs/nixos-unstable"; # uncomment this if you know what you're doing
-      follows = "hydenix/nixpkgs"; # then comment this
+      follows = "hydenix/nixpkgs";
     };
     hydenix.url = "github:richen604/hydenix";
     nixos-hardware.url = "github:nixos/nixos-hardware/master";
   };
 
-  outputs =
-    { ... }@inputs:
+  outputs = { ... }@inputs:
     let
-      hydenixConfig = inputs.nixpkgs.lib.nixosSystem {
+      mkConfig = host: inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = {
-          inherit inputs;
-        };
+        specialArgs = { inherit inputs; };
         modules = [
-          ./configuration.nix
+          ./hosts/${host}/configuration.nix
         ];
       };
+
+      vmConfigBase = mkConfig "vm";
       vmConfig = inputs.hydenix.lib.vmConfig {
         inherit inputs;
-        nixosConfiguration = hydenixConfig;
+        nixosConfiguration = vmConfigBase;
       };
     in
     {
-      nixosConfigurations.hydenix = hydenixConfig;
-      nixosConfigurations.default = hydenixConfig;
+      nixosConfigurations.hydenix = vmConfigBase;
+      nixosConfigurations.default = vmConfigBase;
       packages."x86_64-linux".vm = vmConfig.config.system.build.vm;
     };
 }

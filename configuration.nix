@@ -7,8 +7,9 @@
   imports = [
     inputs.hydenix.inputs.home-manager.nixosModules.home-manager
     inputs.hydenix.nixosModules.default
-    ./modules/system
-    ./hardware/vm-hardware.nix
+    ../../modules/core
+    ../../modules/desktop
+    ../../modules/home
   ];
 
   home-manager = {
@@ -22,7 +23,9 @@
       {
         imports = [
           inputs.hydenix.homeModules.default
-          ./modules/hm
+          ../../modules/home/terminal
+          ../../modules/home/nvim
+          ../../modules/home/media
         ];
       };
   };
