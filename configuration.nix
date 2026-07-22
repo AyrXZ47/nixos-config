@@ -27,7 +27,6 @@
       };
   };
 
-  # Aquí creamos tu cuenta en el sistema
   users.users.yovick = {
     isNormalUser = true;
     initialPassword = "yovick"; 
