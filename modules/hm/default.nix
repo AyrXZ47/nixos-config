@@ -53,6 +53,10 @@
       window#waybar {
         background: transparent;
       }
+      /* Aumentar el tamaño de todos los iconos y widgets */
+      * {
+        font-size: 18px; /* Súbelo a 20px si los quieres aún más grandes */
+      }
     '';
   };
 
