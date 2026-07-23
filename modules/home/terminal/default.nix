@@ -38,8 +38,8 @@
       plugins = [ "git" "fzf" ];
     };
 
-    # Inicialización de Powerlevel10k
-    initExtra = ''
+# Inicialización de Powerlevel10k (actualizado al nuevo estándar de Nix)
+    initContent = ''
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
       [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
     '';
