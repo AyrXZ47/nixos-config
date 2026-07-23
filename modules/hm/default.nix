@@ -4,14 +4,8 @@
   imports = [ ];
   home.packages = [ ];
 
-  # --- [ CONTROL DE FRAMEWORK HYDENIX Y BLOATWARE ] ---
   hydenix.hm = {
     enable = true;
-    
-    # APAGAMOS EL BLOATWARE PREINSTALADO DEL AUTOR:
-    vscode.enable = false;   # Fuera VSCode (usamos Neovim)
-    discord.enable = false;  # Fuera el Discord oficial rancio
-    spotify.enable = false;  # Fuera Spotify si no lo usas
   };
 
   # --- [ HYPRLAND PREFS: RESOLUCIÓN Y TRANSPARENCIA ] ---
