@@ -7,13 +7,14 @@
 
   hydenix.hm.enable = true;
 
-  # --- [ WAYBAR A LA DERECHA CON ESTÉTICA INTACTA ] ---
+# --- [ WAYBAR A LA DERECHA CON ESTÉTICA INTACTA ] ---
   home.file.".config/waybar/config" = lib.mkForce {
     text = ''
       {
         "include": [
-          "~/.config/waybar/modules",
-          "~/.config/waybar/modules.json"
+          "~/.config/waybar/modules.json",
+          "~/.config/waybar/modules/*.json",
+          "~/.config/waybar/modules/*.jsonc"
         ],
         "layer": "top",
         "position": "right",
