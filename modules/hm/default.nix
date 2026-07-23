@@ -4,24 +4,29 @@
   imports = [ ];
   home.packages = [ ];
 
-  
   # --- [ CONTROL DE HYDENIX Y ANIMACIONES ] ---
   hydenix.hm = {
-    enable = true;
+    enable = true;[cite: 4]
     
     # Blindar la animación LimeFrenzy para siempre
     hyprland.animations = {
-      enable = true;
+      enable = true;[cite: 4]
       preset = "LimeFrenzy";
     };
 
-    editors.vscode.enable = false;
+    # ❌ APAGAMOS LOS EDITORES DE HYDENIX PARA ACABAR CON LA COLISIÓN
+    editors = {
+      enable = true;[cite: 4]
+      neovim = false;      # <- Aquí moría el clon de /bin/nvim
+      vim.enable = false;  # <- Apagamos vim clásico para evitar ruido[cite: 4]
+      vscode.enable = false;[cite: 4]
+      default = "nvim";    # <- Le decimos a Hydenix cuál es nuestro editor supremo[cite: 4]
+    };
+
     social.discord.enable = false;
-    social.vesktop.enable = true;
+    social.vesktop.enable = true;[cite: 4]
     spotify.enable = false;
   };
-
-
 
   # --- [ HYPRLAND PREFS: RESOLUCIÓN Y TRANSPARENCIA ] ---
   home.file.".config/hypr/userprefs.conf" = lib.mkForce {
@@ -51,7 +56,7 @@
     '';
   };
 
-# --- [ WAYBAR: CSS OPTIMIZADO Y SUTIL PARA BARRA VERTICAL ] ---
+  # --- [ WAYBAR: CSS OPTIMIZADO Y SUTIL PARA BARRA VERTICAL ] ---
   home.file.".config/waybar/user-style.css" = lib.mkForce {
     text = ''
       window#waybar {
@@ -109,5 +114,4 @@
     GTK_THEME_VARIANT = "dark";
     MOZ_ENABLE_WAYLAND = "1";
   };
-
 }
