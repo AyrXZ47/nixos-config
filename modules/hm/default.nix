@@ -1,41 +1,29 @@
 { lib, ... }:
 
 {
-  imports = [
-    # ./example.nix
-  ];
+  imports = [ ];
 
-  home.packages = [
-    # tus paquetes
-  ];
+  home.packages = [ ];
 
   hydenix.hm.enable = true;
 
-  # --- [ INYECCIÓN DE DOTFILES CON FORZADO DE PRIORIDAD ] ---
+  # --- [ INYECCIÓN DE DOTFILES ] ---
 
-  # 1. Waybar
-  home.file.".config/waybar/config" = lib.mkForce {
-    text = ''
-      {
-        "layer": "top",
-        "position": "right",
-        "width": 45,
-        "modules-left": ["hyprland/workspaces"],
-        "modules-center": ["clock"],
-        "modules-right": ["tray"]
-      }
-    '';
-  };
-
-  # 2. Hyprland User Prefs
+  # 1. Hyprland User Prefs (Resolución + Transparencia de Waybar)
   home.file.".config/hypr/userprefs.conf" = lib.mkForce {
     text = ''
+      # Forzar resolución desde el segundo cero
+      monitor = Virtual-1, 1920x1080@60, auto, 1
+      # Fallback genérico por si la VM le asigna otro nombre al monitor
+      monitor = , 1920x1080@60, auto, 1
+
+      # Quitar el blur de Waybar
       layerrule = ignorealpha 1, waybar
       layerrule = noanim, waybar
     '';
   };
 
-  # 3. Hypridle
+  # 2. Hypridle
   home.file.".config/hypr/hypridle.conf" = lib.mkForce {
     text = ''
       general {
