@@ -98,4 +98,16 @@
     '';
   };
 
+  # --- [ BLINDAR MODO OSCURO EN SISTEMA Y FIREFOX ] ---
+  dconf.settings = {
+    "org/gnome/desktop/interface" = {
+      color-scheme = "prefer-dark";
+    };
+  };
+
+  home.sessionVariables = {
+    GTK_THEME_VARIANT = "dark";
+    MOZ_ENABLE_WAYLAND = "1";
+  };
+
 }

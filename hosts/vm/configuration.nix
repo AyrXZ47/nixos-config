@@ -59,6 +59,7 @@
   system.stateVersion = "25.05";
 
 boot = {
+    kernelPackages = lib.mkForce pkgs.linuxPackages_zen;
     loader.timeout = 0;
     plymouth = {
       enable = true;
