@@ -4,20 +4,24 @@
   imports = [ ];
   home.packages = [ ];
 
-  # --- [ CONTROL DE BLOATWARE EN HOME MANAGER ] ---
+  
+  # --- [ CONTROL DE HYDENIX Y ANIMACIONES ] ---
   hydenix.hm = {
     enable = true;
+    
+    # Blindar la animación LimeFrenzy para siempre
+    hyprland.animations = {
+      enable = true;
+      preset = "LimeFrenzy";
+    };
 
-    # 1. Quitar VSCode
     editors.vscode.enable = false;
-
-    # 2. Quitar Discord oficial y dejar Vesktop
     social.discord.enable = false;
-    social.vesktop.enable = false;
-
-    # 3. Quitar Spotify
+    social.vesktop.enable = true;
     spotify.enable = false;
   };
+
+
 
   # --- [ HYPRLAND PREFS: RESOLUCIÓN Y TRANSPARENCIA ] ---
   home.file.".config/hypr/userprefs.conf" = lib.mkForce {
@@ -47,15 +51,35 @@
     '';
   };
 
-# --- [ WAYBAR: TRANSPARENCIA TOTAL ] ---
+# --- [ WAYBAR: CSS OPTIMIZADO PARA BARRA VERTICAL ] ---
   home.file.".config/waybar/user-style.css" = lib.mkForce {
     text = ''
       window#waybar {
         background: transparent;
       }
-      /* Aumentar el tamaño de todos los iconos y widgets */
+
+      /* Aumentar tamaño base de íconos */
       * {
-        font-size: 18px; /* Súbelo a 20px si los quieres aún más grandes */
+        font-size: 18px;
+      }
+
+      /* Matar el relleno gordo horizontal y apretar la píldora al icono */
+      .pill, group {
+        padding: 4px 2px !important;
+        margin: 4px 0px !important;
+        border-radius: 12px !important;
+      }
+
+      /* Ceñir los botones de las apps y del área de trabajo */
+      #taskbar button, #workspaces button {
+        padding: 4px 2px !important;
+        margin: 2px 0px !important;
+        min-width: 0px !important;
+        border-radius: 8px !important;
+      }
+
+      #taskbar {
+        padding: 0px !important;
       }
     '';
   };
