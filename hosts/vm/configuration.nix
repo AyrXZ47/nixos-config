@@ -61,7 +61,7 @@
     consoleLogLevel = 0;
     initrd.verbose = false;
     
-    initrd.kernelModules = [ "virtio_gpu" "virtio_vga" "qxl" ];
+    initrd.kernelModules = [ "virtio_gpu" "qxl" ];
     
     kernelParams = [
       "quiet"
