@@ -68,7 +68,7 @@ boot = {
     consoleLogLevel = 0;
     initrd.verbose = false;
     initrd.systemd.enable = true;
-    initrd.kernelModules = [ "virtio_gpu" "qxl" ];
+    initrd.kernelModules = [ "virtio_gpu" ];
     
     kernelParams = [
       "quiet"
