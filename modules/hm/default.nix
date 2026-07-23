@@ -51,35 +51,49 @@
     '';
   };
 
-# --- [ WAYBAR: CSS OPTIMIZADO PARA BARRA VERTICAL ] ---
+# --- [ WAYBAR: CSS OPTIMIZADO Y SUTIL PARA BARRA VERTICAL ] ---
   home.file.".config/waybar/user-style.css" = lib.mkForce {
     text = ''
       window#waybar {
         background: transparent;
       }
 
-      /* Aumentar tamaño base de íconos */
+      /* Tamaño base de tipografía */
       * {
         font-size: 18px;
       }
 
-      /* Matar el relleno gordo horizontal y apretar la píldora al icono */
+      /* Contenedores generales (píldoras): ultra delgadas */
       .pill, group {
-        padding: 4px 2px;
+        padding: 4px 0px;
         margin: 4px 0px;
         border-radius: 12px;
       }
 
-      /* Ceñir los botones de las apps y del área de trabajo */
-      #taskbar button, #workspaces button {
-        padding: 4px 2px;
+      /* Botones normales de áreas de trabajo y apps */
+      #workspaces button, #taskbar button {
+        padding: 4px 0px;
         margin: 2px 0px;
-        min-width: 0px;
+        min-width: 28px;
+        min-height: 28px;
+        border-radius: 8px;
+        background: transparent;
+      }
+
+      /* INDICADOR ACTIVO SUTIL: Reemplaza la madre azul por un brillo translúcido */
+      #workspaces button.active, #workspaces button.focused,
+      #taskbar button.active {
+        box-shadow: none;
+        border: none;
+        padding: 4px 0px;
+        min-width: 28px;
         border-radius: 8px;
       }
 
-      #taskbar {
+      /* Eliminar márgenes extras del contenedor de apps */
+      #taskbar, #workspaces {
         padding: 0px;
+        margin: 0px;
       }
     '';
   };
