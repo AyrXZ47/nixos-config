@@ -50,6 +50,54 @@
     ]; 
     shell = pkgs.zsh; 
   };
+{
+  inputs,
+  config,
+  pkgs,
+  ...
+}:
+{
+  imports = [
+    inputs.hydenix.inputs.home-manager.nixosModules.home-manager
+    inputs.hydenix.nixosModules.default
+    ../../modules/core
+    ../../modules/desktop
+    ./hardware-configuration.nix # <-- ¡El anclaje de tu File System!
+  ];
+
+  # --- [ TWEAKS DE ENERGÍA Y VIRTUALIZACIÓN ] ---
+  systemd.targets.sleep.enable = false;
+  systemd.targets.suspend.enable = false;
+  systemd.targets.hibernate.enable = false;
+  systemd.targets.hybrid-sleep.enable = false;
+
+  services.spice-vdagentd.enable = true;
+
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    extraSpecialArgs = { inherit inputs; };
+    
+    users."yovick" =
+      { ... }:
+      {
+        imports = [
+          inputs.hydenix.homeModules.default
+          ../../modules/home/default.nix
+        ];
+      };
+  };
+
+  users.users.yovick = {
+    isNormalUser = true;
+    initialPassword = "yovick"; 
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "video"
+    ]; 
+    shell = pkgs.zsh; 
+  };
 
   hydenix = {
     enable = true; 
@@ -65,7 +113,6 @@
     consoleLogLevel = 0;
     initrd.verbose = false;
     
-    # Forzamos los drivers de video desde el initrd para Plymouth
     initrd.kernelModules = [ "virtio_gpu" "virtio_vga" "qxl" ];
     
     kernelParams = [
