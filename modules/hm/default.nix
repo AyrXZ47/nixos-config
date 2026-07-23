@@ -17,8 +17,8 @@
     # APAGAMOS LOS EDITORES DE HYDENIX PARA ACABAR CON LA COLISIÓN DE /bin/nvim
     editors = {
       enable = true;
-      neovim = false;      # <- Neutraliza la colisión con nuestro programs.neovim
-      vim.enable = false;  # <- Apagamos vim clásico
+      neovim = false;      # <- Booleano directo: apaga el nvim de Hydenix
+      vim = false;         # <- CORREGIDO: Booleano directo para apagar vim clásico
       vscode.enable = false;
       default = "nvim";    # <- Declaramos tu Neovim cyberpunk como supremo
     };
