@@ -6,25 +6,25 @@
 
   # --- [ CONTROL DE HYDENIX Y ANIMACIONES ] ---
   hydenix.hm = {
-    enable = true;[cite: 4]
+    enable = true;
     
     # Blindar la animación LimeFrenzy para siempre
     hyprland.animations = {
-      enable = true;[cite: 4]
+      enable = true;
       preset = "LimeFrenzy";
     };
 
-    # ❌ APAGAMOS LOS EDITORES DE HYDENIX PARA ACABAR CON LA COLISIÓN
+    # APAGAMOS LOS EDITORES DE HYDENIX PARA ACABAR CON LA COLISIÓN DE /bin/nvim
     editors = {
-      enable = true;[cite: 4]
-      neovim = false;      # <- Aquí moría el clon de /bin/nvim
-      vim.enable = false;  # <- Apagamos vim clásico para evitar ruido[cite: 4]
-      vscode.enable = false;[cite: 4]
-      default = "nvim";    # <- Le decimos a Hydenix cuál es nuestro editor supremo[cite: 4]
+      enable = true;
+      neovim = false;      # <- Neutraliza la colisión con nuestro programs.neovim
+      vim.enable = false;  # <- Apagamos vim clásico
+      vscode.enable = false;
+      default = "nvim";    # <- Declaramos tu Neovim cyberpunk como supremo
     };
 
     social.discord.enable = false;
-    social.vesktop.enable = true;[cite: 4]
+    social.vesktop.enable = true;
     spotify.enable = false;
   };
 
