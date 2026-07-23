@@ -15,8 +15,6 @@
     
     # Herramientas IA Locales y CLI
     aider-chat
-    # Para OpenCode y Headroom podemos requerir paquetes de python/nodejs
-    python313
     uv
     nodejs_22
     nodePackages.pnpm

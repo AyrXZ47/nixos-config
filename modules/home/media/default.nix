@@ -1,11 +1,10 @@
-{ pkgs, ... }:
+{config, pkgs, ... }:
 
 {
   home.packages = with pkgs; [
     mpc
     ncmpcpp
     yt-dlp
-    python3
   ];
 
   services.mpd = {
