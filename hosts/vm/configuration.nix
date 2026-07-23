@@ -54,10 +54,6 @@
     hostname = "nixos-vm"; 
     timezone = "America/Mexico_City"; 
     locale = "en_US.UTF-8"; 
-    # --- [ MATANDO EL BLOATWARE PREINSTALADO ] ---
-    vscode.enable = false;   # Fuera VSCode
-    discord.enable = false;  # Fuera Discord oficial (instalarás Vesktop después)
-    spotify.enable = false;  # Fuera Spotify
   };
 
   system.stateVersion = "25.05";

@@ -4,23 +4,16 @@
   imports = [ ];
   home.packages = [ ];
 
-  # --- [ CONTROL DE BLOATWARE EN HYDENIX ] ---
+  # --- [ CONTROL DE BLOATWARE EN HOME MANAGER ] ---
   hydenix.hm = {
     enable = true;
-    
-    # 1. Quitar VSCode (Nos quedamos con Neovim)
-    editors = {
-      enable = true;
-      neovim = true;
-      vscode.enable = false;
-    };
 
-    # 2. Quitar Discord oficial rancio (Y dejamos Vesktop activo)
-    social = {
-      enable = true;
-      discord.enable = false;
-      vesktop.enable = true;
-    };
+    # 1. Quitar VSCode
+    editors.vscode.enable = false;
+
+    # 2. Quitar Discord oficial y dejar Vesktop
+    social.discord.enable = false;
+    social.vesktop.enable = false;
 
     # 3. Quitar Spotify
     spotify.enable = false;
