@@ -12,6 +12,16 @@
     ../../modules/home
   ];
 
+  # --- [ TWEAKS DE ENERGÍA Y VIRTUALIZACIÓN ] ---
+  # Evitamos que la VM hiberne o se suspenda a nivel de systemd
+  systemd.targets.sleep.enable = false;
+  systemd.targets.suspend.enable = false;
+  systemd.targets.hibernate.enable = false;
+  systemd.targets.hybrid-sleep.enable = false;
+
+  # Agente para negociar la resolución automáticamente con GNOME Boxes
+  services.spice-vdagentd.enable = true;
+
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -54,6 +64,10 @@
     plymouth.enable = true;
     consoleLogLevel = 0;
     initrd.verbose = false;
+    
+    # Forzamos los drivers de video desde el initrd para Plymouth
+    initrd.kernelModules = [ "virtio_gpu" "virtio_vga" "qxl" ];
+    
     kernelParams = [
       "quiet"
       "splash"
