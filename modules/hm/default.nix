@@ -46,4 +46,14 @@
       }
     '';
   };
+
+# --- [ WAYBAR: TRANSPARENCIA TOTAL ] ---
+  home.file.".config/waybar/user-style.css" = lib.mkForce {
+    text = ''
+      window#waybar {
+        background: transparent !important;
+      }
+    '';
+  };
+
 }
