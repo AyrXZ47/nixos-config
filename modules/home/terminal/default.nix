@@ -21,8 +21,9 @@
     nodejs_22
     nodePackages.pnpm
     
-    # Fuentes (JetBrains Mono Nerd Font para íconos cyberpunk)
+    # Fuentes y Temas (JetBrains Mono Nerd Font para íconos cyberpunk)
     nerd-fonts.jetbrains-mono
+    zsh-powerlevel10k
   ];
 
   # 2. Configuración declarativa de Zsh (Reemplaza setup manual)
@@ -44,8 +45,6 @@
     '';
   };
 
-  # Paquete de Powerlevel10k necesario para Zsh
-  home.packages = [ pkgs.zsh-powerlevel10k ];
 
   # 3. Fix para PipeWire: Bloquear control de volumen de Chrome
   xdg.configFile."pipewire/pipewire-pulse.conf.d/10-block-chrome-volume.conf".text = ''
