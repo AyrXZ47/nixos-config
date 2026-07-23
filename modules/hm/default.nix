@@ -4,8 +4,26 @@
   imports = [ ];
   home.packages = [ ];
 
+  # --- [ CONTROL DE BLOATWARE EN HYDENIX ] ---
   hydenix.hm = {
     enable = true;
+    
+    # 1. Quitar VSCode (Nos quedamos con Neovim)
+    editors = {
+      enable = true;
+      neovim = true;
+      vscode.enable = false;
+    };
+
+    # 2. Quitar Discord oficial rancio (Y dejamos Vesktop activo)
+    social = {
+      enable = true;
+      discord.enable = false;
+      vesktop.enable = true;
+    };
+
+    # 3. Quitar Spotify
+    spotify.enable = false;
   };
 
   # --- [ HYPRLAND PREFS: RESOLUCIÓN Y TRANSPARENCIA ] ---
