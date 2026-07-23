@@ -1,5 +1,6 @@
 {
   inputs,
+  config,
   pkgs,
   ...
 }:
@@ -9,7 +10,7 @@
     inputs.hydenix.nixosModules.default
     ../../modules/core
     ../../modules/desktop
-    ../../modules/home
+    # ❌ ELIMINADO: ../../modules/home (¡Este era el bug que rompía todo!)
   ];
 
   # --- [ TWEAKS DE ENERGÍA Y VIRTUALIZACIÓN ] ---
@@ -33,9 +34,8 @@
       {
         imports = [
           inputs.hydenix.homeModules.default
-          ../../modules/home/terminal
-          ../../modules/home/nvim
-          ../../modules/home/media
+          # ✅ INYECTADO CORRECTAMENTE: Centralizamos todos tus tweaks aquí
+          ../../modules/home/default.nix
         ];
       };
   };
