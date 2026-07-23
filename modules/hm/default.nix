@@ -65,21 +65,21 @@
 
       /* Matar el relleno gordo horizontal y apretar la píldora al icono */
       .pill, group {
-        padding: 4px 2px !important;
-        margin: 4px 0px !important;
-        border-radius: 12px !important;
+        padding: 4px 2px;
+        margin: 4px 0px;
+        border-radius: 12px;
       }
 
       /* Ceñir los botones de las apps y del área de trabajo */
       #taskbar button, #workspaces button {
-        padding: 4px 2px !important;
-        margin: 2px 0px !important;
-        min-width: 0px !important;
-        border-radius: 8px !important;
+        padding: 4px 2px;
+        margin: 2px 0px;
+        min-width: 0px;
+        border-radius: 8px;
       }
 
       #taskbar {
-        padding: 0px !important;
+        padding: 0px;
       }
     '';
   };
