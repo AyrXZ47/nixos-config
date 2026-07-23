@@ -1,4 +1,5 @@
-{ ... }:
+# Agregamos 'lib' a los argumentos de entrada
+{ lib, ... }:
 
 {
   imports = [
@@ -11,10 +12,10 @@
 
   hydenix.hm.enable = true;
 
-  # --- [ INYECCIÓN DE DOTFILES ] ---
+  # --- [ INYECCIÓN DE DOTFILES CON FORZADO DE PRIORIDAD ] ---
 
   # 1. Waybar
-  xdg.configFile."waybar/config".text = ''
+  xdg.configFile."waybar/config".text = lib.mkForce ''
     {
       "layer": "top",
       "position": "right",
@@ -25,23 +26,21 @@
     }
   '';
 
-  # 2. Hyprland User Prefs (para quitar el blur de Waybar)
-  xdg.configFile."hypr/userprefs.conf".text = ''
+  # 2. Hyprland User Prefs
+  xdg.configFile."hypr/userprefs.conf".text = lib.mkForce ''
     # Ignorar la opacidad/blur en waybar
     layerrule = ignorealpha 1, waybar
     layerrule = noanim, waybar
   '';
 
-  # 3. Hypridle (Configuración de energía y pantalla)
-  # Aquí puedes ajustar los timeouts a tu gusto (en segundos)
-  xdg.configFile."hypr/hypridle.conf".text = ''
+  # 3. Hypridle
+  xdg.configFile."hypr/hypridle.conf".text = lib.mkForce ''
     general {
         lock_cmd = pidof hyprlock || hyprlock
         before_sleep_cmd = loginctl lock-session
         after_sleep_cmd = hyprctl dispatch dpms on
     }
 
-    # Apagar la pantalla a los 10 minutos (600 segundos) en lugar de 5
     listener {
         timeout = 600
         on-timeout = hyprctl dispatch dpms off
