@@ -58,17 +58,16 @@
 
   system.stateVersion = "25.05";
 
-  boot = {
-    # --- [ ARRANQUE SILENCIOSO Y ELEGANTE ] ---
-    loader.timeout = 0; # Oculta el menú de generaciones
-
-    plymouth.enable = true;
+boot = {
+    loader.timeout = 0;
+    plymouth = {
+      enable = true;
+      # CRÍTICO: 'spinner' o 'fade-in' dibujan la UI gráfica sin buscar el logo UEFI de la motherboard.
+      theme = "spinner"; 
+    };
     consoleLogLevel = 0;
     initrd.verbose = false;
-    
-    # Fundamental para que Plymouth dibuje la UI gráfica al pedir contraseña
     initrd.systemd.enable = true;
-    
     initrd.kernelModules = [ "virtio_gpu" "qxl" ];
     
     kernelParams = [
@@ -79,6 +78,8 @@
       "rd.systemd.show_status=false"
       "rd.udev.log_level=3"
       "udev.log_priority=3"
+      "vt.global_cursor_default=0" # Oculta el cursor parpadeante en la consola
+      "video=1920x1080@60"         # FUERZA 1080p desde el milisegundo 0: Arregla SDDM y Plymouth
     ];
   };
 }

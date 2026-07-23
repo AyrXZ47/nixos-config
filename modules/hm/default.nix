@@ -7,23 +7,38 @@
 
   hydenix.hm.enable = true;
 
-  # --- [ INYECCIÓN DE DOTFILES ] ---
+  # --- [ WAYBAR A LA DERECHA CON ESTÉTICA INTACTA ] ---
+  home.file.".config/waybar/config" = lib.mkForce {
+    text = ''
+      {
+        "include": [
+          "~/.config/waybar/modules",
+          "~/.config/waybar/modules.json"
+        ],
+        "layer": "top",
+        "position": "right",
+        "width": 44,
+        "modules-left": ["hyprland/workspaces"],
+        "modules-center": ["clock"],
+        "modules-right": ["tray", "custom/power"]
+      }
+    '';
+  };
 
-  # 1. Hyprland User Prefs (Resolución + Transparencia de Waybar)
+  # --- [ HYPRLAND PREFS: RESOLUCIÓN Y TRANSPARENCIA ] ---
   home.file.".config/hypr/userprefs.conf" = lib.mkForce {
     text = ''
-      # Forzar resolución desde el segundo cero
+      # Forzar resolución desde el segundo cero (soporte específico y genérico)
       monitor = Virtual-1, 1920x1080@60, auto, 1
-      # Fallback genérico por si la VM le asigna otro nombre al monitor
       monitor = , 1920x1080@60, auto, 1
 
-      # Quitar el blur de Waybar
+      # Forzamos la transparencia y quitamos el blur feo de Waybar
       layerrule = ignorealpha 1, waybar
       layerrule = noanim, waybar
     '';
   };
 
-  # 2. Hypridle
+  # --- [ HYPRIDLE: GESTIÓN DE ENERGÍA Y SUSPENSIÓN ] ---
   home.file.".config/hypr/hypridle.conf" = lib.mkForce {
     text = ''
       general {
