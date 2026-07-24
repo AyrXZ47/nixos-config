@@ -46,16 +46,16 @@
     '';
   };
 
- # --- [ HYPRLAND PREFS: RESOLUCIÓN, TRANSPARENCIA, ANIMACIONES, GAPS Y DWINDLE ] ---
+# --- [ HYPRLAND PREFS: TUS MÁRGENES SAGRADOS INTELIGENTES ] ---
   home.file.".config/hypr/userprefs.conf" = lib.mkForce {
     text = ''
       monitor = Virtual-1, 1920x1080@60, auto, 1
       monitor = , 1920x1080@60, auto, 1
 
-      # Gaps compactos para no perder pantalla (6px alinea exactamente con Waybar)
+      # TU MARGEN SAGRADO DE 14PX INTACTO
       general {
-          gaps_in = 4
-          gaps_out = 6
+          gaps_in = 6
+          gaps_out = 14
       }
 
       dwindle {
@@ -72,7 +72,7 @@
     '';
   };
 
-  # --- [ WAYBAR: CSS ALINEADO, AZUL NATIVO Y CERO ÓVALOS ] ---
+  # --- [ WAYBAR: PÍLDORAS LARGAS Y ALINEACIÓN SIN ESCALÓN ] ---
   home.file.".config/waybar/user-style.css" = lib.mkForce {
     text = ''
       window#waybar {
@@ -83,13 +83,21 @@
         font-size: 18px;
       }
 
-      /* Cajitas negras: Acolchado compacto de 8px para que quepan bien todos los iconos */
+      /* ALINEACIÓN ANTIESCALÓN: Empujamos los extremos para igualar tus 14px de gaps_out */
+      .modules-left {
+        margin-top: 14px;
+      }
+      .modules-right {
+        margin-bottom: 14px;
+      }
+
+      /* PÍLDORAS MÁS LARGAS: Subimos el acolchado vertical a 14px y margen entre ellas a 6px */
       .pill, group {
-        padding-top: 8px;
-        padding-bottom: 8px;
+        padding-top: 14px;
+        padding-bottom: 14px;
         padding-left: 0px;
         padding-right: 0px;
-        margin: 4px 0px;
+        margin: 6px 0px;
         border-radius: 10px;
       }
 
@@ -102,11 +110,11 @@
       }
 
       group > *, .pill > * {
-        margin-top: 5px;
-        margin-bottom: 5px;
+        margin-top: 6px;
+        margin-bottom: 6px;
       }
 
-      /* BOTONES: Adiós al óvalo. Usamos border-radius: 4px para un rectángulo moderno */
+      /* BOTONES DE APPS: Rectangulares con bordes boleados (4px) y buen tamaño */
       #workspaces button, #taskbar button {
         padding: 4px 0px;
         margin: 4px 0px;
@@ -116,7 +124,7 @@
         background: transparent;
       }
 
-      /* INDICADOR ACTIVO: Al no poner 'background', hereda tu AZUL BONITO pero en rectángulo (4px) */
+      /* INDICADOR ACTIVO: Azul nativo en rectángulo elegante */
       #workspaces button.active, #workspaces button.focused,
       #taskbar button.active {
         box-shadow: none;
@@ -133,6 +141,7 @@
       }
     '';
   };
+
   # --- [ BLINDAR MODO OSCURO EN SISTEMA Y FIREFOX ] ---
   dconf.settings = {
     "org/gnome/desktop/interface" = {
