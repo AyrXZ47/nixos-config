@@ -28,11 +28,22 @@
     spotify.enable = false;
   };
 
-  # --- [ HYPRLAND PREFS: RESOLUCIÓN Y TRANSPARENCIA ] ---
+# --- [ HYPRLAND PREFS: RESOLUCIÓN, TRANSPARENCIA, ANIMACIONES Y GAPS ] ---
   home.file.".config/hypr/userprefs.conf" = lib.mkForce {
     text = ''
       monitor = Virtual-1, 1920x1080@60, auto, 1
       monitor = , 1920x1080@60, auto, 1
+
+      # Gaps simétricos y quirúrgicos para alinear ventanas con Waybar (3px)
+      general {
+          gaps_in = 3
+          gaps_out = 3
+      }
+
+      # Blindar animaciones para siempre
+      animations {
+          enabled = true
+      }
 
       layerrule = ignorealpha 1, waybar
       layerrule = noanim, waybar
