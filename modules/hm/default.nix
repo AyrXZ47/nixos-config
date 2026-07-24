@@ -28,27 +28,6 @@
     spotify.enable = false;
   };
 
-# --- [ HYPRLAND PREFS: RESOLUCIÓN, TRANSPARENCIA, ANIMACIONES Y GAPS ] ---
-  home.file.".config/hypr/userprefs.conf" = lib.mkForce {
-    text = ''
-      monitor = Virtual-1, 1920x1080@60, auto, 1
-      monitor = , 1920x1080@60, auto, 1
-
-      # Gaps simétricos y quirúrgicos para alinear ventanas con Waybar (3px)
-      general {
-          gaps_in = 6
-          gaps_out = 14
-      }
-
-      # Blindar animaciones para siempre
-      animations {
-          enabled = true
-      }
-
-      layerrule = ignorealpha 1, waybar
-      layerrule = noanim, waybar
-    '';
-  };
 
   # --- [ HYPRIDLE: GESTIÓN DE ENERGÍA ] ---
   home.file.".config/hypr/hypridle.conf" = lib.mkForce {
@@ -67,29 +46,54 @@
     '';
   };
 
- # --- [ WAYBAR: CSS OPTIMIZADO, SIMÉTRICO Y GEOMÉTRICO PARA BARRA VERTICAL ] ---
+ # --- [ HYPRLAND PREFS: RESOLUCIÓN, TRANSPARENCIA, ANIMACIONES, GAPS Y DWINDLE ] ---
+  home.file.".config/hypr/userprefs.conf" = lib.mkForce {
+    text = ''
+      monitor = Virtual-1, 1920x1080@60, auto, 1
+      monitor = , 1920x1080@60, auto, 1
+
+      # Gaps compactos para no perder pantalla (6px alinea exactamente con Waybar)
+      general {
+          gaps_in = 4
+          gaps_out = 6
+      }
+
+      dwindle {
+          force_split = 2
+          preserve_split = true
+      }
+
+      animations {
+          enabled = true
+      }
+
+      layerrule = ignorealpha 1, waybar
+      layerrule = noanim, waybar
+    '';
+  };
+
+  # --- [ WAYBAR: CSS ALINEADO, AZUL NATIVO Y CERO ÓVALOS ] ---
   home.file.".config/waybar/user-style.css" = lib.mkForce {
     text = ''
       window#waybar {
         background: transparent;
       }
 
-      /* Tamaño base de tipografía */
       * {
         font-size: 18px;
       }
 
-      /* Cajitas negras: Acolchado vertical de 10px y bordes menos ovalados (10px) */
+      /* Cajitas negras: Acolchado compacto de 8px para que quepan bien todos los iconos */
       .pill, group {
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding-top: 8px;
+        padding-bottom: 8px;
         padding-left: 0px;
         padding-right: 0px;
         margin: 4px 0px;
         border-radius: 10px;
       }
 
-      /* RESET: Matar márgenes horizontales residuales del tema superior para centrar todo */
+      /* RESET: Matar márgenes horizontales residuales para centrar todo */
       .pill *, group *, #tray, #tray * {
         margin-left: 0px;
         margin-right: 0px;
@@ -97,42 +101,38 @@
         padding-right: 0px;
       }
 
-      /* Distribución vertical limpia y uniforme entre íconos inferiores */
       group > *, .pill > * {
-        margin-top: 6px;
-        margin-bottom: 6px;
+        margin-top: 5px;
+        margin-bottom: 5px;
       }
 
-      /* Botones normales de áreas de trabajo y apps: Más espacio vertical (32px) y menos ovalados (6px) */
+      /* BOTONES: Adiós al óvalo. Usamos border-radius: 4px para un rectángulo moderno */
       #workspaces button, #taskbar button {
         padding: 4px 0px;
-        margin: 6px 0px;
+        margin: 4px 0px;
         min-width: 28px;
-        min-height: 32px;
-        border-radius: 6px;
+        min-height: 28px;
+        border-radius: 4px;
         background: transparent;
       }
 
-      /* INDICADOR ACTIVO SUTIL: Rectángulo moderno y elegante en vez de óvalo saturado */
+      /* INDICADOR ACTIVO: Al no poner 'background', hereda tu AZUL BONITO pero en rectángulo (4px) */
       #workspaces button.active, #workspaces button.focused,
       #taskbar button.active {
-        background: rgba(255, 255, 255, 0.12);
         box-shadow: none;
         border: none;
         padding: 4px 0px;
         min-width: 28px;
-        min-height: 32px;
-        border-radius: 6px;
+        min-height: 28px;
+        border-radius: 4px;
       }
 
-      /* Eliminar márgenes extras del contenedor de apps */
       #taskbar, #workspaces {
         padding: 0px;
         margin: 0px;
       }
     '';
   };
-
   # --- [ BLINDAR MODO OSCURO EN SISTEMA Y FIREFOX ] ---
   dconf.settings = {
     "org/gnome/desktop/interface" = {
