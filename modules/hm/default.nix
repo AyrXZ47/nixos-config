@@ -36,8 +36,8 @@
 
       # Gaps simétricos y quirúrgicos para alinear ventanas con Waybar (3px)
       general {
-          gaps_in = 9
-          gaps_out = 9
+          gaps_in = 11
+          gaps_out = 11
       }
 
       # Blindar animaciones para siempre
