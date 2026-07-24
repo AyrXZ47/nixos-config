@@ -54,7 +54,7 @@
 
       # TU MARGEN SAGRADO DE 14PX INTACTO
       general {
-          gaps_in = 6
+          gaps_in = 0
           gaps_out = 14 0 14 14
       }
 
@@ -85,20 +85,20 @@
 
       /* ALINEACIÓN ANTIESCALÓN: Empujamos los extremos para igualar tus 14px de gaps_out */
       .modules-left {
-        margin-top: 14px;
+        margin-top: 0px;
       }
       .modules-right {
-        margin-bottom: 14px;
+        margin-bottom: 0px;
       }
 
-      /* PÍLDORAS MÁS LARGAS: Subimos el acolchado vertical a 14px y margen entre ellas a 6px */
+      /* PÍLDORAS MÁS LARGAS */
       .pill, group {
-        padding-top: 24px;
-        padding-bottom: 24px;
+        padding-top: 0px;
+        padding-bottom: 0px;
         padding-left: 0px;
         padding-right: 0px;
         margin: 0px 0px;
-        border-radius: 10px;
+        border-radius: 20px;
       }
 
       /* RESET: Matar márgenes horizontales residuales para centrar todo */
@@ -110,17 +110,17 @@
       }
 
       group > *, .pill > * {
-        margin-top: 6px;
-        margin-bottom: 6px;
+        margin-top: 0px;
+        margin-bottom: 0px;
       }
 
       /* BOTONES DE APPS: Rectangulares con bordes boleados (4px) y buen tamaño */
       #workspaces button, #taskbar button {
-        padding: 4px 0px;
-        margin: 4px 0px;
+        padding: 2px 0px;
+        margin: 2px 0px;
         min-width: 28px;
         min-height: 28px;
-        border-radius: 4px;
+        border-radius: 2px;
         background: transparent;
       }
 
@@ -129,10 +129,10 @@
       #taskbar button.active {
         box-shadow: none;
         border: none;
-        padding: 4px 0px;
+        padding: 2px 0px;
         min-width: 28px;
         min-height: 28px;
-        border-radius: 4px;
+        border-radius: 2px;
       }
 
       #taskbar, #workspaces {
