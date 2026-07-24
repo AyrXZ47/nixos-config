@@ -54,8 +54,8 @@
 
       # TU MARGEN SAGRADO DE 14PX INTACTO
       general {
-          gaps_in = 0
-          gaps_out = 14 0 14 14
+          gaps_in = 6
+          gaps_out = 6 0 6 6
       }
 
       dwindle {
