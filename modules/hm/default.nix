@@ -55,7 +55,7 @@
       # TU MARGEN SAGRADO DE 14PX INTACTO
       general {
           gaps_in = 6
-          gaps_out = 14
+          gaps_out = 14 0 14 14
       }
 
       dwindle {
@@ -93,11 +93,11 @@
 
       /* PÍLDORAS MÁS LARGAS: Subimos el acolchado vertical a 14px y margen entre ellas a 6px */
       .pill, group {
-        padding-top: 14px;
-        padding-bottom: 14px;
+        padding-top: 24px;
+        padding-bottom: 24px;
         padding-left: 0px;
         padding-right: 0px;
-        margin: 6px 0px;
+        margin: 0px 0px;
         border-radius: 10px;
       }
 
