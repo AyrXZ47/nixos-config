@@ -67,7 +67,7 @@
     '';
   };
 
-  # --- [ WAYBAR: CSS OPTIMIZADO Y SUTIL PARA BARRA VERTICAL ] ---
+ # --- [ WAYBAR: CSS OPTIMIZADO, SIMÉTRICO Y GEOMÉTRICO PARA BARRA VERTICAL ] ---
   home.file.".config/waybar/user-style.css" = lib.mkForce {
     text = ''
       window#waybar {
@@ -79,31 +79,50 @@
         font-size: 18px;
       }
 
-      /* Contenedores generales (píldoras): ultra delgadas */
+      /* Cajitas negras: Acolchado vertical de 10px y bordes menos ovalados (10px) */
       .pill, group {
-        padding: 4px 0px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 0px;
+        padding-right: 0px;
         margin: 4px 0px;
-        border-radius: 12px;
+        border-radius: 10px;
       }
 
-      /* Botones normales de áreas de trabajo y apps */
+      /* RESET: Matar márgenes horizontales residuales del tema superior para centrar todo */
+      .pill *, group *, #tray, #tray * {
+        margin-left: 0px;
+        margin-right: 0px;
+        padding-left: 0px;
+        padding-right: 0px;
+      }
+
+      /* Distribución vertical limpia y uniforme entre íconos inferiores */
+      group > *, .pill > * {
+        margin-top: 6px;
+        margin-bottom: 6px;
+      }
+
+      /* Botones normales de áreas de trabajo y apps: Más espacio vertical (32px) y menos ovalados (6px) */
       #workspaces button, #taskbar button {
         padding: 4px 0px;
-        margin: 2px 0px;
+        margin: 6px 0px;
         min-width: 28px;
-        min-height: 28px;
-        border-radius: 8px;
+        min-height: 32px;
+        border-radius: 6px;
         background: transparent;
       }
 
-      /* INDICADOR ACTIVO SUTIL: Reemplaza la madre azul por un brillo translúcido */
+      /* INDICADOR ACTIVO SUTIL: Rectángulo moderno y elegante en vez de óvalo saturado */
       #workspaces button.active, #workspaces button.focused,
       #taskbar button.active {
+        background: rgba(255, 255, 255, 0.12);
         box-shadow: none;
         border: none;
         padding: 4px 0px;
         min-width: 28px;
-        border-radius: 8px;
+        min-height: 32px;
+        border-radius: 6px;
       }
 
       /* Eliminar márgenes extras del contenedor de apps */
