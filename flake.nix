@@ -11,11 +11,10 @@
 
     stylix.url = "github:danth/stylix";
 
-    hyprpanel.url = "github:Jas-SinghFSU/Hyprpanel";
   };
 
   outputs =
-    { nixpkgs, home-manager, stylix, hyprpanel, ... }:
+    { nixpkgs, home-manager, stylix, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
