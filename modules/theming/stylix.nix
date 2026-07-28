@@ -1,6 +1,9 @@
 { config, pkgs, lib, ... }:
 
 {
+  home-manager.users.yovick.home.pointerCursor.enable = true;
+
+
   stylix = {
     enable = true;
     autoEnable = true;
