@@ -61,7 +61,6 @@
       };
 
       animations = {
-        enabled = true;
         bezier = [
           "easeOut, 0.05, 0.9, 0.1, 1.05"
           "easeInOut, 0.5, 0, 0.5, 1"
@@ -75,7 +74,6 @@
       };
 
       dwindle = {
-        pseudo = true;
         preserve_split = true;
       };
 
@@ -97,7 +95,7 @@
         "SUPER, V, togglefloating"
         "SUPER, R, exec, rofi -show run"
         "SUPER, P, pseudo"
-        "SUPER, J, togglesplit"
+        "SUPER, J, layoutmsg, togglesplit"
 
         "SUPER, left, movefocus, l"
         "SUPER, right, movefocus, r"
