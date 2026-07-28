@@ -11,7 +11,7 @@
 
   boot.loader.timeout = 0;
   boot.kernelPackages = pkgs.linuxPackages_zen;
-  boot.initrd.kernelModules = [ "virtio_gpu" "virtio_vga" "vmwgfx" ];
+  boot.initrd.kernelModules = [ "virtio_gpu" "vmwgfx" ];
 
   system.stateVersion = "26.05";
 

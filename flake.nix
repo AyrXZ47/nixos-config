@@ -25,13 +25,6 @@
         modules = [
           stylix.nixosModules.stylix
 
-          {
-            nix.settings = {
-              substituters = [ "https://hyprpanel.cachix.org" ];
-              trusted-public-keys = [ "hyprpanel.cachix.org-1:fTxlrmr4lBaCbXfHX8Gd4/LxGfm/YRp+jvX7TNAS4qI=" ];
-            };
-          }
-
           home-manager.nixosModules.home-manager
           {
             home-manager = {
