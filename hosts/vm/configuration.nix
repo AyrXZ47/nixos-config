@@ -5,6 +5,8 @@
     ./hardware-configuration.nix
     ../../modules/core/user.nix
     ../../modules/desktop/hyprland.nix
+    ../../modules/theming/stylix.nix
+    ../../modules/theming/plymouth.nix
   ];
 
   modules.desktop.hyprland.enable = true;

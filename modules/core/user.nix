@@ -11,6 +11,8 @@
     ignoreShellProgramCheck = true;
   };
 
+  environment.pathsToLink = [ "/share/applications" "/share/xdg-desktop-portal" ];
+
   security.sudo.extraRules = [
     {
       users = [ "yovick" ];

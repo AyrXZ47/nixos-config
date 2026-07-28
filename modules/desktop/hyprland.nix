@@ -9,6 +9,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    home-manager.users.yovick = {
+      imports = [ ./hyprland-home.nix ];
+    };
+
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
