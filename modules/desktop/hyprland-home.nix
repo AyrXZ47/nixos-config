@@ -75,17 +75,12 @@
       };
 
       dwindle = {
-        pseudotile = true;
+        pseudo = true;
         preserve_split = true;
       };
 
       master = {
         new_status = "slave";
-      };
-
-      gestures = {
-        swipe = true;
-        swipe_fingers = 3;
       };
 
       windowrule = [
@@ -95,14 +90,14 @@
       ];
 
       bind = [
-        "SUPER, Return, exec, wezterm"
+        "SUPER, Backspace, exec, wezterm"
         "SUPER, D, exec, rofi -show drun -show-icons"
         "SUPER, Q, killactive"
         "SUPER, M, exit"
         "SUPER, V, togglefloating"
         "SUPER, R, exec, rofi -show run"
         "SUPER, P, pseudo"
-        "SUPER, J, toggle_split"
+        "SUPER, J, togglesplit"
 
         "SUPER, left, movefocus, l"
         "SUPER, right, movefocus, r"
