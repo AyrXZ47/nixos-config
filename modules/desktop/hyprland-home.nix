@@ -41,7 +41,6 @@
         border_size = 2;
         "col.active_border" = lib.mkForce "rgba(00f0ffee)";
         "col.inactive_border" = lib.mkForce "rgba(1a0b1cee)";
-        cursor_inactive_timeout = 3;
         layout = "dwindle";
       };
 
@@ -85,8 +84,8 @@
       };
 
       gestures = {
-        workspace_swipe = true;
-        workspace_swipe_fingers = 3;
+        swipe = true;
+        swipe_fingers = 3;
       };
 
       windowrule = [
@@ -103,7 +102,7 @@
         "SUPER, V, togglefloating"
         "SUPER, R, exec, rofi -show run"
         "SUPER, P, pseudo"
-        "SUPER, J, togglesplit"
+        "SUPER, J, toggle_split"
 
         "SUPER, left, movefocus, l"
         "SUPER, right, movefocus, r"
