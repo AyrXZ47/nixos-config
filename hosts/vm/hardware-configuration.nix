@@ -38,9 +38,10 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  swapDevices =
-    [ { device = "/dev/mapper/luks-c4e518d5-1a41-4c16-98b8-676fb78dff7e"; }
-    ];
+  # swapDevices commented out — LUKS-encrypted swap causes 90s boot timeout on VM
+  # swapDevices =
+  #   [ { device = "/dev/mapper/luks-c4e518d5-1a41-4c16-98b8-676fb78dff7e"; }
+  #   ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

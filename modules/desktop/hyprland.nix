@@ -11,7 +11,7 @@ in
   config = lib.mkIf cfg.enable {
     services.displayManager.sddm = {
       enable = true;
-      wayland.enable = true;
+      wayland.enable = false;
     };
     programs.hyprland = {
       enable = true;

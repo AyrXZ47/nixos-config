@@ -10,6 +10,7 @@
     Service = {
       Type = "simple";
       Environment = "HEADROOM_OUTPUT_SHAPER=1";
+      ExecCondition = "${pkgs.coreutils}/bin/test -x %h/.local/bin/headroom";
       ExecStart = "%h/.local/bin/headroom proxy --port 8787";
       Restart = "on-failure";
     };

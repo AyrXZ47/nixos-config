@@ -9,7 +9,9 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  boot.loader.timeout = 0;
   boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.initrd.kernelModules = [ "modesetting" "virtio_vga" "virtio_gpu" "vmwgfx" ];
 
   system.stateVersion = "26.05";
 
