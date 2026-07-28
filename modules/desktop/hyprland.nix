@@ -27,7 +27,6 @@ in
     };
 
     environment.systemPackages = with pkgs; [
-      hyprpanel
       wl-clipboard
       wlogout
       swaylock-effects
