@@ -26,6 +26,7 @@
     fzf
     libnotify
     obsidian
+    opencode
     pipes-rs
     ripgrep
     scrcpy
