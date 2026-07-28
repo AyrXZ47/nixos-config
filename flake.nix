@@ -26,7 +26,6 @@
           stylix.nixosModules.stylix
 
           {
-            nixpkgs.overlays = [ hyprpanel.overlay ];
             nix.settings = {
               substituters = [ "https://hyprpanel.cachix.org" ];
               trusted-public-keys = [ "hyprpanel.cachix.org-1:fTxlrmr4lBaCbXfHX8Gd4/LxGfm/YRp+jvX7TNAS4qI=" ];
