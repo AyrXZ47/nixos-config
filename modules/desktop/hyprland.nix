@@ -16,7 +16,7 @@ in
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
-      theme = "astronaut";
+      theme = "sddm-astronaut-theme";
       extraPackages = with pkgs; [ sddm-astronaut ];
     };
     services.displayManager.gdm.enable = lib.mkForce false;
