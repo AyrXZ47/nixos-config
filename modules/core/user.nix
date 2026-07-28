@@ -13,6 +13,8 @@
 
   environment.pathsToLink = [ "/share/applications" "/share/xdg-desktop-portal" ];
 
+  home-manager.backupFileExtension = "bak";
+
   security.sudo.extraRules = [
     {
       users = [ "yovick" ];
