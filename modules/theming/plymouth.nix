@@ -3,7 +3,7 @@
 {
   boot.plymouth = {
     enable = true;
-    theme = "rings";
+    theme = lib.mkForce "rings";
     themePackages = [ pkgs.adi1090x-plymouth ];
   };
 
