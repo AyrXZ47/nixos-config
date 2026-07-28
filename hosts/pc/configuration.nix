@@ -19,6 +19,11 @@
 
   system.stateVersion = "26.05";
 
+  fileSystems."/" = {
+    device = "none";
+    fsType = "tmpfs";
+  };
+
   networking.hostName = "nixos-pc";
   networking.networkmanager.enable = true;
 
@@ -46,7 +51,7 @@
   # ============================================================
 
   services.xserver.videoDrivers = [ "modesetting" ];
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
 
   environment.systemPackages = with pkgs; [
     vim

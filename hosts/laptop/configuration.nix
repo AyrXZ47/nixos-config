@@ -21,7 +21,7 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   services.xserver.videoDrivers = [ "modesetting" ];
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
 
   services.libinput.enable = true;
   services.power-profiles-daemon.enable = true;

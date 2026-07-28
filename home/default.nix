@@ -18,7 +18,7 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
-    _1password
+    _1password-cli
     btop
     cava
     ffmpeg
