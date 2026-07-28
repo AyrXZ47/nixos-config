@@ -3,6 +3,7 @@
 {
   wayland.windowManager.hyprland = {
     enable = true;
+    configType = "hyprlang";
     xwayland.enable = true;
     systemd.enable = false;
 
@@ -38,8 +39,8 @@
         gaps_in = 5;
         gaps_out = 10;
         border_size = 2;
-        "col.active_border" = "rgba(00f0ffee)";
-        "col.inactive_border" = "rgba(1a0b1cee)";
+        "col.active_border" = lib.mkForce "rgba(00f0ffee)";
+        "col.inactive_border" = lib.mkForce "rgba(1a0b1cee)";
         cursor_inactive_timeout = 3;
         layout = "dwindle";
       };
@@ -56,7 +57,7 @@
           enabled = true;
           range = 8;
           render_power = 3;
-          color = "rgba(1a0b1cee)";
+          color = lib.mkForce "rgba(1a0b1cee)";
         };
       };
 
