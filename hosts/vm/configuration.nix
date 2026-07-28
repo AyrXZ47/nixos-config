@@ -13,11 +13,6 @@
 
   system.stateVersion = "26.05";
 
-  fileSystems."/" = {
-    device = "none";
-    fsType = "tmpfs";
-  };
-
   networking.hostName = "nixos-vm";
   networking.networkmanager.enable = true;
 
