@@ -81,12 +81,6 @@
         new_status = "slave";
       };
 
-      windowrule = [
-        "float, ^(pavucontrol)$"
-        "float, ^(blueberry)$"
-        "float, title:^(Volume Control)$"
-      ];
-
       bind = [
         "SUPER, Backspace, exec, wezterm"
         "SUPER, D, exec, rofi -show drun -show-icons"
@@ -148,6 +142,12 @@
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
       ];
     };
+
+    extraConfig = ''
+      windowrule=float, ^(pavucontrol)$
+      windowrule=float, ^(blueberry)$
+      windowrule=float, title:^(Volume Control)$
+    '';
   };
 
   home.packages = with pkgs; [
