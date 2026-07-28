@@ -27,6 +27,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+      wayle
       wl-clipboard
       wlogout
       swaylock-effects
@@ -45,7 +46,11 @@ in
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     };
 
-    fonts.packages = with pkgs; [ jetbrains-mono nerdfonts ];
+    fonts.packages = with pkgs; [
+      jetbrains-mono
+      nerd-fonts.jetbrains-mono
+      nerd-fonts.symbols-only
+    ];
 
     systemd.user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";
