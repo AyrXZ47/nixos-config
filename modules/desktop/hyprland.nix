@@ -33,6 +33,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+      sddm-astronaut
       wayle
       wl-clipboard
       wlogout
