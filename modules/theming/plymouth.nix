@@ -4,7 +4,7 @@
   boot.plymouth = {
     enable = true;
     theme = lib.mkForce "rings";
-    themePackages = [ pkgs.adi1090x-plymouth ];
+    themePackages = lib.mkForce [ pkgs.adi1090x-plymouth-themes ];
   };
 
   boot.initrd.systemd.enable = true;
