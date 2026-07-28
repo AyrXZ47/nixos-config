@@ -9,6 +9,13 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    services.displayManager.sddm = {
+      enable = true;
+      wayland.enable = true;
+    };
+    services.xserver.displayManager.gdm.enable = lib.mkForce false;
+    services.xserver.desktopManager.gnome.enable = lib.mkForce false;
+
     programs.hyprland = {
       enable = true;
       withUWSM = true;

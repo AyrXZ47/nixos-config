@@ -8,7 +8,7 @@
     withNodeJs = true;
     withRuby = true;
 
-    extraLuaConfig = ''
+    initLua = ''
       local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
       if not (vim.uv or vim.loop).fs_stat(lazypath) then
         local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -64,8 +64,7 @@
       # Treesitter context
       nvim-treesitter-context
 
-      # LSP Lines
-      lsp-lines-nvim
+      lsp_lines-nvim
 
       # Obsidian
       obsidian-nvim
@@ -87,7 +86,7 @@
   home.packages = with pkgs; [
     lua-language-server
     stylua
-    nodePackages.typescript-language-server
-    nodePackages.pyright
+    typescript-language-server
+    pyright
   ];
 }
