@@ -27,7 +27,8 @@
 
       require("lazy").setup({
         spec = {
-          { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "cyberpunk-neon" } },
+          { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "cyberneon" } },
+          { "followLemmi/cyberneon.nvim", name = "cyberneon", priority = 1000 },
           { import = "plugins" },
         },
         defaults = {
@@ -54,9 +55,6 @@
     '';
 
     plugins = with pkgs.vimPlugins; [
-      # Theme
-      cyberpunk-neon-nvim
-
       # Utility
       plenary-nvim
 
