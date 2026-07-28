@@ -6,7 +6,6 @@
     enableCompletion = true;
     enableAutosuggestions = true;
     syntaxHighlighting.enable = true;
-    autoclose = true;
 
     oh-my-zsh = {
       enable = true;
