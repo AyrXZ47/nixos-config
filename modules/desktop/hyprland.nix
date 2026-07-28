@@ -11,14 +11,15 @@ in
   config = lib.mkIf cfg.enable {
     services.displayManager.sddm = {
       enable = true;
-      wayland.enable = false;
+      wayland.enable = true;
     };
+    services.displayManager.gdm.enable = lib.mkForce false;
+    services.desktopManager.gnome.enable = lib.mkForce false;
+
     programs.hyprland = {
       enable = true;
-      withUWSM = true;
+      xwayland.enable = true;
     };
-
-    programs.uwsm.enable = true;
 
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";

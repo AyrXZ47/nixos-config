@@ -4,7 +4,10 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/core/user.nix
+    ../../modules/desktop/hyprland.nix
   ];
+
+  modules.desktop.hyprland.enable = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
