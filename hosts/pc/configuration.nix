@@ -11,7 +11,12 @@
     ../../modules/apps/gaming.nix
   ];
 
-  modules.desktop.hyprland.enable = true;
+  modules.desktop.hyprland = {
+    enable = true;
+    screenshotKey = "SUPER, F4";
+    screenshotWindowKey = "SHIFT, F4";
+    screenshotScreenKey = "SUPER SHIFT, F4";
+  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

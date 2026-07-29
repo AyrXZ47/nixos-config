@@ -1,6 +1,25 @@
 { config, pkgs, lib, ... }:
 
+let
+  headroomPkg = "headroom-ai[all]";
+  pythonVersion = "3.13";
+in
 {
+  home.packages = with pkgs; [ uv python313 ];
+
+  home.activation.installHeadroom = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if [[ "''${VERBOSE:-}" != "true" ]]; then
+      export UV_QUIET=1
+      export UV_NO_PROGRESS=1
+    fi
+    if ! ${pkgs.coreutils}/bin/test -x "$HOME/.local/bin/headroom"; then
+      ${pkgs.uv}/bin/uv tool install \
+        --no-python-downloads \
+        --python ${pkgs.python313}/bin/python3.13 \
+        ${headroomPkg}
+    fi
+  '';
+
   systemd.user.services.headroom-proxy = {
     Unit = {
       Description = "Headroom Proxy Service (User Level)";

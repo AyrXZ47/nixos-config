@@ -6,11 +6,31 @@ in
 {
   options.modules.desktop.hyprland = {
     enable = lib.mkEnableOption "Hyprland window manager";
+    screenshotKey = lib.mkOption {
+      type = lib.types.str;
+      default = ", Print";
+      description = "Keybind for region screenshot (e.g. 'SUPER, F4' or ', Print')";
+    };
+    screenshotWindowKey = lib.mkOption {
+      type = lib.types.str;
+      default = "SHIFT, Print";
+      description = "Keybind for window screenshot";
+    };
+    screenshotScreenKey = lib.mkOption {
+      type = lib.types.str;
+      default = "SUPER, Print";
+      description = "Keybind for full screen screenshot";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     home-manager.users.yovick = {
       imports = [ ./hyprland-home.nix ];
+      wayland.windowManager.hyprland.settings.bind = [
+        "${cfg.screenshotKey}, exec, hyprshot -m region"
+        "${cfg.screenshotWindowKey}, exec, hyprshot -m window"
+        "${cfg.screenshotScreenKey}, exec, hyprshot -m output"
+      ];
     };
 
     services.displayManager.sddm = {
@@ -43,8 +63,6 @@ in
       swayidle
       polkit_gnome
       brightnessctl
-      pulseaudio
-      pavucontrol
     ];
 
     security.polkit.enable = true;

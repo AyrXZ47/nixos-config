@@ -24,6 +24,7 @@
     ffmpeg
     fd
     fzf
+    gh
     libnotify
     obsidian
     opencode

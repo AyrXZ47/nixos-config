@@ -158,9 +158,11 @@
     swayidle
     wlogout
     brightnessctl
-    pulseaudio
     pavucontrol
     libnotify
     wl-clipboard
+    hyprshot
+    swayimg
   ];
+
 }
