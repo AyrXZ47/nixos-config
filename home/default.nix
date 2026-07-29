@@ -9,6 +9,7 @@
     ../modules/apps/git.nix
     ../modules/apps/headroom.nix
     ../modules/apps/mpd.nix
+    ../modules/apps/firefox.nix
   ];
 
   home.username = "yovick";
