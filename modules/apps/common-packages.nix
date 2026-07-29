@@ -48,7 +48,6 @@
 
     # Audio Routing
     qpwgraph
-    pwvucontrol
 
     # Utility
     scrcpy
