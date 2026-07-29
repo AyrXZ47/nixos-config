@@ -15,7 +15,7 @@
 
       exec-once = [
         "wayle shell"
-        "hyprpaper"
+        "${pkgs.awww}/bin/awww-daemon"
         "dunst"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
       ];
@@ -45,12 +45,13 @@
       };
 
       decoration = {
-        rounding = 10;
+        rounding = 12;
         blur = {
           enabled = true;
           size = 8;
           passes = 3;
           new_optimizations = true;
+          ignore_opacity = true;
         };
         shadow = {
           enabled = true;
@@ -59,6 +60,15 @@
           color = lib.mkForce "rgba(1a0b1cee)";
         };
       };
+
+      layerrule = [
+        "blur, wayle"
+        "blur, rofi"
+        "blur, wlogout"
+        "ignorezero, wayle"
+        "ignorezero, rofi"
+        "ignorezero, wlogout"
+      ];
 
       animations = {
         bezier = [
@@ -120,6 +130,8 @@
         "SUPER SHIFT, 8, movetoworkspace, 8"
         "SUPER SHIFT, 9, movetoworkspace, 9"
 
+        "SUPER SHIFT, E, exec, wlogout --protocol layer-shell"
+
         "SUPER, mouse_down, workspace, e+1"
         "SUPER, mouse_up, workspace, e-1"
 
@@ -167,6 +179,22 @@
     tree-sitter
     awww
   ];
+
+  xdg.configFile = {
+    "wayle/config.json" = {
+      text = ''
+        {
+          "layer": "top",
+          "position": "right",
+          "margin": "10 10 10 0",
+          "width": 60
+        }
+      '';
+    };
+    "rofi/launcher.rasi" = {
+      source = ./themes/rofi/launcher.rasi;
+    };
+  };
 
   xdg.mimeApps.enable = true;
 

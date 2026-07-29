@@ -3,7 +3,14 @@
 {
   home-manager.users.yovick = {
     home.pointerCursor.enable = true;
-    stylix.targets.firefox.profileNames = [ "yovick" ];
+    stylix.targets = {
+      firefox.profileNames = [ "yovick" ];
+      hyprland.enable = true;
+      wezterm.enable = true;
+      neovim.enable = true;
+      rofi.enable = true;
+      hyprpaper.enable = lib.mkForce false;
+    };
   };
 
   stylix = {
@@ -11,7 +18,7 @@
     autoEnable = true;
     polarity = "dark";
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
-    image = ./wallpapers/cyberpunk2077.jpg;
+    image = ../../assets/wallpapers/default.jpg;
     cursor = {
       name = "Bibata-Modern-Classic";
       package = pkgs.bibata-cursors;
@@ -40,7 +47,5 @@
     opacity = {
       terminal = 0.85;
     };
-
-
   };
 }
