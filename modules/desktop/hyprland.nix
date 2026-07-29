@@ -8,17 +8,17 @@ in
     enable = lib.mkEnableOption "Hyprland window manager";
     screenshotKey = lib.mkOption {
       type = lib.types.str;
-      default = ", Print";
-      description = "Keybind for region screenshot (e.g. 'SUPER, F4' or ', Print')";
+      default = "SUPER SHIFT, P";
+      description = "Keybind for region screenshot";
     };
     screenshotWindowKey = lib.mkOption {
       type = lib.types.str;
-      default = "SHIFT, Print";
+      default = "SUPER ALT, P";
       description = "Keybind for window screenshot";
     };
     screenshotScreenKey = lib.mkOption {
       type = lib.types.str;
-      default = "SUPER, Print";
+      default = "SUPER, P";
       description = "Keybind for full screen screenshot";
     };
   };

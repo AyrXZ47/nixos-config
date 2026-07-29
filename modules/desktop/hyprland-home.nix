@@ -15,7 +15,6 @@
 
       exec-once = [
         "wayle shell"
-        "hyprpaper"
         "dunst"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
       ];
@@ -140,19 +139,18 @@
         ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
       ];
-    };
 
-    extraConfig = ''
-      windowrulev2 = float, class:^(pavucontrol)$
-      windowrulev2 = float, class:^(blueberry)$
-      windowrulev2 = float, title:^(Volume Control)$
-    '';
+      windowrule = [
+        "float, class:^(pavucontrol)$"
+        "float, class:^(blueberry)$"
+        "float, title:^(Volume Control)$"
+      ];
+    };
   };
 
   home.packages = with pkgs; [
     rofi
     dunst
-    hyprpaper
     swaylock-effects
     swayidle
     wlogout
@@ -162,6 +160,7 @@
     wl-clipboard
     hyprshot
     swayimg
+    swww
   ];
 
 }

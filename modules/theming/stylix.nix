@@ -3,7 +3,6 @@
 {
   home-manager.users.yovick.home.pointerCursor.enable = true;
 
-
   stylix = {
     enable = true;
     autoEnable = true;
@@ -37,6 +36,11 @@
     };
     opacity = {
       terminal = 0.85;
+    };
+
+    targets = {
+      swww.enable = true;
+      hyprpaper.enable = false;
     };
   };
 }
