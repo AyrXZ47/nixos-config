@@ -10,7 +10,7 @@ let
           "followLemmi/cyberneon.nvim",
           name = "cyberneon",
           lazy = false,
-          priority = 1000,
+          priority = 20000,
         }
       '';
     };
@@ -249,7 +249,6 @@ in
         },
       })
 
-      vim.cmd.colorscheme("${theme}")
     '';
   };
 
