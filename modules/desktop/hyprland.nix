@@ -27,9 +27,9 @@ in
     home-manager.users.yovick = {
       imports = [ ./hyprland-home.nix ];
       wayland.windowManager.hyprland.settings.bind = [
-        "${cfg.screenshotKey}, exec, hyprshot -m region"
-        "${cfg.screenshotWindowKey}, exec, hyprshot -m window"
-        "${cfg.screenshotScreenKey}, exec, hyprshot -m output"
+        "${cfg.screenshotKey}, exec, hyprshot -m region -o ~/Pictures/Screenshots"
+        "${cfg.screenshotWindowKey}, exec, hyprshot -m window -o ~/Pictures/Screenshots"
+        "${cfg.screenshotScreenKey}, exec, hyprshot -m output -o ~/Pictures/Screenshots"
       ];
     };
 
