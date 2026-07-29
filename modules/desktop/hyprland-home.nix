@@ -162,7 +162,27 @@
     wl-clipboard
     hyprshot
     swayimg
+    imv
     awww
   ];
+
+  xdg.mimeApps.defaultApplications = {
+    "image/avif" = "imv.desktop";
+    "image/bmp" = "imv.desktop";
+    "image/gif" = "imv.desktop";
+    "image/jpeg" = "imv.desktop";
+    "image/jpg" = "imv.desktop";
+    "image/png" = "imv.desktop";
+    "image/svg+xml" = "imv.desktop";
+    "image/tiff" = "imv.desktop";
+    "image/webp" = "imv.desktop";
+    "image/x-bmp" = "imv.desktop";
+    "image/x-portable-bitmap" = "imv.desktop";
+    "image/x-portable-graymap" = "imv.desktop";
+    "image/x-portable-pixmap" = "imv.desktop";
+    "image/x-tga" = "imv.desktop";
+    "image/x-xbitmap" = "imv.desktop";
+    "image/x-xpixmap" = "imv.desktop";
+  };
 
 }
