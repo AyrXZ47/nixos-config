@@ -16,6 +16,13 @@
   home.homeDirectory = "/home/yovick";
   home.stateVersion = "26.05";
 
+  xdg.userDirs = {
+    enable = true;
+    pictures = "${config.home.homeDirectory}/Pictures";
+  };
+
+  home.file."Pictures/Screenshots/.keep".text = "";
+
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
