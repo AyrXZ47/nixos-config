@@ -34,6 +34,8 @@
         popups = 12;
       };
     };
+    targets.firefox.profileNames = [ "yovick" ];
+
     opacity = {
       terminal = 0.85;
     };
