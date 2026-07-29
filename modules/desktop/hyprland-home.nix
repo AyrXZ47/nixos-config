@@ -15,6 +15,7 @@
 
       exec-once = [
         "wayle shell"
+        "hyprpaper"
         "dunst"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
       ];
@@ -151,6 +152,7 @@
   home.packages = with pkgs; [
     rofi
     dunst
+    hyprpaper
     swaylock-effects
     swayidle
     wlogout
@@ -160,7 +162,7 @@
     wl-clipboard
     hyprshot
     swayimg
-    swww
+    awww
   ];
 
 }
