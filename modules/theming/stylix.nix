@@ -1,7 +1,10 @@
 { config, pkgs, lib, ... }:
 
 {
-  home-manager.users.yovick.home.pointerCursor.enable = true;
+  home-manager.users.yovick = {
+    home.pointerCursor.enable = true;
+    stylix.targets.firefox.profileNames = [ "yovick" ];
+  };
 
   stylix = {
     enable = true;
@@ -34,8 +37,6 @@
         popups = 12;
       };
     };
-    targets.firefox.profileNames = [ "yovick" ];
-
     opacity = {
       terminal = 0.85;
     };
