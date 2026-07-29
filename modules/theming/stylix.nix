@@ -38,9 +38,6 @@
       terminal = 0.85;
     };
 
-    targets = {
-      swww.enable = true;
-      hyprpaper.enable = false;
-    };
+
   };
 }
