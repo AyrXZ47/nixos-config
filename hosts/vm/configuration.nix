@@ -51,5 +51,4 @@
     "d /nix/var/nix/profiles/per-user/yovick 1777 root root"
   ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 }

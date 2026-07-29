@@ -32,6 +32,8 @@
               users.yovick = import ./home/default.nix;
             };
           }
+
+          ./modules/core/nix-optimization.nix
         ] ++ hostModules;
       };
     in
