@@ -4,7 +4,7 @@
   environment.systemPackages = with pkgs; [
     # Browsers
     firefox
-    tor-browser-bundle-bin
+    tor-browser
 
     # Office & Productivity
     libreoffice-fresh
