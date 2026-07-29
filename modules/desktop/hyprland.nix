@@ -17,7 +17,9 @@ in
       enable = true;
       wayland.enable = true;
       theme = "sddm-astronaut-theme";
-      extraPackages = with pkgs; [ sddm-astronaut ];
+      extraPackages = with pkgs; [
+        (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
+      ];
     };
     services.displayManager.gdm.enable = lib.mkForce false;
     services.desktopManager.gnome.enable = lib.mkForce false;
@@ -33,7 +35,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
-      sddm-astronaut
+      (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       wayle
       wl-clipboard
       wlogout
