@@ -32,7 +32,7 @@
           natural_scroll = true;
           disable_while_typing = true;
         };
-        sensitivity = 0;
+        sensitivity = 0.0;
       };
 
       general = {
@@ -142,9 +142,9 @@
       ];
 
       windowrule = [
-        "float, class:^(pavucontrol)$"
-        "float, class:^(blueberry)$"
-        "float, title:^(Volume Control)$"
+        "float pavucontrol"
+        "float blueberry"
+        "float title:Volume Control"
       ];
     };
   };
