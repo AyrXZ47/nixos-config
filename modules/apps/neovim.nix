@@ -1,5 +1,190 @@
 { config, pkgs, lib, ... }:
 
+let
+  theme = "cyberneon";
+
+  pluginsDir = {
+    ".config/nvim/lua/plugins/theme.lua" = {
+      text = ''
+        return {
+          "followLemmi/cyberneon.nvim",
+          name = "cyberneon",
+          lazy = false,
+          priority = 1000,
+        }
+      '';
+    };
+    ".config/nvim/lua/plugins/smear-cursor.lua" = {
+      text = ''
+        return {
+          "sphamba/smear-cursor.nvim",
+          event = "VeryLazy",
+          opts = {},
+        }
+      '';
+    };
+    ".config/nvim/lua/plugins/obsidian.lua" = {
+      text = ''
+        return {
+          "epwalsh/obsidian.nvim",
+          version = "*",
+          lazy = true,
+          ft = "markdown",
+          dependencies = {
+            "nvim-lua/plenary.nvim",
+          },
+          opts = {
+            workspaces = {
+              {
+                name = "personal",
+                path = "~/Sync/Notes",
+              },
+            },
+            wiki_link_func = function(opts)
+              return require("obsidian.util").wiki_link_id_prefix(opts)
+            end,
+          },
+        }
+      '';
+    };
+    ".config/nvim/lua/plugins/render-markdown.lua" = {
+      text = ''
+        return {
+          "MeanderingProgrammer/render-markdown.nvim",
+          dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+            "nvim-mini/mini.nvim",
+          },
+          opts = {
+            heading = {
+              icons = { "󰲡 ", "󰲣 ", "󰲥 ", "󰲧 ", "󰲩 ", "󰲫 " },
+              sign = true,
+              position = "inline",
+            },
+            code = {
+              sign = true,
+              width = "block",
+              right_pad = 1,
+            },
+            bullet = {
+              icons = { "●", "○", "◆", "◇" },
+            },
+            checkbox = {
+              unchecked = { icon = "󰄱 " },
+              checked = { icon = "󰱒 " },
+            },
+          },
+        }
+      '';
+    };
+    ".config/nvim/lua/plugins/img-clip.lua" = {
+      text = ''
+        return {
+          "HakonHarnes/img-clip.nvim",
+          event = "VeryLazy",
+          opts = {
+            default = {
+              dir_path = "assets",
+              extension = "png",
+              prompt_for_file_name = false,
+              drag_and_drop = {
+                insert_mode = true,
+              },
+            },
+          },
+          keys = {
+            { "<leader>p", "<cmd>PasteImage<cr>", desc = "Paste image from clipboard" },
+          },
+        }
+      '';
+    };
+    ".config/nvim/lua/plugins/ollama.lua" = {
+      text = ''
+        return {
+          "nomnivore/ollama.nvim",
+          dependencies = { "nvim-lua/plenary.nvim" },
+          cmd = { "Ollama", "OllamaModel", "OllamaServe", "OllamaServeStop" },
+          opts = {
+            model = "codegemma:7b",
+            serve = {
+              on_start = true,
+              command = "ollama",
+              args = { "serve" },
+              stop_command = "pkill",
+              stop_args = { "-SIGTERM", "ollama" },
+            },
+          },
+        }
+      '';
+    };
+    ".config/nvim/lua/plugins/visuals.lua" = {
+      text = ''
+        return {
+          {
+            "HiPhish/rainbow-delimiters.nvim",
+            event = "BufReadPost",
+            config = function()
+              local rainbow_delimiters = require("rainbow-delimiters")
+              vim.g.rainbow_delimiters = {
+                strategy = {
+                  [""] = rainbow_delimiters.strategy["global"],
+                  vim = rainbow_delimiters.strategy["local"],
+                },
+                query = {
+                  [""] = "rainbow-delimiters",
+                  lua = "rainbow-blocks",
+                },
+                highlight = {
+                  "RainbowDelimiterRed",
+                  "RainbowDelimiterYellow",
+                  "RainbowDelimiterBlue",
+                  "RainbowDelimiterOrange",
+                  "RainbowDelimiterGreen",
+                  "RainbowDelimiterViolet",
+                  "RainbowDelimiterCyan",
+                },
+              }
+            end,
+          },
+          {
+            "nvim-treesitter/nvim-treesitter-context",
+            event = "BufReadPre",
+            opts = {
+              enable = true,
+              max_lines = 3,
+              min_window_height = 0,
+              line_numbers = true,
+              multiline_threshold = 20,
+              trim_scope = "outer",
+              mode = "cursor",
+              separator = nil,
+              zindex = 20,
+            },
+          },
+          {
+            "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+            event = "LspAttach",
+            config = function()
+              require("lsp_lines").setup()
+              vim.diagnostic.config({
+                virtual_text = false,
+                virtual_lines = true,
+              })
+              vim.keymap.set("", "<leader>ul", function()
+                local config = vim.diagnostic.config() or {}
+                if config.virtual_text then
+                  vim.diagnostic.config({ virtual_text = false, virtual_lines = true })
+                else
+                  vim.diagnostic.config({ virtual_text = true, virtual_lines = false })
+                end
+              end, { desc = "Toggle lsp_lines" })
+            end,
+          },
+        }
+      '';
+    };
+  };
+in
 {
   programs.neovim = {
     enable = true;
@@ -27,8 +212,7 @@
 
       require("lazy").setup({
         spec = {
-          { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "cyberneon" } },
-          { "followLemmi/cyberneon.nvim", name = "cyberneon", priority = 1000 },
+          { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "${theme}" } },
           { import = "plugins" },
         },
         defaults = {
@@ -55,35 +239,14 @@
     '';
 
     plugins = with pkgs.vimPlugins; [
-      # Utility
       plenary-nvim
-
-      # Rainbow delimiters
-      rainbow-delimiters-nvim
-
-      # Treesitter context
-      nvim-treesitter-context
-
-      lsp_lines-nvim
-
-      # Obsidian
-      obsidian-nvim
-
-      # Ollama
-      ollama-nvim
-
-      # Markdown rendering
-      render-markdown-nvim
-
-      # Image clipboard
-      img-clip-nvim
-
-      # Smear cursor
-      smear-cursor-nvim
     ];
   };
 
+  home.file = pluginsDir;
+
   home.packages = with pkgs; [
+    gcc
     lua-language-server
     stylua
     typescript-language-server
