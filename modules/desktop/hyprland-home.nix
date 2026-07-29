@@ -83,7 +83,7 @@
 
       bind = [
         "SUPER, Backspace, exec, wezterm"
-        "SUPER, D, exec, rofi -show drun -show-icons"
+        "SUPER, A, exec, rofi -show drun -show-icons"
         "SUPER, Q, killactive"
         "SUPER, M, exit"
         "SUPER, V, togglefloating"
