@@ -144,9 +144,9 @@
     };
 
     extraConfig = ''
-      windowrule=float, ^(pavucontrol)$
-      windowrule=float, ^(blueberry)$
-      windowrule=float, title:^(Volume Control)$
+      windowrulev2 = float, class:^(pavucontrol)$
+      windowrulev2 = float, class:^(blueberry)$
+      windowrulev2 = float, title:^(Volume Control)$
     '';
   };
 

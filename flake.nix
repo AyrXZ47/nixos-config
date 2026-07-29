@@ -37,8 +37,10 @@
     in
     {
       nixosConfigurations = {
-        vm = mkHost "vm" [ ./hosts/vm/configuration.nix ];
         pc = mkHost "pc" [ ./hosts/pc/configuration.nix ];
+        laptop = mkHost "laptop" [ ./hosts/laptop/configuration.nix ];
+        server = mkHost "server" [ ./hosts/server/configuration.nix ];
+        vm = mkHost "vm" [ ./hosts/vm/configuration.nix ];
       };
     };
 }

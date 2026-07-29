@@ -7,6 +7,7 @@
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/stylix.nix
     ../../modules/theming/plymouth.nix
+    ../../modules/apps/common-packages.nix
   ];
 
   modules.desktop.hyprland.enable = true;
@@ -33,12 +34,15 @@
 
   services.xserver.videoDrivers = [ "modesetting" ];
 
-  environment.systemPackages = with pkgs; [
-    vim
-    git
-    curl
-    wget
-  ];
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
+
+  security.rtkit.enable = true;
 
   services.openssh.enable = true;
 
