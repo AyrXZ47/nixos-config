@@ -10,6 +10,10 @@
       id = 0;
       isDefault = true;
 
+      settings = {
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+      };
+
       userChrome = ''
         /* Source file https://github.com/MrOtherGuy/firefox-csshacks/tree/master/chrome/autohide_toolbox.css made available under Mozilla Public License v. 2.0 */
 
