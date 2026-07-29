@@ -8,6 +8,7 @@
     ../../modules/theming/stylix.nix
     ../../modules/theming/plymouth.nix
     ../../modules/apps/common-packages.nix
+    ../../modules/apps/gaming.nix
   ];
 
   modules.desktop.hyprland.enable = true;
