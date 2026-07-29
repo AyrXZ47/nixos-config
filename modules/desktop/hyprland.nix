@@ -55,6 +55,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+      awww
       (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       wayle
       wl-clipboard

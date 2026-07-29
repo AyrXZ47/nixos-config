@@ -1,0 +1,129 @@
+@import "colors.rasi"
+
+* {
+    background:     @base00;
+    background-alt: @base01;
+    foreground:     @base05;
+    selected:       @base0D;
+    active:         @base0C;
+    urgent:         @base08;
+}
+
+window {
+    transparency: "real";
+    fullscreen: false;
+    width: 900px;
+    location: northwest;
+    anchor: center;
+    border: 0px;
+    border-radius: 12px;
+    background-color: @background;
+}
+
+mainbox {
+    spacing: 0px;
+    padding: 0px;
+    background-color: transparent;
+}
+
+inputbar {
+    spacing: 0px;
+    padding: 12px;
+    background-color: @background-alt;
+    border-radius: 12px 12px 0 0;
+    text-color: @foreground;
+    placeholder: "Launch";
+    placeholder-color: @foreground;
+}
+
+entry {
+    background-color: transparent;
+    text-color: @foreground;
+    cursor: text;
+    placeholder: "@";
+    placeholder-color: @foreground;
+}
+
+listview {
+    spacing: 8px;
+    padding: 12px;
+    lines: 4;
+    columns: 4;
+    fixed-height: false;
+    fixed-columns: true;
+    scrollbar: false;
+    layout: vertical;
+    dynamic: true;
+    cycle: true;
+}
+
+element {
+    padding: 8px;
+    border-radius: 8px;
+    background-color: transparent;
+    text-color: @foreground;
+    cursor: pointer;
+}
+
+element normal.normal {
+    background-color: transparent;
+    text-color: @foreground;
+}
+
+element normal.urgent {
+    background-color: @urgent;
+    text-color: @background;
+}
+
+element normal.active {
+    background-color: @active;
+    text-color: @background;
+}
+
+element selected.normal {
+    background-color: @selected;
+    text-color: @background;
+}
+
+element selected.urgent {
+    background-color: @urgent;
+    text-color: @background;
+}
+
+element selected.active {
+    background-color: @active;
+    text-color: @background;
+}
+
+element-icon {
+    size: 0.8em;
+    padding: 0 8px 0 0;
+}
+
+element-text {
+    text-color: inherit;
+    vertical-align: 0.5;
+    horizontal-align: 0.0;
+    highlight: inherit;
+    cursor: inherit;
+}
+
+button {
+    padding: 8px;
+    border-radius: 8px;
+    background-color: @background-alt;
+    text-color: @foreground;
+    cursor: pointer;
+}
+
+button selected {
+    background-color: @selected;
+    text-color: @background;
+}
+
+scrollbar {
+    width: 6px;
+    handle-width: 6px;
+    handle-color: @selected;
+    border-radius: 3px;
+}
