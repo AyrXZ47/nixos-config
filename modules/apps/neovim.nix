@@ -224,14 +224,14 @@ in
 
       require("lazy").setup({
         spec = {
-          { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+          { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "${theme}" } },
           { import = "plugins" },
         },
         defaults = {
           lazy = false,
           version = false,
         },
-        install = { colorscheme = { "tokyonight", "habamax" } },
+        install = { colorscheme = { "${theme}", "tokyonight", "habamax" } },
         checker = {
           enabled = true,
           notify = false,
@@ -251,10 +251,6 @@ in
 
       vim.cmd.colorscheme("${theme}")
     '';
-
-    plugins = with pkgs.vimPlugins; [
-      plenary-nvim
-    ];
   };
 
   home.file = pluginsDir;
