@@ -12,12 +12,12 @@ in
       export UV_QUIET=1
       export UV_NO_PROGRESS=1
     fi
-    if ! ${pkgs.coreutils}/bin/test -x "$HOME/.local/bin/headroom"; then
-      ${pkgs.uv}/bin/uv tool install \
-        --no-python-downloads \
-        --python ${pkgs.python313}/bin/python3.13 \
-        ${headroomPkg}
-    fi
+    export UV_TOOL_DIR="$HOME/.local/share/uv/tools"
+    ${pkgs.uv}/bin/uv tool install \
+      --no-python-downloads \
+      --python ${pkgs.python313}/bin/python3.13 \
+      ${headroomPkg}
+    ${pkgs.systemd}/bin/systemctl --user restart headroom-proxy 2>/dev/null || true
   '';
 
   systemd.user.services.headroom-proxy = {
