@@ -13,9 +13,9 @@
 
   modules.desktop.hyprland = {
     enable = true;
-    screenshotKey = "SUPER, F4";
-    screenshotWindowKey = "SHIFT, F4";
-    screenshotScreenKey = "SUPER SHIFT, F4";
+    screenshotKey = "SUPER, P";
+    screenshotWindowKey = "SUPER SHIFT, P";
+    screenshotScreenKey = "SUPER, F4";
   };
 
   boot.loader.systemd-boot.enable = true;

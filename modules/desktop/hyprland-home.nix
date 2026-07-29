@@ -88,7 +88,6 @@
         "SUPER, M, exit"
         "SUPER, V, togglefloating"
         "SUPER, R, exec, rofi -show run"
-        "SUPER, P, pseudo"
         "SUPER, J, layoutmsg, togglesplit"
 
         "SUPER, left, movefocus, l"
