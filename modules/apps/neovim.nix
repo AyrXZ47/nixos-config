@@ -224,7 +224,7 @@ in
 
       require("lazy").setup({
         spec = {
-          { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "${theme}" } },
+          { "LazyVim/LazyVim", import = "lazyvim.plugins" },
           { import = "plugins" },
         },
         defaults = {
@@ -249,6 +249,9 @@ in
         },
       })
 
+      vim.schedule(function()
+        vim.cmd.colorscheme("${theme}")
+      end)
     '';
   };
 
