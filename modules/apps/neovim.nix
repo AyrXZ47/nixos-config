@@ -117,6 +117,18 @@ let
         }
       '';
     };
+    ".config/nvim/lua/plugins/mason.lua" = {
+      text = ''
+        return {
+          "williamboman/mason.nvim",
+          opts = function(_, opts)
+            opts.ensure_installed = vim.tbl_filter(function(pkg)
+              return pkg ~= "tree-sitter-cli"
+            end, opts.ensure_installed or {})
+          end,
+        }
+      '';
+    };
     ".config/nvim/lua/plugins/visuals.lua" = {
       text = ''
         return {

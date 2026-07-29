@@ -145,6 +145,7 @@
         "float pavucontrol"
         "float blueberry"
         "float title:Volume Control"
+        "float imv"
       ];
     };
   };
@@ -163,8 +164,11 @@
     hyprshot
     swayimg
     imv
+    tree-sitter
     awww
   ];
+
+  xdg.mimeApps.enable = true;
 
   xdg.mimeApps.defaultApplications = {
     "image/avif" = "imv.desktop";
