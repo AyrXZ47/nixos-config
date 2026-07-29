@@ -115,7 +115,7 @@ in
   home.file.".firefox-chrome/userChrome.css" = { text = userChrome; };
 
   home.activation.installFirefoxChrome = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    PROFILE_DIR=$(awk -F= '$1=="Path"{p=$2} $1=="Default"{print p;exit}' "$HOME/.mozilla/firefox/profiles.ini" 2>/dev/null)
+    PROFILE_DIR=$(grep -B5 'Default=1' "$HOME/.mozilla/firefox/profiles.ini" 2>/dev/null | grep '^Path=' | sed 's/^Path=//' | head -1)
     if [ -n "$PROFILE_DIR" ]; then
       CHROME_DIR="$HOME/.mozilla/firefox/$PROFILE_DIR/chrome"
       mkdir -p "$CHROME_DIR"
