@@ -26,6 +26,20 @@ in
   config = lib.mkIf cfg.enable {
     home-manager.users.yovick = {
       imports = [ ./hyprland-home.nix ];
+      gtk = {
+        enable = true;
+        theme = {
+          name = "Adwaita-dark";
+          package = pkgs.gnome-themes-extra;
+        };
+      };
+      qt = {
+        enable = true;
+        platformTheme = "gtk3";
+      };
+      home.sessionVariables = {
+        GTK_THEME = "Adwaita:dark";
+      };
       xdg.configFile."wayle/config.toml".text = ''
         [bar]
         location = "right"
@@ -76,7 +90,7 @@ in
         right = [
           { name = "bottom", modules = [
             "custom-clipboard",
-            "custom-wallpaper",
+            "custom-wpcycle",
             "custom-syncthing",
             "custom-kdeconnect",
             "separator",
@@ -158,9 +172,9 @@ in
         popup-gap = 8
         popup-shadow = true
         popup-urgency-bar = "low"
-        border-color = "primary"
-        icon-color = "primary"
-        icon-bg-color = "primary"
+        border-color = "#ff44bb"
+        icon-color = "#ff44bb"
+        icon-bg-color = "#ff44bb"
         button-bg-color = "bg-elevated"
 
         [modules.brightness]
@@ -179,9 +193,9 @@ in
         alert-icon = "md-battery_android_alert-symbolic"
         icon-show = true
         label-show = false
-        border-color = "primary"
-        icon-color = "primary"
-        icon-bg-color = "primary"
+        border-color = "#cc55ee"
+        icon-color = "#cc55ee"
+        icon-bg-color = "#cc55ee"
         button-bg-color = "bg-elevated"
 
         [modules.dashboard]
@@ -194,8 +208,8 @@ in
         button-bg-color = "bg-elevated"
 
         [[modules.custom]]
-        id = "wallpaper"
-        command = "echo "
+        id = "wpcycle"
+        command = "printf 'WP'"
         interval-ms = 3600000
         icon-show = false
         label-show = true
