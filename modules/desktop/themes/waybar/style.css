@@ -11,98 +11,107 @@ window#waybar {
 }
 
 tooltip {
-  background: rgba(30, 30, 30, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 11, 30, 0.95);
+  border: 1px solid rgba(10, 173, 198, 0.3);
   border-radius: 12px;
 }
 
 #workspaces,
+#window,
 #pulseaudio,
+#pulseaudio-microphone,
 #backlight,
 #clock,
 #battery,
-#bluetooth,
 #idle_inhibitor,
 #custom-clipboard,
 #custom-wallpaper,
-#custom-menu,
+#custom-usb,
 #custom-keybinds,
 #custom-syncthing,
 #custom-wlogout,
-#window {
-  background: rgba(30, 30, 30, 0.8);
+#network {
+  background: rgba(10, 21, 40, 0.8);
   border-radius: 20px;
   padding: 10px 5px;
-  margin: 5px 0;
+  margin: 4px 0;
+  border: 1px solid rgba(10, 173, 198, 0.15);
+  transition: all 0.3s cubic-bezier(0.05, 0.9, 0.1, 1.05);
 }
 
 #workspaces button {
   padding: 4px 8px;
   margin: 2px 0;
   border-radius: 15px;
-  color: #cdd6f4;
+  color: #0ABDC6;
   transition: all 0.3s cubic-bezier(0.05, 0.9, 0.1, 1.05);
 }
 
 #workspaces button.active {
-  background: #00aaff;
-  color: #1e1e2e;
+  background: #0ABDC6;
+  color: #000B1E;
   border-radius: 15px;
 }
 
 #workspaces button:hover {
-  background: rgba(0, 170, 255, 0.3);
-}
-
-#pulseaudio {
-  color: #cdd6f4;
-}
-
-#backlight {
-  color: #f9e2af;
+  background: rgba(10, 173, 198, 0.25);
 }
 
 #clock {
-  color: #cdd6f4;
-  font-size: 12px;
-}
-
-#battery {
-  color: #a6e3a1;
-}
-
-#bluetooth {
-  color: #89b4fa;
+  color: #0ABDC6;
+  font-size: 11px;
+  padding: 10px 4px;
+  letter-spacing: 1px;
 }
 
 #idle_inhibitor {
-  color: #f38ba8;
+  color: #ff79c6;
 }
 
-#custom-clipboard {
-  color: #cba6f7;
+#pulseaudio {
+  color: #0ABDC6;
+}
+
+#pulseaudio-microphone {
+  color: #f1fa8c;
 }
 
 #custom-wallpaper {
   color: #89dceb;
 }
 
-#custom-menu {
-  color: #fab387;
-}
-
-#custom-keybinds {
-  color: #b4befe;
+#custom-usb {
+  color: #bd93f9;
 }
 
 #custom-syncthing {
   color: #a6e3a1;
 }
 
+#custom-clipboard {
+  color: #cba6f7;
+}
+
+#network {
+  color: #89b4fa;
+}
+
+#backlight {
+  color: #f9e2af;
+}
+
+#battery {
+  color: #a6e3a1;
+}
+
+#custom-keybinds {
+  color: #b4befe;
+}
+
 #custom-wlogout {
-  color: #f38ba8;
+  color: #ff5555;
 }
 
 #window {
-  color: #cdd6f4;
+  color: #0ABDC6;
 }

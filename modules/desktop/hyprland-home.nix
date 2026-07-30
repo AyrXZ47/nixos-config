@@ -1,5 +1,13 @@
 { config, pkgs, lib, ... }:
 
+let
+  adi1090x-src = pkgs.fetchFromGitHub {
+    owner = "adi1090x";
+    repo = "rofi";
+    rev = "512a585fff6da5b2a90e5948059b062516ddb2e7";
+    hash = "sha256-iUX0Quae06tGd7gDgXZo1B3KYgPHU+ADPBrowHlv02A=";
+  };
+in
 {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -17,7 +25,7 @@
         "wayle shell"
         "waybar"
         "${pkgs.awww}/bin/awww-daemon"
-        "${pkgs.bash}/bin/bash -c 'sleep 1 && ${pkgs.awww}/bin/awww img $(${pkgs.coreutils}/bin/shuf -n1 -e ${../../assets/wallpapers}/*)'"
+        "${pkgs.bash}/bin/bash -c 'sleep 1 && ${pkgs.findutils}/bin/find ${../../assets/wallpapers} -maxdepth 1 -type f -print0 | ${pkgs.coreutils}/bin/shuf -z -n1 | ${pkgs.findutils}/bin/xargs -0 ${pkgs.awww}/bin/awww img'"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
         "dunst"
@@ -133,6 +141,8 @@
         "SUPER SHIFT, 8, movetoworkspace, 8"
         "SUPER SHIFT, 9, movetoworkspace, 9"
 
+        "SUPER, T, exec, ${config.xdg.configHome}/hypr/scripts/time-to-work.sh"
+        "SUPER, H, exec, ${config.xdg.configHome}/hypr/scripts/hypr-dev.sh"
         "SUPER SHIFT, E, exec, wlogout --protocol layer-shell"
 
         "SUPER, mouse_down, workspace, e+1"
@@ -190,6 +200,64 @@
   ];
 
   xdg.configFile = {
+    "hypr/scripts/time-to-work.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        hyprctl dispatch workspace 1
+        mixxx &
+        sleep 0.5
+        hyprctl dispatch workspace 2
+        obsidian &
+        sleep 0.5
+        hyprctl dispatch workspace 3
+        firefox &
+      '';
+    };
+    "hypr/scripts/hypr-dev.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        hyprctl dispatch exec "wezterm start -- zsh -ic nvim"
+        sleep 0.6
+        hyprctl dispatch layoutmsg orientationright
+        sleep 0.1
+        hyprctl dispatch exec "wezterm start -- zsh -ic 'headroom wrap opencode'"
+        sleep 0.6
+        hyprctl dispatch movefocus r
+        sleep 0.1
+        hyprctl dispatch layoutmsg orientationbottom
+        sleep 0.1
+        hyprctl dispatch exec "wezterm start -- zsh -ic 'headroom wrap aider --model ollama/qwen3.6:27b'"
+        sleep 0.6
+        hyprctl dispatch movefocus l
+        sleep 0.1
+        hyprctl dispatch layoutmsg orientationbottom
+        sleep 0.1
+        hyprctl dispatch exec "wezterm start"
+        sleep 0.6
+        hyprctl dispatch movefocus r
+        sleep 0.1
+        hyprctl dispatch movefocus d
+        sleep 0.1
+        hyprctl dispatch layoutmsg orientationbottom
+        sleep 0.1
+        hyprctl dispatch exec "wezterm start -- zsh -ic 'pipes-rs'"
+        sleep 0.6
+        hyprctl dispatch movefocus r
+        sleep 0.1
+        hyprctl dispatch layoutmsg orientationright
+        sleep 0.1
+        hyprctl dispatch exec "wezterm start -- zsh -ic 'cava'"
+      '';
+    };
+    "hypr/scripts/wallpaper-cycle.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        find ${../../assets/wallpapers} -type f | shuf -n1 | xargs -r awww img
+      '';
+    };
     "wayle/config.toml" = {
       text = ''
         [bar]
@@ -223,6 +291,12 @@
     "rofi/launcher.rasi" = {
       source = ./themes/rofi/launcher.rasi;
     };
+    "rofi/launchers".source = "${adi1090x-src}/files/launchers";
+    "rofi/colors".source = "${adi1090x-src}/files/colors";
+    "rofi/applets".source = "${adi1090x-src}/files/applets";
+    "rofi/powermenu".source = "${adi1090x-src}/files/powermenu";
+    "rofi/scripts".source = "${adi1090x-src}/files/scripts";
+    "rofi/fonts".source = "${adi1090x-src}/fonts";
     "wlogout/style.css" = {
       text = ''
         * {
