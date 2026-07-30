@@ -250,11 +250,6 @@ in
     };
     "rofi/launchers".source = "${adi1090x-src}/files/launchers";
     "rofi/colors".source = "${adi1090x-src}/files/colors";
-    "rofi/launchers/type-7/shared/colors.rasi" = {
-      text = ''
-        @import "~/.config/rofi/colors/cyber-punk.rasi"
-      '';
-    };
     "rofi/applets".source = "${adi1090x-src}/files/applets";
     "rofi/powermenu".source = "${adi1090x-src}/files/powermenu";
     "rofi/scripts".source = "${adi1090x-src}/files/scripts";
