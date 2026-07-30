@@ -17,6 +17,7 @@
         "wayle shell"
         "waybar"
         "${pkgs.awww}/bin/awww-daemon"
+        "${pkgs.bash}/bin/bash -c 'sleep 1 && ${pkgs.awww}/bin/awww img $(${pkgs.coreutils}/bin/shuf -n1 -e ${../../assets/wallpapers}/*)'"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
         "dunst"
@@ -164,8 +165,12 @@
     };
   };
 
+  programs.rofi = {
+    enable = true;
+    theme = lib.mkForce ./themes/rofi/launcher.rasi;
+  };
+
   home.packages = with pkgs; [
-    rofi
     dunst
     hyprpaper
     swaylock-effects
@@ -185,18 +190,65 @@
   ];
 
   xdg.configFile = {
-    "wayle/config.json" = {
+    "wayle/config.toml" = {
       text = ''
-        {
-          "layer": "top",
-          "position": "right",
-          "margin": "10 10 10 0",
-          "width": 60
-        }
+        [bar]
+        location = "top"
+        exclusive = true
+        layer = "top"
+        rounding = "none"
+        button-variant = "block-prefix"
+        button-rounding = "sm"
+
+        [[bar.layout]]
+        monitor = "*"
+        show = true
+        left = ["hyprland-workspaces"]
+        center = []
+        right = ["systray"]
+
+        [styling]
+        theme-provider = "wayle"
+        theming-monitor = ""
+
+        [wallpaper]
+        engine-enabled = false
+
+        [osd]
+        enabled = true
+        position = "bottom"
+        duration = 2500
       '';
     };
     "rofi/launcher.rasi" = {
       source = ./themes/rofi/launcher.rasi;
+    };
+    "wlogout/style.css" = {
+      text = ''
+        * {
+          background-image: none;
+          box-shadow: none;
+        }
+
+        window {
+          background: rgba(20, 20, 30, 0.85);
+        }
+
+        button {
+          border-radius: 12px;
+          border-color: rgba(255, 255, 255, 0.1);
+          border-width: 1px;
+          background: rgba(30, 30, 44, 0.9);
+          color: #cdd6f4;
+          margin: 8px;
+          padding: 12px 24px;
+        }
+
+        button:hover {
+          background: rgba(0, 170, 255, 0.3);
+          border-color: #00aaff;
+        }
+      '';
     };
     "waybar/config.jsonc" = {
       source = ./themes/waybar/config.jsonc;
