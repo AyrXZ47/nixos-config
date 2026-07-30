@@ -115,13 +115,10 @@ in
           { name = "bottom", modules = [
             "custom-clipboard",
             "custom-syncthing",
-            "custom-kdeconnect",
             "separator",
             "custom-wpcycle",
-            "brightness",
-            "battery",
             "custom-usb",
-            "custom-keybinds",
+            "battery",
             "dashboard",
           ] },
         ]
@@ -173,7 +170,7 @@ in
         app-icons-empty = "tb-minus-symbolic"
         active-indicator = "background"
         min-workspace-count = 5
-        container-bg-color = "transparent"
+        container-bg-color = "#000000"
         active-color = "#ff0066"
         occupied-color = "#8888aa"
         empty-color = "#2a2a44"
@@ -238,7 +235,7 @@ in
         icon-show = false
         label-show = true
         label-color = "#ff0066"
-        left-click = "~/.config/hypr/scripts/wallpaper-picker.sh"
+        left-click = "~/.config/hypr/scripts/wallpaper-menu.sh"
         button-bg-color = "bg-elevated"
         right-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"
 
@@ -268,32 +265,11 @@ in
         left-click = "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"
         button-bg-color = "bg-elevated"
 
-        [[modules.custom]]
-        id = "kdeconnect"
-        command = "if kdeconnect-cli -a --id-only 2>/dev/null | head -1 | grep -q .; then echo ; else echo ; fi"
-        interval-ms = 30000
-        icon-show = false
-        label-show = true
-        left-click = "kdeconnect-cli -l"
-        button-bg-color = "bg-elevated"
-
-        [[modules.custom]]
-        id = "keybinds"
-        command = "echo "
-        interval-ms = 3600000
-        icon-show = false
-        label-show = true
-        left-click = "wezterm start -e man hyprland"
-        button-bg-color = "bg-elevated"
-
         # --- Wallpaper Engine ---
 
         [wallpaper]
         engine-enabled = true
-        cycling-enabled = true
-        cycling-directory = "/home/yovick/workspaces/nixos-config/assets/wallpapers"
-        cycling-mode = "shuffle"
-        cycling-interval-mins = 30
+        cycling-enabled = false
         transition-type = "fade"
         transition-duration = 0.7
         transition-fps = 60
