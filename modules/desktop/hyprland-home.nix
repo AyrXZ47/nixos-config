@@ -33,7 +33,7 @@ in
       ];
 
       input = {
-        kb_layout = "us,latam";
+        kb_layout = "latam,us";
         follow_mouse = 1;
         touchpad = {
           natural_scroll = true;
@@ -68,10 +68,8 @@ in
       };
 
       layerrule = [
-        "blur, namespace:wayle"
-        "blur, namespace:rofi"
-        "ignorezero, namespace:wayle"
-        "ignorezero, namespace:rofi"
+        "blur on, match:namespace wayle"
+        "blur on, match:namespace rofi"
       ];
 
       animations = {
@@ -85,7 +83,7 @@ in
           "windowsOut, 1, 5, default, popin 80%"
           "border, 1, 10, default"
           "fade, 1, 7, default"
-          "workspaces, 1, 6, default, slidevert"
+          "workspaces, 1, 6, overshot, slidevert"
         ];
       };
 
