@@ -32,12 +32,15 @@ in
         exclusive = true
         layer = "top"
         rounding = "none"
-        module-gap = 0.35
-        padding = 0.35
+        module-gap = 0.5
+        padding = 0.5
         padding-ends = 0.5
         inset-edge = 0.5
-        bg = "transparent"
-        shadow = "floating"
+        bg = "bg"
+        background-opacity = 0
+        border-location = "none"
+        border-width = 0
+        shadow = "none"
 
         button-variant = "block-prefix"
         button-rounding = "full"
@@ -47,13 +50,16 @@ in
         button-label-weight = "bold"
         button-label-padding = 1.0
         button-gap = 0.5
-        button-bg-opacity = 90
+        button-bg-opacity = 100
         button-opacity = 100
+        button-border-location = "none"
+        button-border-width = 0
         button-group-module-gap = 0.15
         button-group-padding = 0.15
         button-group-rounding = "full"
         button-group-background = "bg-elevated"
-        button-group-opacity = 90
+        button-group-opacity = 100
+        button-group-border-location = "none"
 
         dropdown-shadow = true
         dropdown-opacity = 100
@@ -64,23 +70,23 @@ in
         monitor = "*"
         show = true
         left = [
-          "idle-inhibit",
-          "clock",
+          { name = "top", modules = ["idle-inhibit", "clock"] },
         ]
         center = ["hyprland-workspaces"]
         right = [
-          "notifications",
-          "custom-clipboard",
-          "custom-wallpaper",
-          "custom-syncthing",
-          "custom-kdeconnect",
-          "separator",
-          "bluetooth",
-          "brightness",
-          "battery",
-          "custom-usb",
-          "custom-keybinds",
-          "dashboard",
+          { name = "bottom", modules = [
+            "notifications",
+            "custom-clipboard",
+            "custom-wallpaper",
+            "custom-syncthing",
+            "custom-kdeconnect",
+            "separator",
+            "brightness",
+            "battery",
+            "custom-usb",
+            "custom-keybinds",
+            "dashboard",
+          ] },
         ]
 
         [styling]
@@ -144,7 +150,7 @@ in
         label-show = false
         left-click = "dropdown:notification"
         right-click = "wayle notify dnd"
-        popup-position = "bottom-left"
+        popup-position = "bottom-right"
         popup-max-visible = 5
         popup-duration = 5000
         popup-hover-pause = true
@@ -153,12 +159,6 @@ in
         popup-gap = 8
         popup-shadow = true
         popup-urgency-bar = "low"
-        button-bg-color = "bg-elevated"
-
-        [modules.bluetooth]
-        icon-show = true
-        label-show = false
-        left-click = "dropdown:bluetooth"
         button-bg-color = "bg-elevated"
 
         [modules.brightness]

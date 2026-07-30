@@ -15,15 +15,8 @@
 
   home-manager.backupFileExtension = "bak";
 
-  security.sudo.extraRules = [
-    {
-      users = [ "yovick" ];
-      commands = [
-        {
-          command = "ALL";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
+  security.sudo = {
+    wheelNeedsPassword = true;
+    extraRules = [];
+  };
 }

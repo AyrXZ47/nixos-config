@@ -34,8 +34,6 @@ window {
     border-radius:              24px;
     cursor:                     "default";
     background-color:           @background;
-    background-image:           "url(/home/yovick/workspaces/nixos-config/assets/wallpapers/default.jpg, width)",
-                                "linear-gradient(rgba(15, 15, 26, 0.85), rgba(15, 15, 26, 0.85))";
 }
 
 mainbox {

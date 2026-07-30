@@ -34,7 +34,6 @@ in
 
       input = {
         kb_layout = "us,latam";
-        kb_options = "grp:alt_shift_toggle";
         follow_mouse = 1;
         touchpad = {
           natural_scroll = true;
@@ -134,6 +133,7 @@ in
 
         "SUPER, T, exec, ${config.xdg.configHome}/hypr/scripts/time-to-work.sh"
         "SUPER, H, exec, ${config.xdg.configHome}/hypr/scripts/hypr-dev.sh"
+        "SUPER, SPACE, exec, hyprctl switchxkblayout && notify-send -t 2000 -a layout -u low \"$(hyprctl getoption input:kb_layout | sed -n 's/.*str: *//p' | cut -d, -f1)\""
 
         "SUPER, mouse_down, workspace, e+1"
         "SUPER, mouse_up, workspace, e-1"
