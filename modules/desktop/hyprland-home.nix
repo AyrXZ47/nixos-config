@@ -23,7 +23,6 @@ in
 
       exec-once = [
         "wayle shell"
-        "waybar"
         "${pkgs.awww}/bin/awww-daemon"
         "${pkgs.bash}/bin/bash -c 'sleep 1 && ${pkgs.findutils}/bin/find ${../../assets/wallpapers} -maxdepth 1 -type f -print0 | ${pkgs.coreutils}/bin/shuf -z -n1 | ${pkgs.findutils}/bin/xargs -0 ${pkgs.awww}/bin/awww img'"
         "wl-paste --type text --watch cliphist store"
@@ -51,8 +50,6 @@ in
         gaps_in = 5;
         gaps_out = 10;
         border_size = 2;
-        "col.active_border" = lib.mkForce "rgba(00f0ffee)";
-        "col.inactive_border" = lib.mkForce "rgba(1a0b1cee)";
         layout = "dwindle";
       };
 
@@ -69,7 +66,6 @@ in
           enabled = true;
           range = 8;
           render_power = 3;
-          color = lib.mkForce "rgba(1a0b1cee)";
         };
       };
 
@@ -196,7 +192,6 @@ in
     tree-sitter
     awww
     cliphist
-    waybar
   ];
 
   xdg.configFile = {
@@ -258,36 +253,7 @@ in
         find ${../../assets/wallpapers} -type f | shuf -n1 | xargs -r awww img
       '';
     };
-    "wayle/config.toml" = {
-      text = ''
-        [bar]
-        location = "top"
-        exclusive = true
-        layer = "top"
-        rounding = "none"
-        button-variant = "block-prefix"
-        button-rounding = "sm"
 
-        [[bar.layout]]
-        monitor = "*"
-        show = true
-        left = ["hyprland-workspaces"]
-        center = []
-        right = ["systray"]
-
-        [styling]
-        theme-provider = "wayle"
-        theming-monitor = ""
-
-        [wallpaper]
-        engine-enabled = false
-
-        [osd]
-        enabled = true
-        position = "bottom"
-        duration = 2500
-      '';
-    };
     "rofi/launcher.rasi" = {
       source = ./themes/rofi/launcher.rasi;
     };
@@ -324,12 +290,7 @@ in
         }
       '';
     };
-    "waybar/config.jsonc" = {
-      source = ./themes/waybar/config.jsonc;
-    };
-    "waybar/style.css" = {
-      source = ./themes/waybar/style.css;
-    };
+
   };
 
   xdg.mimeApps.enable = true;
