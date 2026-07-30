@@ -32,13 +32,28 @@ in
           name = "Adwaita-dark";
           package = pkgs.gnome-themes-extra;
         };
+        iconTheme = {
+          name = "Papirus-Dark";
+          package = pkgs.papirus-icon-theme;
+        };
+        gtk3.extraConfig = {
+          gtk-application-prefer-dark-theme = 1;
+        };
+        gtk4.extraConfig = {
+          gtk-application-prefer-dark-theme = 1;
+        };
       };
       qt = {
         enable = true;
-        platformTheme = "gtk3";
+        platformTheme.name = "gtk3";
+        style = {
+          name = "adwaita-dark";
+          package = pkgs.adwaita-qt;
+        };
       };
       home.sessionVariables = {
         GTK_THEME = "Adwaita:dark";
+        QT_QPA_PLATFORMTHEME = "gtk3";
       };
       xdg.configFile."wayle/config.toml".text = ''
         [bar]
@@ -161,6 +176,8 @@ in
         [modules.notifications]
         icon-show = true
         label-show = false
+        icon-inactive = "preferences-system-notifications-symbolic"
+        icon-active = "notifications-disabled-symbolic"
         left-click = "dropdown:notification"
         right-click = "wayle notify dnd"
         popup-position = "bottom-right"
@@ -172,9 +189,8 @@ in
         popup-gap = 8
         popup-shadow = true
         popup-urgency-bar = "low"
-        border-color = "#ff44bb"
-        icon-color = "#ff44bb"
-        icon-bg-color = "#ff44bb"
+        border-color = "#ff0066"
+        icon-color = "#ff0066"
         button-bg-color = "bg-elevated"
 
         [modules.brightness]
@@ -188,14 +204,13 @@ in
         button-bg-color = "bg-elevated"
 
         [modules.battery]
-        level-icons = ["md-battery_android_0-symbolic", "md-battery_android_frame_1-symbolic", "md-battery_android_frame_2-symbolic", "md-battery_android_frame_3-symbolic", "md-battery_android_frame_4-symbolic", "md-battery_android_frame_5-symbolic", "md-battery_android_frame_6-symbolic", "md-battery_android_frame_full-symbolic"]
-        charging-icon = "md-battery_android_frame_bolt-symbolic"
-        alert-icon = "md-battery_android_alert-symbolic"
+        level-icons = ["battery-caution-symbolic", "battery-low-symbolic", "battery-medium-symbolic", "battery-good-symbolic", "battery-full-symbolic", "battery-full-charging-symbolic"]
+        charging-icon = "battery-full-charging-symbolic"
+        alert-icon = "battery-caution-symbolic"
         icon-show = true
         label-show = false
-        border-color = "#cc55ee"
-        icon-color = "#cc55ee"
-        icon-bg-color = "#cc55ee"
+        border-color = "#ff0066"
+        icon-color = "#ff0066"
         button-bg-color = "bg-elevated"
 
         [modules.dashboard]
