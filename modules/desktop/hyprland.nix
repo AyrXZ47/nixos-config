@@ -114,10 +114,10 @@ in
         right = [
           { name = "bottom", modules = [
             "custom-clipboard",
-            "custom-wpcycle",
             "custom-syncthing",
             "custom-kdeconnect",
             "separator",
+            "custom-wpcycle",
             "brightness",
             "battery",
             "custom-usb",
@@ -150,7 +150,7 @@ in
         format = "%I\n%M"
         icon-show = false
         label-show = true
-        label-color = "primary"
+        label-color = "#ff0066"
         label-max-length = 0
         left-click = "dropdown:calendar"
         button-bg-color = "transparent"
@@ -198,7 +198,7 @@ in
         popup-gap = 8
         popup-shadow = true
         popup-urgency-bar = "low"
-        border-color = "#ffcc00"
+        border-color = "#000000"
         icon-color = "#000000"
         button-bg-color = "#ff0066"
 
@@ -218,7 +218,7 @@ in
         alert-icon = "battery-caution-symbolic"
         icon-show = true
         label-show = false
-        border-color = "#00ff88"
+        border-color = "#000000"
         icon-color = "#000000"
         button-bg-color = "#ff0066"
 
@@ -237,7 +237,7 @@ in
         interval-ms = 300000
         icon-show = false
         label-show = true
-        label-color = "primary"
+        label-color = "#ff0066"
         left-click = "~/.config/hypr/scripts/wallpaper-picker.sh"
         button-bg-color = "bg-elevated"
         right-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"

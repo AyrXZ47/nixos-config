@@ -170,9 +170,7 @@ in
 
   programs.rofi = {
     enable = true;
-    theme = lib.mkForce "${adi1090x-src}/files/launchers/type-7/style-6.rasi";
     extraConfig = {
-      color-scheme = "cyberpunk";
       display-drun = "";
       display-run = "";
       display-filebrowser = "";
@@ -180,6 +178,7 @@ in
       drun-display-format = "{name}";
       show-icons = true;
     };
+    theme = lib.mkForce "~/.config/rofi/cyberpunk.rasi";
   };
 
   home.packages = with pkgs; [
@@ -282,6 +281,18 @@ in
     "rofi/launcher.rasi" = {
       source = ./themes/rofi/launcher.rasi;
     };
+    "rofi/cyberpunk.rasi".text = ''
+      @theme "launchers/type-7/style-6"
+
+      * {
+          background:     #000B1E;
+          background-alt: #0A1528;
+          foreground:     #0ABDC6;
+          selected:       #0ABDC6;
+          active:         #00FF00;
+          urgent:         #FF0000;
+      }
+    '';
     "rofi/launchers".source = "${adi1090x-src}/files/launchers";
     "rofi/colors".source = "${adi1090x-src}/files/colors";
     "rofi/applets".source = "${adi1090x-src}/files/applets";
