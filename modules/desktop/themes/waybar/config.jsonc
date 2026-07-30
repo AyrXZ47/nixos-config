@@ -1,25 +1,28 @@
 {
   "layer": "top",
   "position": "right",
-  "width": 60,
-  "margin": "10 10 10 0",
+  "width": 64,
+  "margin": "6 6 6 0",
   "spacing": 4,
+
   "modules": [
-    "custom/menu",
     "idle_inhibitor",
     "clock",
     "hyprland/workspaces",
     "hyprland/window",
     "pulseaudio",
-    "backlight",
-    "custom/clipboard",
-    "battery",
-    "bluetooth",
+    "pulseaudio#microphone",
     "custom/wallpaper",
-    "custom/keybinds",
+    "custom/usb",
     "custom/syncthing",
+    "custom/clipboard",
+    "network",
+    "backlight",
+    "battery",
+    "custom/keybinds",
     "custom/wlogout"
   ],
+
   "idle_inhibitor": {
     "format": "☕",
     "format-icons": {
@@ -27,39 +30,80 @@
       "deactivated": "☕"
     }
   },
+
   "clock": {
-    "format": "{:%H\n%M}",
-    "interval": 60,
+    "format": "{:%I\n%M\n%p}",
+    "interval": 30,
     "tooltip-format": "{:%A, %B %d %Y}",
     "on-click": "gnome-calendar"
   },
+
   "hyprland/workspaces": {
     "format": "{name}",
     "sort-by-number": true,
     "on-click": "hyprctl dispatch workspace {name}"
   },
+
   "hyprland/window": {
     "format": "{}",
     "max-length": 1,
     "separate-outputs": true
   },
+
   "pulseaudio": {
     "format": "{icon}",
     "format-icons": {
-      "default": ["", "", ""]
+      "default": [""]
     },
     "on-click": "pavucontrol"
   },
-  "backlight": {
-    "format": "",
-    "on-scroll-up": "brightnessctl s 5%+",
-    "on-scroll-down": "brightnessctl s 5%-"
+
+  "pulseaudio#microphone": {
+    "format": "{icon}",
+    "format-icons": {
+      "default": [""]
+    },
+    "on-click": "pavucontrol"
   },
+
+  "custom/wallpaper": {
+    "exec": "echo ",
+    "on-click": "~/.config/hypr/scripts/wallpaper-cycle.sh",
+    "interval": 3600
+  },
+
+  "custom/usb": {
+    "exec": "if findmnt | grep -q /media; then echo ; else echo ; fi",
+    "on-click": "udisksctl dump | grep -oP 'block_devices/\\K[^/]+' | while read d; do udisksctl unmount -b /dev/$d && udisksctl power-off -b /dev/$d; done",
+    "interval": 60
+  },
+
+  "custom/syncthing": {
+    "exec": "if systemctl --user is-active syncthing >/dev/null 2>&1; then echo ; else echo ; fi",
+    "interval": 30
+  },
+
   "custom/clipboard": {
     "exec": "echo ",
     "on-click": "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy",
     "interval": 3600
   },
+
+  "network": {
+    "format": "",
+    "format-wifi": "",
+    "format-ethernet": "",
+    "format-disconnected": "",
+    "on-click": "nm-connection-editor",
+    "tooltip-format": "{ifname} - {ipaddr}"
+  },
+
+  "backlight": {
+    "format": "",
+    "on-scroll-up": "brightnessctl s 5%+",
+    "on-scroll-down": "brightnessctl s 5%-"
+  },
+
   "battery": {
     "format": "{icon}",
     "format-icons": {
@@ -67,29 +111,13 @@
       "default": ["", "", "", "", "", "", "", "", "", ""]
     }
   },
-  "bluetooth": {
-    "format": "",
-    "on-click": "blueman-manager"
-  },
-  "custom/wallpaper": {
-    "exec": "echo ",
-    "on-click": "swaybg -i $(find ~/Pictures/Wallpapers -type f | shuf -n1) &",
-    "interval": 3600
-  },
-  "custom/menu": {
-    "exec": "echo ",
-    "on-click": "rofi -show drun -show-icons",
-    "interval": 3600
-  },
+
   "custom/keybinds": {
     "exec": "echo ",
     "on-click": "wezterm start -e man hyprland",
     "interval": 3600
   },
-  "custom/syncthing": {
-    "exec": "if systemctl --user is-active syncthing >/dev/null 2>&1; then echo ; else echo ; fi",
-    "interval": 30
-  },
+
   "custom/wlogout": {
     "exec": "echo ⏻",
     "on-click": "wlogout --protocol layer-shell",
