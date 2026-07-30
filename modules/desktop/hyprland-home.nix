@@ -160,6 +160,7 @@ in
       ];
 
       windowrule = [
+        "blur, .*"
         "match:class pavucontrol, float on"
         "match:class blueberry, float on"
         "match:title Volume Control, float on"
@@ -252,28 +253,36 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        find /home/yovick/workspaces/nixos-config/assets/wallpapers -type f | shuf -n1 | xargs -r awww img
+        find /home/yovick/workspaces/nixos-config/assets/wallpapers -type f | shuf -n1 | while read f; do awww img "$f"; done
       '';
     };
-    "hypr/scripts/wallpaper-picker.sh" = {
+    "hypr/scripts/wallpaper-menu.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
         dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
-        pick=$(find "$dir" -type f | sort | while read f; do
-          name=$(basename "$f")
-          echo "$name"
-        done | rofi -dmenu -p " wallpaper" -theme-str 'window {width: 400px;} listview {lines: 15;}')
-        [ -z "$pick" ] && exit 0
-        awww img "$dir/$pick"
+        action=$(printf " Pick manually\n Next wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2;}')
+        [ -z "$action" ] && exit 0
+        case "$action" in
+          " Pick manually")
+            pick=$(find "$dir" -type f -name '*' | sort | while read f; do basename "$f"; done | rofi -dmenu -p " wallpaper" -theme-str 'window {width: 400px;} listview {lines: 15;}')
+            [ -z "$pick" ] && exit 0
+            awww img "$dir/$pick"
+            ;;
+          " Next wallpaper")
+            find "$dir" -type f | shuf -n1 | while read f; do awww img "$f"; done
+            ;;
+        esac
       '';
     };
     "hypr/scripts/switch-layout.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        hyprctl switchxkblayout
-        layout=$(hyprctl devices | sed -n '/main: yes/,/active keymap:/p' | sed -n 's/.*active keymap: //p')
+        kb_count=$(hyprctl devices | grep -c "Keyboard at")
+        [ "$kb_count" -eq 0 ] && notify-send -t 2000 -a layout -u critical " No keyboard" && exit 1
+        hyprctl switchxkblayout "$((kb_count - 1))"
+        layout=$(hyprctl devices | grep -A 10 "main: yes" | grep "active keymap" | sed 's/.*active keymap: //')
         notify-send -t 2000 -a layout -u low " $layout"
       '';
     };
