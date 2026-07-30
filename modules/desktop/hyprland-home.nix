@@ -55,8 +55,10 @@ in
         rounding = 12;
         blur = {
           enabled = true;
-          size = 10;
-          passes = 3;
+          size = 12;
+          passes = 4;
+          new_optimizations = true;
+          ignore_opacity = true;
         };
         shadow = {
           enabled = true;
@@ -66,8 +68,8 @@ in
       };
 
       layerrule = [
-        "blur on, match:namespace wayle"
-        "blur on, match:namespace rofi"
+        "blur on, ignore_alpha 0, match:namespace wayle"
+        "blur on, ignore_alpha 0, match:namespace rofi"
       ];
 
       animations = {
@@ -168,7 +170,15 @@ in
 
   programs.rofi = {
     enable = true;
-    theme = lib.mkForce ./themes/rofi/launcher.rasi;
+    theme = lib.mkForce "${adi1090x-src}/files/launchers/type-7/style-6.rasi";
+    extraConfig = {
+      display-drun = "";
+      display-run = "";
+      display-filebrowser = "";
+      display-window = "";
+      drun-display-format = "{name}";
+      show-icons = true;
+    };
   };
 
   home.packages = with pkgs; [
@@ -245,13 +255,27 @@ in
         find /home/yovick/workspaces/nixos-config/assets/wallpapers -type f | shuf -n1 | xargs -r awww img
       '';
     };
+    "hypr/scripts/wallpaper-picker.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
+        pick=$(find "$dir" -type f | sort | while read f; do
+          name=$(basename "$f")
+          echo "$name"
+        done | rofi -dmenu -p " wallpaper" -theme-str 'window {width: 400px;} listview {lines: 15;}')
+        [ -z "$pick" ] && exit 0
+        awww img "$dir/$pick"
+      '';
+    };
     "hypr/scripts/switch-layout.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
         hyprctl switchxkblayout
-        layout=$(hyprctl getoption input:kb_layout | sed -n 's/.*str: *//p' | cut -d, -f1)
-        notify-send -t 2000 -a layout -u low "$layout"
+        layout=$(hyprctl getoption input:kb_layout | sed -n 's/.*str: *//p')
+        lang=$(echo "$layout" | cut -d, -f1)
+        notify-send -t 2000 -a layout -u low " $lang"
       '';
     };
 
