@@ -4,7 +4,7 @@
  * Github : @adi1090x
  **/
 
-@import "colors/cyberpunk.rasi"
+@import "colors.rasi"
 
 configuration {
 	modi:                       "drun,filebrowser,window";

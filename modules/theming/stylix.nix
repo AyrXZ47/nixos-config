@@ -9,6 +9,7 @@
       wezterm.enable = true;
       neovim.enable = true;
       rofi.enable = true;
+      wayle.enable = true;
       hyprpaper.enable = lib.mkForce false;
     };
   };
