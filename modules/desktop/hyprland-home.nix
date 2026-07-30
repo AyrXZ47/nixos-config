@@ -47,7 +47,7 @@ in
         gaps_out = 10;
         border_size = 2;
         layout = "dwindle";
-        "col.active_border" = "rgba(ff0066ff) rgba(00aaffff) 45deg";
+        "col.active_border" = "rgba(ff0066ff) rgba(9900ffff) rgba(00aaffff) 45deg";
         "col.inactive_border" = "rgba(1e1e3aff)";
       };
 
@@ -55,10 +55,8 @@ in
         rounding = 12;
         blur = {
           enabled = true;
-          size = 12;
-          passes = 4;
-          new_optimizations = true;
-          ignore_opacity = true;
+          size = 10;
+          passes = 3;
         };
         shadow = {
           enabled = true;
