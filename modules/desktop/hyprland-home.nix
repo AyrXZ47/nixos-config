@@ -172,6 +172,7 @@ in
     enable = true;
     theme = lib.mkForce "${adi1090x-src}/files/launchers/type-7/style-6.rasi";
     extraConfig = {
+      color-scheme = "cyberpunk";
       display-drun = "";
       display-run = "";
       display-filebrowser = "";
@@ -273,9 +274,8 @@ in
       text = ''
         #!/usr/bin/env bash
         hyprctl switchxkblayout
-        layout=$(hyprctl getoption input:kb_layout | sed -n 's/.*str: *//p')
-        lang=$(echo "$layout" | cut -d, -f1)
-        notify-send -t 2000 -a layout -u low " $lang"
+        layout=$(hyprctl devices | sed -n '/main: yes/,/active keymap:/p' | sed -n 's/.*active keymap: //p')
+        notify-send -t 2000 -a layout -u low " $layout"
       '';
     };
 
