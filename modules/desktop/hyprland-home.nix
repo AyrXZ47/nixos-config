@@ -47,8 +47,8 @@ in
         gaps_out = 10;
         border_size = 2;
         layout = "dwindle";
-        col.active_border = "rgb(ff0066) rgb(00aaff) 45deg";
-        col.inactive_border = "rgb(1e1e3a)";
+        "col.active_border" = "rgba(ff0066ff) rgba(00aaffff) 45deg";
+        "col.inactive_border" = "rgba(1e1e3aff)";
       };
 
       decoration = {
@@ -57,17 +57,13 @@ in
           enabled = true;
           size = 12;
           passes = 4;
-          brightness = 1.0;
-          contrast = 1.0;
-          noise = 0.01;
-          popups = true;
-          popups_ignorealpha = 0.2;
+          new_optimizations = true;
+          ignore_opacity = true;
         };
         shadow = {
           enabled = true;
           range = 12;
           render_power = 3;
-          color = "rgba(ff0066, 0.2)";
         };
       };
 
