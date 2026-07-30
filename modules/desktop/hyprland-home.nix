@@ -68,10 +68,10 @@ in
       };
 
       layerrule = [
-        "blur, match:namespace wayle"
-        "blur, match:namespace rofi"
-        "ignorezero, match:namespace wayle"
-        "ignorezero, match:namespace rofi"
+        "blur, namespace:wayle"
+        "blur, namespace:rofi"
+        "ignorezero, namespace:wayle"
+        "ignorezero, namespace:rofi"
       ];
 
       animations = {
@@ -85,7 +85,7 @@ in
           "windowsOut, 1, 5, default, popin 80%"
           "border, 1, 10, default"
           "fade, 1, 7, default"
-          "workspaces, 1, 6, bounce, slidevert"
+          "workspaces, 1, 6, default, slidevert"
         ];
       };
 
