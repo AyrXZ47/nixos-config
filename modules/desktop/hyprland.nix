@@ -198,9 +198,9 @@ in
         popup-gap = 8
         popup-shadow = true
         popup-urgency-bar = "low"
-        border-color = "#ff0066"
-        icon-color = "#ff0066"
-        button-bg-color = "bg-elevated"
+        border-color = "#ffcc00"
+        icon-color = "#000000"
+        button-bg-color = "#ff0066"
 
         [modules.brightness]
         level-icons = ["ld-sun-dim-symbolic", "ld-sun-medium-symbolic", "ld-sun-symbolic"]
@@ -218,9 +218,9 @@ in
         alert-icon = "battery-caution-symbolic"
         icon-show = true
         label-show = false
-        border-color = "#ff0066"
-        icon-color = "#ff0066"
-        button-bg-color = "bg-elevated"
+        border-color = "#00ff88"
+        icon-color = "#000000"
+        button-bg-color = "#ff0066"
 
         [modules.dashboard]
         icon-override = ""
@@ -233,13 +233,14 @@ in
 
         [[modules.custom]]
         id = "wpcycle"
-        command = "echo 'WP'"
+        command = "echo ''"
         interval-ms = 300000
         icon-show = false
         label-show = true
         label-color = "primary"
         left-click = "~/.config/hypr/scripts/wallpaper-picker.sh"
         button-bg-color = "bg-elevated"
+        right-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"
 
         [[modules.custom]]
         id = "usb"
