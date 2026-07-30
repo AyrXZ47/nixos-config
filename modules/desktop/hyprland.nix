@@ -70,12 +70,11 @@ in
         monitor = "*"
         show = true
         left = [
-          { name = "top", modules = ["idle-inhibit", "clock"] },
+          { name = "top", modules = ["notifications", "clock"] },
         ]
         center = ["hyprland-workspaces"]
         right = [
           { name = "bottom", modules = [
-            "notifications",
             "custom-clipboard",
             "custom-wallpaper",
             "custom-syncthing",
