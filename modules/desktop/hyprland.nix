@@ -56,7 +56,9 @@ in
 
     environment.systemPackages = with pkgs; [
       awww
+      cliphist
       (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
+      waybar
       wayle
       wl-clipboard
       wlogout

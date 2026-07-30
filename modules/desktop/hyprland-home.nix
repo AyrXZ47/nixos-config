@@ -15,7 +15,10 @@
 
       exec-once = [
         "wayle shell"
+        "waybar"
         "${pkgs.awww}/bin/awww-daemon"
+        "wl-paste --type text --watch cliphist store"
+        "wl-paste --type image --watch cliphist store"
         "dunst"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
       ];
@@ -71,15 +74,14 @@
       ];
 
       animations = {
-        bezier = [
-          "easeOut, 0.05, 0.9, 0.1, 1.05"
-          "easeInOut, 0.5, 0, 0.5, 1"
-        ];
+        enabled = true;
+        bezier = [ "overshot, 0.05, 0.9, 0.1, 1.05" ];
         animation = [
-          "windows, 1, 7, easeOut, popin"
-          "windowsOut, 1, 7, easeInOut, popin"
-          "fade, 1, 7, easeInOut"
-          "workspaces, 1, 6, easeOut, slide"
+          "windows, 1, 5, overshot, slide"
+          "windowsOut, 1, 5, default, popin 80%"
+          "border, 1, 10, default"
+          "fade, 1, 7, default"
+          "workspaces, 1, 6, overshot, slidevert"
         ];
       };
 
@@ -178,6 +180,8 @@
     imv
     tree-sitter
     awww
+    cliphist
+    waybar
   ];
 
   xdg.configFile = {
@@ -193,6 +197,12 @@
     };
     "rofi/launcher.rasi" = {
       source = ./themes/rofi/launcher.rasi;
+    };
+    "waybar/config.jsonc" = {
+      source = ./themes/waybar/config.jsonc;
+    };
+    "waybar/style.css" = {
+      source = ./themes/waybar/style.css;
     };
   };
 
