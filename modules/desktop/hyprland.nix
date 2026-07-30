@@ -51,9 +51,19 @@ in
           package = pkgs.adwaita-qt;
         };
       };
+      xdg.configFile."kdeglobals" = {
+        text = ''
+          [KDE]
+          ColorScheme=BreezeDark
+          widgetStyle=Breeze
+          [General]
+          colorScheme=BreezeDark
+        '';
+      };
       home.sessionVariables = {
         GTK_THEME = "Adwaita:dark";
         QT_QPA_PLATFORMTHEME = "gtk3";
+        XDG_CURRENT_DESKTOP = "KDE";
       };
       xdg.configFile."wayle/config.toml".text = ''
         [bar]
@@ -65,8 +75,7 @@ in
         padding = 0.3
         padding-ends = 0.25
         inset-edge = 0.25
-        bg = "bg"
-        background-opacity = 0
+        bg = "transparent"
         border-location = "none"
         border-width = 0
         shadow = "none"
@@ -224,12 +233,12 @@ in
 
         [[modules.custom]]
         id = "wpcycle"
-        command = "printf 'WP'"
-        interval-ms = 3600000
+        command = "echo 'WP'"
+        interval-ms = 300000
         icon-show = false
         label-show = true
         label-color = "primary"
-        left-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"
+        left-click = "~/.config/hypr/scripts/wallpaper-picker.sh"
         button-bg-color = "bg-elevated"
 
         [[modules.custom]]
