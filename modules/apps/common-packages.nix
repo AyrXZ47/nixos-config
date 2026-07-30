@@ -36,8 +36,8 @@
     ollama
     aider-chat
 
-    # Virtualization
-    gnome-boxes
+      # Virtualization
+    virt-manager
 
     # Networking & VPN
     proton-vpn

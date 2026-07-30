@@ -1,10 +1,17 @@
 /**
- * adi1090x Type 7 Style 9 — Cyberpunk
+ * adi1090x Type 7 Style 6 — Cyberpunk
  * Author : Aditya Shakya (adi1090x)
  * Github : @adi1090x
  **/
 
-@import "colors.rasi"
+* {
+    background:     #0f0f1a;
+    background-alt: #1a1a2e;
+    foreground:     #e0e0f0;
+    selected:       #ff0066;
+    active:         #00ff88;
+    urgent:         #ff0040;
+}
 
 configuration {
 	modi:                       "drun,filebrowser,window";
@@ -22,11 +29,13 @@ window {
     location:                   center;
     anchor:                     center;
     fullscreen:                 false;
-    width:                      700px;
+    width:                      720px;
     enabled:                    true;
-    border-radius:              20px;
+    border-radius:              24px;
     cursor:                     "default";
     background-color:           @background;
+    background-image:           "url(/home/yovick/workspaces/nixos-config/assets/wallpapers/default.jpg, width)",
+                                "linear-gradient(rgba(15, 15, 26, 0.85), rgba(15, 15, 26, 0.85))";
 }
 
 mainbox {
@@ -48,7 +57,7 @@ listbox {
 inputbar {
     enabled:                    true;
     spacing:                    10px;
-    padding:                    80px 60px;
+    padding:                    60px 60px 20px;
     background-color:           transparent;
     text-color:                 @foreground;
     orientation:                horizontal;
@@ -59,7 +68,7 @@ textbox-prompt-colon {
     enabled:                    true;
     expand:                     false;
     str:                        "";
-    padding:                    12px 15px;
+    padding:                    14px 18px;
     border-radius:              100%;
     background-color:           @background-alt;
     text-color:                 inherit;
@@ -68,8 +77,8 @@ textbox-prompt-colon {
 entry {
     enabled:                    true;
     expand:                     false;
-    width:                      250px;
-    padding:                    12px 16px;
+    width:                      280px;
+    padding:                    14px 18px;
     border-radius:              100%;
     background-color:           @background-alt;
     text-color:                 inherit;
@@ -115,7 +124,8 @@ listview {
     reverse:                    false;
     fixed-height:               true;
     fixed-columns:              true;
-    spacing:                    10px;
+    spacing:                    12px;
+    padding:                    0px 20px 20px;
     background-color:           transparent;
     text-color:                 @foreground;
     cursor:                     "default";
@@ -123,8 +133,8 @@ listview {
 
 element {
     enabled:                    true;
-    spacing:                    15px;
-    padding:                    35px 10px;
+    spacing:                    12px;
+    padding:                    30px 10px;
     border-radius:              20px;
     background-color:           transparent;
     text-color:                 @foreground;
@@ -192,7 +202,7 @@ textbox {
 
 error-message {
     padding:                    12px;
-    border-radius:              0px;
+    border-radius:              24px;
     background-color:           @background;
     text-color:                 @foreground;
 }
