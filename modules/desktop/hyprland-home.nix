@@ -62,12 +62,12 @@
       };
 
       layerrule = [
-        "blur, wayle"
-        "blur, rofi"
-        "blur, wlogout"
-        "ignorezero, wayle"
-        "ignorezero, rofi"
-        "ignorezero, wlogout"
+        "blur on, match:namespace wayle"
+        "blur on, match:namespace rofi"
+        "blur on, match:namespace wlogout"
+        "ignore_alpha 0, match:namespace wayle"
+        "ignore_alpha 0, match:namespace rofi"
+        "ignore_alpha 0, match:namespace wlogout"
       ];
 
       animations = {
@@ -154,10 +154,10 @@
       ];
 
       windowrule = [
-        "float pavucontrol"
-        "float blueberry"
-        "float title:Volume Control"
-        "float imv"
+        "match:class pavucontrol, float on"
+        "match:class blueberry, float on"
+        "match:title Volume Control, float on"
+        "match:class imv, float on"
       ];
     };
   };
