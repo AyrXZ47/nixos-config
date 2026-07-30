@@ -244,7 +244,7 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        find ${../../assets/wallpapers} -type f | shuf -n1 | xargs -r awww img
+        find /home/yovick/workspaces/nixos-config/assets/wallpapers -type f | shuf -n1 | xargs -r awww img
       '';
     };
     "hypr/scripts/switch-layout.sh" = {
