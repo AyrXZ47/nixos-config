@@ -1,0 +1,98 @@
+{
+  "layer": "top",
+  "position": "right",
+  "width": 60,
+  "margin": "10 10 10 0",
+  "spacing": 4,
+  "modules": [
+    "custom/menu",
+    "idle_inhibitor",
+    "clock",
+    "hyprland/workspaces",
+    "hyprland/window",
+    "pulseaudio",
+    "backlight",
+    "custom/clipboard",
+    "battery",
+    "bluetooth",
+    "custom/wallpaper",
+    "custom/keybinds",
+    "custom/syncthing",
+    "custom/wlogout"
+  ],
+  "idle_inhibitor": {
+    "format": "☕",
+    "format-icons": {
+      "activated": "☕",
+      "deactivated": "☕"
+    }
+  },
+  "clock": {
+    "format": "{:%H\n%M}",
+    "interval": 60,
+    "tooltip-format": "{:%A, %B %d %Y}",
+    "on-click": "gnome-calendar"
+  },
+  "hyprland/workspaces": {
+    "format": "{name}",
+    "sort-by-number": true,
+    "on-click": "hyprctl dispatch workspace {name}"
+  },
+  "hyprland/window": {
+    "format": "{}",
+    "max-length": 1,
+    "separate-outputs": true
+  },
+  "pulseaudio": {
+    "format": "{icon}",
+    "format-icons": {
+      "default": ["", "", ""]
+    },
+    "on-click": "pavucontrol"
+  },
+  "backlight": {
+    "format": "",
+    "on-scroll-up": "brightnessctl s 5%+",
+    "on-scroll-down": "brightnessctl s 5%-"
+  },
+  "custom/clipboard": {
+    "exec": "echo ",
+    "on-click": "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy",
+    "interval": 3600
+  },
+  "battery": {
+    "format": "{icon}",
+    "format-icons": {
+      "charging": [""],
+      "default": ["", "", "", "", "", "", "", "", "", ""]
+    }
+  },
+  "bluetooth": {
+    "format": "",
+    "on-click": "blueman-manager"
+  },
+  "custom/wallpaper": {
+    "exec": "echo ",
+    "on-click": "swaybg -i $(find ~/Pictures/Wallpapers -type f | shuf -n1) &",
+    "interval": 3600
+  },
+  "custom/menu": {
+    "exec": "echo ",
+    "on-click": "rofi -show drun -show-icons",
+    "interval": 3600
+  },
+  "custom/keybinds": {
+    "exec": "echo ",
+    "on-click": "wezterm start -e man hyprland",
+    "interval": 3600
+  },
+  "custom/syncthing": {
+    "exec": "if systemctl --user is-active syncthing >/dev/null 2>&1; then echo ; else echo ; fi",
+    "interval": 30
+  },
+  "custom/wlogout": {
+    "exec": "echo ⏻",
+    "on-click": "wlogout --protocol layer-shell",
+    "interval": 3600
+  }
+}
