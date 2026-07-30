@@ -2,51 +2,19 @@
 
 {
   home-manager.users.yovick = {
-    home.pointerCursor.enable = true;
-    stylix.targets = {
-      firefox.profileNames = [ "yovick" ];
-      hyprland.enable = true;
-      wezterm.enable = true;
-      neovim.enable = true;
-      rofi.enable = true;
-      wayle.enable = true;
-      hyprpaper.enable = lib.mkForce false;
-    };
-  };
-
-  stylix = {
-    enable = true;
-    autoEnable = true;
-    polarity = "dark";
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
-    image = ../../assets/wallpapers/default.jpg;
-    cursor = {
+    home.pointerCursor = {
+      enable = true;
       name = "Bibata-Modern-Classic";
       package = pkgs.bibata-cursors;
       size = 24;
     };
-    fonts = {
-      monospace = {
-        package = pkgs.jetbrains-mono;
-        name = "JetBrains Mono Nerd Font";
-      };
-      sansSerif = {
-        package = pkgs.inter;
-        name = "Inter";
-      };
-      serif = {
-        package = pkgs.noto-fonts;
-        name = "Noto Serif";
-      };
-      sizes = {
-        applications = 12;
-        terminal = 14;
-        desktop = 11;
-        popups = 12;
-      };
-    };
-    opacity = {
-      terminal = 0.85;
-    };
   };
+
+  fonts.packages = with pkgs; [
+    jetbrains-mono
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
+    inter
+    noto-fonts
+  ];
 }

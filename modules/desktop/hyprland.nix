@@ -26,211 +26,238 @@ in
   config = lib.mkIf cfg.enable {
     home-manager.users.yovick = {
       imports = [ ./hyprland-home.nix ];
-      xdg.configFile."wayle/config.toml" = let
-        extractColor = name: builtins.head (builtins.match ".*${name}: \"(#[0-9a-fA-F]+)\".*" (builtins.readFile config.stylix.base16Scheme));
-        base00 = extractColor "base00";
-        base01 = extractColor "base01";
-        base02 = extractColor "base02";
-        base03 = extractColor "base03";
-        base04 = extractColor "base04";
-        base05 = extractColor "base05";
-        base08 = extractColor "base08";
-        base0A = extractColor "base0A";
-        base0B = extractColor "base0B";
-        base0C = extractColor "base0C";
-        base0D = extractColor "base0D";
-      in {
-        text = ''
-          [bar]
-          location = "right"
-          exclusive = true
-          layer = "top"
-          rounding = "none"
-          module-gap = 0.35
-          button-variant = "block-prefix"
-          button-rounding = "full"
-          button-icon-size = 1.0
-          button-icon-padding = 1.0
-          button-label-size = 1.0
-          button-label-padding = 1.0
-          button-gap = 0.5
-          button-bg-opacity = 100
-          button-opacity = 100
-          button-group-module-gap = 0.15
+      xdg.configFile."wayle/config.toml".text = ''
+        [bar]
+        location = "right"
+        exclusive = true
+        layer = "top"
+        rounding = "none"
+        module-gap = 0.35
+        padding = 0.35
+        padding-ends = 0.5
+        inset-edge = 0.5
+        bg = "transparent"
+        shadow = "floating"
 
-          [[bar.layout]]
-          monitor = "*"
-          show = true
-          left = [
-            "idle-inhibit",
-            "clock",
-            "hyprland-workspaces",
-            "window-title",
-          ]
-          center = []
-          right = [
-            "volume",
-            "microphone",
-            "custom-wallpaper",
-            "custom-usb",
-            "custom-syncthing",
-            "custom-clipboard",
-            "network",
-            "brightness",
-            "battery",
-            "custom-keybinds",
-            "dashboard",
-          ]
+        button-variant = "block-prefix"
+        button-rounding = "full"
+        button-icon-size = 1.0
+        button-icon-padding = 1.0
+        button-label-size = 1.35
+        button-label-weight = "bold"
+        button-label-padding = 1.0
+        button-gap = 0.5
+        button-bg-opacity = 90
+        button-opacity = 100
+        button-group-module-gap = 0.15
+        button-group-padding = 0.15
+        button-group-rounding = "full"
+        button-group-background = "bg-elevated"
+        button-group-opacity = 90
 
-          [styling]
-          scale = 1.01
-          rounding = "sm"
-          theme-provider = "wayle"
-          theming-monitor = ""
+        dropdown-shadow = true
+        dropdown-opacity = 100
+        dropdown-autohide = true
+        dropdown-freeze-label = true
 
-          [styling.palette]
-          bg = "${base00}"
-          surface = "${base01}"
-          elevated = "${base02}"
-          fg = "${base05}"
-          fg-muted = "${base04}"
-          primary = "${base0D}"
-          red = "${base08}"
-          yellow = "${base0A}"
-          green = "${base0B}"
-          blue = "${base0C}"
+        [[bar.layout]]
+        monitor = "*"
+        show = true
+        left = [
+          "idle-inhibit",
+          "clock",
+        ]
+        center = ["hyprland-workspaces"]
+        right = [
+          "notifications",
+          "custom-clipboard",
+          "custom-wallpaper",
+          "custom-syncthing",
+          "custom-kdeconnect",
+          "separator",
+          "bluetooth",
+          "brightness",
+          "battery",
+          "custom-usb",
+          "custom-keybinds",
+          "dashboard",
+        ]
 
-          # --- Modules ---
+        [styling]
+        scale = 1.1
+        rounding = "lg"
+        theme-provider = "wayle"
+        theming-monitor = ""
 
-          [modules.clock]
-          format = "%I\n%M\n%p"
-          icon-name = "tb-calendar-time-symbolic"
-          icon-show = false
-          label-show = true
-          label-color = "primary"
-          label-max-length = 0
-          left-click = "gnome-calendar"
+        [styling.palette]
+        bg = "#0a0a12"
+        surface = "#141428"
+        elevated = "#1e1e3a"
+        fg = "#d4d4f0"
+        fg-muted = "#8888aa"
+        primary = "#ff0066"
+        red = "#ff0040"
+        yellow = "#ffcc00"
+        green = "#00ff88"
+        blue = "#00aaff"
 
-          [modules.idle-inhibit]
-          icon-inactive = "tb-coffee-symbolic"
-          icon-active = "tb-coffee-symbolic"
-          format = "{{ state }}"
-          icon-show = true
-          label-show = false
-          left-click = "wayle idle toggle --indefinite"
+        # --- Modules ---
 
-          [modules.hyprland-workspaces]
-          display-mode = "label"
-          label-use-name = false
-          numbering = "absolute"
-          app-icons-show = true
-          app-icons-dedupe = true
-          active-indicator = "background"
+        [modules.clock]
+        format = "%I\n%M"
+        icon-show = false
+        label-show = true
+        label-color = "primary"
+        label-max-length = 0
+        left-click = "dropdown:calendar"
+        button-bg-color = "transparent"
 
-          [modules.window-title]
-          format = "{{ title }}"
-          icon-show = true
-          label-show = true
-          label-max-length = 1
+        [modules.idle-inhibit]
+        icon-inactive = "tb-coffee-symbolic"
+        icon-active = "tb-coffee-symbolic"
+        format = "{{ state }}"
+        icon-show = true
+        label-show = false
+        left-click = "wayle idle toggle --indefinite"
+        button-bg-color = "bg-elevated"
 
-          [modules.volume]
-          level-icons = ["ld-volume-symbolic", "ld-volume-1-symbolic", "ld-volume-2-symbolic"]
-          icon-muted = "ld-volume-x-symbolic"
-          icon-show = true
-          label-show = false
-          left-click = "pavucontrol"
-          middle-click = "wayle audio output-mute"
+        [modules.hyprland-workspaces]
+        display-mode = "label"
+        label-use-name = false
+        numbering = "absolute"
+        app-icons-show = true
+        app-icons-dedupe = true
+        app-icons-empty = "tb-minus-symbolic"
+        active-indicator = "background"
+        min-workspace-count = 5
+        container-bg-color = "transparent"
+        active-color = "#ff0066"
+        occupied-color = "#8888aa"
+        empty-color = "#2a2a44"
+        workspace-padding = 0.3
+        icon-size = 1.0
+        label-size = 0.85
+        icon-gap = 0.2
 
-          [modules.microphone]
-          icon-active = "ld-mic-symbolic"
-          icon-muted = "ld-mic-off-symbolic"
-          icon-show = true
-          label-show = false
-          left-click = "pavucontrol"
-          middle-click = "wayle audio input-mute"
+        [modules.notifications]
+        icon-show = true
+        label-show = false
+        left-click = "dropdown:notification"
+        right-click = "wayle notify dnd"
+        popup-position = "bottom-left"
+        popup-max-visible = 5
+        popup-duration = 5000
+        popup-hover-pause = true
+        popup-margin-x = 12
+        popup-margin-y = 12
+        popup-gap = 8
+        popup-shadow = true
+        popup-urgency-bar = "low"
+        button-bg-color = "bg-elevated"
 
-          [modules.network]
-          wifi-connected-icon = "cm-wireless-connected-symbolic"
-          wired-connected-icon = "cm-wired-symbolic"
-          wired-disconnected-icon = "cm-wired-disconnected-symbolic"
-          icon-show = true
-          label-show = false
-          left-click = "nm-connection-editor"
+        [modules.bluetooth]
+        icon-show = true
+        label-show = false
+        left-click = "dropdown:bluetooth"
+        button-bg-color = "bg-elevated"
 
-          [modules.brightness]
-          level-icons = ["ld-sun-dim-symbolic", "ld-sun-medium-symbolic", "ld-sun-symbolic"]
-          icon-show = true
-          label-show = false
-          left-click = "dropdown:brightness"
+        [modules.brightness]
+        level-icons = ["ld-sun-dim-symbolic", "ld-sun-medium-symbolic", "ld-sun-symbolic"]
+        icon-show = true
+        label-show = false
+        left-click = "dropdown:brightness"
+        button-bg-color = "bg-elevated"
 
-          [modules.battery]
-          level-icons = ["md-battery_android_0-symbolic", "md-battery_android_frame_1-symbolic", "md-battery_android_frame_2-symbolic", "md-battery_android_frame_3-symbolic", "md-battery_android_frame_4-symbolic", "md-battery_android_frame_5-symbolic", "md-battery_android_frame_6-symbolic", "md-battery_android_frame_full-symbolic"]
-          charging-icon = "md-battery_android_frame_bolt-symbolic"
-          alert-icon = "md-battery_android_alert-symbolic"
-          icon-show = true
-          label-show = false
+        [modules.battery]
+        level-icons = ["md-battery_android_0-symbolic", "md-battery_android_frame_1-symbolic", "md-battery_android_frame_2-symbolic", "md-battery_android_frame_3-symbolic", "md-battery_android_frame_4-symbolic", "md-battery_android_frame_5-symbolic", "md-battery_android_frame_6-symbolic", "md-battery_android_frame_full-symbolic"]
+        charging-icon = "md-battery_android_frame_bolt-symbolic"
+        alert-icon = "md-battery_android_alert-symbolic"
+        icon-show = true
+        label-show = false
+        button-bg-color = "bg-elevated"
 
-          [modules.dashboard]
-          icon-override = ""
-          left-click = "dropdown:dashboard"
-          dropdown-lock-command = "loginctl lock-session"
-          dropdown-logout-command = "loginctl terminate-session $XDG_SESSION_ID"
-          dropdown-reboot-command = "systemctl reboot"
-          dropdown-poweroff-command = "systemctl poweroff"
+        [modules.dashboard]
+        icon-override = ""
+        left-click = "dropdown:dashboard"
+        dropdown-lock-command = "loginctl lock-session"
+        dropdown-logout-command = "loginctl terminate-session $XDG_SESSION_ID"
+        dropdown-reboot-command = "systemctl reboot"
+        dropdown-poweroff-command = "systemctl poweroff"
+        button-bg-color = "bg-elevated"
 
-          [[modules.custom]]
-          id = "wallpaper"
-          command = "echo "
-          interval-ms = 3600000
-          icon-show = false
-          label-show = true
-          label-color = "primary"
-          left-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"
+        [[modules.custom]]
+        id = "wallpaper"
+        command = "echo "
+        interval-ms = 3600000
+        icon-show = false
+        label-show = true
+        label-color = "primary"
+        left-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"
+        button-bg-color = "bg-elevated"
 
-          [[modules.custom]]
-          id = "usb"
-          command = "if findmnt | grep -q /media; then echo ; else echo ; fi"
-          interval-ms = 60000
-          icon-show = false
-          label-show = true
-          left-click = "udisksctl dump | grep -oP 'block_devices/\\K[^/]+' | while read d; do udisksctl unmount -b /dev/$d && udisksctl power-off -b /dev/$d; done"
+        [[modules.custom]]
+        id = "usb"
+        command = "if findmnt | grep -q /media; then echo ; else echo ; fi"
+        interval-ms = 60000
+        icon-show = false
+        label-show = true
+        left-click = "udisksctl dump | grep -oP 'block_devices/\\K[^/]+' | while read d; do udisksctl unmount -b /dev/$d && udisksctl power-off -b /dev/$d; done"
+        button-bg-color = "bg-elevated"
 
-          [[modules.custom]]
-          id = "syncthing"
-          command = "if systemctl --user is-active syncthing >/dev/null 2>&1; then echo ; else echo ; fi"
-          interval-ms = 30000
-          icon-show = false
-          label-show = true
+        [[modules.custom]]
+        id = "syncthing"
+        command = "if systemctl --user is-active syncthing >/dev/null 2>&1; then echo ; else echo ; fi"
+        interval-ms = 30000
+        icon-show = false
+        label-show = true
+        button-bg-color = "bg-elevated"
 
-          [[modules.custom]]
-          id = "clipboard"
-          command = "echo "
-          interval-ms = 3600000
-          icon-show = false
-          label-show = true
-          left-click = "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"
+        [[modules.custom]]
+        id = "clipboard"
+        command = "echo "
+        interval-ms = 3600000
+        icon-show = false
+        label-show = true
+        left-click = "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"
+        button-bg-color = "bg-elevated"
 
-          [[modules.custom]]
-          id = "keybinds"
-          command = "echo "
-          interval-ms = 3600000
-          icon-show = false
-          label-show = true
-          left-click = "wezterm start -e man hyprland"
+        [[modules.custom]]
+        id = "kdeconnect"
+        command = "if kdeconnect-cli -a --id-only 2>/dev/null | head -1 | grep -q .; then echo ; else echo ; fi"
+        interval-ms = 30000
+        icon-show = false
+        label-show = true
+        left-click = "kdeconnect-cli -l"
+        button-bg-color = "bg-elevated"
 
-          # --- Wallpaper Engine ---
+        [[modules.custom]]
+        id = "keybinds"
+        command = "echo "
+        interval-ms = 3600000
+        icon-show = false
+        label-show = true
+        left-click = "wezterm start -e man hyprland"
+        button-bg-color = "bg-elevated"
 
-          [wallpaper]
-          engine-enabled = false
+        # --- Wallpaper Engine ---
 
-          # --- OSD ---
+        [wallpaper]
+        engine-enabled = true
+        cycling-enabled = true
+        cycling-directory = "/home/yovick/workspaces/nixos-config/assets/wallpapers"
+        cycling-mode = "shuffle"
+        cycling-interval-mins = 30
+        transition-type = "fade"
+        transition-duration = 0.7
+        transition-fps = 60
 
-          [osd]
-          enabled = true
-          position = "bottom"
-          duration = 2500
-        '';
-      };
+        # --- OSD ---
+
+        [osd]
+        enabled = true
+        position = "bottom"
+        duration = 2500
+      '';
       wayland.windowManager.hyprland.settings.bind = [
         "${cfg.screenshotKey}, exec, hyprshot -m region -o ~/Pictures/Screenshots"
         "${cfg.screenshotWindowKey}, exec, hyprshot -m window -o ~/Pictures/Screenshots"
@@ -265,7 +292,6 @@ in
       (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       wayle
       wl-clipboard
-      wlogout
       swaylock-effects
       swayidle
       polkit_gnome

@@ -23,11 +23,8 @@ in
 
       exec-once = [
         "wayle shell"
-        "${pkgs.awww}/bin/awww-daemon"
-        "${pkgs.bash}/bin/bash -c 'sleep 1 && ${pkgs.findutils}/bin/find ${../../assets/wallpapers} -maxdepth 1 -type f -print0 | ${pkgs.coreutils}/bin/shuf -z -n1 | ${pkgs.findutils}/bin/xargs -0 ${pkgs.awww}/bin/awww img'"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
-        "dunst"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
       ];
 
@@ -72,10 +69,8 @@ in
       layerrule = [
         "blur on, match:namespace wayle"
         "blur on, match:namespace rofi"
-        "blur on, match:namespace wlogout"
         "ignore_alpha 0, match:namespace wayle"
         "ignore_alpha 0, match:namespace rofi"
-        "ignore_alpha 0, match:namespace wlogout"
       ];
 
       animations = {
@@ -139,7 +134,6 @@ in
 
         "SUPER, T, exec, ${config.xdg.configHome}/hypr/scripts/time-to-work.sh"
         "SUPER, H, exec, ${config.xdg.configHome}/hypr/scripts/hypr-dev.sh"
-        "SUPER SHIFT, E, exec, wlogout --protocol layer-shell"
 
         "SUPER, mouse_down, workspace, e+1"
         "SUPER, mouse_up, workspace, e-1"
@@ -177,11 +171,8 @@ in
   };
 
   home.packages = with pkgs; [
-    dunst
-    hyprpaper
     swaylock-effects
     swayidle
-    wlogout
     brightnessctl
     pavucontrol
     libnotify
@@ -190,8 +181,8 @@ in
     swayimg
     imv
     tree-sitter
-    awww
     cliphist
+    awww
   ];
 
   xdg.configFile = {
@@ -259,38 +250,15 @@ in
     };
     "rofi/launchers".source = "${adi1090x-src}/files/launchers";
     "rofi/colors".source = "${adi1090x-src}/files/colors";
+    "rofi/launchers/type-7/shared/colors.rasi" = {
+      text = ''
+        @import "~/.config/rofi/colors/cyber-punk.rasi"
+      '';
+    };
     "rofi/applets".source = "${adi1090x-src}/files/applets";
     "rofi/powermenu".source = "${adi1090x-src}/files/powermenu";
     "rofi/scripts".source = "${adi1090x-src}/files/scripts";
     "rofi/fonts".source = "${adi1090x-src}/fonts";
-    "wlogout/style.css" = {
-      text = ''
-        * {
-          background-image: none;
-          box-shadow: none;
-        }
-
-        window {
-          background: rgba(20, 20, 30, 0.85);
-        }
-
-        button {
-          border-radius: 12px;
-          border-color: rgba(255, 255, 255, 0.1);
-          border-width: 1px;
-          background: rgba(30, 30, 44, 0.9);
-          color: #cdd6f4;
-          margin: 8px;
-          padding: 12px 24px;
-        }
-
-        button:hover {
-          background: rgba(0, 170, 255, 0.3);
-          border-color: #00aaff;
-        }
-      '';
-    };
-
   };
 
   xdg.mimeApps.enable = true;

@@ -9,12 +9,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    stylix.url = "github:danth/stylix";
-
   };
 
   outputs =
-    { nixpkgs, home-manager, stylix, ... }:
+    { nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -22,8 +20,6 @@
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
-          stylix.nixosModules.stylix
-
           home-manager.nixosModules.home-manager
           {
             home-manager = {
