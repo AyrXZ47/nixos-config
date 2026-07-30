@@ -32,10 +32,10 @@ in
         exclusive = true
         layer = "top"
         rounding = "none"
-        module-gap = 0.5
-        padding = 0.5
-        padding-ends = 0.5
-        inset-edge = 0.5
+        module-gap = 0.3
+        padding = 0.3
+        padding-ends = 0.25
+        inset-edge = 0.25
         bg = "bg"
         background-opacity = 0
         border-location = "none"
@@ -119,8 +119,8 @@ in
         button-bg-color = "transparent"
 
         [modules.idle-inhibit]
-        icon-inactive = "tb-coffee-symbolic"
-        icon-active = "tb-coffee-symbolic"
+        icon-inactive = "ld-bell-symbolic"
+        icon-active = "ld-bell-off-symbolic"
         format = "{{ state }}"
         icon-show = true
         label-show = false
@@ -159,6 +159,9 @@ in
         popup-gap = 8
         popup-shadow = true
         popup-urgency-bar = "low"
+        border-color = "primary"
+        icon-color = "primary"
+        icon-bg-color = "primary"
         button-bg-color = "bg-elevated"
 
         [modules.brightness]
@@ -166,6 +169,9 @@ in
         icon-show = true
         label-show = false
         left-click = "dropdown:brightness"
+        border-color = "blue"
+        icon-color = "blue"
+        icon-bg-color = "blue"
         button-bg-color = "bg-elevated"
 
         [modules.battery]
@@ -174,6 +180,9 @@ in
         alert-icon = "md-battery_android_alert-symbolic"
         icon-show = true
         label-show = false
+        border-color = "primary"
+        icon-color = "primary"
+        icon-bg-color = "primary"
         button-bg-color = "bg-elevated"
 
         [modules.dashboard]
