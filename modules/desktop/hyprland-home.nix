@@ -47,40 +47,49 @@ in
         gaps_out = 10;
         border_size = 2;
         layout = "dwindle";
+        col.active_border = "rgb(ff0066) rgb(00aaff) 45deg";
+        col.inactive_border = "rgb(1e1e3a)";
       };
 
       decoration = {
         rounding = 12;
         blur = {
           enabled = true;
-          size = 8;
-          passes = 3;
-          new_optimizations = true;
-          ignore_opacity = true;
+          size = 12;
+          passes = 4;
+          brightness = 1.0;
+          contrast = 1.0;
+          noise = 0.01;
+          popups = true;
+          popups_ignorealpha = 0.2;
         };
         shadow = {
           enabled = true;
-          range = 8;
+          range = 12;
           render_power = 3;
+          color = "rgba(ff0066, 0.2)";
         };
       };
 
       layerrule = [
-        "blur on, match:namespace wayle"
-        "blur on, match:namespace rofi"
-        "ignore_alpha 0, match:namespace wayle"
-        "ignore_alpha 0, match:namespace rofi"
+        "blur, match:namespace wayle"
+        "blur, match:namespace rofi"
+        "ignorezero, match:namespace wayle"
+        "ignorezero, match:namespace rofi"
       ];
 
       animations = {
         enabled = true;
-        bezier = [ "overshot, 0.05, 0.9, 0.1, 1.05" ];
+        bezier = [
+          "bounce, 0.05, 1.8, 0.2, 1.0"
+          "overshot, 0.05, 0.9, 0.1, 1.05"
+        ];
         animation = [
-          "windows, 1, 5, overshot, slide"
+          "windows, 1, 6, bounce, slideright"
           "windowsOut, 1, 5, default, popin 80%"
           "border, 1, 10, default"
           "fade, 1, 7, default"
-          "workspaces, 1, 6, overshot, slidevert"
+          "workspaces, 1, 6, bounce, slidevert"
         ];
       };
 
@@ -133,7 +142,7 @@ in
 
         "SUPER, T, exec, ${config.xdg.configHome}/hypr/scripts/time-to-work.sh"
         "SUPER, H, exec, ${config.xdg.configHome}/hypr/scripts/hypr-dev.sh"
-        "SUPER, SPACE, exec, hyprctl switchxkblayout && notify-send -t 2000 -a layout -u low \"$(hyprctl getoption input:kb_layout | sed -n 's/.*str: *//p' | cut -d, -f1)\""
+        "SUPER, SPACE, exec, ${config.xdg.configHome}/hypr/scripts/switch-layout.sh"
 
         "SUPER, mouse_down, workspace, e+1"
         "SUPER, mouse_up, workspace, e-1"
@@ -242,6 +251,15 @@ in
       text = ''
         #!/usr/bin/env bash
         find ${../../assets/wallpapers} -type f | shuf -n1 | xargs -r awww img
+      '';
+    };
+    "hypr/scripts/switch-layout.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        hyprctl switchxkblayout
+        layout=$(hyprctl getoption input:kb_layout | sed -n 's/.*str: *//p' | cut -d, -f1)
+        notify-send -t 2000 -a layout -u low "$layout"
       '';
     };
 
