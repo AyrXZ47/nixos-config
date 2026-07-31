@@ -5,18 +5,12 @@
     ./amd-common.nix
   ];
 
-  # Ryzen 5700X optimization
-  boot.kernelParams = [
-    "amd_pstate=active"
-    "mitigations=off"
-    "processor.max_cstate=1"
-  ];
-
-  powerManagement.cpuFreqGovernor = "performance";
-
   # RX 7600 GPU
   services.xserver.videoDrivers = [ "amdgpu" "modesetting" ];
 
-  boot.initrd.kernelModules = [ "amdgpu" ];
-  boot.kernelModules = [ "kvm-amd" ];
+  # Ollama en GPU: ROCm para RDNA3 (gfx1102). La laptop usa -vulkan en amd-laptop.nix.
+  services.ollama.package = pkgs.ollama-rocm;
+
+  # GUI para llevar la GPU al límite: clocks, fan curve y OC manual
+  programs.corectrl.enable = true;
 }
