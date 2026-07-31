@@ -29,9 +29,12 @@ in
     Service = {
       Type = "simple";
       Environment = "HEADROOM_OUTPUT_SHAPER=1";
-      ExecCondition = "${pkgs.coreutils}/bin/test -x %h/.local/bin/headroom";
+      # Sin ExecCondition: en el primer arranque el tool aún no está instalado
+      # (uv tool install corre en home.activation) y saltar el servicio era terminal
+      # → opencode veía "connection closed". Restart+RestartSec reintenta hasta que exista.
       ExecStart = "%h/.local/bin/headroom proxy --port 8787";
       Restart = "on-failure";
+      RestartSec = 5;
     };
 
     Install = {
