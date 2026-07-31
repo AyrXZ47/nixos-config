@@ -38,11 +38,7 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  # swapDevices commented out — LUKS-encrypted swap causes 90s boot timeout (same as VM).
-  # zramSwap (amd-common.nix) already provides swap; remove when regenerating this file.
-  # swapDevices =
-  #   [ { device = "/dev/mapper/luks-c7b7c463-bf1a-4b09-a351-e56b6c0bc0e7"; }
-  #   ];
+  swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
