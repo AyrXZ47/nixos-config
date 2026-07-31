@@ -53,8 +53,8 @@ in
 
       decoration = {
         rounding = 12;
-        active_opacity = 0.85;
-        inactive_opacity = 0.75;
+        active_opacity = 0.8;
+        inactive_opacity = 0.7;
         blur = {
           enabled = true;
           size = 30;
