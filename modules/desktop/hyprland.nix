@@ -279,6 +279,19 @@ in
         popover.dropdown > contents > .dropdown {
             margin-right: calc(0.75rem * var(--global-scale));
         }
+
+        // Bounce de los iconos de apps en el workspace activo
+        @keyframes workspace-bounce {
+            0%   { -gtk-icon-transform: scale(1) translateY(0); }
+            50%  { -gtk-icon-transform: scale(1.2) translateY(-3px); }
+            100% { -gtk-icon-transform: scale(1) translateY(0); }
+        }
+
+        .workspace.active .workspace-icon {
+            animation-name: workspace-bounce;
+            animation-duration: 0.35s;
+            animation-timing-function: cubic-bezier(0.28, 0.84, 0.42, 1);
+        }
       '';
       wayland.windowManager.hyprland.settings.bind = [
         "${cfg.screenshotKey}, exec, hyprshot -m region -o ~/Pictures/Screenshots"
