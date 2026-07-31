@@ -289,7 +289,7 @@ in
 
         .workspace.active .workspace-icon {
             animation-name: workspace-bounce;
-            animation-duration: 0.35s;
+            animation-duration: 0.6s;
             animation-timing-function: cubic-bezier(0.28, 0.84, 0.42, 1);
         }
       '';

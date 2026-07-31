@@ -70,7 +70,7 @@ in
       };
 
       render = {
-        use_shader_blur_blend = true;
+        use_fp16 = 0;
       };
 
       layerrule = [
