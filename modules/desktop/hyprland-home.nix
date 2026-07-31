@@ -362,6 +362,9 @@ loop-file=inf" ALL "$f"
   xdg.mimeApps.enable = true;
 
   xdg.mimeApps.defaultApplications = {
+    "text/html" = "firefox.desktop";
+    "x-scheme-handler/http" = "firefox.desktop";
+    "x-scheme-handler/https" = "firefox.desktop";
     "image/avif" = "imv.desktop";
     "image/bmp" = "imv.desktop";
     "image/gif" = "imv.desktop";
