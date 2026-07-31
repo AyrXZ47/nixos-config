@@ -53,13 +53,13 @@ in
 
       decoration = {
         rounding = 12;
-        active_opacity = 0.95;
-        inactive_opacity = 0.9;
+        active_opacity = 0.85;
+        inactive_opacity = 0.75;
         blur = {
           enabled = true;
-          size = 24;
+          size = 30;
           passes = 6;
-          new_optimizations = true;
+          new_optimizations = false;
           ignore_opacity = true;
         };
         shadow = {
@@ -85,7 +85,7 @@ in
           "overshot, 0.05, 0.9, 0.1, 1.05"
         ];
         animation = [
-          "windows, 1, 6, bounce, slideright"
+          "windows, 1, 6, overshot, slideright"
           "windowsOut, 1, 5, default, popin 80%"
           "border, 1, 10, default"
           "fade, 1, 7, default"

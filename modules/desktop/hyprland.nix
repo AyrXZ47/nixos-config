@@ -283,7 +283,7 @@ in
         // Bounce de los iconos de apps en el workspace activo
         @keyframes workspace-bounce {
             0%   { -gtk-icon-transform: scale(1) translateY(0); }
-            50%  { -gtk-icon-transform: scale(1.2) translateY(-3px); }
+            50%  { -gtk-icon-transform: scale(1.5) translateY(-10px); }
             100% { -gtk-icon-transform: scale(1) translateY(0); }
         }
 
