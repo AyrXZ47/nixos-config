@@ -53,6 +53,14 @@ in
 
       decoration = {
         rounding = 12;
+        active_opacity = 0.8;
+        inactive_opacity = 0.75;
+        blur = {
+          enabled = true;
+          size = 12;
+          passes = 3;
+          ignore_opacity = true;
+        };
         shadow = {
           enabled = true;
           range = 12;
@@ -63,6 +71,11 @@ in
       render = {
         use_fp16 = 0;
       };
+
+      layerrule = [
+        "blur on, ignore_alpha 1, match:namespace wayle"
+        "blur on, ignore_alpha 1, match:namespace rofi"
+      ];
 
       animations = {
         enabled = true;
@@ -157,7 +170,10 @@ in
         "match:class blueberry, float on"
         "match:title Volume Control, float on"
         "match:class imv, float on"
-        "match:class org.wezfurlong.wezterm, blur on"
+        "match:class org.wezfurlong.wezterm, opacity 1 1 1"
+        "match:class steam, no_blur on, opacity 1 1 1"
+        "match:class steam_app_.*, no_blur on, opacity 1 1 1"
+        "match:class gamescope, no_blur on, opacity 1 1 1"
       ];
     };
   };
@@ -305,6 +321,11 @@ in
           selected:       #0ABDC6;
           active:         #00FF00;
           urgent:         #FF0000;
+      }
+
+      window {
+          transparency: "real";
+          background-color: rgba(0, 11, 30, 0.66);
       }
     '';
     "rofi/launchers".source = "${adi1090x-src}/files/launchers";
