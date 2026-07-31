@@ -9,6 +9,8 @@
     extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
+    # Solo se aplica si el usuario aun no existe (primer boot); cambiala despues con `passwd`
+    initialPassword = "yovick";
   };
 
   environment.pathsToLink = [ "/share/applications" "/share/xdg-desktop-portal" ];

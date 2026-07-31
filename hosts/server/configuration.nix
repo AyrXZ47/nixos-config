@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./hardware-configuration.nix
     ../../modules/core/user.nix
     ../../modules/hardware/amd-common.nix
     ../../modules/apps/common-packages.nix
@@ -11,16 +12,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   system.stateVersion = "26.05";
-
-  # Replace with generated hardware-configuration.nix
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "ext4";
-  };
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/boot";
-    fsType = "vfat";
-  };
 
   networking.hostName = "nixos-server";
   networking.networkmanager.enable = true;

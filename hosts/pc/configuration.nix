@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./hardware-configuration.nix
     ../../modules/core/user.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/theme-base.nix
@@ -22,11 +23,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   system.stateVersion = "26.05";
-
-  fileSystems."/" = {
-    device = "none";
-    fsType = "tmpfs";
-  };
 
   networking.hostName = "nixos-pc";
   networking.networkmanager.enable = true;

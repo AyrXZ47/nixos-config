@@ -7,6 +7,7 @@ let
     rev = "512a585fff6da5b2a90e5948059b062516ddb2e7";
     hash = "sha256-iUX0Quae06tGd7gDgXZo1B3KYgPHU+ADPBrowHlv02A=";
   };
+  wallpapersDir = ../../assets/wallpapers;
 in
 {
   wayland.windowManager.hyprland = {
@@ -267,7 +268,7 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
+        dir="${wallpapersDir}"
         f="$1"
         if [ -z "$f" ]; then
           f=$(find "$dir" -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' \) 2>/dev/null | shuf -n1)
@@ -291,7 +292,7 @@ loop-file=inf" ALL "$f"
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
+        dir="${wallpapersDir}"
         set="$HOME/.config/hypr/scripts/wallpaper-set.sh"
         action=$(printf "Next wallpaper\nSet wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1;} element-icon {size: 0px;}')
         [ -z "$action" ] && exit 0

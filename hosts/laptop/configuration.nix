@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./hardware-configuration.nix
     ../../modules/core/user.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/theme-base.nix
@@ -17,16 +18,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   system.stateVersion = "26.05";
-
-  # Replace with generated hardware-configuration.nix
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
-    fsType = "ext4";
-  };
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/boot";
-    fsType = "vfat";
-  };
 
   networking.hostName = "nixos-laptop";
   networking.networkmanager.enable = true;
