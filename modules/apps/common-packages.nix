@@ -30,6 +30,7 @@
     shotcut
     obs-studio
     vlc
+    ffmpeg
 
     # AI & Development
     octave
@@ -51,5 +52,6 @@
     # Utility
     scrcpy
     syncthing
+    cmatrix
   ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde ]);
 }
