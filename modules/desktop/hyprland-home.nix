@@ -23,6 +23,7 @@ in
 
       exec-once = [
         "wayle shell"
+        "${config.xdg.configHome}/hypr/scripts/wallpaper-set.sh"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
         "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1"
@@ -203,7 +204,6 @@ in
     imv
     tree-sitter
     cliphist
-    awww
     setxkbmap
   ];
 
@@ -259,11 +259,27 @@ in
         hyprctl dispatch exec "wezterm start -- zsh -ic 'cava'"
       '';
     };
+    "hypr/scripts/wallpaper-set.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
+        f="$1"
+        if [ -z "$f" ]; then
+          f=$(find "$dir" -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' \) 2>/dev/null | shuf -n1)
+          [ -z "$f" ] && f=$(find "$dir" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) 2>/dev/null | shuf -n1)
+        fi
+        [ -z "$f" ] && exit 0
+        pkill -x mpvpaper 2>/dev/null
+        sleep 0.2
+        mpvpaper -f -o "no-audio loop-file=inf" ALL "$f"
+      '';
+    };
     "hypr/scripts/wallpaper-cycle.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        find /home/yovick/workspaces/nixos-config/assets/wallpapers -type f | shuf -n1 | while read f; do awww img -t center --transition-duration 0.7 "$f"; done
+        exec ~/.config/hypr/scripts/wallpaper-set.sh
       '';
     };
     "hypr/scripts/wallpaper-menu.sh" = {
@@ -271,16 +287,17 @@ in
       text = ''
         #!/usr/bin/env bash
         dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
+        set="$HOME/.config/hypr/scripts/wallpaper-set.sh"
         action=$(printf "Next wallpaper\nSet wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1;} element-icon {size: 0px;}')
         [ -z "$action" ] && exit 0
         case "$action" in
           "Next wallpaper")
-            find "$dir" -type f | shuf -n1 | while read f; do awww img -t center --transition-duration 0.7 "$f"; done
+            "$set"
             ;;
           "Set wallpaper")
-            pick=$(find "$dir" -type f -name '*' | sort | while read f; do basename "$f"; done | rofi -dmenu -p "wallpaper" -theme-str 'window {width: 600px;} listview {lines: 15; columns: 1;} element-icon {size: 0px;}')
+            pick=$(find "$dir" -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) | sort | while read f; do basename "$f"; done | rofi -dmenu -p "wallpaper" -theme-str 'window {width: 600px;} listview {lines: 15; columns: 1;} element-icon {size: 0px;}')
             [ -z "$pick" ] && exit 0
-            awww img -t center --transition-duration 0.7 "$dir/$pick"
+            "$set" "$dir/$pick"
             ;;
         esac
       '';

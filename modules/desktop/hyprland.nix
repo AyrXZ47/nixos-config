@@ -232,6 +232,7 @@ in
         icon-name = "ld-image-symbolic"
         icon-show = true
         icon-color = "#ff0066"
+        icon-bg-color = "transparent"
         label-show = false
         tooltip-format = "Wallpaper"
         left-click = "~/.config/hypr/scripts/wallpaper-menu.sh"
@@ -243,19 +244,17 @@ in
         icon-name = "edit-paste-symbolic"
         icon-show = true
         icon-color = "#ff0066"
+        icon-bg-color = "transparent"
         label-show = false
         tooltip-format = "Clipboard"
         left-click = "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"
         button-bg-color = "bg-elevated"
 
-        # --- Wallpaper Engine ---
+        # --- Wallpaper (mpvpaper, no awww engine) ---
 
         [wallpaper]
-        engine-enabled = true
+        engine-enabled = false
         cycling-enabled = false
-        transition-type = "fade"
-        transition-duration = 0.7
-        transition-fps = 60
 
         # --- OSD ---
 
@@ -312,7 +311,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
-      awww
+      mpvpaper
       cliphist
       (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       wayle
