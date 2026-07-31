@@ -5,7 +5,7 @@
     ./hardware-configuration.nix
     ../../modules/core/user.nix
     ../../modules/desktop/hyprland.nix
-    ../../modules/theming/stylix.nix
+    ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/gaming.nix

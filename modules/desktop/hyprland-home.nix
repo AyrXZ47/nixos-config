@@ -53,6 +53,8 @@ in
 
       decoration = {
         rounding = 12;
+        active_opacity = 0.95;
+        inactive_opacity = 0.9;
         blur = {
           enabled = true;
           size = 12;
@@ -65,6 +67,10 @@ in
           range = 12;
           render_power = 3;
         };
+      };
+
+      render = {
+        use_shader_blur_blend = true;
       };
 
       layerrule = [
@@ -83,7 +89,7 @@ in
           "windowsOut, 1, 5, default, popin 80%"
           "border, 1, 10, default"
           "fade, 1, 7, default"
-          "workspaces, 1, 6, overshot, slidevert"
+          "workspaces, 1, 6, bounce, slidevert"
         ];
       };
 
@@ -137,6 +143,7 @@ in
         "SUPER, T, exec, ${config.xdg.configHome}/hypr/scripts/time-to-work.sh"
         "SUPER, H, exec, ${config.xdg.configHome}/hypr/scripts/hypr-dev.sh"
         "SUPER, SPACE, exec, ${config.xdg.configHome}/hypr/scripts/switch-layout.sh"
+        "SUPER, L, exec, loginctl lock-session"
 
         "SUPER, mouse_down, workspace, e+1"
         "SUPER, mouse_up, workspace, e-1"
@@ -279,15 +286,22 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        current=$(setxkbmap -query 2>/dev/null | grep '^layout' | awk '{print $2}')
-        if [ "$current" = "latam" ]; then
-          setxkbmap us
-          layout="us"
+        if command -v hyprctl >/dev/null 2>&1; then
+          dev=$(hyprctl devices | awk '/^\t\t[a-z0-9-]+$/{d=$1} /main: yes/{print d}' | tail -1)
+          [ -n "$dev" ] && hyprctl switchxkblayout "$dev" next
+          sleep 0.1
+          layout=$(hyprctl devices | awk '/active keymap: /{km=$0} /main: yes/{print km}' | tail -1 | sed 's/.*active keymap: //')
         else
-          setxkbmap latam
-          layout="latam"
+          current=$(setxkbmap -query 2>/dev/null | grep '^layout' | awk '{print $2}')
+          if [ "$current" = "latam" ]; then
+            setxkbmap us
+            layout="us"
+          else
+            setxkbmap latam
+            layout="latam"
+          fi
         fi
-        notify-send -t 2000 -a layout -u low " $layout"
+        [ -n "$layout" ] && notify-send -t 2000 -a layout -u low " $layout"
       '';
     };
 

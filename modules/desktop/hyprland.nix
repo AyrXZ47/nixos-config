@@ -72,9 +72,9 @@ in
         layer = "top"
         rounding = "none"
         module-gap = 0.3
-        padding = 0.3
-        padding-ends = 0.25
-        inset-edge = 0.25
+        padding = 0.15
+        padding-ends = 0.2
+        inset-edge = 0
         bg = "transparent"
         border-location = "none"
         border-width = 0
@@ -83,7 +83,7 @@ in
         button-variant = "block-prefix"
         button-rounding = "full"
         button-icon-size = 1.0
-        button-icon-padding = 1.0
+        button-icon-padding = 0.75
         button-label-size = 1.35
         button-label-weight = "bold"
         button-label-padding = 1.0
@@ -196,7 +196,8 @@ in
         popup-urgency-bar = "low"
         border-color = "#000000"
         icon-color = "#000000"
-        button-bg-color = "#ff0066"
+        icon-bg-color = "bg-elevated"
+        button-bg-color = "bg-elevated"
 
         [modules.brightness]
         level-icons = ["ld-sun-dim-symbolic", "ld-sun-medium-symbolic", "ld-sun-symbolic"]
@@ -216,7 +217,8 @@ in
         label-show = false
         border-color = "#000000"
         icon-color = "#000000"
-        button-bg-color = "#ff0066"
+        icon-bg-color = "bg-elevated"
+        button-bg-color = "bg-elevated"
 
         [modules.dashboard]
         icon-override = ""
@@ -271,6 +273,12 @@ in
         enabled = true
         position = "bottom"
         duration = 2500
+      '';
+      xdg.configFile."wayle/styles/index.scss".text = ''
+        // Gap entre la barra (derecha) y los dropdowns
+        popover.dropdown > contents > .dropdown {
+            margin-right: calc(0.75rem * var(--global-scale));
+        }
       '';
       wayland.windowManager.hyprland.settings.bind = [
         "${cfg.screenshotKey}, exec, hyprshot -m region -o ~/Pictures/Screenshots"
@@ -338,6 +346,15 @@ in
         RestartSec = 1;
         TimeoutStopSec = 10;
       };
+    };
+
+    systemd.user.services.swaylock = {
+      description = "Swaylock - session lock";
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "${pkgs.swaylock-effects}/bin/swaylock";
+      };
+      wantedBy = [ "lock.target" ];
     };
   };
 }
