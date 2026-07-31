@@ -16,7 +16,13 @@
         ]
       },
       "logo": {
-        "type": "small"
+        "type": "kitty",
+        "source": "/home/yovick/workspaces/nixos-config/assets/Terminal/nixTeminal.png",
+        "width": 40,
+        "padding": {
+          "top": 2,
+          "left": 4
+        }
       },
       "modules": [
         {
