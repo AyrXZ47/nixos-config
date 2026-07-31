@@ -8,6 +8,7 @@
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
     ../../modules/apps/common-packages.nix
+    ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
   ];
 
