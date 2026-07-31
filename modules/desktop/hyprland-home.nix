@@ -313,7 +313,7 @@ loop-file=inf" ALL "$f"
       text = ''
         #!/usr/bin/env bash
         if command -v hyprctl >/dev/null 2>&1; then
-          dev=$(hyprctl devices | awk '/^\t\t[a-z0-9-]+$/{d=$1} /main: yes/{print d}' | tail -1)
+          dev=$(hyprctl devices | awk '/^\t\t[a-zA-Z0-9._-]+$/{d=$1} /main: yes/{print d}' | tail -1)
           [ -n "$dev" ] && hyprctl switchxkblayout "$dev" next
           sleep 0.1
           layout=$(hyprctl devices | awk '/active keymap: /{km=$0} /main: yes/{print km}' | tail -1 | sed 's/.*active keymap: //')

@@ -1,5 +1,19 @@
 { config, pkgs, lib, ... }:
 
+let
+  # ponytail: mixxx crashea en el file dialog (QGtk3Theme → g_settings_set_property abort).
+  # Trigger: QT_QPA_PLATFORMTHEME=gtk3 global. Desactivamos el platform theme solo para
+  # mixxx; su theming no depende de él (qt.style/kdeglobals lo cubren).
+  mixxx = pkgs.symlinkJoin {
+    name = "mixxx";
+    paths = [ pkgs.mixxx ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      mv $out/bin/mixxx $out/bin/.mixxx-wrapped
+      makeWrapper $out/bin/.mixxx-wrapped $out/bin/mixxx --unset QT_QPA_PLATFORMTHEME
+    '';
+  };
+in
 {
   environment.systemPackages = with pkgs; [
       # Browsers
