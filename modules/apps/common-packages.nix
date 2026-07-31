@@ -90,6 +90,7 @@ in
     scrcpy
     syncthing
     cmatrix
-    nvtop
+    nvtopPackages.amd
+    amdgpu_top
   ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde ]);
 }

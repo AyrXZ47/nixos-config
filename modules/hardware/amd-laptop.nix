@@ -7,18 +7,13 @@
 
   services.xserver.videoDrivers = [ "amdgpu" "modesetting" ];
 
-  boot.kernelParams = [
-    "amd_pstate=guided"
-    "mitigations=off"
-  ];
+  # Ollama en GPU: Vulkan funciona con cualquier Radeon/APU (RADV) sin rocm pesado.
+  services.ollama.package = pkgs.ollama-vulkan;
 
-  # Hybrid power management
-  powerManagement = {
-    cpuFreqGovernor = "schedutil";
-    enable = true;
-  };
-
-  services.power-profiles-daemon.enable = true;
+  # Sin capadores: hereda de amd-common CPU governor "performance", amd_pstate=active,
+  # max_cstate=1 y GPU dpm high. power-profiles-daemon está deshabilitado porque
+  # cambiaría el governor y caparía el rendimiento.
+  services.power-profiles-daemon.enable = lib.mkForce false;
 
   # ThinkPad specific
   services.libinput = {
