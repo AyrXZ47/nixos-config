@@ -1,5 +1,9 @@
 { config, pkgs, lib, ... }:
 
+let
+  terminalLogo = ../../assets/Terminal/nixTeminal.png;
+in
+
 {
   home.packages = with pkgs; [ fastfetch ];
 
@@ -17,7 +21,7 @@
       },
       "logo": {
         "type": "kitty",
-        "source": "/home/yovick/workspaces/nixos-config/assets/Terminal/nixTeminal.png",
+        "source": "${terminalLogo}",
         "width": 40,
         "padding": {
           "top": 2,

@@ -85,11 +85,15 @@ nix flake update
 
 ## Applying to a New Machine
 
-1. Add your host under `hosts/<name>/configuration.nix`
-2. Import the relevant modules from `modules/`
-3. Register it in `flake.nix` under `nixosConfigurations`
-4. Replace `fileSystems` with your generated `hardware-configuration.nix`
-5. Build with `sudo nixos-rebuild switch --flake .#<name>`
+1. Install NixOS on the machine (official installer; disk labels `nixos` + `boot` optional).
+2. Clone this repo: `git clone https://github.com/<you>/nixos-config && cd nixos-config`
+3. Deploy with `./bootstrap.sh <host>` — generates `hardware-configuration.nix`
+   (only if missing), runs `nixos-rebuild switch --flake .#<host>` and commits the file.
+4. Add your host under `hosts/<name>/configuration.nix`, import the relevant
+   modules from `modules/`, and register it in `flake.nix` under `nixosConfigurations`.
+
+> First login after a fresh install uses `initialPassword` (see `modules/core/user.nix`);
+> change it with `passwd`.
 
 ## License
 
