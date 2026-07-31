@@ -101,6 +101,10 @@ in
         new_status = "slave";
       };
 
+      misc = {
+        disable_xdg_env_checks = true;
+      };
+
       bind = [
         "SUPER, Backspace, exec, wezterm"
         "SUPER, A, exec, rofi -show drun -show-icons"
