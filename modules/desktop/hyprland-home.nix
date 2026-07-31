@@ -108,7 +108,7 @@ in
       bind = [
         "SUPER, Backspace, exec, wezterm"
         "SUPER, A, exec, rofi -show drun -show-icons"
-        "SUPER, Q, killactive"
+        "SUPER, Delete, killactive"
         "SUPER, M, exit"
         "SUPER, V, togglefloating"
         "SUPER, R, exec, rofi -show run"
