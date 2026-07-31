@@ -22,7 +22,7 @@
         brightness = 1.0,
       }
 
-      config.window_background_opacity = 0.85
+      config.window_background_opacity = 0.66
       config.text_background_opacity = 1.0
 
       config.use_fancy_tab_bar = false
