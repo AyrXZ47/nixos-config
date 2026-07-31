@@ -46,6 +46,27 @@
     # Hardware Control
     openrgb
 
+    # Android
+    android-tools
+
+    # Embedded & IoT (arduino, esp32, stm32)
+    arduino-cli
+    esptool
+    stm32flash
+    openocd
+
+    # Raspberry Pi
+    rpiboot
+    raspberrypi-eeprom
+    picocom
+
+    # Dev toolchains
+    rustup
+    pnpm
+
+    # Fun
+    cbonsai
+
     # Audio Routing
     qpwgraph
 
