@@ -263,7 +263,7 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        find /home/yovick/workspaces/nixos-config/assets/wallpapers -type f | shuf -n1 | while read f; do awww img "$f"; done
+        find /home/yovick/workspaces/nixos-config/assets/wallpapers -type f | shuf -n1 | while read f; do awww img -t center --transition-duration 0.7 "$f"; done
       '';
     };
     "hypr/scripts/wallpaper-menu.sh" = {
@@ -271,16 +271,16 @@ in
       text = ''
         #!/usr/bin/env bash
         dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
-        action=$(printf " Next wallpaper\n Pick manually" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1;} element-icon {size: 0px;}')
+        action=$(printf "Next wallpaper\nSet wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1;} element-icon {size: 0px;}')
         [ -z "$action" ] && exit 0
         case "$action" in
-          " Next wallpaper")
-            find "$dir" -type f | shuf -n1 | while read f; do awww img "$f"; done
+          "Next wallpaper")
+            find "$dir" -type f | shuf -n1 | while read f; do awww img -t center --transition-duration 0.7 "$f"; done
             ;;
-          " Pick manually")
-            pick=$(find "$dir" -type f -name '*' | sort | while read f; do basename "$f"; done | rofi -dmenu -p " wallpaper" -theme-str 'window {width: 600px;} listview {lines: 15; columns: 1;} element-icon {size: 0px;}')
+          "Set wallpaper")
+            pick=$(find "$dir" -type f -name '*' | sort | while read f; do basename "$f"; done | rofi -dmenu -p "wallpaper" -theme-str 'window {width: 600px;} listview {lines: 15; columns: 1;} element-icon {size: 0px;}')
             [ -z "$pick" ] && exit 0
-            awww img "$dir/$pick"
+            awww img -t center --transition-duration 0.7 "$dir/$pick"
             ;;
         esac
       '';

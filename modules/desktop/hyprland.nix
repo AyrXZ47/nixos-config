@@ -114,9 +114,7 @@ in
         right = [
           { name = "bottom", modules = [
             "custom-clipboard",
-            "separator",
-            "custom-wpcycle",
-            "custom-usb",
+            "custom-wallpaper",
             "battery",
             "dashboard",
           ] },
@@ -230,31 +228,23 @@ in
         button-bg-color = "bg-elevated"
 
         [[modules.custom]]
-        id = "wpcycle"
-        command = "echo ''"
-        interval-ms = 300000
-        icon-show = false
-        label-show = true
-        label-color = "#ff0066"
+        id = "wallpaper"
+        icon-name = "ld-image-symbolic"
+        icon-show = true
+        icon-color = "#ff0066"
+        label-show = false
+        tooltip-format = "Wallpaper"
         left-click = "~/.config/hypr/scripts/wallpaper-menu.sh"
-        button-bg-color = "bg-elevated"
         right-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"
-
-        [[modules.custom]]
-        id = "usb"
-        command = "if findmnt | grep -q /media; then echo ; else echo ; fi"
-        interval-ms = 60000
-        icon-show = false
-        label-show = true
-        left-click = "udisksctl dump | grep -oP 'block_devices/\\K[^/]+' | while read d; do udisksctl unmount -b /dev/$d && udisksctl power-off -b /dev/$d; done"
         button-bg-color = "bg-elevated"
 
         [[modules.custom]]
         id = "clipboard"
-        command = "echo "
-        interval-ms = 3600000
-        icon-show = false
-        label-show = true
+        icon-name = "edit-paste-symbolic"
+        icon-show = true
+        icon-color = "#ff0066"
+        label-show = false
+        tooltip-format = "Clipboard"
         left-click = "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"
         button-bg-color = "bg-elevated"
 
