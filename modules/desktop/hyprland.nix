@@ -63,7 +63,9 @@ in
       home.sessionVariables = {
         GTK_THEME = "Adwaita:dark";
         QT_QPA_PLATFORMTHEME = "gtk3";
-        XDG_CURRENT_DESKTOP = "KDE";
+        # Hyprland, no KDE: XDG_CURRENT_DESKTOP=KDE hace que xdg-open use kfmclient
+        # (no instalado) y nunca abra el navegador (rompía gh auth login).
+        XDG_CURRENT_DESKTOP = "Hyprland";
       };
       xdg.configFile."wayle/config.toml".text = ''
         [bar]
