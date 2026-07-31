@@ -25,4 +25,12 @@
 
   # ── Flags experimentales (centralizado) ──────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # ── Basura: mantener solo 3 generaciones atrás ───────────────────────────
+  nix.gc = {
+    automatic = true;
+    dates = "daily";
+    options = "--delete-older-than 3";
+  };
+  nix.optimise.automatic = true;
 }
