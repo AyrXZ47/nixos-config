@@ -270,9 +270,10 @@ in
           [ -z "$f" ] && f=$(find "$dir" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) 2>/dev/null | shuf -n1)
         fi
         [ -z "$f" ] && exit 0
-        pkill -x mpvpaper 2>/dev/null
+        pkill -x .mpvpaper-wrapp 2>/dev/null
         sleep 0.2
-        mpvpaper -f -o "no-audio loop-file=inf" ALL "$f"
+        mpvpaper -f -o "no-audio
+loop-file=inf" ALL "$f"
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
