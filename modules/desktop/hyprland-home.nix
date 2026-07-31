@@ -197,7 +197,7 @@ in
     tree-sitter
     cliphist
     awww
-    xorg.setxkbmap
+    setxkbmap
   ];
 
   xdg.configFile = {
