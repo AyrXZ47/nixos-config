@@ -30,6 +30,7 @@
 
   networking.hostName = "nixos-pc";
   networking.networkmanager.enable = true;
+  networking.firewall.enable = true;
 
   time.timeZone = "America/Mexico_City";
 

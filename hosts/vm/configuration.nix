@@ -24,6 +24,7 @@
 
   networking.hostName = "nixos-vm";
   networking.networkmanager.enable = true;
+  networking.firewall.enable = true;
 
   time.timeZone = "America/Mexico_City";
 
