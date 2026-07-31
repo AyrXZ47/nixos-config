@@ -72,9 +72,9 @@ in
         layer = "top"
         rounding = "none"
         module-gap = 0.3
-        padding = 0.15
+        padding = 0.1
         padding-ends = 0.2
-        inset-edge = 0
+        inset-edge = 0.25
         bg = "transparent"
         border-location = "none"
         border-width = 0
@@ -83,7 +83,7 @@ in
         button-variant = "block-prefix"
         button-rounding = "full"
         button-icon-size = 1.0
-        button-icon-padding = 0.75
+        button-icon-padding = 0.6
         button-label-size = 1.35
         button-label-weight = "bold"
         button-label-padding = 1.0
@@ -195,7 +195,7 @@ in
         popup-shadow = true
         popup-urgency-bar = "low"
         border-color = "#000000"
-        icon-color = "#000000"
+        icon-color = "#ff0066"
         icon-bg-color = "bg-elevated"
         button-bg-color = "bg-elevated"
 
@@ -216,7 +216,7 @@ in
         icon-show = true
         label-show = false
         border-color = "#000000"
-        icon-color = "#000000"
+        icon-color = "#ff0066"
         icon-bg-color = "bg-elevated"
         button-bg-color = "bg-elevated"
 
