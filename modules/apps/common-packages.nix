@@ -15,6 +15,8 @@ let
   };
 in
 {
+  services.ollama.enable = true;
+
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
@@ -88,5 +90,6 @@ in
     scrcpy
     syncthing
     cmatrix
+    nvtop
   ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde ]);
 }

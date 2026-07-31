@@ -297,6 +297,9 @@ in
         (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       ];
     };
+
+    # udisks2: Dolphin lista/monta los discos extra (sda/sdb) sin fstab
+    services.udisks2.enable = true;
     services.displayManager.gdm.enable = lib.mkForce false;
     services.desktopManager.gnome.enable = lib.mkForce false;
 
