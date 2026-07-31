@@ -68,8 +68,8 @@ in
       };
 
       layerrule = [
-        "blur on, ignore_alpha 0, match:namespace wayle"
-        "blur on, ignore_alpha 0, match:namespace rofi"
+        "blur on, ignore_alpha 1, match:namespace wayle"
+        "blur on, ignore_alpha 1, match:namespace rofi"
       ];
 
       animations = {
@@ -195,6 +195,7 @@ in
     tree-sitter
     cliphist
     awww
+    xorg.setxkbmap
   ];
 
   xdg.configFile = {
@@ -261,16 +262,16 @@ in
       text = ''
         #!/usr/bin/env bash
         dir="/home/yovick/workspaces/nixos-config/assets/wallpapers"
-        action=$(printf " Pick manually\n Next wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2;}')
+        action=$(printf " Next wallpaper\n Pick manually" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1;} element-icon {size: 0px;}')
         [ -z "$action" ] && exit 0
         case "$action" in
+          " Next wallpaper")
+            find "$dir" -type f | shuf -n1 | while read f; do awww img "$f"; done
+            ;;
           " Pick manually")
-            pick=$(find "$dir" -type f -name '*' | sort | while read f; do basename "$f"; done | rofi -dmenu -p " wallpaper" -theme-str 'window {width: 400px;} listview {lines: 15;}')
+            pick=$(find "$dir" -type f -name '*' | sort | while read f; do basename "$f"; done | rofi -dmenu -p " wallpaper" -theme-str 'window {width: 600px;} listview {lines: 15; columns: 1;} element-icon {size: 0px;}')
             [ -z "$pick" ] && exit 0
             awww img "$dir/$pick"
-            ;;
-          " Next wallpaper")
-            find "$dir" -type f | shuf -n1 | while read f; do awww img "$f"; done
             ;;
         esac
       '';
@@ -279,10 +280,14 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        kb_count=$(hyprctl devices | grep -c "Keyboard at")
-        [ "$kb_count" -eq 0 ] && notify-send -t 2000 -a layout -u critical " No keyboard" && exit 1
-        hyprctl switchxkblayout "$((kb_count - 1))"
-        layout=$(hyprctl devices | grep -A 10 "main: yes" | grep "active keymap" | sed 's/.*active keymap: //')
+        current=$(setxkbmap -query 2>/dev/null | grep '^layout' | awk '{print $2}')
+        if [ "$current" = "latam" ]; then
+          setxkbmap us
+          layout="us"
+        else
+          setxkbmap latam
+          layout="latam"
+        fi
         notify-send -t 2000 -a layout -u low " $layout"
       '';
     };

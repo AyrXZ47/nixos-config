@@ -114,7 +114,6 @@ in
         right = [
           { name = "bottom", modules = [
             "custom-clipboard",
-            "custom-syncthing",
             "separator",
             "custom-wpcycle",
             "custom-usb",
@@ -246,14 +245,6 @@ in
         icon-show = false
         label-show = true
         left-click = "udisksctl dump | grep -oP 'block_devices/\\K[^/]+' | while read d; do udisksctl unmount -b /dev/$d && udisksctl power-off -b /dev/$d; done"
-        button-bg-color = "bg-elevated"
-
-        [[modules.custom]]
-        id = "syncthing"
-        command = "if systemctl --user is-active syncthing >/dev/null 2>&1; then echo ; else echo ; fi"
-        interval-ms = 30000
-        icon-show = false
-        label-show = true
         button-bg-color = "bg-elevated"
 
         [[modules.custom]]
