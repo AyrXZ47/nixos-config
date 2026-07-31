@@ -160,11 +160,13 @@ in
       ];
 
       windowrule = [
-        "blur, .*"
         "match:class pavucontrol, float on"
         "match:class blueberry, float on"
         "match:title Volume Control, float on"
         "match:class imv, float on"
+      ];
+      windowrulev2 = [
+        "blur, .*"
       ];
     };
   };
