@@ -164,7 +164,6 @@ in
         "match:class blueberry, float on"
         "match:title Volume Control, float on"
         "match:class imv, float on"
-        "match:class .*, blur on"
       ];
     };
   };
