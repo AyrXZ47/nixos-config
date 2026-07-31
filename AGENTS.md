@@ -31,6 +31,33 @@ Not lazy about: understanding the problem (read it fully and trace the real flow
 
 (Yes, this file also applies to agents working on the ponytail repo itself. Especially to them.)
 
+# NixOS config — repo-specific guide
+
+Flake-driven NixOS config (`nixos-unstable`, pinned in `flake.lock`) for 4 hosts: `pc`, `laptop`, `server`, `vm`. All `x86_64-linux`, single user `yovick` via Home Manager.
+
+## Wiring (not obvious from filenames)
+
+- `flake.nix` `mkHost` gives EVERY host: home-manager (user `yovick` + `home/default.nix`) + `modules/core/nix-optimization.nix` + its own `hosts/<name>/configuration.nix`. Hosts differ only in which modules they import.
+- System modules live in `modules/{core,apps,desktop,hardware,theming}`; `home/default.nix` imports the home-side apps (`modules/apps/{shell,wezterm,neovim,fastfetch,git,headroom,mpd,firefox}.nix`).
+- Convention: modules declare `options.modules.<category>.<name>.enable` (e.g. `modules.desktop.hyprland` in `modules/desktop/hyprland.nix`) and hosts flip it (`modules.desktop.hyprland.enable = true`). New feature = new file under `modules/`, imported by the hosts that want it, not added to `flake.nix`.
+- `hosts/*/hardware-configuration.nix` is GENERATED (`nixos-generate-config`, disk-by-label on pc/laptop/server). Never hand-edit; regenerate. `./bootstrap.sh <host>` regenerates, rebuilds, and commits it.
+
+## Commands
+
+```bash
+sudo nixos-rebuild switch --flake .#<host>   # apply system + home (host ∈ pc|laptop|server|vm)
+home-manager switch --flake .#<host>         # Home Manager only
+nix flake check                              # evaluate all hosts — closest thing to a test suite
+nix flake update                             # bump inputs (home-manager follows nixpkgs)
+```
+
+No tests, no CI, no formatter/linter config. `nix flake check` is the only verification; run it after any change.
+
+## Gotchas
+
+- `yovick` is hardcoded in `flake.nix`, `home/default.nix`, and `modules/core/user.nix` — the latter holds `initialPassword` (applies only at first boot). Renaming the user touches all three.
+- Nothing secret is ever committed; `result*`, `.direnv`, `*.iso`, `*.qcow2` are gitignored — never commit build results.
+- Comments and commit messages are written in Spanish, conventional-commit style (`feat(hyprland):`, `fix(deploy):`, `chore(host):`). Match that for commits.
 
 <!-- headroom:rtk-instructions -->
 # RTK (Rust Token Killer) - Token-Optimized Commands
