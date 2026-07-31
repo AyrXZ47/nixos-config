@@ -53,15 +53,6 @@ in
 
       decoration = {
         rounding = 12;
-        active_opacity = 0.8;
-        inactive_opacity = 0.7;
-        blur = {
-          enabled = true;
-          size = 30;
-          passes = 6;
-          new_optimizations = false;
-          ignore_opacity = true;
-        };
         shadow = {
           enabled = true;
           range = 12;
@@ -72,11 +63,6 @@ in
       render = {
         use_fp16 = 0;
       };
-
-      layerrule = [
-        "blur on, ignore_alpha 1, match:namespace wayle"
-        "blur on, ignore_alpha 1, match:namespace rofi"
-      ];
 
       animations = {
         enabled = true;
@@ -171,6 +157,7 @@ in
         "match:class blueberry, float on"
         "match:title Volume Control, float on"
         "match:class imv, float on"
+        "match:class org.wezfurlong.wezterm, blur on"
       ];
     };
   };
