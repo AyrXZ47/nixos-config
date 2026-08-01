@@ -110,24 +110,28 @@ let
   # Aplica userChrome.css + pref al perfil (o perfiles) de firefox.
   # Idempotente: corre en cada switch, y también al crearse el perfil en el
   # primer arranque (systemd.user.paths.firefox-chrome-apply).
+  # El root del perfil varía: ~/.mozilla/firefox (legacy) o
+  # ~/.config/mozilla/firefox (XDG) — se prueban ambos.
   applyFirefoxChrome = pkgs.writeShellScript "apply-firefox-chrome" ''
     set -u
-    INI="$HOME/.mozilla/firefox/profiles.ini"
     CSS="$HOME/.firefox-chrome/userChrome.css"
-    [ -f "$INI" ] || exit 0
     [ -f "$CSS" ] || exit 0
-    grep '^Path=' "$INI" | sed 's/^Path=//' | while read -r P; do
-      PROFILE="$HOME/.mozilla/firefox/$P"
-      [ -d "$PROFILE" ] || continue
-      mkdir -p "$PROFILE/chrome"
-      cp -f "$CSS" "$PROFILE/chrome/userChrome.css"
-      JS="$PROFILE/user.js"
-      [ -f "$JS" ] && sed -i '/^\/\/ ---- managed by home-manager ----/,/^\/\/ ---- end managed ----/d' "$JS"
-      cat >> "$JS" << 'PREFS_EOF'
+    for ROOT in "$HOME/.mozilla/firefox" "$HOME/.config/mozilla/firefox"; do
+      INI="$ROOT/profiles.ini"
+      [ -f "$INI" ] || continue
+      grep '^Path=' "$INI" | sed 's/^Path=//' | while read -r P; do
+        PROFILE="$ROOT/$P"
+        [ -d "$PROFILE" ] || continue
+        mkdir -p "$PROFILE/chrome"
+        cp -f "$CSS" "$PROFILE/chrome/userChrome.css"
+        JS="$PROFILE/user.js"
+        [ -f "$JS" ] && sed -i '/^\/\/ ---- managed by home-manager ----/,/^\/\/ ---- end managed ----/d' "$JS"
+        cat >> "$JS" << 'PREFS_EOF'
 // ---- managed by home-manager ----
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 // ---- end managed ----
 PREFS_EOF
+      done
     done
   '';
 in
@@ -159,7 +163,7 @@ in
     };
     Path = {
       Unit = "firefox-chrome-apply.service";
-      PathChanged = "%h/.mozilla/firefox";
+      PathChanged = [ "%h/.mozilla/firefox" "%h/.config/mozilla/firefox" ];
     };
     Install = {
       WantedBy = [ "default.target" ];
