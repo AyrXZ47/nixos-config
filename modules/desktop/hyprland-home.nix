@@ -216,6 +216,9 @@ in
     setxkbmap
   ];
 
+  # cliphist: limite de historial en 18 items (config file, default 750).
+  xdg.configFile."cliphist/config".text = "max-items 18\n";
+
   xdg.configFile = {
     "hypr/scripts/time-to-work.sh" = {
       executable = true;
