@@ -29,6 +29,10 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
+  # OpenRGB: instala 60-openrgb.rules (vienen en el paquete); sin ellas avisa
+  # "udev rules are not installed" y no puede tocar los dispositivos RGB.
+  services.udev.packages = [ pkgs.openrgb ];
+
   time.timeZone = "America/Mexico_City";
 
   i18n.defaultLocale = "en_US.UTF-8";

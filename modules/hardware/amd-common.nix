@@ -4,6 +4,11 @@
   # AMD CPU microcode
   hardware.cpu.amd.updateMicrocode = true;
 
+  # OpenRGB: sp5100_tco (watchdog) se queda con el SMBus FCH que usa el
+  # controlador de la RAM (SPD/RGB); sacarlo del medio deja las RAM visibles
+  # para controlar su color.
+  boot.blacklistedKernelModules = [ "sp5100_tco" ];
+
   # Zen kernel
   boot.kernelPackages = pkgs.linuxPackages_zen;
 
