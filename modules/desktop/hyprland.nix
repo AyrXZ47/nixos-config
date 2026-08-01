@@ -120,6 +120,8 @@ in
             "network",
             "bluetooth",
             "battery",
+            "volume",
+            "custom-brightness",
             "dashboard",
           ] },
         ]
@@ -248,6 +250,32 @@ in
         dropdown-reboot-command = "systemctl reboot"
         dropdown-poweroff-command = "systemctl poweroff"
         button-bg-color = "bg-elevated"
+
+        [modules.volume]
+        icon-show = true
+        label-show = true
+        label-max-length = 3
+        icon-color = "#ff0066"
+        label-color = "#ff0066"
+        button-bg-color = "bg-elevated"
+
+        # Brillo via ddcutil (monitor DDC externo). Se oculta (hide-if-empty) en
+        # portatiles sin DDC, donde el brillo va por brightnessctl en los keybinds.
+        [[modules.custom]]
+        id = "brightness"
+        command = "timeout 3 ddcutil getvcp 10 --terse 2>/dev/null | awk '$2==10{print $4}'"
+        mode = "poll"
+        interval-ms = 5000
+        format = "{{ output }}%"
+        icon-name = "ld-sun-symbolic"
+        icon-show = true
+        label-show = true
+        label-max-length = 3
+        button-bg-color = "bg-elevated"
+        hide-if-empty = true
+        scroll-up = "~/.config/hypr/scripts/brightness.sh up"
+        scroll-down = "~/.config/hypr/scripts/brightness.sh down"
+        on-action = "timeout 3 ddcutil getvcp 10 --terse 2>/dev/null | awk '$2==10{print $4}'"
 
         [[modules.custom]]
         id = "wallpaper"
@@ -383,19 +411,9 @@ in
       nerd-fonts.symbols-only
     ];
 
-    systemd.user.services.polkit-gnome-authentication-agent-1 = {
-      description = "polkit-gnome-authentication-agent-1";
-      wantedBy = [ "graphical-session.target" ];
-      wants = [ "graphical-session.target" ];
-      after = [ "graphical-session.target" ];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
-        Restart = "on-failure";
-        RestartSec = 1;
-        TimeoutStopSec = 10;
-      };
-    };
+    # El agente polkit corre via exec-once en hyprland-home.nix; este servicio
+    # nunca arrancaba (graphical-session.target inactivo con systemd.enable=false).
+    # Nota: dos agentes polkit a la vez rompen los diálogos de autenticación.
 
     systemd.user.services.swaylock = {
       description = "Swaylock - session lock";
