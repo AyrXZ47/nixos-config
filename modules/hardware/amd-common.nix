@@ -15,7 +15,9 @@
 
   # AMD kernel modules
   boot.kernelModules = [ "kvm-amd" "amdgpu" ];
-  boot.initrd.kernelModules = [ "amdgpu" ];
+  # amdgpu SOLO en userspace: cargarlo en el initrd (boot.initrd.kernelModules)
+  # colgaba ~38s en el probe MST/DP ([drm] pre_validate_dsc) y atrasaba el boot
+  # entero, sin ganancia real (no hace falta KMS temprano).
 
   # PipeWire for pro audio
   services.pipewire = {

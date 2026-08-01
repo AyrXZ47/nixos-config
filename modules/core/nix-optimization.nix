@@ -33,4 +33,10 @@
     options = "--delete-older-than 3";
   };
   nix.optimise.automatic = true;
+
+  # ── Boot: sin menú de generaciones y solo 3 en el bootloader ─────────────
+  # timeout = 0 → systemd-boot arranca el default directo (sin espera ni menú);
+  # configurationLimit = 3 → el bootloader conserva solo 3 entradas de generación.
+  boot.loader.timeout = 0;
+  boot.loader.systemd-boot.configurationLimit = 3;
 }
