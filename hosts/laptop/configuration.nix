@@ -30,7 +30,13 @@
 
   services.openssh.enable = true;
 
-  # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384
-  services.syncthing.enable = true;
+  # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384.
+  # Corre como yovick (el user por defecto "syncthing" no tiene permisos
+  # sobre /home/yovick) con config en /home/yovick/.config/syncthing.
+  services.syncthing = {
+    enable = true;
+    user = "yovick";
+    dataDir = "/home/yovick";
+  };
 
 }
