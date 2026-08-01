@@ -340,6 +340,20 @@ loop-file=inf" ALL "$f"
         esac
       '';
     };
+    # Bloqueo: swaylock al instante y, en paralelo, el hook de OpenRGB aplica el
+    # perfil "apagado"; al desbloquear restaura el perfil normal. Los hooks solo
+    # corren si el módulo openrgb está activo (el `[ -x ... ]` lo decide).
+    "hypr/scripts/lock.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        swaylock &
+        _swaylock_pid=$!
+        [ -x "$HOME/.local/bin/openrgb-lock-before" ] && "$HOME/.local/bin/openrgb-lock-before"
+        wait "$_swaylock_pid"
+        [ -x "$HOME/.local/bin/openrgb-lock-after" ] && "$HOME/.local/bin/openrgb-lock-after"
+      '';
+    };
     "hypr/scripts/switch-layout.sh" = {
       executable = true;
       text = ''
