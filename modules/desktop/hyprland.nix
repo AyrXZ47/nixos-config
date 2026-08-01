@@ -115,13 +115,13 @@ in
         center = ["hyprland-workspaces"]
         right = [
           { name = "bottom", modules = [
-            "custom-clipboard",
             "custom-wallpaper",
+            "custom-clipboard",
             "network",
             "bluetooth",
             "battery",
             "volume",
-            "custom-brightness",
+            "brightness",
             "dashboard",
           ] },
         ]
@@ -208,9 +208,11 @@ in
         icon-show = true
         label-show = false
         left-click = "dropdown:brightness"
-        border-color = "blue"
-        icon-color = "blue"
-        icon-bg-color = "blue"
+        scroll-up = "~/.config/hypr/scripts/brightness.sh up"
+        scroll-down = "~/.config/hypr/scripts/brightness.sh down"
+        border-color = "#000000"
+        icon-color = "#ff0066"
+        icon-bg-color = "transparent"
         button-bg-color = "bg-elevated"
 
         [modules.battery]
@@ -253,29 +255,14 @@ in
 
         [modules.volume]
         icon-show = true
-        label-show = true
-        label-max-length = 3
+        label-show = false
         icon-color = "#ff0066"
-        label-color = "#ff0066"
+        icon-bg-color = "transparent"
         button-bg-color = "bg-elevated"
 
-        # Brillo via ddcutil (monitor DDC externo). Se oculta (hide-if-empty) en
-        # portatiles sin DDC, donde el brillo va por brightnessctl en los keybinds.
-        [[modules.custom]]
-        id = "brightness"
-        command = "timeout 3 ddcutil getvcp 10 --terse 2>/dev/null | awk '$2==10{print $4}'"
-        mode = "poll"
-        interval-ms = 5000
-        format = "{{ output }}%"
-        icon-name = "ld-sun-symbolic"
-        icon-show = true
-        label-show = true
-        label-max-length = 3
-        button-bg-color = "bg-elevated"
-        hide-if-empty = true
-        scroll-up = "~/.config/hypr/scripts/brightness.sh up"
-        scroll-down = "~/.config/hypr/scripts/brightness.sh down"
-        on-action = "timeout 3 ddcutil getvcp 10 --terse 2>/dev/null | awk '$2==10{print $4}'"
+        # Brillo via el modulo nativo de wayle: lee /sys/class/backlight.
+        # En pc lo provee ddcci (monitor DDC/CI); en laptop el panel interno.
+        # Da dropdown con slider + OSD y iconos por nivel (no se oculta en 0).
 
         [[modules.custom]]
         id = "wallpaper"
@@ -291,7 +278,7 @@ in
 
         [[modules.custom]]
         id = "clipboard"
-        icon-name = "edit-paste-symbolic"
+        icon-name = "ld-file-text-symbolic"
         icon-show = true
         icon-color = "#ff0066"
         icon-bg-color = "transparent"
