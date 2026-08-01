@@ -53,6 +53,12 @@ nix flake update                             # bump inputs (home-manager follows
 
 No tests, no CI, no formatter/linter config. `nix flake check` is the only verification; run it after any change.
 
+## Regla de flujo (obligatoria al terminar cada tarea)
+
+- Al terminar, usa todas las herramientas que nix pone a nuestra disposición para evaluar y auditar el código hasta que compile sin errores (`nix flake check`).
+- Al finalizar, siempre haz `git commit`. No dejar trabajo sin commitear.
+- Nunca hacer `nixos-rebuild switch` sin que el código tenga commit previo; el rebuild lo corre el usuario, después del commit.
+
 ## Gotchas
 
 - `yovick` is hardcoded in `flake.nix`, `home/default.nix`, and `modules/core/user.nix` — the latter holds `initialPassword` (applies only at first boot). Renaming the user touches all three.
