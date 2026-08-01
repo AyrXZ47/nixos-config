@@ -8,11 +8,46 @@ let
     hash = "sha256-iUX0Quae06tGd7gDgXZo1B3KYgPHU+ADPBrowHlv02A=";
   };
   wallpapersDir = ../../assets/wallpapers;
+
+  # Autoscroll estilo navegador con click medio: libinput on_button_down no
+  # funciona en ratones con rueda, así que se usa este plugin (ABI contra la
+  # misma version de Hyprland del flake). Con direct_activation el click medio
+  # hace autoscroll siempre; SUPER+A alterna al modo normal.
+  hypr-autoscroll = pkgs.stdenv.mkDerivation {
+    pname = "hypr-autoscroll";
+    version = "unstable-2026-07-25";
+    src = pkgs.fetchFromGitHub {
+      owner = "estebanhiram";
+      repo = "hypr-autoscroll";
+      rev = "301508bf19d2bd29993a0fca32b4b8abcf64aabb";
+      hash = "sha256-0tr35AEm24ertylt+g6TCjDADRp4yQpeu6j+vNO77Uc=";
+    };
+    nativeBuildInputs = [ pkgs.pkg-config ];
+    buildInputs = [ pkgs.hyprland ] ++ pkgs.hyprland.buildInputs;
+    buildPhase = ''
+      runHook preBuild
+      make clean all
+      runHook postBuild
+    '';
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out/lib
+      cp build/hypr-autoscroll.so $out/lib/libhypr-autoscroll.so
+      runHook postInstall
+    '';
+    meta = {
+      description = "Autoscroll de click medio estilo navegador para Hyprland";
+      homepage = "https://github.com/estebanhiram/hypr-autoscroll";
+      license = pkgs.lib.licenses.bsd3;
+      platforms = pkgs.lib.platforms.linux;
+    };
+  };
 in
 {
   wayland.windowManager.hyprland = {
     enable = true;
     configType = "hyprlang";
+    plugins = [ hypr-autoscroll ];
     xwayland.enable = true;
     systemd.enable = false;
 
@@ -105,6 +140,15 @@ in
       misc = {
         disable_xdg_env_checks = true;
       };
+
+      plugin.hypr_autoscroll = {
+        enabled = true;
+        direct_activation = true;
+      };
+
+      bindd = [
+        "SUPER, A, Toggle middle-button autoscroll, hypr-autoscroll:middle-mode, toggle"
+      ];
 
       bind = [
         "SUPER, Backspace, exec, wezterm"
