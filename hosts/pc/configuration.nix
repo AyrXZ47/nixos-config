@@ -33,6 +33,13 @@
   # "udev rules are not installed" y no puede tocar los dispositivos RGB.
   services.udev.packages = [ pkgs.openrgb ];
 
+  # ddcci: expone el monitor externo (DDC/CI) como /sys/class/backlight/ddcci0.
+  # Asi wayle (modulo brightness nativo: dropdown + OSD) y brightnessctl pueden
+  # controlar el brillo, sin depender de ddcutil por cada cambio. Sin esto no hay
+  # /sys/class/backlight en este PC (monitor externo) y el brillo solo va por DDC.
+  boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
+  boot.kernelModules = [ "ddcci" "ddcci-backlight" ];
+
   time.timeZone = "America/Mexico_City";
 
   i18n.defaultLocale = "en_US.UTF-8";
