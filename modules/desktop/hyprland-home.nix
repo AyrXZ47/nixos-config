@@ -365,7 +365,7 @@ loop-file=inf" ALL "$f"
   # guardar "abrir con" ahí. Se siembra un archivo real escribible una sola vez
   # (si ya existe, KDE conserva sus asociaciones manuales entre switches).
   home.activation.materializeMimeapps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    local f="$HOME/.config/mimeapps.list"
+    f="$HOME/.config/mimeapps.list"
     if [ ! -f "$f" ]; then
       cat > "$f" <<EOF
 [Default Applications]
