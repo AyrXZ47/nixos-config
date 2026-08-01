@@ -117,6 +117,8 @@ in
           { name = "bottom", modules = [
             "custom-clipboard",
             "custom-wallpaper",
+            "network",
+            "bluetooth",
             "battery",
             "dashboard",
           ] },
