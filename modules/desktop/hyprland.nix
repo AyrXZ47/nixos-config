@@ -117,6 +117,8 @@ in
           { name = "bottom", modules = [
             "custom-clipboard",
             "custom-wallpaper",
+            "network",
+            "bluetooth",
             "battery",
             "dashboard",
           ] },
@@ -302,6 +304,9 @@ in
 
     # udisks2: Dolphin lista/monta los discos extra (sda/sdb) sin fstab
     services.udisks2.enable = true;
+    # Daemons runtime del dashboard de Wayle (red, bluetooth, batería)
+    hardware.bluetooth.enable = true;
+    services.upower.enable = true;
     services.displayManager.gdm.enable = lib.mkForce false;
     services.desktopManager.gnome.enable = lib.mkForce false;
 
@@ -328,6 +333,21 @@ in
     ];
 
     security.polkit.enable = true;
+    # Montar/desbloquear discos (udisks2) sin pedir contraseña al usuario wheel
+    security.polkit.extraConfig = ''
+      polkit.addRule(function(action, subject) {
+        if (subject.isInGroup("wheel") &&
+            (action.id == "org.freedesktop.udisks2.filesystem-mount" ||
+             action.id == "org.freedesktop.udisks2.filesystem-mount-system" ||
+             action.id == "org.freedesktop.udisks2.filesystem-unmount-others" ||
+             action.id == "org.freedesktop.udisks2.filesystem-unmount-others-seat" ||
+             action.id == "org.freedesktop.udisks2.encrypted-unlock" ||
+             action.id == "org.freedesktop.udisks2.encrypted-unlock-system" ||
+             action.id == "org.freedesktop.udisks2.encrypted-lock")) {
+          return polkit.Result.YES;
+        }
+      });
+    '';
 
     xdg.portal = {
       enable = true;
