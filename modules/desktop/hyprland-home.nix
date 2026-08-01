@@ -159,6 +159,8 @@ in
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
         ", XF86MonBrightnessUp, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh up"
         ", XF86MonBrightnessDown, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh down"
+        "SUPER, F12, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh up"
+        "SUPER, F11, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh down"
         "SUPER, XF86AudioRaiseVolume, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh up"
         "SUPER, XF86AudioLowerVolume, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh down"
       ];
@@ -270,19 +272,23 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # ponytail: monitores externos via DDC/CI (ddcutil sobre i2c); si no hay
-        # monitor DDC (portatil con panel interno) cae a brightnessctl.
-        # Ceiling: si el panel externo no implementa DDC/CI, setvcp falla y no hay
-        # alternativa por software al OSD fisico del monitor.
-        if command -v ddcutil >/dev/null 2>&1 && ddcutil detect --brief >/dev/null 2>&1; then
-          case "$1" in
-            up) ddcutil setvcp 10 +5 ;;
-            down) ddcutil setvcp 10 -5 ;;
-          esac
-        else
+        # ponytail: panel interno (portatil) via brightnessctl; monitor externo
+        # via DDC/CI (ddcutil sobre i2c). El detect en cada llamada re-escaneaba
+        # todos los buses i2c y decenas de procesos peleaban el flock -> journal
+        # lleno y delays de minutos; por eso ahora se decide por /sys/class/backlight
+        # (chequeo barato) y se serializa con flock. "down" usa "10 - 5" (con
+        # espacio): "10 -5" lo traga getopt como opcion y no hace nada.
+        # Ceiling: si el monitor externo no implementa DDC/CI, setvcp falla.
+        if ls /sys/class/backlight/*/brightness >/dev/null 2>&1; then
           case "$1" in
             up) brightnessctl s +10% ;;
             down) brightnessctl s 10%- ;;
+          esac
+        else
+          lock=/tmp/ddcutil-brightness.lock
+          case "$1" in
+            up)   exec flock -w 1 "$lock" ddcutil setvcp 10 + 5 ;;
+            down) exec flock -w 1 "$lock" ddcutil setvcp 10 - 5 ;;
           esac
         fi
       '';
