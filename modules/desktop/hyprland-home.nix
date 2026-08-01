@@ -157,8 +157,10 @@ in
         ", XF86AudioLowerVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"
         ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
         ", XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-        ", XF86MonBrightnessUp, exec, brightnessctl s 10%+"
-        ", XF86MonBrightnessDown, exec, brightnessctl s 10%-"
+        ", XF86MonBrightnessUp, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh up"
+        ", XF86MonBrightnessDown, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh down"
+        "SUPER, XF86AudioRaiseVolume, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh up"
+        "SUPER, XF86AudioLowerVolume, exec, ${config.xdg.configHome}/hypr/scripts/brightness.sh down"
       ];
 
       bindel = [
@@ -262,6 +264,27 @@ in
         hyprctl dispatch layoutmsg orientationright
         sleep 0.1
         hyprctl dispatch exec "wezterm start -- zsh -ic 'cava'"
+      '';
+    };
+    "hypr/scripts/brightness.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # ponytail: monitores externos via DDC/CI (ddcutil sobre i2c); si no hay
+        # monitor DDC (portatil con panel interno) cae a brightnessctl.
+        # Ceiling: si el panel externo no implementa DDC/CI, setvcp falla y no hay
+        # alternativa por software al OSD fisico del monitor.
+        if command -v ddcutil >/dev/null 2>&1 && ddcutil detect --brief >/dev/null 2>&1; then
+          case "$1" in
+            up) ddcutil setvcp 10 +5 ;;
+            down) ddcutil setvcp 10 -5 ;;
+          esac
+        else
+          case "$1" in
+            up) brightnessctl s +10% ;;
+            down) brightnessctl s 10%- ;;
+          esac
+        fi
       '';
     };
     "hypr/scripts/wallpaper-set.sh" = {
