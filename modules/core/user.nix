@@ -6,7 +6,7 @@
   users.users.yovick = {
     isNormalUser = true;
     description = "Yovick R. Z.";
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" "i2c" ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     # Solo se aplica si el usuario aun no existe (primer boot); cambiala despues con `passwd`

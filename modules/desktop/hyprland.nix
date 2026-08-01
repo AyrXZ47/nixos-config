@@ -219,8 +219,26 @@ in
         label-show = false
         border-color = "#000000"
         icon-color = "#ff0066"
-        icon-bg-color = "bg-elevated"
+        icon-bg-color = "transparent"
         button-bg-color = "bg-elevated"
+
+        [modules.network]
+        icon-show = true
+        label-show = false
+        border-color = "#000000"
+        icon-color = "#ff0066"
+        icon-bg-color = "transparent"
+        button-bg-color = "bg-elevated"
+        left-click = "dropdown:network"
+
+        [modules.bluetooth]
+        icon-show = true
+        label-show = false
+        border-color = "#000000"
+        icon-color = "#ff0066"
+        icon-bg-color = "transparent"
+        button-bg-color = "bg-elevated"
+        left-click = "dropdown:bluetooth"
 
         [modules.dashboard]
         icon-override = ""
@@ -307,6 +325,9 @@ in
     # Daemons runtime del dashboard de Wayle (red, bluetooth, batería)
     hardware.bluetooth.enable = true;
     services.upower.enable = true;
+    # Brillo de monitores externos via DDC/CI (i2c) con ddcutil
+    hardware.i2c.enable = true;
+    services.udev.packages = [ pkgs.ddcutil ];
     services.displayManager.gdm.enable = lib.mkForce false;
     services.desktopManager.gnome.enable = lib.mkForce false;
 
@@ -330,6 +351,7 @@ in
       swayidle
       polkit_gnome
       brightnessctl
+      ddcutil
     ];
 
     security.polkit.enable = true;
