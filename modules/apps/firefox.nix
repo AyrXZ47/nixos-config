@@ -106,6 +106,31 @@ let
     window.sidebar-panel{ --lwt-sidebar-background-color: rgb(36,44,59) !important; }
   '';
 in
+let
+  # Aplica userChrome.css + pref al perfil (o perfiles) de firefox.
+  # Idempotente: corre en cada switch, y también al crearse el perfil en el
+  # primer arranque (systemd.user.paths.firefox-chrome-apply).
+  applyFirefoxChrome = pkgs.writeShellScript "apply-firefox-chrome" ''
+    set -u
+    INI="$HOME/.mozilla/firefox/profiles.ini"
+    CSS="$HOME/.firefox-chrome/userChrome.css"
+    [ -f "$INI" ] || exit 0
+    [ -f "$CSS" ] || exit 0
+    grep '^Path=' "$INI" | sed 's/^Path=//' | while read -r P; do
+      PROFILE="$HOME/.mozilla/firefox/$P"
+      [ -d "$PROFILE" ] || continue
+      mkdir -p "$PROFILE/chrome"
+      cp -f "$CSS" "$PROFILE/chrome/userChrome.css"
+      JS="$PROFILE/user.js"
+      [ -f "$JS" ] && sed -i '/^\/\/ ---- managed by home-manager ----/,/^\/\/ ---- end managed ----/d' "$JS"
+      cat >> "$JS" << 'PREFS_EOF'
+// ---- managed by home-manager ----
+user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+// ---- end managed ----
+PREFS_EOF
+    done
+  '';
+in
 {
   programs.firefox = {
     enable = true;
@@ -114,20 +139,30 @@ in
 
   home.file.".firefox-chrome/userChrome.css" = { text = userChrome; };
 
-  home.activation.installFirefoxChrome = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    PROFILE_DIR=$(grep -B5 'Default=1' "$HOME/.mozilla/firefox/profiles.ini" 2>/dev/null | grep '^Path=' | sed 's/^Path=//' | head -1 || true)
-    if [ -n "$PROFILE_DIR" ]; then
-      CHROME_DIR="$HOME/.mozilla/firefox/$PROFILE_DIR/chrome"
-      mkdir -p "$CHROME_DIR"
-      cp -f "$HOME/.firefox-chrome/userChrome.css" "$CHROME_DIR/userChrome.css"
+  home.activation.installFirefoxChrome = lib.hm.dag.entryAfter ["writeBoundary"] ''${applyFirefoxChrome}'';
 
-      JS_FILE="$HOME/.mozilla/firefox/$PROFILE_DIR/user.js"
-      [ -f "$JS_FILE" ] && sed -i '/^\/\/ ---- managed by home-manager ----/,/^\/\/ ---- end managed ----/d' "$JS_FILE"
-      cat >> "$JS_FILE" << 'PREFS_EOF'
-// ---- managed by home-manager ----
-user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-// ---- end managed ----
-PREFS_EOF
-    fi
-  '';
+  # Aplica el chrome cuando firefox crea el perfil en el primer arranque
+  systemd.user.services.firefox-chrome-apply = {
+    Unit = {
+      Description = "Aplica userChrome.css a los perfiles de firefox";
+      After = [ "firefox-chrome-apply.path" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = applyFirefoxChrome;
+    };
+  };
+
+  systemd.user.paths.firefox-chrome-apply = {
+    Unit = {
+      Description = "Detecta la creacion del perfil de firefox";
+    };
+    Path = {
+      Unit = "firefox-chrome-apply.service";
+      PathChanged = "%h/.mozilla/firefox";
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
 }
