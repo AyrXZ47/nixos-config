@@ -89,6 +89,7 @@ in
     # Utility
     scrcpy
     syncthing
+    smartmontools
     cmatrix
     nvtopPackages.amd
     amdgpu_top

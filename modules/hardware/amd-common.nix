@@ -51,6 +51,11 @@
     # btrfs se quedaba esperando el commit de transacción y el sistema entero se
     # congelaba. default_ps_max_latency_us=0 desactiva todos los estados de bajo consumo.
     "nvme_core.default_ps_max_latency_us=0"
+    # ASPM apagado en todo el PCIe: con APST ya off, el freeze (btrfs endio-write en
+    # wait_current_trans, journald en watchdog timeout) volvió a ocurrir el 2026-08-01
+    # con escritura sostenida. En estos ADATA DRAM-less la gestión de enlace PCIe
+    # (ASPM L0s/L1) también produce stalls de I/O silenciosos en AMD.
+    "pcie_aspm=off"
   ];
 
   powerManagement.cpuFreqGovernor = "performance";
