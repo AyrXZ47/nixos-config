@@ -47,4 +47,10 @@
 
   services.openssh.enable = true;
 
+  # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384
+  services.syncthing.enable = true;
+
+  # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
+  programs.kdeconnect.enable = true;
+
 }

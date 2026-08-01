@@ -49,6 +49,9 @@
 
   services.openssh.enable = true;
 
+  # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384
+  services.syncthing.enable = true;
+
   systemd.tmpfiles.rules = [
     "d /nix/var/nix/profiles/per-user/yovick 1777 root root"
   ];
