@@ -97,5 +97,5 @@ in
   # plasma-workspace aporta el modulo kded "soliduiserver" que muestra el dialogo
   # de passphrase al hacer click en un disco LUKS (Solid depende de el: llama a
   # org.kde.kded6 /modules/soliduiserver; sin el, el click se cuelga).
-  ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde kio kio-extras kio-fuse kded plasma-workspace ]);
+  ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde kio kio-extras kio-fuse kded plasma-workspace ark partitionmanager filelight ]);
 }
