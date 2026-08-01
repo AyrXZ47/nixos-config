@@ -150,6 +150,13 @@ in
         "SUPER, A, Toggle middle-button autoscroll, hypr-autoscroll:middle-mode, toggle"
       ];
 
+      # Mouse binds: sin bindm el config sobreescribe los defaults de Hyprland y
+      # SUPER+LMB/RMB no hacen nada. LMB arrastra (mover), RMB redimensiona.
+      bindm = [
+        "SUPER, mouse:272, movewindow"
+        "SUPER, mouse:273, resizewindow"
+      ];
+
       bind = [
         "SUPER, Backspace, exec, wezterm"
         "SUPER, A, exec, rofi -show drun -show-icons"
@@ -197,6 +204,11 @@ in
         "SUPER, mouse_down, workspace, e+1"
         "SUPER, mouse_up, workspace, e-1"
 
+        # Deslizarse entre escritorios como GNOME (SUPER+CTRL+ flechas); la
+        # animacion "workspaces, slidevert" ya esta en animations.
+        "SUPER CTRL, left, workspace, -1"
+        "SUPER CTRL, right, workspace, +1"
+
         ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
         ", XF86AudioLowerVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"
         ", XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
@@ -224,10 +236,12 @@ in
         "match:class blueberry, float on"
         "match:title Volume Control, float on"
         "match:class imv, float on"
-        "match:class org.wezfurlong.wezterm, opacity 1 1 1"
-        "match:class steam, no_blur on, opacity 1 1 1"
-        "match:class steam_app_.*, no_blur on, opacity 1 1 1"
-        "match:class gamescope, no_blur on, opacity 1 1 1"
+        # opacity con "override": multiplicador (1.0) x active_opacity 0.8 = 0.8
+        # (transparente). "1 override" fuerza 1.0 absoluto.
+        "match:class org.wezfurlong.wezterm, no_blur on, opacity 1 override"
+        "match:class steam, no_blur on, opacity 1 override"
+        "match:class steam_app_.*, no_blur on, opacity 1 override"
+        "match:class gamescope, no_blur on, opacity 1 override"
       ];
     };
   };
