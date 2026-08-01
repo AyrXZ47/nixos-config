@@ -94,5 +94,8 @@ in
     amdgpu_top
   # Dolphin standalone (sin Plasma) necesita el stack KIO completo para
   # desbloquear/montar discos (kded, kio-extras: prompts de passphrase, kioslaves).
-  ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde kio kio-extras kio-fuse kded ]);
+  # plasma-workspace aporta el modulo kded "soliduiserver" que muestra el dialogo
+  # de passphrase al hacer click en un disco LUKS (Solid depende de el: llama a
+  # org.kde.kded6 /modules/soliduiserver; sin el, el click se cuelga).
+  ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde kio kio-extras kio-fuse kded plasma-workspace ]);
 }
