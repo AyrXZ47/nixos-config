@@ -33,6 +33,11 @@
   # "udev rules are not installed" y no puede tocar los dispositivos RGB.
   services.udev.packages = [ pkgs.openrgb ];
 
+  # OpenRGB en Gigabyte: el SMBus de las RAM (AMD FCH, /dev/i2c via i2c-piix4)
+  # no se vincula porque ACPI reclama el rango 0xB00 (OpRegion \GSA1.SMBI).
+  # `lax` deja que el driver i2c-piix4 acceda al bus y OpenRGB vea las RAM.
+  boot.kernelParams = [ "acpi_enforce_resources=lax" ];
+
   # ddcci: expone el monitor externo (DDC/CI) como /sys/class/backlight/ddcci0.
   # Asi wayle (modulo brightness nativo: dropdown + OSD) y brightnessctl pueden
   # controlar el brillo, sin depender de ddcutil por cada cambio. Sin esto no hay
