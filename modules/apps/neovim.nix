@@ -120,7 +120,7 @@ let
     ".config/nvim/lua/plugins/mason.lua" = {
       text = ''
         return {
-          "williamboman/mason.nvim",
+          "mason-org/mason.nvim",
           opts = function(_, opts)
             opts.ensure_installed = vim.tbl_filter(function(pkg)
               return pkg ~= "tree-sitter-cli"
