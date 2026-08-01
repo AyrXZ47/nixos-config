@@ -92,5 +92,7 @@ in
     cmatrix
     nvtopPackages.amd
     amdgpu_top
-  ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde ]);
+  # Dolphin standalone (sin Plasma) necesita el stack KIO completo para
+  # desbloquear/montar discos (kded, kio-extras: prompts de passphrase, kioslaves).
+  ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde kio kio-extras kio-fuse kded ]);
 }
