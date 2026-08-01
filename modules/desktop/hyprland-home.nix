@@ -359,28 +359,38 @@ loop-file=inf" ALL "$f"
     "rofi/fonts".source = "${adi1090x-src}/fonts";
   };
 
-  xdg.mimeApps.enable = true;
+  xdg.mimeApps.enable = false;
 
-  xdg.mimeApps.defaultApplications = {
-    "text/html" = "firefox.desktop";
-    "x-scheme-handler/http" = "firefox.desktop";
-    "x-scheme-handler/https" = "firefox.desktop";
-    "image/avif" = "imv.desktop";
-    "image/bmp" = "imv.desktop";
-    "image/gif" = "imv.desktop";
-    "image/jpeg" = "imv.desktop";
-    "image/jpg" = "imv.desktop";
-    "image/png" = "imv.desktop";
-    "image/svg+xml" = "imv.desktop";
-    "image/tiff" = "imv.desktop";
-    "image/webp" = "imv.desktop";
-    "image/x-bmp" = "imv.desktop";
-    "image/x-portable-bitmap" = "imv.desktop";
-    "image/x-portable-graymap" = "imv.desktop";
-    "image/x-portable-pixmap" = "imv.desktop";
-    "image/x-tga" = "imv.desktop";
-    "image/x-xbitmap" = "imv.desktop";
-    "image/x-xpixmap" = "imv.desktop";
-  };
+  # xdg.mimeApps genera un symlink read-only al store; Dolphin no puede
+  # guardar "abrir con" ahí. Se siembra un archivo real escribible una sola vez
+  # (si ya existe, KDE conserva sus asociaciones manuales entre switches).
+  home.activation.materializeMimeapps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    local f="$HOME/.config/mimeapps.list"
+    if [ ! -f "$f" ]; then
+      cat > "$f" <<EOF
+[Default Applications]
+text/html=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+image/avif=imv.desktop
+image/bmp=imv.desktop
+image/gif=imv.desktop
+image/jpeg=imv.desktop
+image/jpg=imv.desktop
+image/png=imv.desktop
+image/svg+xml=imv.desktop
+image/tiff=imv.desktop
+image/webp=imv.desktop
+image/x-bmp=imv.desktop
+image/x-portable-bitmap=imv.desktop
+image/x-portable-graymap=imv.desktop
+image/x-portable-pixmap=imv.desktop
+image/x-tga=imv.desktop
+image/x-xbitmap=imv.desktop
+image/x-xpixmap=imv.desktop
+application/x-keepass2=org.keepassxc.KeePassXC.desktop
+EOF
+    fi
+  '';
 
 }
