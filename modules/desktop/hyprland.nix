@@ -406,7 +406,9 @@ in
       description = "Swaylock - session lock";
       serviceConfig = {
         Type = "simple";
-        ExecStart = "${pkgs.swaylock-effects}/bin/swaylock";
+        # Wrapper: bloquea al instante y, en paralelo, aplica el perfil RGB de
+        # "apagado" (hook de OpenRGB); al desbloquear restaura el normal.
+        ExecStart = "/home/yovick/.config/hypr/scripts/lock.sh";
       };
       wantedBy = [ "lock.target" ];
     };
