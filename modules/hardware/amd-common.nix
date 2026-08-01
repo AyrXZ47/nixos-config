@@ -45,9 +45,24 @@
     "processor.max_cstate=1"
     # GPU: desbloquea todo el rango de clocks/OC/fan vía /sys (no cambia nada solo)
     "amdgpu.ppfeaturemask=0xffffffff"
+    # NVMe sin DRAM (XPG SPECTRIX S20G): APST apagado. Con APST activo el controlador
+    # entra a bajo consumo y, bajo una ráfaga de escritura sostenida (copia/extracción
+    # grande), dejaba de completar I/O en silencio (sin timeouts ni errores en journal);
+    # btrfs se quedaba esperando el commit de transacción y el sistema entero se
+    # congelaba. default_ps_max_latency_us=0 desactiva todos los estados de bajo consumo.
+    "nvme_core.default_ps_max_latency_us=0"
   ];
 
   powerManagement.cpuFreqGovernor = "performance";
+
+  # Writeback pronto y en tandas pequeñas: el kernel vacía la page cache de forma
+  # continua en vez de acumular ~12G sucios (dirty_ratio 20) y volcarlos de golpe,
+  # lo que satura el controlador del NVMe sin DRAM durante copias/extracciones
+  # grandes. 5/10 mantiene las escrituras en ráfagas cortas y controlables.
+  boot.kernel.sysctl = {
+    "vm.dirty_background_ratio" = 5;
+    "vm.dirty_ratio" = 10;
+  };
 
   # ZRAM
   zramSwap.enable = true;
