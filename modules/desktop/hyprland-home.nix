@@ -42,6 +42,11 @@ in
           disable_while_typing = true;
         };
         sensitivity = 0.0;
+        # Scroll con click medio (libinput on_button_down): mantienes el boton
+        # y mueves el raton para desplazarte en cualquier app, incluida Dolphin.
+        # Efecto colateral: el click medio deja de funcionar como click normal.
+        scroll_method = "on_button_down";
+        scroll_button = 2;
       };
 
       general = {
