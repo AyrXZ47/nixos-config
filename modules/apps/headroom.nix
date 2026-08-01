@@ -45,4 +45,41 @@ in
       WantedBy = [ "default.target" ];
     };
   };
+
+  # La instalación en boot es por guard ([ -x ~/.local/bin/headroom ] → solo si
+  # falta), así que las versiones nuevas llegan por este timer: semanalmente
+  # actualiza en segundo plano y reinicia el proxy. No hay que hacer nada a mano.
+  systemd.user.services.headroom-update = {
+    Unit = {
+      Description = "Actualiza headroom a la última versión";
+    };
+
+    Service = {
+      Type = "oneshot";
+      Environment = [
+        "UV_QUIET=1"
+        "UV_NO_PROGRESS=1"
+        "UV_TOOL_DIR=%h/.local/share/uv/tools"
+      ];
+      ExecStart = [
+        "${pkgs.uv}/bin/uv tool upgrade --no-python-downloads --python ${pkgs.python313}/bin/python3.13 ${headroomPkg}"
+        "${pkgs.systemd}/bin/systemctl --user restart headroom-proxy"
+      ];
+    };
+  };
+
+  systemd.user.timers.headroom-update = {
+    Unit = {
+      Description = "Revisa actualizaciones de headroom semanalmente";
+    };
+
+    Timer = {
+      OnCalendar = "weekly";
+      Persistent = true;
+    };
+
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
 }
