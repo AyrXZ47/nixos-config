@@ -96,12 +96,6 @@ in
           preserve_split = true,
         },
 
-        gestures = {
-          workspace_swipe = true,
-          workspace_swipe_fingers = 3,
-          workspace_swipe_forever = true,
-        },
-
         master = {
           new_status = "slave",
         },
@@ -202,6 +196,14 @@ in
       hl.bind("SUPER + F11", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
       hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
       hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
+
+      -----------------------
+      ---- GESTOS -----------
+      -----------------------
+      -- Trackpad: 3 dedos en horizontal = cambiar de escritorio.
+      -- API nueva (Hyprland 0.51+): hl.gesture; las claves gestures:workspace_swipe
+      -- quedaron deprecadas/eliminadas.
+      hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
     '';
   };
 
