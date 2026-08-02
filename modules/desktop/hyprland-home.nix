@@ -178,8 +178,8 @@ in
       hl.bind("SUPER + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 
       -- Deslizarse entre escritorios como GNOME (la animación slidevert está arriba).
-      hl.bind("SUPER + CTRL + up", hl.dsp.focus({ workspace = "-1" }))
-      hl.bind("SUPER + CTRL + down", hl.dsp.focus({ workspace = "+1" }))
+      hl.bind("SUPER + ALT + up", hl.dsp.focus({ workspace = "-1" }))
+      hl.bind("SUPER + ALT + down", hl.dsp.focus({ workspace = "+1" }))
 
       -- Ratón: LMB arrastra (mover), RMB redimensiona (sin estos binds el config
       -- sobreescribe los defaults de Hyprland).
@@ -355,7 +355,7 @@ loop-file=inf" ALL "$f"
       source = ./themes/rofi/launcher.rasi;
     };
     "rofi/cyberpunk.rasi".text = ''
-      @theme "launchers/type-7/style-6"
+      @theme "launchers/type-3/style-1"
 
       * {
           background:     #000B1E;
