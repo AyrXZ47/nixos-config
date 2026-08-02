@@ -6,7 +6,6 @@
 
     extraConfig = ''
       local wezterm = require("wezterm")
-      local mux = wezterm.mux
       local config = {}
 
       config.set_environment_variables = { COLORTERM = "truecolor" }
@@ -55,12 +54,6 @@
       config.window_padding = { left = 30, right = 30, top = 30, bottom = 30 }
       config.initial_cols = 110
       config.initial_rows = 30
-
-      wezterm.on("gui-startup", function(cmd)
-        local tab, pane, window = mux.spawn_window(cmd or {})
-        local gui_window = window:gui_window()
-        gui_window:maximize()
-      end)
 
       return config
     '';

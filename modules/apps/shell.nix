@@ -56,7 +56,7 @@
       # la orientación se fija antes de spawnear nvtop, así el orden nunca
       # depende de cuándo mapee la ventana nueva.
       netrunner() {
-        hyprctl dispatch layoutmsg orientationright
+        hyprctl dispatch layoutmsg preselect r
         hyprctl dispatch exec "wezterm start --class nr-nvtop -- zsh -ic nvtop"
         exec btop
       }
