@@ -306,7 +306,7 @@ in
         sleep 0.1
         hyprctl dispatch layoutmsg orientationbottom
         sleep 0.1
-        hyprctl dispatch exec "wezterm start -- zsh -ic 'headroom wrap aider --model ollama/qwen3.6:35b'"
+        hyprctl dispatch exec "wezterm start -- zsh -ic 'headroom wrap aider --model ollama/qwen3.6:35b-a3b-mtp-q4_K_M'"
         sleep 0.6
         hyprctl dispatch movefocus l
         sleep 0.1
