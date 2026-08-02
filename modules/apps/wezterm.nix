@@ -30,7 +30,7 @@
 
       config.colors = {
         tab_bar = {
-          # Misma transparencia que el fondo de la ventana (window_background_opacity).
+          -- Misma transparencia que el fondo de la ventana (window_background_opacity).
           background = "rgba(21, 17, 68, 0.66)",
           active_tab = {
             bg_color = "#00f0ff",
