@@ -17,9 +17,6 @@
 
   modules.desktop.hyprland = {
     enable = true;
-    screenshotKey = "SUPER SHIFT, P";
-    screenshotWindowKey = "SUPER ALT, P";
-    screenshotScreenKey = "SUPER, P";
   };
 
   modules.hardware.openrgb.enable = true;
@@ -48,6 +45,10 @@
   # instancia el dispositivo por si solo), y sin el, /sys/class/backlight queda
   # vacio -> wayle oculta el icono de brillo. Fix: instanciar manualmente el
   # dispositivo 0x37 (DDC/CI) en el bus i2c del conector conectado.
+  # Ojo: en DP el DDC/CI viaja por el bus i2c AUXILIAR (drm_dp_auxN, nombre
+  # "AMDGPU DM aux hw bus"), NO por el symlink ddc (que apunta a un i2c del
+  # conector que no responde a 0x37 -> probe -19, backlight vacio). Se prueba el
+  # aux primero y se cae al symlink ddc solo para conectores sin aux (HDMI/DVI).
   systemd.services.ddcci-instantiate = {
     description = "Instancia el dispositivo ddcci del monitor DDC/CI";
     wantedBy = [ "multi-user.target" ];
@@ -57,11 +58,15 @@
       RemainAfterExit = true;
     };
     script = ''
-      for ddc in /sys/class/drm/card*-*-*/ddc; do
-        [ -e "$ddc" ] || continue
-        conn=$(dirname "$ddc")
+      for conn in /sys/class/drm/card*-*-*; do
+        [ -d "$conn" ] || continue
         [ "$(cat "$conn/status" 2>/dev/null)" = "connected" ] || continue
-        bus=$(basename "$(readlink -f "$ddc")")
+        bus=""
+        for i2c in "$conn"/i2c-*; do
+          [ -r "$i2c/name" ] && grep -qi aux "$i2c/name" && bus=$(basename "$i2c") && break
+        done
+        [ -z "$bus" ] && [ -e "$conn/ddc" ] && bus=$(basename "$(readlink -f "$conn/ddc")")
+        [ -z "$bus" ] && continue
         [ -w "/sys/bus/i2c/devices/$bus/new_device" ] || continue
         # Si ya esta instanciado (reload), no hacer nada
         ls /sys/bus/i2c/devices/$bus/0-0037 >/dev/null 2>&1 && continue
