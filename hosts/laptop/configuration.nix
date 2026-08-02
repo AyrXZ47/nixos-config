@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/core/user.nix
+    ../../modules/core/networking.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
@@ -24,8 +25,6 @@
   system.stateVersion = "26.05";
 
   networking.hostName = "nixos-laptop";
-  networking.networkmanager.enable = true;
-  networking.firewall.enable = true;
 
   # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
   # (sin esto el daemon corre pero no descubre/conecta dispositivos).
