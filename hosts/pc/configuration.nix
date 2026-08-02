@@ -49,10 +49,15 @@
   # "AMDGPU DM aux hw bus"), NO por el symlink ddc (que apunta a un i2c del
   # conector que no responde a 0x37 -> probe -19, backlight vacio). Se prueba el
   # aux primero y se cae al symlink ddc solo para conectores sin aux (HDMI/DVI).
+  # El probe del core falla -19 si corre antes de que el display manager ponga
+  # el monitor en marcha (en el boot el MSI G2412 todavia no responde a DDC/CI,
+  # aunque luego si, verificado con ddcutil). Por eso el servicio se dispara con
+  # graphical.target (despues de display-manager) y reintenta borrando el device
+  # stale hasta que ddcci lo enlaza (driver presente).
   systemd.services.ddcci-instantiate = {
     description = "Instancia el dispositivo ddcci del monitor DDC/CI";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "systemd-udevd.service" ];
+    wantedBy = [ "graphical.target" ];
+    after = [ "display-manager.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -68,11 +73,15 @@
         [ -z "$bus" ] && [ -e "$conn/ddc" ] && bus=$(basename "$(readlink -f "$conn/ddc")")
         [ -z "$bus" ] && continue
         [ -w "/sys/bus/i2c/devices/$bus/new_device" ] || continue
-        # Si ya esta instanciado (reload/switch), no hacer nada; el dir del
-        # device es "<n>-0037" (bus i2c-n), no "$bus/0-0037".
+        # dir del device: "<n>-0037" (bus i2c-n), no "$bus/0-0037".
         n="''${bus#i2c-}"
-        [ -e "/sys/bus/i2c/devices/$n-0037" ] && continue
-        echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device"
+        dev="/sys/bus/i2c/devices/$n-0037"
+        for i in $(seq 1 15); do
+          [ -L "$dev/driver" ] && break
+          [ -e "$dev" ] && echo 0x37 > "$bus/delete_device" 2>/dev/null || true
+          echo ddcci 0x37 > "$bus/new_device" 2>/dev/null || true
+          sleep 2
+        done
       done
     '';
   };
