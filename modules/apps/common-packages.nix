@@ -22,6 +22,11 @@ in
   # decoding not supported by this context") -> caia de ~44 a ~18 t/s.
   services.ollama.environmentVariables = {
     OLLAMA_CONTEXT_LENGTH = "16384";
+    # Reserva VRAM para el escritorio: sin esto ollama se come los 8GiB completos
+    # y Hyprland renderiza desde GTT (ram del sistema) -> la UI se arrastra.
+    # ponytail: 2048 quita ~10% de VRAM a los pesos del modelo (unos ~2 t/s);
+    # bajar a 1024 si se prefiere mas velocidad que fluidez del escritorio.
+    OLLAMA_GPU_OVERHEAD = "2048";
   };
 
   environment.systemPackages = with pkgs; [
