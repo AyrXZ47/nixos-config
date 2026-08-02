@@ -149,8 +149,8 @@ Fun: `cbonsai`.
 | `SUPER J` | Toggle split |
 | `SUPER arrows` / `SUPER SHIFT arrows` | Focus / move window |
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
-| `SUPER T` | *time-to-work*: Mixxx → Obsidian → Firefox on ws 1-3 |
-| `SUPER H` | Dev layout: nvim + headroom-wrapped opencode + pipes + cava |
+| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox on ws 1-3 |
+| `SUPER N` | *netrunner*: btop + nvtop split |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session |
 | `SUPER P` variants | Screenshot region (`SUPER SHIFT P`) / window (`SUPER ALT P`) / screen (`SUPER P`) |
@@ -158,7 +158,8 @@ Fun: `cbonsai`.
 
 ## Custom Commands
 
-- `dev` — full dev workspace in WezTerm panes (editor, AI, cava, pipes).
+- `dev [repo]` — full dev workspace in WezTerm panes (editor, AI, cava, pipes);
+  con directorio opcional entra al repo antes de partir paneles.
 - `netrunner` — nvtop + btop split.
 - `SecDesk` / `Mirror` (+ `_WiFi <ip>`) — scrcpy tablet mirroring, 85 fps,
   h265/opus, virtual 1920x1080 display for a secure desk setup.

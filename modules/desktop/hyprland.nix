@@ -6,21 +6,6 @@ in
 {
   options.modules.desktop.hyprland = {
     enable = lib.mkEnableOption "Hyprland window manager";
-    screenshotKey = lib.mkOption {
-      type = lib.types.str;
-      default = "SUPER SHIFT, P";
-      description = "Keybind for region screenshot";
-    };
-    screenshotWindowKey = lib.mkOption {
-      type = lib.types.str;
-      default = "SUPER ALT, P";
-      description = "Keybind for window screenshot";
-    };
-    screenshotScreenKey = lib.mkOption {
-      type = lib.types.str;
-      default = "SUPER, P";
-      description = "Keybind for full screen screenshot";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -248,8 +233,9 @@ in
         icon-override = ""
         icon-show = true
         # La "bola" que envuelve el logo es icon-bg-color (default amarillo "yellow")
-        # y el logo en sí icon-color; azul neón + blanco.
-        icon-bg-color = "#00e5ff"
+        # y el logo en sí icon-color. #00aaff = el azul final del gradiente de borde
+        # activo (ff0066 → 9900ff → 00aaff); antes era #00e5ff (cian más frío).
+        icon-bg-color = "#00aaff"
         icon-color = "#ffffff"
         left-click = "dropdown:dashboard"
         dropdown-lock-command = "loginctl lock-session"
@@ -324,11 +310,6 @@ in
             animation-timing-function: cubic-bezier(0.28, 0.84, 0.42, 1);
         }
       '';
-      wayland.windowManager.hyprland.settings.bind = [
-        "${cfg.screenshotKey}, exec, hyprshot -m region -o ~/Pictures/Screenshots"
-        "${cfg.screenshotWindowKey}, exec, hyprshot -m window -o ~/Pictures/Screenshots"
-        "${cfg.screenshotScreenKey}, exec, hyprshot -m output -o ~/Pictures/Screenshots"
-      ];
     };
 
     services.displayManager.sddm = {
