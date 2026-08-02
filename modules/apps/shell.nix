@@ -51,13 +51,15 @@
 
       fastfetch
 
-      # 2.0: dos ventanas separadas tiled por Hyprland (con gaps), siempre btop
-      # a la izquierda y nvtop a la derecha. La ventana actual pasa a ser btop;
-      # la orientación se fija antes de spawnear nvtop, así el orden nunca
-      # depende de cuándo mapee la ventana nueva.
+      # Parte la terminal en dos: btop (izquierda) y nvtop (derecha). La versión
+      # con hyprctl dispatch layoutmsg/exec dejó de funcionar con la config Lua
+      # (el dispatch legacy no se parsea) y solo abría btop.
       netrunner() {
-        hyprctl dispatch layoutmsg preselect r
-        hyprctl dispatch exec "wezterm start --class nr-nvtop -- zsh -ic nvtop"
+        if [[ -z "$WEZTERM_PANE" ]]; then
+          echo "Error: Se requiere WezTerm activo."
+          return 1
+        fi
+        wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 50 -- zsh -ic nvtop
         exec btop
       }
 

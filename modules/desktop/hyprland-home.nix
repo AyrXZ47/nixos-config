@@ -58,13 +58,14 @@ in
 
         decoration = {
           rounding = 12,
-          -- Vidrio esmerilado: más transparencia para que el blur del fondo se note.
-          active_opacity = 0.75,
-          inactive_opacity = 0.68,
+          -- Vidrio esmerilado: más transparencia y blur más notorio. Steam y wezterm
+          -- quedan exentos via reglas (opacity "N override" fuerza opacidad absoluta).
+          active_opacity = 0.65,
+          inactive_opacity = 0.55,
           blur = {
             enabled = true,
-            size = 12,
-            passes = 3,
+            size = 16,
+            passes = 4,
             ignore_opacity = true,
           },
           shadow = {
@@ -72,6 +73,19 @@ in
             range = 12,
             render_power = 3,
           },
+        },
+
+        -- Teclado: latam/us (switchxkblayout cicla entre estas). El bloque input
+        -- se perdió en la migración a Lua y sin kb_layout el switch no tenía nada
+        -- que alternar.
+        input = {
+          kb_layout = "latam,us",
+          follow_mouse = 1,
+          touchpad = {
+            natural_scroll = true,
+            disable_while_typing = true,
+          },
+          sensitivity = 0.0,
         },
 
         render = {
@@ -222,11 +236,13 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # exec [workspace N] fuerza la apertura en ese escritorio aunque la app
-        # tarde en mapear su ventana (antes obsidian tardaba >0.5s y caía en el 3).
-        hyprctl dispatch exec [workspace 1] mixxx
-        hyprctl dispatch exec [workspace 2] obsidian
-        hyprctl dispatch exec [workspace 3] firefox
+        # Con config Lua, "hyprctl dispatch exec [workspace N]" ya no se parsea
+        # (error: ']' expected); la regla de workspace se pasa como 2º argumento
+        # del dispatcher hl.dsp.exec_cmd. La regla sigue forzando la apertura en
+        # ese escritorio aunque la app tarde en mapear su ventana.
+        hyprctl dispatch 'hl.dsp.exec_cmd("mixxx", { workspace = 1 })'
+        hyprctl dispatch 'hl.dsp.exec_cmd("obsidian", { workspace = 2 })'
+        hyprctl dispatch 'hl.dsp.exec_cmd("firefox", { workspace = 3 })'
       '';
     };
     "hypr/scripts/brightness.sh" = {
