@@ -15,6 +15,9 @@
 
   modules.desktop.hyprland.enable = true;
 
+  # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
+  environment.systemPackages = [ pkgs.openrgb ];
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 

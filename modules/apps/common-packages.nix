@@ -59,9 +59,6 @@ in
     # Networking & VPN
     proton-vpn
 
-    # Hardware Control
-    openrgb
-
     # Android
     android-tools
 
