@@ -101,6 +101,7 @@ in
     cmatrix
     nvtopPackages.amd
     amdgpu_top
+    popsicle
   # Dolphin standalone (sin Plasma) necesita el stack KIO completo para
   # desbloquear/montar discos (kded, kio-extras: prompts de passphrase, kioslaves).
   # plasma-workspace aporta el modulo kded "soliduiserver" que muestra el dialogo
