@@ -305,16 +305,19 @@ in
         #   | pipes-rs | cava   |                  |
         #   +-------------------+------------------+
         #
-        # Determinismo: con follow_mouse=1 el warp del cursor a la ventana
-        # recién enfocada re-rotaba el foco y reordenaba el árbol (el mouse se
-        # movía "solo"); se apaga durante el montaje y se restaura al salir.
-        # Cada ventana se espera por su clase antes del siguiente paso (los
-        # sleeps mágicos del script viejo dejaban abrir la app tarde y el layout
-        # se desarmaba), y el único salto de vuelta a la raíz se hace por clase
-        # (focuswindow), no por dirección espacial.
-
-        hyprctl keyword input:follow_mouse 0
-        trap 'hyprctl keyword input:follow_mouse 1' EXIT
+        # Determinismo: con follow_mouse=0 el cursor se queda quieto y dwindle
+        # (force_split=0, "sigue al mouse") usaba esa posición estática para
+        # partir el árbol, dejando el grid comprimido en un cuarto de pantalla;
+        # por eso NO se toca follow_mouse aquí. La dirección la fija el layoutmsg
+        # preselect (override de un solo uso, independiente del mouse), el padre
+        # del split se fija explícitamente con focuswindow antes de cada paso
+        # (no fiarse del foco implícito tras spawnear), y cada ventana se espera
+        # por su clase antes del siguiente paso (los sleeps mágicos del script
+        # viejo dejaban abrir la app tarde y el layout se desarmaba).
+        # Verificado: 30+ corridas seguidas con grid perfecto (todas las ventanas
+        # fs0 y la columna izquierda a 915 px). No hace falta esperar a que la
+        # primera ventana alcance full-width: wezterm ya mapea expandida y el
+        # wait_window + sleep 0.3 de W() alcanza.
 
         wait_window() {
           local cls="$1"
@@ -333,19 +336,29 @@ in
             hyprctl dispatch exec "wezterm start --class $cls"
           fi
           wait_window "$cls"
+          sleep 0.3
+        }
+
+        F() {
+          hyprctl dispatch focuswindow "class:$1"
+          sleep 0.3
         }
 
         W dev-lazyvim "zsh -ic nvim"
-        hyprctl dispatch layoutmsg orientationright
+        F dev-lazyvim
+        hyprctl dispatch layoutmsg preselect r
         W dev-opencode "zsh -ic 'headroom wrap opencode'"
-        hyprctl dispatch layoutmsg orientationbottom
+        F dev-opencode
+        hyprctl dispatch layoutmsg preselect d
         W dev-aider "zsh -ic 'headroom wrap aider --model ollama/qwen3.6:35b-a3b-mtp-q4_K_M'"
-        hyprctl dispatch focuswindow class:dev-lazyvim
-        hyprctl dispatch layoutmsg orientationbottom
+        F dev-lazyvim
+        hyprctl dispatch layoutmsg preselect d
         W dev-clean
-        hyprctl dispatch layoutmsg orientationbottom
+        F dev-clean
+        hyprctl dispatch layoutmsg preselect d
         W dev-pipes "zsh -ic 'pipes-rs'"
-        hyprctl dispatch layoutmsg orientationright
+        F dev-pipes
+        hyprctl dispatch layoutmsg preselect r
         W dev-cava "zsh -ic 'cava'"
       '';
     };
