@@ -17,6 +17,13 @@ in
 {
   services.ollama.enable = true;
 
+  # Contexto 16k: con el default de 4096, las sesiones largas de aider llenaban el
+  # contexto y MTP (decodificacion especulativa) se desactivaba ("speculative
+  # decoding not supported by this context") -> caia de ~44 a ~18 t/s.
+  services.ollama.environmentVariables = {
+    OLLAMA_CONTEXT_LENGTH = "16384";
+  };
+
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
