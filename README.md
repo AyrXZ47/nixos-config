@@ -71,7 +71,7 @@ flake.nix              # Entry point — hosts & shared modules
 
 ### Editor & Dev
 - **Neovim** (LazyVim) — `cyberneon` theme, smear-cursor, render-markdown,
-  obsidian.nvim (`~/Sync/Notes`), img-clip paste, ollama.nvim (`codegemma:7b`),
+  obsidian.nvim (`~/Sync/Notes`), img-clip paste, ollama.nvim (`qwen3.6:35b-a3b-mtp-q4_K_M`),
   mason, rainbow-delimiters, treesitter-context, lsp_lines; LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.
 - **OpenCode** + **Ollama** + **aider-chat** (local AI stack, `OLLAMA_API_BASE` set).
