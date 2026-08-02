@@ -247,7 +247,10 @@ in
         [modules.dashboard]
         icon-override = ""
         icon-show = true
-        icon-color = "#00aaff"
+        # La "bola" que envuelve el logo es icon-bg-color (default amarillo "yellow")
+        # y el logo en sí icon-color; azul neón + blanco.
+        icon-bg-color = "#00e5ff"
+        icon-color = "#ffffff"
         left-click = "dropdown:dashboard"
         dropdown-lock-command = "loginctl lock-session"
         dropdown-logout-command = "loginctl terminate-session $XDG_SESSION_ID"
