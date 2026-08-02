@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/core/user.nix
+    ../../modules/core/networking.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
@@ -24,8 +25,6 @@
   system.stateVersion = "26.05";
 
   networking.hostName = "nixos-vm";
-  networking.networkmanager.enable = true;
-  networking.firewall.enable = true;
 
   time.timeZone = "America/Mexico_City";
 

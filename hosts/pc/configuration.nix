@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/core/user.nix
+    ../../modules/core/networking.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
@@ -31,8 +32,6 @@
   system.stateVersion = "26.05";
 
   networking.hostName = "nixos-pc";
-  networking.networkmanager.enable = true;
-  networking.firewall.enable = true;
 
   # ddcci: expone el monitor externo (DDC/CI) como /sys/class/backlight/ddcci0.
   # Asi wayle (modulo brightness nativo: dropdown + OSD) y brightnessctl pueden

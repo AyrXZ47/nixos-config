@@ -29,6 +29,4 @@
   };
 
   hardware.sensor.iio.enable = true;
-
-  networking.networkmanager.wifi.backend = "iwd";
 }
