@@ -21,6 +21,11 @@
 
   i18n.defaultLocale = "en_US.UTF-8";
 
+  # Preserva el comportamiento que heredaba de amd-common antes de mover el
+  # tuneado de rendimiento a amd-desktop.nix (server sigue a tope).
+  powerManagement.cpuFreqGovernor = "performance";
+  boot.kernelParams = [ "processor.max_cstate=1" ];
+
   services.openssh.enable = true;
 
   # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384.

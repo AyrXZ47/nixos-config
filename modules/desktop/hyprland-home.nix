@@ -283,8 +283,12 @@ in
         [ -z "$f" ] && exit 0
         pkill -x .mpvpaper-wrapp 2>/dev/null
         sleep 0.2
-        mpvpaper -f -o "no-audio
-loop-file=inf" ALL "$f"
+        # hwdec=vaapi: descodifica el video en la GPU (VCN/Radeon), no en la CPU.
+        # Sin esto el fondo animado costaba ~274% de CPU en la laptop. -p pausa el
+        # video cuando lo tapa una ventana (ahorra CPU/batería).
+        mpvpaper -f -p -o "no-audio
+loop-file=inf
+hwdec=vaapi" ALL "$f"
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
