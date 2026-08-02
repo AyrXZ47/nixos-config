@@ -136,7 +136,6 @@ in
       ---- LAYER RULES ------
       -----------------------
       hl.layer_rule({ name = "wayle-blur", match = { namespace = "wayle" }, blur = true, ignore_alpha = 1 })
-      hl.layer_rule({ name = "rofi-blur", match = { namespace = "rofi" }, blur = true, ignore_alpha = 1 })
 
       -----------------------
       ---- KEYBINDINGS ------
@@ -371,8 +370,7 @@ hwdec=vaapi" ALL "$f"
       }
 
       window {
-          transparency: "real";
-          background-color: rgba(0, 11, 30, 0.55);
+          background-color: #000B1E;
       }
     '';
     "rofi/launchers".source = "${adi1090x-src}/files/launchers";
