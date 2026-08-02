@@ -282,51 +282,71 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        hyprctl dispatch workspace 1
-        mixxx &
-        sleep 0.5
-        hyprctl dispatch workspace 2
-        obsidian &
-        sleep 0.5
-        hyprctl dispatch workspace 3
-        firefox &
+        # exec [workspace N] fuerza la apertura en ese escritorio aunque la app
+        # tarde en mapear su ventana (antes obsidian tardaba >0.5s y caía en el 3).
+        hyprctl dispatch exec [workspace 1] mixxx
+        hyprctl dispatch exec [workspace 2] obsidian
+        hyprctl dispatch exec [workspace 3] firefox
       '';
     };
     "hypr/scripts/hypr-dev.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        hyprctl dispatch exec "wezterm start -- zsh -ic nvim"
-        sleep 0.6
+        # Layout fijo del workspace de desarrollo:
+        #
+        #   +-------------------+------------------+
+        #   | lazyvim (nvim)    | headroom wrap    |
+        #   |                   |   opencode       |
+        #   +-------------------+------------------+
+        #   | terminal limpia   | headroom wrap    |
+        #   |                   |   aider (qwen3.6)|
+        #   +-------------------+------------------+
+        #   | pipes-rs | cava   |                  |
+        #   +-------------------+------------------+
+        #
+        # Determinismo: con follow_mouse=1 el warp del cursor a la ventana
+        # recién enfocada re-rotaba el foco y reordenaba el árbol (el mouse se
+        # movía "solo"); se apaga durante el montaje y se restaura al salir.
+        # Cada ventana se espera por su clase antes del siguiente paso (los
+        # sleeps mágicos del script viejo dejaban abrir la app tarde y el layout
+        # se desarmaba), y el único salto de vuelta a la raíz se hace por clase
+        # (focuswindow), no por dirección espacial.
+
+        hyprctl keyword input:follow_mouse 0
+        trap 'hyprctl keyword input:follow_mouse 1' EXIT
+
+        wait_window() {
+          local cls="$1"
+          for _ in $(seq 1 100); do
+            hyprctl -j clients 2>/dev/null | grep -q "\"class\": \"$cls\"" && return 0
+            sleep 0.1
+          done
+          notify-send -a hypr-dev -u critical "hypr-dev" "No apareció la ventana $cls" 2>/dev/null
+        }
+
+        W() {
+          local cls="$1"; shift
+          if [ "$#" -gt 0 ]; then
+            hyprctl dispatch exec "wezterm start --class $cls -- $*"
+          else
+            hyprctl dispatch exec "wezterm start --class $cls"
+          fi
+          wait_window "$cls"
+        }
+
+        W dev-lazyvim "zsh -ic nvim"
         hyprctl dispatch layoutmsg orientationright
-        sleep 0.1
-        hyprctl dispatch exec "wezterm start -- zsh -ic 'headroom wrap opencode'"
-        sleep 0.6
-        hyprctl dispatch movefocus r
-        sleep 0.1
+        W dev-opencode "zsh -ic 'headroom wrap opencode'"
         hyprctl dispatch layoutmsg orientationbottom
-        sleep 0.1
-        hyprctl dispatch exec "wezterm start -- zsh -ic 'headroom wrap aider --model ollama/qwen3.6:35b-a3b-mtp-q4_K_M'"
-        sleep 0.6
-        hyprctl dispatch movefocus l
-        sleep 0.1
+        W dev-aider "zsh -ic 'headroom wrap aider --model ollama/qwen3.6:35b-a3b-mtp-q4_K_M'"
+        hyprctl dispatch focuswindow class:dev-lazyvim
         hyprctl dispatch layoutmsg orientationbottom
-        sleep 0.1
-        hyprctl dispatch exec "wezterm start"
-        sleep 0.6
-        hyprctl dispatch movefocus r
-        sleep 0.1
-        hyprctl dispatch movefocus d
-        sleep 0.1
+        W dev-clean
         hyprctl dispatch layoutmsg orientationbottom
-        sleep 0.1
-        hyprctl dispatch exec "wezterm start -- zsh -ic 'pipes-rs'"
-        sleep 0.6
-        hyprctl dispatch movefocus r
-        sleep 0.1
+        W dev-pipes "zsh -ic 'pipes-rs'"
         hyprctl dispatch layoutmsg orientationright
-        sleep 0.1
-        hyprctl dispatch exec "wezterm start -- zsh -ic 'cava'"
+        W dev-cava "zsh -ic 'cava'"
       '';
     };
     "hypr/scripts/brightness.sh" = {
