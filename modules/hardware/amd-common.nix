@@ -105,6 +105,16 @@
         if [ -f "$d/pp_power_profile" ]; then
           echo 1 > "$d/pp_power_profile" 2>/dev/null || true
         fi
+        # Power limit al máximo que permite el firmware (desktop: 145W -> 162W).
+        # ponytail: sube consumo/temperatura/ruido; con el cap en 145W la RX 7600
+        # se queda sin cabeza en cargas GPU-bound. Solo escribe power1_cap_max, asi
+        # cada tarjeta (tambien la de la laptop) queda en su propio maximo seguro.
+        for h in "$d"/hwmon/hwmon*; do
+          if [ -f "$h/power1_cap_max" ]; then
+            cap=$(cat "$h/power1_cap_max" 2>/dev/null) || true
+            [ -n "$cap" ] && echo "$cap" > "$h/power1_cap" 2>/dev/null || true
+          fi
+        done
       done
       [ "$ok" = 1 ]
     '';
