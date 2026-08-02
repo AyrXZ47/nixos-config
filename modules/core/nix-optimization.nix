@@ -30,7 +30,9 @@
   nix.gc = {
     automatic = true;
     dates = "daily";
-    options = "--delete-older-than 3";
+    # "3d" obligatorio: "--delete-older-than 3" (sin unidad) rompe nix-gc
+    # ("invalid number of days specifier '3', expected something like '14d'")
+    options = "--delete-older-than 3d";
   };
   nix.optimise.automatic = true;
 
