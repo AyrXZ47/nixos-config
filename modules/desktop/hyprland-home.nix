@@ -206,8 +206,8 @@ in
 
         # Deslizarse entre escritorios como GNOME (SUPER+CTRL+ flechas); la
         # animacion "workspaces, slidevert" ya esta en animations.
-        "SUPER CTRL, left, workspace, -1"
-        "SUPER CTRL, right, workspace, +1"
+        "SUPER CTRL, up, workspace, -1"
+        "SUPER CTRL, down, workspace, +1"
 
         ", XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
         ", XF86AudioLowerVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"
