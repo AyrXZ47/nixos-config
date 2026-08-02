@@ -25,6 +25,9 @@
   modules.hardware.openrgb.enable = true;
   modules.hardware.mtp.enable = true;
 
+  # openrgb: binario en el PATH para crear/editar los perfiles RGB (la GUI).
+  environment.systemPackages = [ pkgs.openrgb ];
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
