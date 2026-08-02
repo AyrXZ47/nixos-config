@@ -27,6 +27,10 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
+  # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
+  # (sin esto el daemon corre pero no descubre/conecta dispositivos).
+  programs.kdeconnect.enable = true;
+
   time.timeZone = "America/Mexico_City";
 
   i18n.defaultLocale = "en_US.UTF-8";
