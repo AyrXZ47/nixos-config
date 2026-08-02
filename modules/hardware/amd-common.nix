@@ -35,7 +35,12 @@
     "quiet"
     "splash"
     "loglevel=3"
-    "nowatchdog"
+    # NOTA: "nowatchdog" está deliberadamente FUERA. Con el watchdog apagado un
+    # freeze de todo el sistema no deja NINGUNA traza en el journal (el congelado
+    # del 2026-08-02 de ~10 min fue invisible salvo por el gap). El NMI watchdog
+    # + hung-task son las únicas herramientas que dicen DÓNDE se quedó colgado
+    # (btrfs commit, NVMe, amdgpu, CPU). Si un boot requiere reintroducirlo,
+    # documentar por qué.
     "split_lock_detect=off"
     # CPU al tope: driver pstate activo, sin mitigaciones, sin deep C-states
     # (CPU nunca entra a estados que retrasen la respuesta). ponytail: quitar
@@ -67,6 +72,10 @@
   boot.kernel.sysctl = {
     "vm.dirty_background_ratio" = 5;
     "vm.dirty_ratio" = 10;
+    # Con el watchdog activo, volcar los backtraces de TODAS las CPUs al
+    # detectar un soft lockup: en un freeze multi-CPU el stack de la CPU
+    # colgada sola suele ser inútil (está en el spinlock).
+    "kernel.softlockup_all_cpu_backtrace" = 1;
   };
 
   # ZRAM
