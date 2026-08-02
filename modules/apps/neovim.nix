@@ -105,7 +105,7 @@ let
           dependencies = { "nvim-lua/plenary.nvim" },
           cmd = { "Ollama", "OllamaModel", "OllamaServe", "OllamaServeStop" },
           opts = {
-            model = "codegemma:7b",
+            model = "qwen3.6:35b-a3b-mtp-q4_K_M",
             serve = {
               on_start = true,
               command = "ollama",
