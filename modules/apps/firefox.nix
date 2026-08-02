@@ -129,8 +129,6 @@ let
         cat >> "$JS" << 'PREFS_EOF'
 // ---- managed by home-manager ----
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
-// En Linux el click medio pega texto por defecto y el autoscroll viene apagado
-user_pref("general.autoScroll", true);
 // ---- end managed ----
 PREFS_EOF
       done
