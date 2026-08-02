@@ -68,8 +68,10 @@
         [ -z "$bus" ] && [ -e "$conn/ddc" ] && bus=$(basename "$(readlink -f "$conn/ddc")")
         [ -z "$bus" ] && continue
         [ -w "/sys/bus/i2c/devices/$bus/new_device" ] || continue
-        # Si ya esta instanciado (reload), no hacer nada
-        ls /sys/bus/i2c/devices/$bus/0-0037 >/dev/null 2>&1 && continue
+        # Si ya esta instanciado (reload/switch), no hacer nada; el dir del
+        # device es "<n>-0037" (bus i2c-n), no "$bus/0-0037".
+        n="''${bus#i2c-}"
+        [ -e "/sys/bus/i2c/devices/$n-0037" ] && continue
         echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device"
       done
     '';
