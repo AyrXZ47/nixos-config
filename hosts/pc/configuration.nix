@@ -41,6 +41,32 @@
   boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   boot.kernelModules = [ "ddcci" "ddcci-backlight" ];
 
+  # ddcci: desde kernel 6.8 el auto-probe de displays esta roto (el driver no
+  # instancia el dispositivo por si solo), y sin el, /sys/class/backlight queda
+  # vacio -> wayle oculta el icono de brillo. Fix: instanciar manualmente el
+  # dispositivo 0x37 (DDC/CI) en el bus i2c del conector conectado.
+  systemd.services.ddcci-instantiate = {
+    description = "Instancia el dispositivo ddcci del monitor DDC/CI";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-udevd.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      for ddc in /sys/class/drm/card*-*-*/ddc; do
+        [ -e "$ddc" ] || continue
+        conn=$(dirname "$ddc")
+        [ "$(cat "$conn/status" 2>/dev/null)" = "connected" ] || continue
+        bus=$(basename "$(readlink -f "$ddc")")
+        [ -w "/sys/bus/i2c/devices/$bus/new_device" ] || continue
+        # Si ya esta instanciado (reload), no hacer nada
+        ls /sys/bus/i2c/devices/$bus/0-0037 >/dev/null 2>&1 && continue
+        echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device"
+      done
+    '';
+  };
+
   time.timeZone = "America/Mexico_City";
 
   i18n.defaultLocale = "en_US.UTF-8";
