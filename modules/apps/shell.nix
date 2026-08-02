@@ -51,9 +51,14 @@
 
       fastfetch
 
+      # 2.0: dos ventanas separadas tiled por Hyprland (con gaps), siempre btop
+      # a la izquierda y nvtop a la derecha. La ventana actual pasa a ser btop;
+      # la orientación se fija antes de spawnear nvtop, así el orden nunca
+      # depende de cuándo mapee la ventana nueva.
       netrunner() {
-        wezterm cli split-pane --right -- nvtop
-        btop
+        hyprctl dispatch layoutmsg orientationright
+        hyprctl dispatch exec "wezterm start --class nr-nvtop -- zsh -ic nvtop"
+        exec btop
       }
 
       dev() {
