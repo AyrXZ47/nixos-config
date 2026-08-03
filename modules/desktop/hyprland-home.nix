@@ -230,7 +230,7 @@ in
   };
 
   home.packages = with pkgs; [
-    swaylock-effects
+    hyprlock
     swayidle
     brightnessctl
     pavucontrol
@@ -334,17 +334,17 @@ hwdec=vaapi" ALL "$f"
         esac
       '';
     };
-    # Bloqueo: swaylock al instante y, en paralelo, el hook de OpenRGB aplica el
+    # Bloqueo: hyprlock al instante y, en paralelo, el hook de OpenRGB aplica el
     # perfil "apagado"; al desbloquear restaura el perfil normal. Los hooks solo
     # corren si el módulo openrgb está activo (el `[ -x ... ]` lo decide).
     "hypr/scripts/lock.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        swaylock &
-        _swaylock_pid=$!
+        hyprlock &
+        _hyprlock_pid=$!
         [ -x "$HOME/.local/bin/openrgb-lock-before" ] && "$HOME/.local/bin/openrgb-lock-before"
-        wait "$_swaylock_pid"
+        wait "$_hyprlock_pid"
         [ -x "$HOME/.local/bin/openrgb-lock-after" ] && "$HOME/.local/bin/openrgb-lock-after"
       '';
     };
@@ -361,6 +361,69 @@ hwdec=vaapi" ALL "$f"
           before-sleep "$HOME/.config/hypr/scripts/lock.sh"
       '';
     };
+
+    # hyprlock: la config debe existir o hyprlock sale con error y la sesión NO se
+    # bloquea. Autenticación: PAM (contraseña, vía security.pam.services.hyprlock)
+    # y huella nativa por fprintd (auth fingerprint:enabled), en paralelo.
+    # background path=screenshot usa screencopy de Hyprland; el color es el fallback
+    # (el bug de swaylock que daba pantalla blanca no aplica aquí).
+    "hypr/hyprlock.conf".text = ''
+      general {
+          hide_cursor = true
+          immediate_render = true
+      }
+
+      background {
+          path = screenshot
+          color = rgb(10, 10, 18)
+          blur_passes = 3
+          blur_size = 8
+          contrast = 0.9
+          brightness = 0.8
+      }
+
+      auth {
+          pam:enabled = true
+          fingerprint:enabled = true
+      }
+
+      input-field {
+          size = 360, 60
+          position = 0, -100
+          outline_thickness = 3
+          dots_size = 0.2
+          dots_spacing = 0.2
+          dots_center = true
+          outer_color = rgb(255, 0, 102)
+          inner_color = rgb(10, 10, 18)
+          font_color = rgb(212, 212, 240)
+          fade_on_empty = false
+          placeholder_text = Password
+          fail_text = $FAIL
+          check_color = rgb(0, 255, 136)
+          fail_color = rgb(255, 0, 64)
+          rounding = 8
+      }
+
+      label {
+          text = cmd[update:1000] echo "$(date +'%H:%M')"
+          color = rgb(255, 0, 102)
+          font_size = 44
+          font_family = "JetBrains Mono"
+          position = 0, 120
+          halign = center
+          valign = center
+      }
+
+      label {
+          text = $FPRINTPROMPT
+          color = rgb(136, 136, 170)
+          font_size = 13
+          position = 0, -170
+          halign = center
+          valign = center
+      }
+    '';
     "hypr/scripts/switch-layout.sh" = {
       executable = true;
       text = ''

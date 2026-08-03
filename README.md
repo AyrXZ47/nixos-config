@@ -58,7 +58,7 @@ flake.nix              # Entry point — hosts & shared modules
 - **wayle** — right-side cyberpunk bar: workspaces, clock, notifications, battery,
   clipboard, wallpaper, dashboard (lock/logout/reboot/poweroff).
 - **rofi** — drun/run launchers with a custom `cyberpunk.rasi` theme.
-- **swaylock / swayidle**, polkit-gnome agent, `cliphist` clipboard manager,
+- **hyprlock / swayidle**, polkit-gnome agent, `cliphist` clipboard manager,
   `hyprshot` screenshots, animated wallpapers via **mpvpaper** (looped mp4).
 
 ### Shell & Terminal

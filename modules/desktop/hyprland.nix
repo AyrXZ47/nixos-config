@@ -348,12 +348,17 @@ in
       (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       wayle
       wl-clipboard
-      swaylock-effects
+      hyprlock
       swayidle
       polkit_gnome
       brightnessctl
       ddcutil
     ];
+
+    # hyprlock hace la autenticación por contraseña vía PAM (servicio "hyprlock");
+    # sin este archivo cae a /etc/pam.d/su. La huella la gestiona hyprlock por
+    # fprintd de forma nativa, así que aquí solo va la pila pam_unix estándar.
+    security.pam.services.hyprlock = { };
 
     security.polkit.enable = true;
     # Montar/desbloquear discos (udisks2) sin pedir contraseña al usuario wheel
