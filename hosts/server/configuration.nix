@@ -6,6 +6,7 @@
     ../../modules/core/user.nix
     ../../modules/core/networking.nix
     ../../modules/hardware/amd-common.nix
+    ../../modules/hardware/fingerprint.nix
     ../../modules/apps/common-packages.nix
   ];
 
@@ -19,6 +20,8 @@
   time.timeZone = "America/Mexico_City";
 
   i18n.defaultLocale = "en_US.UTF-8";
+
+  modules.hardware.fingerprint.enable = true;
 
   # Preserva el comportamiento que heredaba de amd-common antes de mover el
   # tuneado de rendimiento a amd-desktop.nix (server sigue a tope).
