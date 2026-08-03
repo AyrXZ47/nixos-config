@@ -91,7 +91,9 @@ in
         },
 
         render = {
-          use_fp16 = 0,
+          -- fp16: la mitad de bandwidth de composicion; clave para sostener
+          -- 170Hz + blur. El 0 previo (fp32) no tenia comentario que lo justifique.
+          use_fp16 = 1,
         },
 
         dwindle = {
