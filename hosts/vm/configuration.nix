@@ -8,12 +8,15 @@
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
+    ../../modules/hardware/fingerprint.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
   ];
 
   modules.desktop.hyprland.enable = true;
+
+  modules.hardware.fingerprint.enable = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

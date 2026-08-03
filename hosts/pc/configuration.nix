@@ -9,6 +9,7 @@
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
     ../../modules/hardware/amd-desktop.nix
+    ../../modules/hardware/fingerprint.nix
     ../../modules/hardware/openrgb.nix
     ../../modules/hardware/mtp.nix
     ../../modules/apps/common-packages.nix
@@ -22,6 +23,7 @@
 
   modules.hardware.openrgb.enable = true;
   modules.hardware.mtp.enable = true;
+  modules.hardware.fingerprint.enable = true;
 
   # openrgb: binario en el PATH para crear/editar los perfiles RGB (la GUI).
   environment.systemPackages = [ pkgs.openrgb ];

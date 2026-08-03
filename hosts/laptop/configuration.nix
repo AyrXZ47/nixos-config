@@ -9,12 +9,15 @@
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
     ../../modules/hardware/amd-laptop.nix
+    ../../modules/hardware/fingerprint.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
   ];
 
   modules.desktop.hyprland.enable = true;
+
+  modules.hardware.fingerprint.enable = true;
 
   # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
   environment.systemPackages = [ pkgs.openrgb ];
