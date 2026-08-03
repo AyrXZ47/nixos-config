@@ -356,9 +356,13 @@ in
     ];
 
     # hyprlock hace la autenticación por contraseña vía PAM (servicio "hyprlock");
-    # sin este archivo cae a /etc/pam.d/su. La huella la gestiona hyprlock por
-    # fprintd de forma nativa, así que aquí solo va la pila pam_unix estándar.
-    security.pam.services.hyprlock = { };
+    # sin este archivo cae a /etc/pam.d/su. fprintAuth=false: la huella la
+    # gestiona hyprlock por fprintd de forma nativa (auth fingerprint:enabled),
+    # y el pam_fprintd duplicado peleaba el sensor con el fprintd nativo
+    # (Device was already claimed) y rompía la contraseña.
+    security.pam.services.hyprlock = {
+      fprintAuth = false;
+    };
 
     security.polkit.enable = true;
     # Montar/desbloquear discos (udisks2) sin pedir contraseña al usuario wheel

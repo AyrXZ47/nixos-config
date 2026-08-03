@@ -132,6 +132,33 @@ Fun: `cbonsai`.
   touchpad (clickfinger, natural scrolling), iio sensors, NetworkManager with iwd.
 - VM: virtio/VMware guest modules, QEMU guest agent, SPICE.
 
+### Fingerprint (`modules/hardware/fingerprint.nix`)
+Activa `services.fprintd` + libfprint (el sensor del laptop, Synaptics 06cb:00bd,
+lo cubre libfprint base; algunos Goodix/Validity necesitan driver TOD).
+
+Para **registrar huellas** cuando se te antoje (por sensor, por usuario):
+
+```bash
+sudo fprintd-enroll          # pide pass y registra el índice derecho
+sudo fprintd-enroll -f left-index-finger   # otro dedo: -f left-index-finger
+fprintd-list yovick          # ver huellas registradas
+fprintd-delete yovick        # borrar TODAS las huellas del usuario
+fprintd-verify               # probar sin PAM de por medio
+```
+
+Dónde funciona la huella:
+- **sudo** (terminal) — PAM `pam_fprintd`.
+- **hyprlock** (bloqueo de pantalla) — fprintd nativo de hyprlock, sin PAM.
+- **NO** en SDDM: no tiene UI de huella y `pam_fprintd` bloqueaba el login
+  esperando el dedo; el PAM de `login`/`sddm` está desactivado a propósito
+  (`fprintAuth = false`).
+- PC sin sensor: no pasa nada, todo sigue por contraseña (fprintd no encuentra
+  dispositivos y `pam_fprintd` falla rápido).
+
+> Nota: `security.pam.services.<name>.fprintAuth` **defaulta a `true`** cuando
+> `services.fprintd.enable` está activo, así que todos los servicios PAM la
+> heredan salvo que se apague explícitamente.
+
 ### Boot
 - **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (`ironman`
   theme from `adi1090x-plymouth-themes`); quiet boot.
