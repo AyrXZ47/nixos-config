@@ -11,11 +11,11 @@ in
     # lo cubre libfprint base; solo algunos Goodix/Validity necesitan driver TOD.
     services.fprintd.enable = true;
 
-    # Huella como factor de autenticación en: login (tty), SDDM (sesión gráfica),
-    # sudo (auth con permiso) y swaylock (desbloqueo).
+    # Huella como factor de autenticación en: login (tty) y sudo (auth con
+    # permiso). El desbloqueo gráfico NO va por PAM: hyprlock integra fprintd de
+    # forma nativa (auth fingerprint:enabled). SDDM no se toca: sin UI de huella,
+    # el pam_fprintd bloqueaba el login esperando el dedo.
     security.pam.services.login.fprintAuth = true;
-    security.pam.services.sddm.fprintAuth = true;
     security.pam.services.sudo.fprintAuth = true;
-    security.pam.services.swaylock.fprintAuth = true;
   };
 }
