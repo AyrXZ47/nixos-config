@@ -58,10 +58,11 @@ in
 
         decoration = {
           rounding = 12,
-          -- Vidrio esmerilado: más transparencia y blur más notorio. Steam y wezterm
-          -- quedan exentos via reglas (opacity "N override" fuerza opacidad absoluta).
-          active_opacity = 0.65,
-          inactive_opacity = 0.55,
+          -- Vidrio esmerilado con opacidad alta: blur intacto pero el contenido
+          -- (texto/video) queda legible. Steam, wezterm y reproductores quedan
+          -- exentos via reglas (opacity "N override" fuerza opacidad absoluta).
+          active_opacity = 0.9,
+          inactive_opacity = 0.8,
           blur = {
             enabled = true,
             size = 16,
@@ -131,6 +132,11 @@ in
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "gamescope-solid", match = { class = "gamescope" }, no_blur = true, opacity = "1 override" })
+      -- Reproductores de video: sólidos (no se lava el contenido) y sin blur para que
+      -- el compositor no re-borronee el fondo en cada frame del video.
+      hl.window_rule({ name = "mpv-solid", match = { class = "mpv" }, no_blur = true, opacity = "1 override" })
+      hl.window_rule({ name = "celluloid-solid", match = { class = "io.github.celluloid_player.Celluloid" }, no_blur = true, opacity = "1 override" })
+      hl.window_rule({ name = "vlc-solid", match = { class = "vlc" }, no_blur = true, opacity = "1 override" })
 
       -----------------------
       ---- LAYER RULES ------
