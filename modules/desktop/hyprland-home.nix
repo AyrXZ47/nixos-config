@@ -34,6 +34,9 @@ in
       ------------------
       hl.on("hyprland.start", function()
         hl.exec_cmd("wayle shell")
+        -- qpwgraph en segundo plano: QPA offscreen -> sin ventana; re-aplica el
+        -- patchbay (rutas de audio) guardado en ~/.config/rncbc.org/qpwgraph.conf.
+        hl.exec_cmd("env QT_QPA_PLATFORM=offscreen qpwgraph")
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-set.sh")
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
