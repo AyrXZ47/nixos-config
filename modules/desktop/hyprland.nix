@@ -388,15 +388,5 @@ in
     # nunca arrancaba (graphical-session.target inactivo con systemd.enable=false).
     # Nota: dos agentes polkit a la vez rompen los diálogos de autenticación.
 
-    systemd.user.services.swaylock = {
-      description = "Swaylock - session lock";
-      serviceConfig = {
-        Type = "simple";
-        # Wrapper: bloquea al instante y, en paralelo, aplica el perfil RGB de
-        # "apagado" (hook de OpenRGB); al desbloquear restaura el normal.
-        ExecStart = "/home/yovick/.config/hypr/scripts/lock.sh";
-      };
-      wantedBy = [ "lock.target" ];
-    };
   };
 }

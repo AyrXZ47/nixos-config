@@ -38,6 +38,7 @@ in
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
         hl.exec_cmd("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1")
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
         hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")
       end)
 
@@ -343,6 +344,19 @@ hwdec=vaapi" ALL "$f"
         [ -x "$HOME/.local/bin/openrgb-lock-before" ] && "$HOME/.local/bin/openrgb-lock-before"
         wait "$_swaylock_pid"
         [ -x "$HOME/.local/bin/openrgb-lock-after" ] && "$HOME/.local/bin/openrgb-lock-after"
+      '';
+    };
+    # swayidle escucha las señales de logind: loginctl lock-session (SUPER+L y el
+    # dropdown de wayle) SOLO emite la señal D-Bus Lock, nadie la procesaba y el
+    # systemd.user.services.swaylock (wantedBy lock.target) jamás arrancaba.
+    # Aquí se ejecuta lock.sh al recibir Lock y antes de dormir.
+    "hypr/scripts/idle.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        exec swayidle -w \
+          lock "$HOME/.config/hypr/scripts/lock.sh" \
+          before-sleep "$HOME/.config/hypr/scripts/lock.sh"
       '';
     };
     "hypr/scripts/switch-layout.sh" = {
