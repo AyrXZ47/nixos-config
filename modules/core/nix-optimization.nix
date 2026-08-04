@@ -36,6 +36,21 @@
   };
   nix.optimise.automatic = true;
 
+  # ── Logs: journald acotado a 100M ─────────────────────────────────────────
+  # Sustituye el journalctl --vacuum-size de Fedora: se limita una vez y nunca
+  # más hay que vaciar a mano (equivalente al --vacuum-size=100M mensual).
+  services.journald.extraConfig = "SystemMaxUse=100M";
+
+  # ── Actualización automática semanal ──────────────────────────────────────
+  # Rebuild semanal del flake YA CONFIRMADO. No corre `nix flake update`: para
+  # avanzar los inputs bloqueados hay que correrlo a mano y commitear. Si el
+  # repo estuviera sucio (WIP sin commit), el rebuild falla esa semana y
+  # reintenta a la próxima.
+  system.autoUpgrade = {
+    enable = true;
+    flake = "/home/yovick/workspaces/nixos-config";
+  };
+
   # ── Boot: sin menú de generaciones y solo 3 en el bootloader ─────────────
   # timeout = 0 → systemd-boot arranca el default directo (sin espera ni menú);
   # configurationLimit = 3 → el bootloader conserva solo 3 entradas de generación.

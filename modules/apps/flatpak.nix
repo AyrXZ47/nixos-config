@@ -5,6 +5,26 @@
 
   environment.systemPackages = [ pkgs.flatpak ];
 
+  # Actualización automática semanal de flatpaks (en la sesión de usuario,
+  # porque los flatpaks de este setup son --user). Corre solo cuando estás
+  # logueado; Persistent recupera el update perdido en el siguiente arranque.
+  systemd.user.services.flatpak-update = {
+    description = "Actualiza flatpaks";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.flatpak}/bin/flatpak update -y --noninteractive";
+    };
+  };
+
+  systemd.user.timers.flatpak-update = {
+    description = "Actualización semanal de flatpaks";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "weekly";
+      Persistent = true;
+    };
+  };
+
   systemd.user.services.flatpak-flathub = {
     description = "Add Flathub remote";
     wantedBy = [ "default.target" ];
