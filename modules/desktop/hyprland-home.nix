@@ -356,15 +356,14 @@ hwdec=vaapi" ALL "$f"
     # swayidle escucha las señales de logind: loginctl lock-session (SUPER+L y el
     # dropdown de wayle) SOLO emite la señal D-Bus Lock, nadie la procesaba y el
     # systemd.user.services.swaylock (wantedBy lock.target) jamás arrancaba.
-    # Aquí se ejecuta lock.sh al recibir Lock, tras 10 min de inactividad y antes
-    # de dormir.
+    # Aquí se ejecuta lock.sh al recibir Lock y antes de dormir; el bloqueo por
+    # inactividad (timeout) se quitó: el usuario prefiere bloquear solo manual.
     "hypr/scripts/idle.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
         exec swayidle -w \
           lock "$HOME/.config/hypr/scripts/lock.sh" \
-          timeout 600 "$HOME/.config/hypr/scripts/lock.sh" \
           before-sleep "$HOME/.config/hypr/scripts/lock.sh"
       '';
     };
