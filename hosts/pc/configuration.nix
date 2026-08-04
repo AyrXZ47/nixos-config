@@ -31,6 +31,9 @@
   # openrgb: binario en el PATH para crear/editar los perfiles RGB (la GUI).
   environment.systemPackages = [ pkgs.openrgb ];
 
+  # fwupd: servicio para actualizar firmware (BIOS/SSD). Uso: `fwupdmgr refresh && fwupdmgr update`.
+  services.fwupd.enable = true;
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
