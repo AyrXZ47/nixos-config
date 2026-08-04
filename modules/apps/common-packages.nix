@@ -31,6 +31,7 @@ in
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
+    brave-origin
 
     # Office & Productivity
     libreoffice-fresh
