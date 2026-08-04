@@ -82,8 +82,11 @@
         dev="/sys/bus/i2c/devices/$n-0037"
         for i in $(seq 1 15); do
           [ -L "$dev/driver" ] && break
-          [ -e "$dev" ] && echo 0x37 > "$bus/delete_device" 2>/dev/null || true
-          echo ddcci 0x37 > "$bus/new_device" 2>/dev/null || true
+          # Ojo: el guard y los writes usan la MISMA ruta absoluta. Antes los
+          # writes iban a "$bus/new_device" (relativo al cwd del servicio, /),
+          # fallaban con ENOENT y ddcci nunca se instanciaba.
+          [ -e "$dev" ] && echo 0x37 > "/sys/bus/i2c/devices/$bus/delete_device" 2>/dev/null || true
+          echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device" 2>/dev/null || true
           sleep 2
         done
       done
