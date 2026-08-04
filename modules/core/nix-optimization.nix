@@ -36,6 +36,29 @@
   };
   nix.optimise.automatic = true;
 
+  # ── Límite duro de generaciones: máx 3 por CONTEo, no por edad ────────────
+  # nix.gc es por EDAD: si haces 20 rebuilds en 3 días conserva 20 (pasó con
+  # 42 generaciones durante la puesta a punto). Este servicio semanal borra
+  # las generaciones más viejas hasta dejar exactamente las 3 más nuevas del
+  # perfil de sistema y luego recoge la basura de la store.
+  systemd.services.trim-generations = {
+    description = "Deja solo las 3 generaciones mas recientes";
+    serviceConfig = { Type = "oneshot"; };
+    script = ''
+      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +3
+      ${pkgs.nix}/bin/nix-collect-garbage -d
+    '';
+  };
+
+  systemd.timers.trim-generations = {
+    description = "Limpieza semanal de generaciones";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "weekly";
+      Persistent = true;
+    };
+  };
+
   # ── Logs: journald acotado a 100M ─────────────────────────────────────────
   # Sustituye el journalctl --vacuum-size de Fedora: se limita una vez y nunca
   # más hay que vaciar a mano (equivalente al --vacuum-size=100M mensual).
