@@ -15,6 +15,11 @@ let
   };
 in
 {
+  imports = [ ./actual.nix ];
+
+  # Actual Budget desktop app (todos los hosts; firefox sigue siendo el browser default)
+  modules.apps.actual.enable = true;
+
   services.ollama.enable = true;
 
   # Contexto 16k: con el default de 4096, las sesiones largas de aider llenaban el

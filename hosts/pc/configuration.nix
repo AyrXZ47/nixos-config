@@ -15,10 +15,7 @@
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
-    ../../modules/apps/actual.nix
   ];
-
-  modules.apps.actual.enable = true;
 
   modules.desktop.hyprland = {
     enable = true;
