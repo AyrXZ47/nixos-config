@@ -242,7 +242,6 @@ in
     libnotify
     wl-clipboard
     hyprshot
-    swayimg
     imv
     tree-sitter
     cliphist
