@@ -36,6 +36,16 @@
   };
   nix.optimise.automatic = true;
 
+  # La dedup del store (nix-optimise.timer 03:45 + Persistent=true) hace
+  # catch-up en cada boot matutino (la maquina esta apagada a esa hora) y lee
+  # 1-3GB del store justo cuando se abren las apps. Con io/CPU idle no congela
+  # el arranque de aplicaciones; la dedup sigue corriendo en los huecos.
+  systemd.services.nix-optimise.serviceConfig = {
+    Nice = 19;
+    IOSchedulingClass = "idle";
+    CPUSchedulingPolicy = "idle";
+  };
+
   # ── Límite duro de generaciones: máx 3 por CONTEo, no por edad ────────────
   # nix.gc es por EDAD: si haces 20 rebuilds en 3 días conserva 20 (pasó con
   # 42 generaciones durante la puesta a punto). Este servicio semanal borra
@@ -73,6 +83,16 @@
     enable = true;
     flake = "/home/yovick/workspaces/nixos-config";
   };
+
+  # nixos-upgrade corre como root; libgit2 rechaza el repo del flake por no
+  # ser de root ("not owned by current user") y el autoUpgrade semanal fallaba
+  # en cada boot (29s quemados + 381MB escritos, y con Persistent=true
+  # reintentaba en el siguiente arranque). El safe.directory del home de yovick
+  # no le aplica a root, por eso va en /etc/gitconfig.
+  environment.etc."gitconfig".text = ''
+    [safe]
+      directory = /home/yovick/workspaces/nixos-config
+  '';
 
   # ── Boot: sin menú de generaciones y solo 3 en el bootloader ─────────────
   # timeout = 0 → systemd-boot arranca el default directo (sin espera ni menú);
