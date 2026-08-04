@@ -157,6 +157,8 @@ in
       hl.bind("SUPER + Delete", hl.dsp.window.close())
       hl.bind("SUPER + M", hl.dsp.exit())
       hl.bind("SUPER + V", hl.dsp.window.float({ action = "toggle" }))
+      -- Pin = always on top + visible en todos los workspaces (requiere ventana flotante).
+      hl.bind("SUPER + T", hl.dsp.window.pin({ action = "toggle" }))
       hl.bind("SUPER + R", hl.dsp.exec_cmd("rofi -show run"))
       hl.bind("SUPER + J", hl.dsp.layout("togglesplit"))
 
