@@ -236,7 +236,7 @@ in
 
   home.packages = with pkgs; [
     hyprlock
-    swayidle
+    hypridle
     brightnessctl
     pavucontrol
     libnotify
@@ -353,26 +353,29 @@ hwdec=vaapi" ALL "$f"
         [ -x "$HOME/.local/bin/openrgb-lock-after" ] && "$HOME/.local/bin/openrgb-lock-after"
       '';
     };
-    # swayidle escucha las señales de logind: loginctl lock-session (SUPER+L y el
-    # dropdown de wayle) SOLO emite la señal D-Bus Lock, nadie la procesaba y el
-    # systemd.user.services.swaylock (wantedBy lock.target) jamás arrancaba.
-    # Aquí se ejecuta lock.sh al recibir Lock y antes de dormir; el bloqueo por
-    # inactividad (timeout) se quitó: el usuario prefiere bloquear solo manual.
+    # hypridle (daemon de idle nativo de Hyprland) escucha las señales de logind:
+    # loginctl lock-session (SUPER+L y el dropdown de wayle) emite la señal D-Bus
+    # Lock y hypridle corre lock_cmd (lock.sh → hyprlock). No hay listeners de
+    # inactividad: solo se bloquea manual o antes de dormir.
     "hypr/scripts/idle.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        exec swayidle -w \
-          lock "$HOME/.config/hypr/scripts/lock.sh" \
-          before-sleep "$HOME/.config/hypr/scripts/lock.sh"
+        exec hypridle
       '';
     };
+    "hypr/hypridle.conf".text = ''
+      general {
+          lock_cmd = pidof hyprlock || ${config.xdg.configHome}/hypr/scripts/lock.sh
+          before_sleep_cmd = loginctl lock-session
+      }
+    '';
 
     # hyprlock: la config debe existir o hyprlock sale con error y la sesión NO se
     # bloquea. Autenticación: PAM (contraseña, vía security.pam.services.hyprlock)
     # y huella nativa por fprintd (auth fingerprint:enabled), en paralelo.
-    # background path=screenshot usa screencopy de Hyprland; el color es el fallback
-    # (el bug de swaylock que daba pantalla blanca no aplica aquí).
+    # background path=screenshot usa screencopy de Hyprland; el color es solo el
+    # fallback (algunos lockers daban pantalla blanca con screenshot; no aplica).
     "hypr/hyprlock.conf".text = ''
       general {
           hide_cursor = true

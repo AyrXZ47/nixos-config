@@ -349,7 +349,7 @@ in
       wayle
       wl-clipboard
       hyprlock
-      swayidle
+      hypridle
       polkit_gnome
       brightnessctl
       ddcutil
