@@ -35,11 +35,16 @@ Not lazy about: understanding the problem (read it fully and trace the real flow
 
 Flake-driven NixOS config (`nixos-unstable`, pinned in `flake.lock`) for 4 hosts: `pc`, `laptop`, `server`, `vm`. All `x86_64-linux`, single user `yovick` via Home Manager.
 
+`README.md` is the canonical detailed doc (keybindings, fingerprint workflow, headroom update flow, host tuning, adding a host) — read it before touching those areas.
+
 ## Wiring (not obvious from filenames)
 
 - `flake.nix` `mkHost` gives EVERY host: home-manager (user `yovick` + `home/default.nix`) + `modules/core/nix-optimization.nix` + its own `hosts/<name>/configuration.nix`. Hosts differ only in which modules they import.
-- System modules live in `modules/{core,apps,desktop,hardware,theming}`; `home/default.nix` imports the home-side apps (`modules/apps/{shell,wezterm,neovim,fastfetch,git,headroom,mpd,firefox}.nix`).
-- Convention: modules declare `options.modules.<category>.<name>.enable` (e.g. `modules.desktop.hyprland` in `modules/desktop/hyprland.nix`) and hosts flip it (`modules.desktop.hyprland.enable = true`). New feature = new file under `modules/`, imported by the hosts that want it, not added to `flake.nix`.
+- Two module flavors under `modules/{core,apps,desktop,hardware,theming}`:
+  - `modules/hardware/*` (fingerprint, mtp, openrgb) and `modules/desktop/hyprland.nix` declare `options.modules.<category>.<name>.enable`; hosts flip it (`modules.desktop.hyprland.enable = true`).
+  - Everything else (`core/*`, `theming/*`, the apps below) is a plain import with no enable flag.
+- `modules/apps/` is split: home-side files imported by `home/default.nix` (shell, wezterm, neovim, fastfetch, git, headroom, mpd, firefox) vs system-side files imported by host configs (common-packages, flatpak, gaming).
+- New feature = new file under `modules/`, imported by the hosts that want it (or `home/default.nix` for home-side apps), NOT added to `flake.nix`. Match the category's existing pattern (enable-option vs plain import).
 - `hosts/*/hardware-configuration.nix` is GENERATED (`nixos-generate-config`, disk-by-label on pc/laptop/server). Never hand-edit; regenerate. `./bootstrap.sh <host>` regenerates, rebuilds, and commits it.
 
 ## Commands
@@ -62,7 +67,8 @@ No tests, no CI, no formatter/linter config. `nix flake check` is the only verif
 ## Gotchas
 
 - `yovick` is hardcoded in `flake.nix`, `home/default.nix`, and `modules/core/user.nix` — the latter holds `initialPassword` (applies only at first boot). Renaming the user touches all three.
-- Nothing secret is ever committed; `result*`, `.direnv`, `*.iso`, `*.qcow2` are gitignored — never commit build results.
+- Fingerprint PAM trap: with `services.fprintd.enable`, `security.pam.services.<name>.fprintAuth` **defaults to true** for every PAM service. It's deliberately off for `login`/`sddm` (SDDM has no fingerprint UI and it blocked login waiting for a finger); fingerprint works only in `sudo` + `hyprlock`. See `modules/hardware/fingerprint.nix` + README.
+- Nothing secret is ever committed; `result*`, `.direnv`, `*.iso`, `*.qcow2`, `.aider*` are gitignored — never commit build results.
 - Comments and commit messages are written in Spanish, conventional-commit style (`feat(hyprland):`, `fix(deploy):`, `chore(host):`). Match that for commits.
 
 <!-- headroom:rtk-instructions -->
