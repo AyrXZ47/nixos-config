@@ -10,6 +10,7 @@
     ../modules/apps/headroom.nix
     ../modules/apps/mpd.nix
     ../modules/apps/firefox.nix
+    ../modules/apps/cava.nix
   ];
 
   home.username = "yovick";
