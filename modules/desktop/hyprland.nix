@@ -95,7 +95,7 @@ in
         monitor = "*"
         show = true
         left = [
-          { name = "top", modules = ["notifications", "clock"] },
+          { name = "top", modules = ["notifications", "clock", "cava"] },
         ]
         center = ["hyprland-workspaces"]
         right = [
@@ -106,7 +106,6 @@ in
             "bluetooth",
             "battery",
             "volume",
-            "cava",
             "brightness",
             "dashboard",
           ] },
@@ -252,16 +251,17 @@ in
         icon-bg-color = "transparent"
         button-bg-color = "bg-elevated"
 
-        # Pill compacto de visualizador: barras en el acento cyberpunk,
-        # mismas medidas/redondeo que los demas pills del grupo.
+        # Pill compacto de visualizador flotando entre la hora y workspaces
+        # (grupo top, tras clock): barras delgadas en el acento cyberpunk,
+        # mismo redondeo/fondo que los demas pills.
         [modules.cava]
-        bars = 16
+        bars = 22
         stereo = true
         input = "pipe-wire"
         style = "bars"
         color = "accent"
-        bar-width = 3
-        bar-gap = 2
+        bar-width = 2
+        bar-gap = 1
         internal-padding = 0.4
         border-show = false
         button-bg-color = "bg-elevated"
