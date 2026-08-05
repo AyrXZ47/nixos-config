@@ -49,29 +49,20 @@
     "mitigations=off"
     # GPU: desbloquea todo el rango de clocks/OC/fan vía /sys (no cambia nada solo)
     "amdgpu.ppfeaturemask=0xffffffff"
-    # NVMe sin DRAM (XPG SPECTRIX S20G): APST apagado. Con APST activo el controlador
-    # entra a bajo consumo y, bajo una ráfaga de escritura sostenida (copia/extracción
-    # grande), dejaba de completar I/O en silencio (sin timeouts ni errores en journal);
-    # btrfs se quedaba esperando el commit de transacción y el sistema entero se
-    # congelaba. default_ps_max_latency_us=0 desactiva todos los estados de bajo consumo.
-    "nvme_core.default_ps_max_latency_us=0"
+    # NVMe sin DRAM: el APST apagado (nvme_core.default_ps_max_latency_us=0) y el
+    # writeback corto (vm.dirty_*) viven en nvme-dramless.nix, que importa SOLO la
+    # laptop (la S20G pasa alli tras el swap pc<->laptop). La pc tiene disco con DRAM.
     # ASPM apagado en todo el PCIe: con APST ya off, el freeze (btrfs endio-write en
     # wait_current_trans, journald en watchdog timeout) volvió a ocurrir el 2026-08-01
-    # con escritura sostenida. En estos ADATA DRAM-less la gestión de enlace PCIe
-    # (ASPM L0s/L1) también produce stalls de I/O silenciosos en AMD.
+    # con escritura sostenida. En estos ADATA DRAM-less (SATA, siguen en la pc) la
+    # gestión de enlace PCIe (ASPM L0s/L1) también produce stalls de I/O silenciosos en AMD.
     "pcie_aspm=off"
   ];
 
-  # Writeback pronto y en tandas pequeñas: el kernel vacía la page cache de forma
-  # continua en vez de acumular ~12G sucios (dirty_ratio 20) y volcarlos de golpe,
-  # lo que satura el controlador del NVMe sin DRAM durante copias/extracciones
-  # grandes. 5/10 mantiene las escrituras en ráfagas cortas y controlables.
+  # Con el watchdog activo, volcar los backtraces de TODAS las CPUs al
+  # detectar un soft lockup: en un freeze multi-CPU el stack de la CPU
+  # colgada sola suele ser inútil (está en el spinlock).
   boot.kernel.sysctl = {
-    "vm.dirty_background_ratio" = 5;
-    "vm.dirty_ratio" = 10;
-    # Con el watchdog activo, volcar los backtraces de TODAS las CPUs al
-    # detectar un soft lockup: en un freeze multi-CPU el stack de la CPU
-    # colgada sola suele ser inútil (está en el spinlock).
     "kernel.softlockup_all_cpu_backtrace" = 1;
   };
 
