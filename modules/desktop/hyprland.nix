@@ -256,7 +256,7 @@ in
         # (grupo top, tras clock): barras delgadas en el acento cyberpunk,
         # mismo redondeo/fondo que los demas pills.
         [modules.cava]
-        bars = 22
+        bars = 66
         stereo = true
         input = "pipe-wire"
         style = "peaks"
