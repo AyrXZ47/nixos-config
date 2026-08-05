@@ -95,7 +95,8 @@ in
         monitor = "*"
         show = true
         left = [
-          { name = "top", modules = ["notifications", "clock", "cava"] },
+          { name = "top", modules = ["notifications", "clock"] },
+          { name = "cava", modules = ["cava"] },
         ]
         center = ["hyprland-workspaces"]
         right = [
