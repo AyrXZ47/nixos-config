@@ -17,6 +17,11 @@
   powerManagement.cpuFreqGovernor = "powersave";
   services.power-profiles-daemon.enable = lib.mkForce false;
 
+  # Firmware redistribuible (linux-firmware): sin esto el USB3 Renesas del
+  # ThinkPad cae a ROM y el puerto trabaja a USB 2.0 ("failed to load firmware
+  # renesas_usb_fw.mem"); tambien habilita otros blobs (wifi/BT).
+  hardware.enableRedistributableFirmware = true;
+
   # ThinkPad specific
   services.libinput = {
     enable = true;
