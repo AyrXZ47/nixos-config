@@ -31,8 +31,8 @@ in
     # y Hyprland renderiza desde GTT (ram del sistema) -> la UI se arrastra.
     # OLLAMA_GPU_OVERHEAD va en BYTES (envconfig/config.go): el valor previo de
     # 1024 era 1KiB, un no-op -> por eso el desktop seguía congelándose.
-    # 2147483648 = 2GiB reservados; el resto va a IA local.
-    OLLAMA_GPU_OVERHEAD = "2147483648";
+    # 1073741824 = 1GiB reservados; el resto va a IA local.
+    OLLAMA_GPU_OVERHEAD = "1073741824";
   };
 
   environment.systemPackages = with pkgs; [
