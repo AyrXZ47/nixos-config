@@ -259,7 +259,8 @@ in
         bars = 22
         stereo = true
         input = "pipe-wire"
-        style = "wave"
+        style = "peaks"
+        direction = "mirror"
         color = "accent"
         bar-width = 2
         bar-gap = 1
