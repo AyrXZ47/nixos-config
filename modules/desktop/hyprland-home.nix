@@ -34,9 +34,10 @@ in
       ------------------
       hl.on("hyprland.start", function()
         hl.exec_cmd("wayle shell")
-        -- qpwgraph en segundo plano: QPA offscreen -> sin ventana; re-aplica el
-        -- patchbay (rutas de audio) guardado en ~/.config/rncbc.org/qpwgraph.conf.
-        hl.exec_cmd("env QT_QPA_PLATFORM=offscreen qpwgraph")
+        -- qpwgraph: arranca en el workspace special (scratchpad oculto, la regla
+        -- de ventana qpwgraph-bg lo manda ahi) y aplica el patchbay de rutas de
+        -- audio guardado en ~/.config/rncbc.org/audio.qpwgraph. SUPER+Q lo trae.
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/audio-routing.sh")
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-set.sh")
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
@@ -129,6 +130,9 @@ in
       -----------------------
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
+      -- qpwgraph: scratchpad oculto en segundo plano (sin robar foco); se abre
+      -- con SUPER+Q para editar las rutas de audio. class = app_id nativo Wayland.
+      hl.window_rule({ name = "qpwgraph-bg", match = { class = "org.rncbc.qpwgraph" }, workspace = "special:qpwgraph" })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
       hl.window_rule({ name = "imv-float", match = { class = "imv" }, float = true })
       -- wezterm: transparencia propia (window_background_opacity) sin blur del compositor.
@@ -161,6 +165,9 @@ in
       hl.bind("SUPER + T", hl.dsp.window.pin({ action = "toggle" }))
       hl.bind("SUPER + R", hl.dsp.exec_cmd("rofi -show run"))
       hl.bind("SUPER + J", hl.dsp.layout("togglesplit"))
+
+      -- qpwgraph: toggle del scratchpad donde corre en segundo plano.
+      hl.bind("SUPER + Q", hl.dsp.workspace.toggle_special("qpwgraph"))
 
       hl.bind("SUPER + left", hl.dsp.focus({ direction = "left" }))
       hl.bind("SUPER + right", hl.dsp.focus({ direction = "right" }))
@@ -316,6 +323,20 @@ hwdec=vaapi" ALL "$f"
       text = ''
         #!/usr/bin/env bash
         exec ~/.config/hypr/scripts/wallpaper-set.sh
+      '';
+    };
+    # qpwgraph: la regla de ventana qpwgraph-bg lo manda al scratchpad special
+    # (oculto). Aqui solo se decide si aplicar el patchbay guardado; sin archivo
+    # qpwgraph arranca con grafo vacio. El patchbay se crea/edita desde la GUI
+    # (SUPER+Q) y se guarda con File > Save Patchbay As... en
+    # ~/.config/rncbc.org/audio.qpwgraph (o el nombre que se ponga aqui).
+    "hypr/scripts/audio-routing.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        patchbay="$HOME/.config/rncbc.org/audio.qpwgraph"
+        [ -f "$patchbay" ] && exec qpwgraph -a "$patchbay"
+        exec qpwgraph
       '';
     };
     "hypr/scripts/wallpaper-menu.sh" = {
