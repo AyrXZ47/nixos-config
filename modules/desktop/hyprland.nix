@@ -101,14 +101,16 @@ in
         center = ["hyprland-workspaces"]
         right = [
           { name = "bottom", modules = [
-            "custom-wallpaper",
-            "custom-clipboard",
+            "dashboard",
             "network",
             "bluetooth",
             "battery",
-            "volume",
             "brightness",
-            "dashboard",
+            "volume",
+          ] },
+          { name = "system", modules = [
+            "custom-clipboard",
+            "custom-wallpaper",
           ] },
         ]
 
