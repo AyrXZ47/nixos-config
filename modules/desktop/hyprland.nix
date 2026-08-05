@@ -106,6 +106,7 @@ in
             "bluetooth",
             "battery",
             "volume",
+            "cava",
             "brightness",
             "dashboard",
           ] },
@@ -249,6 +250,20 @@ in
         label-show = false
         icon-color = "#ff0066"
         icon-bg-color = "transparent"
+        button-bg-color = "bg-elevated"
+
+        # Pill compacto de visualizador: barras en el acento cyberpunk,
+        # mismas medidas/redondeo que los demas pills del grupo.
+        [modules.cava]
+        bars = 16
+        stereo = true
+        input = "pipe-wire"
+        style = "bars"
+        color = "accent"
+        bar-width = 3
+        bar-gap = 2
+        internal-padding = 0.4
+        border-show = false
         button-bg-color = "bg-elevated"
 
         # Brillo via el modulo nativo de wayle: lee /sys/class/backlight.
