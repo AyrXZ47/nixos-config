@@ -3,7 +3,7 @@
 let
   cfg = config.modules.hardware.openrgb;
   openrgb = "${pkgs.openrgb}/bin/openrgb";
-  profileBoot = "RGBRules"; # perfil de sesión activa (al arranque)
+  profileBoot = "RGBRules1"; # perfil de sesión activa (al arranque)
   profileOff = "RGBRules2"; # perfil al bloquear / suspender / apagar
 in
 {
