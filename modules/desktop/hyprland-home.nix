@@ -34,11 +34,12 @@ in
       ------------------
       hl.on("hyprland.start", function()
         hl.exec_cmd("wayle shell")
-        -- qpwgraph como demonio: arranca minimizado (-m) y aplica el patchbay
-        -- de rutas guardado en ~/.config/rncbc.org/audio.qpwgraph. Volver a
-        -- lanzar qpwgraph (rofi, terminal) muestra la interfaz del mismo proceso
-        -- (instancia unica nativa) para editar rutas.
-        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/audio-routing.sh")
+        -- qpwgraph demonio: minimizado en el tray y aplicando el patchbay
+        -- guardado. Ambas cosas son ajustes nativos de qpwgraph: "Start minimized
+        -- to system tray" (Options) y guardar el patchbay activado una sola vez
+        -- (File > Save Patchbay As); al arrancar restaura el último archivo. Para
+        -- editar rutas se lanza qpwgraph de nuevo (instancia unica -> muestra la UI).
+        hl.exec_cmd("qpwgraph")
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-set.sh")
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
@@ -318,20 +319,6 @@ hwdec=vaapi" ALL "$f"
       text = ''
         #!/usr/bin/env bash
         exec ~/.config/hypr/scripts/wallpaper-set.sh
-      '';
-    };
-    # qpwgraph demonio: arranca minimizado (sin ventana ni robo de foco) y con
-    # -a aplica el patchbay guardado. Sin archivo arranca igual pero vacio. Las
-    # rutas se editan lanzando qpwgraph otra vez (instancia unica: reutiliza el
-    # proceso y muestra la UI) y se guardan con File > Save Patchbay As... en
-    # ~/.config/rncbc.org/audio.qpwgraph (o el nombre que se ponga aqui).
-    "hypr/scripts/audio-routing.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        patchbay="$HOME/.config/rncbc.org/audio.qpwgraph"
-        [ -f "$patchbay" ] && exec qpwgraph -m -a "$patchbay"
-        exec qpwgraph -m
       '';
     };
     "hypr/scripts/wallpaper-menu.sh" = {
