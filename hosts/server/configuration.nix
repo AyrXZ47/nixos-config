@@ -8,6 +8,7 @@
     ../../modules/hardware/amd-common.nix
     ../../modules/hardware/fingerprint.nix
     ../../modules/apps/common-packages.nix
+    ../../modules/apps/rust-dev.nix
   ];
 
   boot.loader.systemd-boot.enable = true;

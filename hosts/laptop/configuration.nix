@@ -14,6 +14,7 @@
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
+    ../../modules/apps/rust-dev.nix
   ];
 
   modules.desktop.hyprland.enable = true;
