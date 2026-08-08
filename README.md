@@ -166,8 +166,11 @@ sigue la distancia al punto de presión). Lo hace **wayland-wheeltani**
 (input flake, no va en nixpkgs), daemon evdev→uinput que graba el mouse físico
 y emite un mouse virtual — funciona con cualquier compositor Wayland.
 
-- El mouse se empareja por USB ids (`device.vendorId`/`productId` de lsusb),
-  así sobrevive reinicios y cambios de puerto. PC: SHARKOON `1ea7:0064`.
+- El mouse se empareja por USB ids (`device.vendorId`/`productId`), así
+  sobrevive reinicios y cambios de puerto. PC: SHARKOON vía su dongle
+  **`0c45:fefe`** (OJO: no usar el ID de lsusb de la base de carga `1ea7:0064`,
+  no expone nodo de input; el ID correcto se ve con
+  `wayland-wheeltani --list-devices` o `/proc/bus/input/devices`).
 - Permisos: `yovick` en el grupo `input` (leer eventX + EVIOCGRAB) y udev rule
   que da el grupo `input` sobre `/dev/uinput`.
 - Servicio: `systemd --user` (`wayland-wheeltani.service`), arranca con la
@@ -180,7 +183,9 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 
 1. Importar `../../modules/hardware/wheeltani.nix` en `hosts/<host>/configuration.nix`.
 2. `modules.hardware.wheeltani = { enable = true; device = { vendorId = "vvvv"; productId = "pppp"; }; }`
-   — los IDs salen de `lsusb` (línea del mouse, formato `vvvv:pppp`).
+   — los IDs NO salen de `lsusb` a ciegas: ratones inalámbricos exponen el nodo
+   de puntero con los IDs del **dongle** (busca el "2.4G Dongle"/"2.4G Mouse" en
+   `wayland-wheeltani --list-devices` o `/proc/bus/input/devices`).
 3. Rebuild. El daemon espera a que exista el mouse que matchea y lo agarra al
    vuelo (hotplug); un mouse sin IDs asignados no se toca. Hosts sin sesión
    gráfica (server) no aplican: el servicio arranca con `graphical-session.target`.

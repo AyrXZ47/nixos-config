@@ -44,7 +44,7 @@ in
     users.users.yovick.extraGroups = lib.mkAfter [ "input" ];
 
     home-manager.users.yovick = {
-      xdg.configFile."Wayland-Wheeltani/config.toml".text = ''
+      xdg.configFile."wayland-wheeltani/config.toml".text = ''
         [device_match]
         vendor_id = "${cfg.device.vendorId}"
         product_id = "${cfg.device.productId}"

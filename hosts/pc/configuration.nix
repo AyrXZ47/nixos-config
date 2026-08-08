@@ -28,12 +28,14 @@
   modules.hardware.fingerprint.enable = true;
 
   # wheeltani: boton central + mover el mouse = scroll (como el trackpoint del
-  # laptop). Mouse SHARKOON More&Better vertical (1ea7:0064, via lsusb).
+  # laptop). Ojo: el puntero real es el DONGLE Microdia 0c45:fefe del SHARKOON
+  # (en lsusb sale como "2.4G Dongle"); el device 1ea7:0064 es la base de carga
+  # y no expone nodo de input. Ver: /proc/bus/input/devices.
   modules.hardware.wheeltani = {
     enable = true;
     device = {
-      vendorId = "1ea7";
-      productId = "0064";
+      vendorId = "0c45";
+      productId = "fefe";
     };
   };
 
