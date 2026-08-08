@@ -174,6 +174,17 @@ y emite un mouse virtual — funciona con cualquier compositor Wayland.
   sesión gráfica. Ver logs: `journalctl --user -u wayland-wheeltani -f`.
 - Un click corto sin mover = click central normal (paste en X11, etc.).
 
+**Activar en otro host** (laptop nueva con mouse genérico, etc.): el daemon
+solo empareja UN mouse por USB ids (no hay modo "cualquier mouse", verificado
+en el source), así que por host se declaran los IDs del mouse que le toque:
+
+1. Importar `../../modules/hardware/wheeltani.nix` en `hosts/<host>/configuration.nix`.
+2. `modules.hardware.wheeltani = { enable = true; device = { vendorId = "vvvv"; productId = "pppp"; }; }`
+   — los IDs salen de `lsusb` (línea del mouse, formato `vvvv:pppp`).
+3. Rebuild. El daemon espera a que exista el mouse que matchea y lo agarra al
+   vuelo (hotplug); un mouse sin IDs asignados no se toca. Hosts sin sesión
+   gráfica (server) no aplican: el servicio arranca con `graphical-session.target`.
+
 ### Boot
 - **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (`ironman`
   theme from `adi1090x-plymouth-themes`); quiet boot.
