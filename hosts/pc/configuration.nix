@@ -12,6 +12,7 @@
     ../../modules/hardware/fingerprint.nix
     ../../modules/hardware/openrgb.nix
     ../../modules/hardware/mtp.nix
+    ../../modules/hardware/wheeltani.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
@@ -25,6 +26,16 @@
   modules.hardware.openrgb.enable = true;
   modules.hardware.mtp.enable = true;
   modules.hardware.fingerprint.enable = true;
+
+  # wheeltani: boton central + mover el mouse = scroll (como el trackpoint del
+  # laptop). Mouse SHARKOON More&Better vertical (1ea7:0064, via lsusb).
+  modules.hardware.wheeltani = {
+    enable = true;
+    device = {
+      vendorId = "1ea7";
+      productId = "0064";
+    };
+  };
 
   # openrgb: binario en el PATH para crear/editar los perfiles RGB (la GUI).
   environment.systemPackages = [ pkgs.openrgb ];

@@ -103,6 +103,7 @@ in
     qpwgraph
 
     # Utility
+    usbutils
     scrcpy
     syncthing
     smartmontools

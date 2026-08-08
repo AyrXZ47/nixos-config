@@ -9,16 +9,22 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    wayland-wheeltani = {
+      url = "github:docloulou/Wayland-Wheeltani";
+      flake = false;
+    };
+
   };
 
   outputs =
-    { nixpkgs, home-manager, ... }:
+    { nixpkgs, home-manager, wayland-wheeltani, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
 
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
+        specialArgs = { inherit wayland-wheeltani; };
         modules = [
           home-manager.nixosModules.home-manager
           {
