@@ -159,6 +159,21 @@ Dónde funciona la huella:
 > `services.fprintd.enable` está activo, así que todos los servicios PAM la
 > heredan salvo que se apague explícitamente.
 
+### Autoscroll con botón central (`modules/hardware/wheeltani.nix`)
+Replica el trackpoint del laptop en el PC (solo activo en `pc`): mantener el
+**botón central** y mover el mouse scrolla en esa dirección (la velocidad
+sigue la distancia al punto de presión). Lo hace **wayland-wheeltani**
+(input flake, no va en nixpkgs), daemon evdev→uinput que graba el mouse físico
+y emite un mouse virtual — funciona con cualquier compositor Wayland.
+
+- El mouse se empareja por USB ids (`device.vendorId`/`productId` de lsusb),
+  así sobrevive reinicios y cambios de puerto. PC: SHARKOON `1ea7:0064`.
+- Permisos: `yovick` en el grupo `input` (leer eventX + EVIOCGRAB) y udev rule
+  que da el grupo `input` sobre `/dev/uinput`.
+- Servicio: `systemd --user` (`wayland-wheeltani.service`), arranca con la
+  sesión gráfica. Ver logs: `journalctl --user -u wayland-wheeltani -f`.
+- Un click corto sin mover = click central normal (paste en X11, etc.).
+
 ### Boot
 - **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (`ironman`
   theme from `adi1090x-plymouth-themes`); quiet boot.

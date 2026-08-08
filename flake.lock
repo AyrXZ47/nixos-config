@@ -39,7 +39,24 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "wayland-wheeltani": "wayland-wheeltani"
+      }
+    },
+    "wayland-wheeltani": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785942388,
+        "narHash": "sha256-Bn8hh3yK/t0CW4CKBGaIATQDgHaBbCQ71NqhVhNs9L4=",
+        "owner": "docloulou",
+        "repo": "Wayland-Wheeltani",
+        "rev": "91914382643c977b7f6b98833187c18697fbae3a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "docloulou",
+        "repo": "Wayland-Wheeltani",
+        "type": "github"
       }
     }
   },
