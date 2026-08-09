@@ -1,7 +1,23 @@
 { config, pkgs, lib, ... }:
 
 {
-  home.packages = with pkgs; [ mpd ncmpcpp ];
+  home.packages = with pkgs; [ mpd ncmpcpp mpc ];
+
+  # mpd como daemon de usuario: arranca al login para que los binds de medios
+  # (SUPER+F6/F7/F8 -> mpc prev/toggle/next) funcionen sin abrir ncmpcpp antes.
+  systemd.user.services.mpd = {
+    Unit = {
+      Description = "Music Player Daemon";
+      After = [ "network.target" "sound.target" ];
+    };
+    Service = {
+      Type = "notify";
+      ExecStart = "${pkgs.mpd}/bin/mpd --systemd";
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
 
   xdg.configFile."mpd/mpd.conf".text = ''
     auto_update    "yes"
