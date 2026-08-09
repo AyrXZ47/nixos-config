@@ -96,6 +96,12 @@ in
           sensitivity = 0.0,
         },
 
+        -- Pantalla tactil: deslizar desde el borde lateral de la pantalla cambia
+        -- de workspace (equivalente al swipe de 3 dedos de GNOME en la pantalla).
+        gestures = {
+          workspace_swipe_touch = true,
+        },
+
         render = {
           -- fp16: la mitad de bandwidth de composicion; clave para sostener
           -- 170Hz + blur. El 0 previo (fp32) no tenia comentario que lo justifique.
