@@ -124,6 +124,16 @@ in
         },
       })
 
+      -------------------------
+      ---- AUTOSCROLL MOUSE ----
+      -------------------------
+      -- Botón central + mover = scroll (estilo trackpoint), nativo de libinput.
+      -- Reemplaza a wayland-wheeltani (que grababa el dispositivo y no
+      -- funcionaba). El dongle 2.4G expone dos nodos de puntero; se cubren
+      -- ambos (los que no matcheen se ignoran).
+      hl.device({ name = "2.4g-dongle-1", scroll_method = "on_button_down", scroll_button = 2 })
+      hl.device({ name = "2.4g-mouse", scroll_method = "on_button_down", scroll_button = 2 })
+
       ------------------------
       ---- ANIMACIONES -------
       ------------------------
