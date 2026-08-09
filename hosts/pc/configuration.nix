@@ -12,7 +12,6 @@
     ../../modules/hardware/fingerprint.nix
     ../../modules/hardware/openrgb.nix
     ../../modules/hardware/mtp.nix
-    ../../modules/hardware/wheeltani.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
@@ -26,18 +25,6 @@
   modules.hardware.openrgb.enable = true;
   modules.hardware.mtp.enable = true;
   modules.hardware.fingerprint.enable = true;
-
-  # wheeltani: boton central + mover el mouse = scroll (como el trackpoint del
-  # laptop). Ojo: el puntero real es el DONGLE Microdia 0c45:fefe del SHARKOON
-  # (en lsusb sale como "2.4G Dongle"); el device 1ea7:0064 es la base de carga
-  # y no expone nodo de input. Ver: /proc/bus/input/devices.
-  modules.hardware.wheeltani = {
-    enable = true;
-    device = {
-      vendorId = "0c45";
-      productId = "fefe";
-    };
-  };
 
   # openrgb: binario en el PATH para crear/editar los perfiles RGB (la GUI).
   environment.systemPackages = [ pkgs.openrgb ];
