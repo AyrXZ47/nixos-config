@@ -494,23 +494,56 @@ hwdec=vaapi" ALL "$f"
   xdg.mimeApps.enable = false;
 
   # xdg.mimeApps genera un symlink read-only al store; Dolphin no puede
-  # guardar "abrir con" ahí. Se siembra un archivo real escribible una sola vez
-  # (si ya existe, KDE conserva sus asociaciones manuales entre switches).
+  # guardar "abrir con" ahí. Se siembra un archivo real escribible (si ya
+  # existe y no tiene ids rotos, KDE conserva sus asociaciones manuales).
+  #
+  # imv upstream declara su .desktop con NoDisplay=true: KDE no lo ofrece en
+  # el diálogo "abrir con" (obliga a "browse" a un binario, que genera stubs
+  # NoDisplay que KDE descarta al resolver el default y re-pregunta siempre).
+  # Se sobreescribe con una entrada visible que sombrea la del perfil.
+  xdg.desktopEntries.imv = {
+    name = "imv";
+    exec = "imv %F";
+    type = "Application";
+    icon = "multimedia-photo-viewer";
+    mimeType = [
+      "image/avif"
+      "image/bmp"
+      "image/gif"
+      "image/heif"
+      "image/jpeg"
+      "image/jpg"
+      "image/png"
+      "image/svg+xml"
+      "image/tiff"
+      "image/webp"
+      "image/x-bmp"
+      "image/x-portable-bitmap"
+      "image/x-portable-graymap"
+      "image/x-portable-pixmap"
+      "image/x-tga"
+      "image/x-xbitmap"
+      "image/x-xpixmap"
+    ];
+  };
+
   home.activation.materializeMimeapps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     f="$HOME/.config/mimeapps.list"
-    if [ ! -f "$f" ]; then
+    write_seed() {
       cat > "$f" <<EOF
 [Default Applications]
+application/pdf=org.kde.okular.desktop
 text/html=firefox.desktop
 x-scheme-handler/http=firefox.desktop
 x-scheme-handler/https=firefox.desktop
 image/avif=imv.desktop
 image/bmp=imv.desktop
 image/gif=imv.desktop
+image/heif=imv.desktop
 image/jpeg=imv.desktop
 image/jpg=imv.desktop
 image/png=imv.desktop
-image/svg+xml=imv.desktop
+image/svg+xml=org.inkscape.Inkscape.desktop
 image/tiff=imv.desktop
 image/webp=imv.desktop
 image/x-bmp=imv.desktop
@@ -520,8 +553,39 @@ image/x-portable-pixmap=imv.desktop
 image/x-tga=imv.desktop
 image/x-xbitmap=imv.desktop
 image/x-xpixmap=imv.desktop
+text/plain=nvim.desktop
 application/x-keepass2=org.keepassxc.KeePassXC.desktop
+audio/mpeg=vlc.desktop
+audio/flac=vlc.desktop
+audio/ogg=vlc.desktop
+audio/wav=vlc.desktop
+video/mp4=vlc.desktop
+video/webm=vlc.desktop
+video/quicktime=vlc.desktop
+video/x-matroska=vlc.desktop
+application/zip=org.kde.ark.desktop
+application/x-7z-compressed=org.kde.ark.desktop
+application/x-rar=org.kde.ark.desktop
+application/gzip=org.kde.ark.desktop
+application/x-tar=org.kde.ark.desktop
+application/x-xz=org.kde.ark.desktop
+application/x-bzip2=org.kde.ark.desktop
 EOF
+    }
+    # El diálogo "Open with" de KDE, al elegir un binario por "browse", genera
+    # .desktop NoDisplay en ~/.local/share/applications; KDE los descarta al
+    # resolver el default y re-pregunta siempre. Se limpian y se usa el id real.
+    rm -f "$HOME/.local/share/applications/firefox-2.desktop" \
+          "$HOME/.local/share/applications/inkscape.desktop"
+    if [ -f "$f" ]; then
+      # Migración única: si el archivo guarda ids de stubs rotos (generados por
+      # el diálogo), se regenera desde el seed; si no, se respeta lo que haya.
+      if grep -qE 'firefox-2\.desktop|inkscape\.desktop' "$f"; then
+        cp "$f" "$f.bak"
+        write_seed
+      fi
+    else
+      write_seed
     fi
   '';
 
