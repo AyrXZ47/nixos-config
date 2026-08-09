@@ -75,17 +75,6 @@ flake.nix              # Entry point — hosts & shared modules
   mason, rainbow-delimiters, treesitter-context, lsp_lines; LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.
 - **OpenCode** + **Ollama** + **aider-chat** (local AI stack, `OLLAMA_API_BASE` set).
-- **Headroom** — installed via `uv tool` (Python 3.13) with a user proxy on port
-  `8787`; shell wrappers `headroom wrap opencode|aider`.
-  - `headroom-ai` is PyPI-only (not in nixpkgs), so it is managed with `uv`: the
-    binary lives at `~/.local/bin/headroom` and the env at
-    `~/.local/share/uv/tools` (not in the Nix store — no rebuild needed for updates).
-  - **Boot install is guarded** (`[ -x ~/.local/bin/headroom ]`): it only installs
-    on the first boot, so it never stalls the boot-critical path.
-  - **Updates are automatic**: the `headroom-update.timer` user timer runs weekly
-    (`uv tool upgrade`) in the background and restarts the proxy. Nothing to do by
-    hand. Manual checks: `uv tool list` (installed version) or
-    `uv tool upgrade headroom-ai` (immediate update).
 
 ### Gaming
 - **Steam** (gamescope session, Remote Play + dedicated server + LAN transfers
