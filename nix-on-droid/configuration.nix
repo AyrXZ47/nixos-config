@@ -32,20 +32,19 @@
     gnupg
   ];
 
-  # Reutilizar los módulos home del repo (shell/nvim/git) requeriría un
-  # home-manager más nuevo que el que bundlea este nix-on-droid (el de los
-  # módulos usa la API nueva, ej. programs.git.settings, que aquí no existe).
-  # Por ahora el config es autocontenido; alinear las versiones de home-manager
-  # es un siguiente paso.
-  # home-manager.config = { config, pkgs, lib, ... }: {
-  #   home.stateVersion = "24.05";
-  #   imports = [
-  #     ../modules/apps/shell.nix
-  #     ../modules/apps/git.nix
-  #     ../modules/apps/neovim.nix
-  #     ../modules/apps/fastfetch.nix
-  #   ];
-  # };
+  # Reutiliza los módulos home del repo (shell con powerlevel10k, nvim con
+  # plugins, git, fastfetch). Requiere el home-manager nuevo (ver flake.nix).
+  # No se importan wezterm (Android usa la terminal de Termux), mpd ni firefox
+  # (dependen de systemd).
+  home-manager.config = { config, pkgs, lib, ... }: {
+    home.stateVersion = "24.05";
+    imports = [
+      ../modules/apps/shell.nix
+      ../modules/apps/git.nix
+      ../modules/apps/neovim.nix
+      ../modules/apps/fastfetch.nix
+    ];
+  };
 
 
 

@@ -3,16 +3,15 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
-          "nix-on-droid",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1709445365,
-        "narHash": "sha256-DVv6nd9FQBbMWbOmhq0KVqmlc3y3FMSYl49UXmMcO+0=",
+        "lastModified": 1786286733,
+        "narHash": "sha256-7dN93WKkEERgutPtTjK7SY3ZarO2LAU33A1+vKu+7cc=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "4de84265d7ec7634a69ba75028696d74de9a44a7",
+        "rev": "367f7ef80856d18438953d54dda235d42a46ba31",
         "type": "github"
       },
       "original": {
@@ -49,7 +48,9 @@
     },
     "nix-on-droid": {
       "inputs": {
-        "home-manager": "home-manager",
+        "home-manager": [
+          "home-manager"
+        ],
         "nix-formatter-pack": "nix-formatter-pack",
         "nixpkgs": [
           "nixpkgs"
@@ -160,6 +161,7 @@
     },
     "root": {
       "inputs": {
+        "home-manager": "home-manager",
         "nix-on-droid": "nix-on-droid",
         "nixpkgs": "nixpkgs"
       }
