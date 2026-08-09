@@ -44,6 +44,9 @@ in
     libreoffice-fresh
     keepassxc
 
+    # LaTeX completo (scheme-full: todas las colecciones, fuentes y utilidades)
+    (texlive.combine { inherit (texlive) scheme-full; })
+
     # Graphics & Design
     blender
     gimp
