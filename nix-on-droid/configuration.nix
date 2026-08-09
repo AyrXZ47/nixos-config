@@ -17,7 +17,37 @@
     fzf
     btop
     curl
+    # Herramientas de desarrollo y terminal completas.
+    opencode
+    gh
+    jq
+    nodejs
+    python3
+    rustup
+    tmux
+    unzip
+    wget
+    sqlite
+    openssl
+    gnupg
   ];
+
+  # Reutilizar los módulos home del repo (shell/nvim/git) requeriría un
+  # home-manager más nuevo que el que bundlea este nix-on-droid (el de los
+  # módulos usa la API nueva, ej. programs.git.settings, que aquí no existe).
+  # Por ahora el config es autocontenido; alinear las versiones de home-manager
+  # es un siguiente paso.
+  # home-manager.config = { config, pkgs, lib, ... }: {
+  #   home.stateVersion = "24.05";
+  #   imports = [
+  #     ../modules/apps/shell.nix
+  #     ../modules/apps/git.nix
+  #     ../modules/apps/neovim.nix
+  #     ../modules/apps/fastfetch.nix
+  #   ];
+  # };
+
+
 
   # Identidad git sincronizada con modules/apps/git.nix del repo.
   environment.etc."gitconfig".text = ''
