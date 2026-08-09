@@ -35,7 +35,7 @@ Not lazy about: understanding the problem (read it fully and trace the real flow
 
 Flake-driven NixOS config (`nixos-unstable`, pinned in `flake.lock`) for 4 hosts: `pc`, `laptop`, `server`, `vm`. All `x86_64-linux`, single user `yovick` via Home Manager.
 
-`README.md` is the canonical detailed doc (keybindings, fingerprint workflow, headroom update flow, host tuning, adding a host) — read it before touching those areas.
+`README.md` is the canonical detailed doc (keybindings, fingerprint workflow, host tuning, adding a host) — read it before touching those areas.
 
 ## Wiring (not obvious from filenames)
 
@@ -43,7 +43,7 @@ Flake-driven NixOS config (`nixos-unstable`, pinned in `flake.lock`) for 4 hosts
 - Two module flavors under `modules/{core,apps,desktop,hardware,theming}`:
   - `modules/hardware/*` (fingerprint, mtp, openrgb) and `modules/desktop/hyprland.nix` declare `options.modules.<category>.<name>.enable`; hosts flip it (`modules.desktop.hyprland.enable = true`).
   - Everything else (`core/*`, `theming/*`, the apps below) is a plain import with no enable flag.
-- `modules/apps/` is split: home-side files imported by `home/default.nix` (shell, wezterm, neovim, fastfetch, git, headroom, mpd, firefox) vs system-side files imported by host configs (common-packages, flatpak, gaming).
+- `modules/apps/` is split: home-side files imported by `home/default.nix` (shell, wezterm, neovim, fastfetch, git, mpd, firefox) vs system-side files imported by host configs (common-packages, flatpak, gaming).
 - New feature = new file under `modules/`, imported by the hosts that want it (or `home/default.nix` for home-side apps), NOT added to `flake.nix`. Match the category's existing pattern (enable-option vs plain import).
 - `hosts/*/hardware-configuration.nix` is GENERATED (`nixos-generate-config`, disk-by-label on pc/laptop/server). Never hand-edit; regenerate. `./bootstrap.sh <host>` regenerates, rebuilds, and commits it.
 
@@ -71,45 +71,3 @@ No tests, no CI, no formatter/linter config. `nix flake check` is the only verif
 - Nothing secret is ever committed; `result*`, `.direnv`, `*.iso`, `*.qcow2`, `.aider*` are gitignored — never commit build results.
 - Comments and commit messages are written in Spanish, conventional-commit style (`feat(hyprland):`, `fix(deploy):`, `chore(host):`). Match that for commits.
 
-<!-- headroom:rtk-instructions -->
-# RTK (Rust Token Killer) - Token-Optimized Commands
-
-When running shell commands, **always prefix with `rtk`**. This reduces context
-usage by 60-90% with zero behavior change. If rtk has no filter for a command,
-it passes through unchanged — so it is always safe to use.
-
-## Key Commands
-```bash
-# Git (59-80% savings)
-rtk git status          rtk git diff            rtk git log
-
-# Files & Search (60-75% savings)
-rtk ls <path>           rtk read <file>         rtk grep <pattern>
-rtk find <pattern>      rtk diff <file>
-
-# Test (90-99% savings) — shows failures only
-rtk pytest tests/       rtk cargo test          rtk test <cmd>
-
-# Build & Lint (80-90% savings) — shows errors only
-rtk tsc                 rtk lint                rtk cargo build
-rtk prettier --check    rtk mypy                rtk ruff check
-
-# Analysis (70-90% savings)
-rtk err <cmd>           rtk log <file>          rtk json <file>
-rtk summary <cmd>       rtk deps                rtk env
-
-# GitHub (26-87% savings)
-rtk gh pr view <n>      rtk gh run list         rtk gh issue list
-
-# Infrastructure (85% savings)
-rtk docker ps           rtk kubectl get         rtk docker logs <c>
-
-# Package managers (70-90% savings)
-rtk pip list            rtk pnpm install        rtk npm run <script>
-```
-
-## Rules
-- In command chains, prefix each segment: `rtk git add . && rtk git commit -m "msg"`
-- For debugging, use raw command without rtk prefix
-- `rtk proxy <cmd>` runs command without filtering but tracks usage
-<!-- /headroom:rtk-instructions -->

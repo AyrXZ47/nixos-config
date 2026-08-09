@@ -75,7 +75,7 @@
         local repo="''${1:-}"
         [[ -n "$repo" ]] && { cd "$repo" || return 1; }
         local PANE_BOTTOM_BLOCK=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --bottom --percent 33)
-        local PANE_OPENCODE=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 67 -- zsh -ic "headroom wrap opencode")
+        local PANE_OPENCODE=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 67 -- zsh -ic "opencode")
         local PANE_PIPES=$(wezterm cli split-pane --pane-id "$PANE_BOTTOM_BLOCK" --left --percent 7 -- zsh -ic "pipes-rs")
         local PANE_AIDER=$(wezterm cli split-pane --pane-id "$PANE_BOTTOM_BLOCK" --right --percent 50 -- zsh -ic "aider")
         echo "nvim\r" | wezterm cli send-text --pane-id "$WEZTERM_PANE"
