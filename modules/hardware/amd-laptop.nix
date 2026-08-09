@@ -34,6 +34,12 @@
     '';
   };
 
+  # Touchpad Synaptics LEN2073: en protocolo PS/2 (synps/2) libinput detecta el
+  # swipe de 3 dedos pero lo descarta al instante ("Touch jump", sin updates de
+  # movimiento) -> el gesto de workspaces nunca disparaba. Este touchpad soporta
+  # RMI4 por SMBus; forzarlo da multitouch real con seguimiento de 3+ dedos.
+  boot.kernelParams = [ "psmouse.synaptics_intertouch=1" ];
+
   # ThinkPad specific
   services.libinput = {
     enable = true;
