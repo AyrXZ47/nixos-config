@@ -44,6 +44,9 @@ in
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
         hl.exec_cmd("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1")
+        -- kdeconnect como daemon de fondo (el autostart XDG de kdeconnect solo
+        -- se lanza en sesiones Plasma; en Hyprland hay que arrancarlo a mano).
+        hl.exec_cmd("kdeconnectd")
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
         hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")
       end)
@@ -587,6 +590,11 @@ EOF
     else
       write_seed
     fi
+    # KDE ignora los caches ksycoca nuevos y sigue usando uno viejo (nixpkgs#292632):
+    # sin esto, Dolphin resuelve las asociaciones contra un cache desactualizado
+    # y re-pregunta "abrir con" aunque ya haya default. Al limpiarlos, KDE los
+    # regenera con el entorno actual en el siguiente arranque/uso.
+    rm -f "$HOME/.cache/ksycoca6_"*
   '';
 
 }
