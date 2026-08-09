@@ -24,14 +24,13 @@
     };
   };
 
-  # avahi deja un /run/avahi-daemon stale entre switches (pid file de una
-  # generación anterior). Al reiniciar el servicio, avahi (tras soltar
-  # privilegios a 'avahi') no puede borrar el pid viejo ("Failed to create PID
-  # file: File exists") y nixos-rebuild aborta la activación (exit 4).
-  # Nota: NO se usa systemd RuntimeDirectory para gestionar el dir: este
-  # systemd no reconoce RuntimeDirectoryUser/Group ("Unknown key ... ignoring"),
-  # así que el dir quedaría root:root y avahi falla con "Failed to create
-  # runtime directory". ExecStartPre limpia el dir stale como root antes de
-  # arrancar, y avahi vuelve a crearlo y chownearlo como siempre.
-  systemd.services.avahi-daemon.serviceConfig.ExecStartPre = [ "${pkgs.coreutils}/bin/rm -rf /run/avahi-daemon" ];
+  # avahi crea /run/avahi-daemon y lo chown al usuario 'avahi' (make_runtime_dir).
+  # El bounding set del módulo de NixOS (CAP_SYS_CHROOT/SETUID/SETGID) NO incluye
+  # CAP_CHOWN, así que el chown falla en silencio (avahi ignora el return), el dir
+  # queda root:root y avahi aborta con "Failed to create runtime directory".
+  # Solo funcionaba mientras el dir pre-existía con dueño avahi (de un arranque
+  # anterior), por eso rompía al reiniciar el servicio en un switch.
+  # Se añade CAP_CHOWN al bounding set: avahi vuelve a crear/chownear el dir en
+  # cada arranque y el pid file stale se gestiona solo (dir avahi-owned).
+  systemd.services.avahi-daemon.serviceConfig.CapabilityBoundingSet = [ "CAP_CHOWN" ];
 }
