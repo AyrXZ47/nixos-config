@@ -12,6 +12,9 @@ let
           "type": "local",
           "command": [
             "uvx",
+            "--no-python-downloads",
+            "--python",
+            "${pkgs.python313}/bin/python3.13",
             "--from",
             "git+https://github.com/oraios/serena",
             "serena",
@@ -45,8 +48,9 @@ in
   # escribe su config global (registra proyectos) y opencode puede reescribir
   # su json, asi que un symlink al store los romperia. En su lugar se siembra
   # una copia escribible solo cuando falta, o se repara la clave `projects`.
-  # opencode.json ademas se re-siembra si aun conserva headroom (semilla vieja)
-  # para que la integracion quede fuera en todos los hosts.
+  # opencode.json se re-siembra si aun conserva headroom (semilla vieja) o la
+  # invocacion vieja de uvx sin el python de nix (uv descargaba su propio
+  # python 3.14 que no corre en NixOS y el MCP moria con "Connection closed").
   home.activation.ensureSerena = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.serena"
     if [ ! -f "$HOME/.serena/serena_config.yml" ]; then
@@ -57,7 +61,8 @@ in
 
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/opencode"
     if [ ! -f "$HOME/.config/opencode/opencode.json" ] || \
-       ${pkgs.gnugrep}/bin/grep -q 'headroom' "$HOME/.config/opencode/opencode.json"; then
+       ${pkgs.gnugrep}/bin/grep -q 'headroom' "$HOME/.config/opencode/opencode.json" || \
+       ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json"; then
       cp ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
     fi
 
@@ -66,5 +71,8 @@ in
     ${pkgs.coreutils}/bin/rm -f "$HOME/.local/bin/headroom"
     ${pkgs.coreutils}/bin/rm -rf "$HOME/.local/share/uv/tools/headroom-ai"
     ${pkgs.coreutils}/bin/rm -f "$HOME/.config/opencode/opencode.json.headroom-backup"
+    # Pythons que uv se descargo (3.14) y que no corren en NixOS; ya no se usan
+    # porque el MCP fija el python de nix con --no-python-downloads.
+    ${pkgs.coreutils}/bin/rm -rf "$HOME/.local/share/uv/python"
   '';
 }
