@@ -45,7 +45,7 @@ in
     keepassxc
 
     # LaTeX completo (scheme-full: todas las colecciones, fuentes y utilidades)
-    (texlive.combine { inherit (texlive) scheme-full; })
+    (texlive.withPackages (ps: [ ps.scheme-full ]))
 
     # Graphics & Design
     blender
