@@ -197,7 +197,10 @@ in
       -- Screenshots (región / ventana / pantalla)
       hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("hyprshot -m region -o ~/Pictures/Screenshots"))
       hl.bind("SUPER + ALT + P", hl.dsp.exec_cmd("hyprshot -m window -o ~/Pictures/Screenshots"))
-      hl.bind("SUPER + P", hl.dsp.exec_cmd("hyprshot -m output -o ~/Pictures/Screenshots"))
+      -- SUPER+P = captura inmediata del monitor activo sin interacción. "hyprshot
+      -- -m output" a secas usa slurp -or (pide arrastrar/click); "-m active -m
+      -- output" resuelve el monitor por hyprctl y captura al instante.
+      hl.bind("SUPER + P", hl.dsp.exec_cmd("hyprshot -m active -m output -o ~/Pictures/Screenshots"))
 
       hl.bind("SUPER + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
       hl.bind("SUPER + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
@@ -222,6 +225,11 @@ in
       hl.bind("SUPER + F11", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
       hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
       hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
+
+      -- Control de reproducción (MPD via mpc): F7 pausa/reanuda, F6/F8 prev/next
+      hl.bind("SUPER + F7", hl.dsp.exec_cmd("mpc toggle"))
+      hl.bind("SUPER + F6", hl.dsp.exec_cmd("mpc prev"))
+      hl.bind("SUPER + F8", hl.dsp.exec_cmd("mpc next"))
 
       -----------------------
       ---- GESTOS -----------
@@ -595,6 +603,21 @@ EOF
     # y re-pregunta "abrir con" aunque ya haya default. Al limpiarlos, KDE los
     # regenera con el entorno actual en el siguiente arranque/uso.
     rm -f "$HOME/.cache/ksycoca6_"*
+  '';
+
+  # Previews de Dolphin para todo tipo de archivo (imágenes, vídeo, audio, pdfs...):
+  # se siembra [PreviewSettings] la primera vez. ffmpegthumbs (common-packages)
+  # aporta el preview de vídeo; sin él, Dolphin no muestra miniaturas de vídeo
+  # (ni siquiera del móvil por MTP).
+  home.activation.materializeDolphinPreview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    f="$HOME/.config/dolphinrc"
+    if [ -f "$f" ] && ! grep -q '\[PreviewSettings\]' "$f"; then
+      cat >> "$f" <<'EOF'
+
+[PreviewSettings]
+Plugins=imagethumbnail;jpegthumbnail;svgthumbnail;directorythumbnail;textthumbnail;audiothumbnail;ffmpegthumbs;comicbookthumbnail;djvu;ebook;exr;kraora;opendocument;
+EOF
+    fi
   '';
 
 }

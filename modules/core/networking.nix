@@ -24,16 +24,14 @@
     };
   };
 
-  # avahi escribe su pid en /run/avahi-daemon/pid como el usuario 'avahi' tras
-  # soltar privilegios. El módulo de NixOS no gestiona ese runtime dir: al
-  # reiniciar el servicio en un switch queda un pid stale de root que avahi no
-  # puede borrar ("Failed to create PID file: File exists") y nixos-rebuild
-  # aborta la activación (exit 4). Con RuntimeDirectory, systemd crea/limpia el
-  # dir con el dueño correcto en cada start/stop.
-  systemd.services.avahi-daemon.serviceConfig = {
-    RuntimeDirectory = "avahi-daemon";
-    RuntimeDirectoryUser = "avahi";
-    RuntimeDirectoryGroup = "avahi";
-    RuntimeDirectoryMode = "0755";
-  };
+  # avahi deja un /run/avahi-daemon stale entre switches (pid file de una
+  # generación anterior). Al reiniciar el servicio, avahi (tras soltar
+  # privilegios a 'avahi') no puede borrar el pid viejo ("Failed to create PID
+  # file: File exists") y nixos-rebuild aborta la activación (exit 4).
+  # Nota: NO se usa systemd RuntimeDirectory para gestionar el dir: este
+  # systemd no reconoce RuntimeDirectoryUser/Group ("Unknown key ... ignoring"),
+  # así que el dir quedaría root:root y avahi falla con "Failed to create
+  # runtime directory". ExecStartPre limpia el dir stale como root antes de
+  # arrancar, y avahi vuelve a crearlo y chownearlo como siempre.
+  systemd.services.avahi-daemon.serviceConfig.ExecStartPre = [ "${pkgs.coreutils}/bin/rm -rf /run/avahi-daemon" ];
 }
