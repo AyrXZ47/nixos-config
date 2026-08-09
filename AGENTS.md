@@ -43,7 +43,7 @@ Flake-driven NixOS config (`nixos-unstable`, pinned in `flake.lock`) for 4 hosts
 - Two module flavors under `modules/{core,apps,desktop,hardware,theming}`:
   - `modules/hardware/*` (fingerprint, mtp, openrgb) and `modules/desktop/hyprland.nix` declare `options.modules.<category>.<name>.enable`; hosts flip it (`modules.desktop.hyprland.enable = true`).
   - Everything else (`core/*`, `theming/*`, the apps below) is a plain import with no enable flag.
-- `modules/apps/` is split: home-side files imported by `home/default.nix` (shell, wezterm, neovim, fastfetch, git, mpd, firefox) vs system-side files imported by host configs (common-packages, flatpak, gaming).
+- `modules/apps/` is split: home-side files imported by `home/default.nix` (shell, wezterm, neovim, fastfetch, git, mpd, firefox, serena) vs system-side files imported by host configs (common-packages, flatpak, gaming).
 - New feature = new file under `modules/`, imported by the hosts that want it (or `home/default.nix` for home-side apps), NOT added to `flake.nix`. Match the category's existing pattern (enable-option vs plain import).
 - `hosts/*/hardware-configuration.nix` is GENERATED (`nixos-generate-config`, disk-by-label on pc/laptop/server). Never hand-edit; regenerate. `./bootstrap.sh <host>` regenerates, rebuilds, and commits it.
 
