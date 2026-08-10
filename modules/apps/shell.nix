@@ -49,7 +49,8 @@
       [ -f /usr/share/fzf/shell/completion.zsh ] && source /usr/share/fzf/shell/completion.zsh
       [ -f /usr/share/fzf/shell/key-bindings.zsh ] && source /usr/share/fzf/shell/key-bindings.zsh
 
-      fastfetch
+      # Solo si está instalado: el celular (nix-on-droid) no trae fastfetch.
+      command -v fastfetch >/dev/null && fastfetch
 
       # Parte la terminal en dos: btop (izquierda) y nvtop (derecha). La versión
       # con hyprctl dispatch layoutmsg/exec dejó de funcionar con la config Lua

@@ -65,7 +65,33 @@
 
       pkgs = import nixpkgs {
         system = "aarch64-linux";
-        overlays = [ androidUnpackFix ];
+        overlays = [
+          androidUnpackFix
+          # opencode 1.1.14 (el único de nixpkgs 25.11) es wrapper de bun y se
+          # cuelga sin salida bajo proot en el celular. La 1.18.x empaqueta un
+          # binario standalone (bun --single) — el que traía unstable y
+          # funcionaba antes del pin a 25.11 — así que se usa el release
+          # precompilado arm64: solo pide glibc 2.17 (el store del celular
+          # trae 2.40), no arrastra glibc 2.42 de unstable (rompe el proot) y
+          # no se compila en el celular.
+          (final: prev: {
+            opencode = prev.stdenv.mkDerivation {
+              pname = "opencode";
+              version = "1.18.16";
+              src = prev.fetchurl {
+                url = "https://github.com/anomalyco/opencode/releases/download/v1.18.16/opencode-linux-arm64.tar.gz";
+                sha256 = "sha256-T9zl+byHfZdzBNccDJCtboPvo4H+Dt8KYeYUKmJeHEE=";
+              };
+              sourceRoot = ".";
+              dontConfigure = true;
+              dontBuild = true;
+              installPhase = ''
+                install -Dm755 opencode $out/bin/opencode
+              '';
+              meta.mainProgram = "opencode";
+            };
+          })
+        ];
       };
     in
     {
