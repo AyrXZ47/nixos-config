@@ -171,6 +171,10 @@ in
       hl.window_rule({ name = "mpv-solid", match = { class = "mpv" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "celluloid-solid", match = { class = "io.github.celluloid_player.Celluloid" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "vlc-solid", match = { class = "vlc" }, no_blur = true, opacity = "1 override" })
+      -- kdeconnect presenter ("Presentation remote" del celular): ventana fullscreen
+      -- transparente; con blur (ignore_opacity=true) se veia como un panel opaco
+      -- borroso que tapa el escritorio. Sin blur solo queda el puntero dibujado.
+      hl.window_rule({ name = "kdeconnect-presenter", match = { class = "org.kde.kdeconnect" }, no_blur = true })
 
       -----------------------
       ---- LAYER RULES ------
@@ -284,7 +288,59 @@ in
     tree-sitter
     cliphist
     setxkbmap
+    # CLI de self-test de inyeccion de input (--self-test-motion/absolute/scroll)
+    hypr-kdeconnect-fix
   ];
+
+  # --- Remote input de KDE Connect (portal RemoteDesktop) ---
+  # kdeconnect en Wayland inyecta teclado/raton llamando a org.freedesktop.portal.RemoteDesktop;
+  # sin un backend que lo implemente ("Remote input" del celular no hace nada). wlr y gtk no lo
+  # tienen y xdg-desktop-portal-hyprland tampoco (solo ScreenCast/Screenshot/GlobalShortcuts/
+  # InputCapture). hypr-kdeconnect-fix (flake.nix) expone esa interfaz y reenvia los eventos a
+  # zwlr_virtual_pointer/zwp_virtual_keyboard, que Hyprland si expone. El backend arranca por
+  # activacion D-Bus (el unit Type=dbus de abajo) cuando kdeconnect lo pide; para entonces el
+  # entorno de la sesion (WAYLAND_DISPLAY) ya esta en el manager de systemd.
+  xdg.configFile."xdg-desktop-portal/portals.conf".text = ''
+    [preferred]
+    org.freedesktop.impl.portal.RemoteDesktop=hypr-kdeconnect
+  '';
+  # Metadata del portal: el frontend escanea $XDG_DATA_HOME/xdg-desktop-portal/portals/.
+  xdg.dataFile."xdg-desktop-portal/portals/hypr-kdeconnect.portal".text = ''
+    [portal]
+    DBusName=org.freedesktop.impl.portal.desktop.hypr_kdeconnect
+    Interfaces=org.freedesktop.impl.portal.RemoteDesktop;
+    UseIn=Hyprland;
+  '';
+  # Activacion D-Bus de usuario (dbus-broker en NixOS): systemd arranca el unit al recibir
+  # la primera llamada RemoteDesktop.
+  xdg.dataFile."dbus-1/services/org.freedesktop.impl.portal.desktop.hypr_kdeconnect.service".text = ''
+    [D-BUS Service]
+    Name=org.freedesktop.impl.portal.desktop.hypr_kdeconnect
+    Exec=${pkgs.hypr-kdeconnect-fix}/bin/hypr-kdeconnect-portal
+    SystemdService=hypr-kdeconnect-portal.service
+  '';
+  systemd.user.services.hypr-kdeconnect-portal = {
+    Unit = {
+      Description = "KDE Connect RemoteDesktop portal backend (hypr-kdeconnect-fix)";
+      PartOf = [ "xdg-desktop-portal.service" ];
+    };
+    Service = {
+      Type = "dbus";
+      BusName = "org.freedesktop.impl.portal.desktop.hypr_kdeconnect";
+      ExecStart = "${pkgs.hypr-kdeconnect-fix}/bin/hypr-kdeconnect-portal";
+      Restart = "on-failure";
+      RestartSec = "1s";
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+      ProtectSystem = "strict";
+      ProtectHome = "read-only";
+      RestrictSUIDSGID = true;
+      RestrictAddressFamilies = [ "AF_UNIX" ];
+      LockPersonality = true;
+      MemoryDenyWriteExecute = true;
+      SystemCallArchitectures = "native";
+    };
+  };
 
   # cliphist: limite de historial en 18 items (config file, default 750).
   xdg.configFile."cliphist/config".text = "max-items 18\n";
