@@ -556,10 +556,34 @@ hwdec=vaapi" ALL "$f"
     ];
   };
 
+  # nvim no trae .desktop (nixpkgs no lo empaqueta): sin él, los defaults de
+  # texto del seed (text/plain=nvim.desktop, etc.) apuntan a nada y Dolphin
+  # vuelve a preguntar. Mismo truco que imv: entrada visible en el perfil.
+  xdg.desktopEntries.nvim = {
+    name = "Neovim";
+    exec = "nvim %F";
+    type = "Application";
+    terminal = true;
+    icon = "utilities-terminal";
+    categories = [ "Utility" "TextEditor" ];
+    mimeType = [
+      "text/plain"
+      "text/markdown"
+      "text/x-log"
+      "application/json"
+      "application/xml"
+      "text/xml"
+      "application/yaml"
+      "application/x-subrip"
+      "text/vtt"
+      "text/csv"
+    ];
+  };
+
   home.activation.materializeMimeapps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     f="$HOME/.config/mimeapps.list"
     write_seed() {
-      cat > "$f" <<EOF
+      cat > "$1" <<EOF
 [Default Applications]
 application/pdf=org.kde.okular.desktop
 text/html=firefox.desktop
@@ -606,6 +630,115 @@ application/gzip=org.kde.ark.desktop
 application/x-tar=org.kde.ark.desktop
 application/x-xz=org.kde.ark.desktop
 application/x-bzip2=org.kde.ark.desktop
+# Office -> LibreOffice
+application/msword=writer.desktop
+application/vnd.ms-word=writer.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=writer.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.template=writer.desktop
+application/vnd.oasis.opendocument.text=writer.desktop
+application/vnd.oasis.opendocument.text-template=writer.desktop
+application/rtf=writer.desktop
+application/vnd.ms-excel=calc.desktop
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=calc.desktop
+application/vnd.openxmlformats-officedocument.spreadsheetml.template=calc.desktop
+application/vnd.oasis.opendocument.spreadsheet=calc.desktop
+application/vnd.oasis.opendocument.spreadsheet-template=calc.desktop
+application/vnd.ms-powerpoint=impress.desktop
+application/vnd.openxmlformats-officedocument.presentationml.presentation=impress.desktop
+application/vnd.openxmlformats-officedocument.presentationml.template=impress.desktop
+application/vnd.oasis.opendocument.presentation=impress.desktop
+# Texto/codigo -> nvim (tipos reales: .md->text/markdown, .sh->application/x-shellscript,
+# .py->text/x-python, .yml->application/yaml, .srt->application/x-subrip, .vtt->text/vtt)
+text/markdown=nvim.desktop
+application/json=nvim.desktop
+application/xml=nvim.desktop
+text/xml=nvim.desktop
+application/yaml=nvim.desktop
+application/x-shellscript=nvim.desktop
+text/x-python=nvim.desktop
+text/x-c=nvim.desktop
+text/x-c++src=nvim.desktop
+text/x-tex=nvim.desktop
+text/x-log=nvim.desktop
+text/calendar=nvim.desktop
+application/x-subrip=nvim.desktop
+text/vtt=nvim.desktop
+text/csv=nvim.desktop
+# Ebooks -> okular
+application/epub+zip=okularApplication_epub.desktop
+application/x-mobipocket-ebook=okularApplication_mobi.desktop
+application/x-fictionbook+xml=okularApplication_fb.desktop
+application/x-cbz=okularApplication_comicbook.desktop
+application/vnd.comicbook-rar=okularApplication_comicbook.desktop
+application/postscript=okularApplication_ghostview.desktop
+application/x-dvi=okularApplication_dvi.desktop
+# Audio/video extra -> vlc (del celular, descargas y rips)
+audio/x-matroska=vlc.desktop
+audio/x-ms-wma=vlc.desktop
+audio/midi=vlc.desktop
+audio/x-aiff=vlc.desktop
+audio/3gpp=vlc.desktop
+audio/3gpp2=vlc.desktop
+audio/AMR=vlc.desktop
+audio/x-flac=vlc.desktop
+audio/ac3=vlc.desktop
+audio/eac3=vlc.desktop
+audio/webm=vlc.desktop
+audio/mpegurl=vlc.desktop
+audio/x-mpegurl=vlc.desktop
+video/x-flv=vlc.desktop
+video/mp2t=vlc.desktop
+video/x-ms-wmv=vlc.desktop
+video/3gp=vlc.desktop
+video/3gpp2=vlc.desktop
+video/ogg=vlc.desktop
+video/x-ogm+ogg=vlc.desktop
+video/mpeg=vlc.desktop
+# Discos/imagenes -> ark (iso real: .iso->application/vnd.efi.iso)
+application/x-cd-image=org.kde.ark.desktop
+application/vnd.efi.iso=org.kde.ark.desktop
+application/vnd.rar=org.kde.ark.desktop
+application/x-compress=org.kde.ark.desktop
+application/x-lzma=org.kde.ark.desktop
+application/x-lz4=org.kde.ark.desktop
+application/x-lzip=org.kde.ark.desktop
+application/zstd=org.kde.ark.desktop
+application/x-zstd-compressed-tar=org.kde.ark.desktop
+application/x-compressed-tar=org.kde.ark.desktop
+application/x-bzip-compressed-tar=org.kde.ark.desktop
+application/x-bzip2-compressed-tar=org.kde.ark.desktop
+application/x-xz-compressed-tar=org.kde.ark.desktop
+# Flash de imagenes -> popsicle
+application/vnd.efi.img=com.system76.Popsicle.desktop
+application/x-raw-disk-image=com.system76.Popsicle.desktop
+# Archivos propios de cada app -> su creadora (comportamiento GNOME: el unico
+# que los produce es el default; .xcf->gimp aunque krita_xcf tambien lo declare)
+application/x-blender=blender.desktop
+application/x-krita=org.kde.krita.desktop
+image/x-xcf=gimp.desktop
+image/x-psd=gimp.desktop
+image/vnd.adobe.photoshop=gimp.desktop
+application/x-audacity-project=audacity.desktop
+application/x-audacity-project+sqlite3=audacity.desktop
+application/vnd.mlt+xml=org.shotcut.Shotcut.desktop
+application/x-kicad-project=org.kicad.kicad.desktop
+application/x-kicad-pcb=org.kicad.pcbnew.desktop
+application/x-kicad-schematic=org.kicad.eeschema.desktop
+application/x-gerber=org.kicad.gerbview.desktop
+application/x-excellon=org.kicad.gerbview.desktop
+application/x-extension-fcstd=org.freecad.FreeCAD.desktop
+model/stl=org.freecad.FreeCAD.desktop
+model/step=org.freecad.FreeCAD.desktop
+model/obj=org.freecad.FreeCAD.desktop
+model/vrml=org.freecad.FreeCAD.desktop
+model/vnd.collada+xml=org.freecad.FreeCAD.desktop
+image/vnd.dxf=org.freecad.FreeCAD.desktop
+image/vnd.dwg=org.freecad.FreeCAD.desktop
+image/svg+xml-compressed=org.inkscape.Inkscape.desktop
+image/x-eps=org.inkscape.Inkscape.desktop
+image/x-emf=org.inkscape.Inkscape.desktop
+image/x-wmf=org.inkscape.Inkscape.desktop
+application/illustrator=org.inkscape.Inkscape.desktop
 EOF
     }
     # El diálogo "Open with" de KDE, al elegir un binario por "browse", genera
@@ -615,13 +748,25 @@ EOF
     rm -f "$HOME/.local/share/applications/"*-[0-9].desktop
     if [ -f "$f" ]; then
       # Migración única: si el archivo guarda ids de stubs rotos (generados por
-      # el diálogo), se regenera desde el seed; si no, se respeta lo que haya.
+      # el diálogo), se regenera desde el seed; si no, MERGE: se anaden los
+      # tipos del seed que falten (los seeds nuevos llegan a máquinas con
+      # archivo ya existente) sin tocar lo que el usuario eligió a mano en el
+      # diálogo "abrir con".
       if grep -qE -- '-[0-9]+\.desktop' "$f"; then
         cp "$f" "$f.bak"
-        write_seed
+        write_seed "$f"
+      else
+        tmp="$(mktemp)"
+        write_seed "$tmp"
+        while IFS= read -r line; do
+          mime=''${line%%=*}
+          [ "$mime" = "$line" ] && continue
+          grep -q "^$mime=" "$f" || printf '%s\n' "$line" >> "$f"
+        done < "$tmp"
+        rm -f "$tmp"
       fi
     else
-      write_seed
+      write_seed "$f"
     fi
     # KDE ignora los caches ksycoca nuevos y sigue usando uno viejo (nixpkgs#292632):
     # sin esto, Dolphin resuelve las asociaciones contra un cache desactualizado
