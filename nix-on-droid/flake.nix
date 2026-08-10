@@ -13,7 +13,15 @@
     };
 
     nix-on-droid = {
-      url = "github:nix-community/nix-on-droid";
+      # Pinchado al commit del PR #529 (update-proot): glibc>=2.42 (nixpkgs
+      # >=26.05) rompe el proot 2024-05-04 bundleado -> tcgetattr falla con
+      # Permission denied en la activacion (issue #495, abierto upstream).
+      # El PR sube proot-termux a 2026-02-20 que si funciona con glibc 2.42.
+      # OJO: al hacer switch por primera vez puede pedir el swap manual de
+      # proot-static (ver issue #495): nix-on-droid build + copiar
+      # result/filesystem/bin/proot-static a /bin/.proot-static.new,
+      # cerrar ventanas y reabrir antes del switch.
+      url = "github:nix-community/nix-on-droid/4f963e270e6dc7f3cfb412c73a0eb8c0c350bce2";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
