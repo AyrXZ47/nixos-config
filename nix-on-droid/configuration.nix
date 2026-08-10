@@ -8,13 +8,13 @@
   time.timeZone = "America/Mexico_City";
 
   # Esenciales de terminal movil: git, ssh, editor, busqueda, monitoreo.
+  # OJO: git, neovim y fzf NO van aqui: los instalan los módulos home del repo
+  # (programs.git, programs.neovim, programs.fzf) y nix-on-droid junta TODO en
+  # un solo buildEnv -> "two given paths contain a conflicting subpath".
   environment.packages = with pkgs; [
-    git
     openssh
-    neovim
     ripgrep
     fd
-    fzf
     btop
     curl
     # Herramientas de desarrollo y terminal completas.
