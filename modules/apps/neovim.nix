@@ -197,41 +197,35 @@ let
     };
   };
 in
-{
-  programs.neovim = {
-    enable = true;
-    viAlias = true;
-    vimAlias = true;
-    withNodeJs = true;
-    withRuby = true;
-
-    # extraLuaConfig: HM escribe extraConfig como VIMSCRIPT en init.vim (y el
-    # init.lua generado lo sourcea) -> el bootstrap de LazyVim en Lua reventaba
-    # en el arranque con "E492: Not an editor command". extraLuaConfig va
-    # directo a init.lua.
-    #
-    # Nombre de la opcion: HM master la renombro a `initLua` (extraLuaConfig
-    # sigue funcionando como alias, solo avisa en el build); release-25.11 (el
-    # pin de nix-on-droid por el proot/glibc) SOLO tiene extraLuaConfig. Este
-    # nombre es la interseccion que funciona en ambos. El bootstrap de LazyVim
-    # es autocontenido, así que el orden respecto al init por defecto de HM no
-    # importa.
-    extraLuaConfig = ''
-      local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-      if not (vim.uv or vim.loop).fs_stat(lazypath) then
-        local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-        local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-        if vim.v.shell_error ~= 0 then
-          vim.api.nvim_echo({
-            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-            { out, "WarningMsg" },
-            { "\nPress any key to exit..." },
-          }, true, {})
-          vim.fn.getchar()
-          os.exit(1)
-        end
+let
+  # HM escribe extraConfig como VIMSCRIPT en init.vim (y el init.lua generado
+  # lo sourcea) -> el bootstrap de LazyVim en Lua reventaba en el arranque con
+  # "E492: Not an editor command". El bootstrap va en lua, directo a init.lua.
+  #
+  # Nombre de la opcion segun version de HM: master la renombro a `initLua`
+  # (extraLuaConfig queda como alias deprecado -> warning en el build);
+  # release-25.11 (el pin de nix-on-droid por el proot/glibc) SOLO tiene
+  # extraLuaConfig. `config.programs.neovim ? initLua` detecta cual existe sin
+  # forzar valores (los nombres de opcion vienen de las declaraciones, no de
+  # las definiciones), asi el rebuild queda limpio en ambos. El bootstrap es
+  # autocontenido, así que el orden respecto al init por defecto de HM no
+  # importa.
+  luaConfig = ''
+    local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+    if not (vim.uv or vim.loop).fs_stat(lazypath) then
+      local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+      local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+      if vim.v.shell_error ~= 0 then
+        vim.api.nvim_echo({
+          { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+          { out, "WarningMsg" },
+          { "\nPress any key to exit..." },
+        }, true, {})
+        vim.fn.getchar()
+        os.exit(1)
       end
-      vim.opt.rtp:prepend(lazypath)
+    end
+    vim.opt.rtp:prepend(lazypath)
 
       require("lazy").setup({
         spec = {
@@ -264,6 +258,16 @@ in
         vim.cmd.colorscheme("${theme}")
       end)
     '';
+in
+{
+  programs.neovim = {
+    enable = true;
+    viAlias = true;
+    vimAlias = true;
+    withNodeJs = true;
+    withRuby = true;
+
+    ${if config.programs.neovim ? initLua then "initLua" else "extraLuaConfig"} = luaConfig;
   };
 
   home.file = pluginsDir;
