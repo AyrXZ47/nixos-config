@@ -4,6 +4,12 @@
   # No tocar sin leer el changelog de nix-on-droid antes de subir de version.
   system.stateVersion = "24.05";
 
+  # OJO: el default de nix-on-droid es bash. Sin esto la terminal abre en bash:
+  # sin p10k, sin aliases (tree/dev/ll), sin fastfetch al abrir, sin fzf. El
+  # modulo home de programs.zsh SOLO genera los rc; el shell de login lo fija
+  # esto (en NixOS lo haria users.users.<name>.shell, aqui no existe).
+  user.shell = "${pkgs.zsh}/bin/zsh";
+
   # Zona horaria, misma que el resto de los hosts.
   time.timeZone = "America/Mexico_City";
 
@@ -30,21 +36,24 @@
     sqlite
     openssl
     gnupg
+    cmatrix
     # LaTeX para escribir documentos desde el celular (pdflatex, amsmath, ...).
     (pkgs.texlive.withPackages (ps: [ ps.scheme-medium ]))
   ];
 
   # Reutiliza los módulos home del repo (shell con powerlevel10k, nvim con
-  # plugins, git, fastfetch). Requiere el home-manager nuevo (ver flake.nix).
+  # plugins, git). Requiere el home-manager nuevo (ver flake.nix).
   # No se importan wezterm (Android usa la terminal de Termux), mpd ni firefox
   # (dependen de systemd).
+  # fastfetch tampoco: el config del pc usa logo PNG (protocolo kitty) y lineas
+  # de 70+ chars que en la terminal angosta del celular envuelven y se pisan.
+  # Aqui fastfetch corre con su config por defecto (logo ascii, ajusta ancho).
   home-manager.config = { config, pkgs, lib, ... }: {
     home.stateVersion = "24.05";
     imports = [
       ../modules/apps/shell.nix
       ../modules/apps/git.nix
       ../modules/apps/neovim.nix
-      ../modules/apps/fastfetch.nix
     ];
   };
 
