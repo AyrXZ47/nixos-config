@@ -205,11 +205,18 @@ in
     withNodeJs = true;
     withRuby = true;
 
-    # extraConfig (no initLua): funciona en HM master y release-25.11 (el pin
-    # de nix-on-droid usa release-25.11 por el proot/glibc). El bootstrap de
-    # LazyVim es autocontenido, así que el orden respecto al init por defecto
-    # de HM no importa.
-    extraConfig = ''
+    # extraLuaConfig: HM escribe extraConfig como VIMSCRIPT en init.vim (y el
+    # init.lua generado lo sourcea) -> el bootstrap de LazyVim en Lua reventaba
+    # en el arranque con "E492: Not an editor command". extraLuaConfig va
+    # directo a init.lua.
+    #
+    # Nombre de la opcion: HM master la renombro a `initLua` (extraLuaConfig
+    # sigue funcionando como alias, solo avisa en el build); release-25.11 (el
+    # pin de nix-on-droid por el proot/glibc) SOLO tiene extraLuaConfig. Este
+    # nombre es la interseccion que funciona en ambos. El bootstrap de LazyVim
+    # es autocontenido, así que el orden respecto al init por defecto de HM no
+    # importa.
+    extraLuaConfig = ''
       local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
       if not (vim.uv or vim.loop).fs_stat(lazypath) then
         local lazyrepo = "https://github.com/folke/lazy.nvim.git"
