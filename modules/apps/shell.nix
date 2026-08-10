@@ -69,12 +69,12 @@
           return 1
         fi
         # Uso: dev [directorio-repo] — si se pasa, entra al repo antes de partir paneles.
-        # Layout: arriba 85% (nvim 15% a la izquierda + opencode 85% a la
-        # derecha) y abajo 15% partido en vertical con pipes-rs (15% del ancho)
+        # Layout: arriba 80% (nvim 15% a la izquierda + opencode 85% a la
+        # derecha) y abajo 20% partido en vertical con pipes-rs (15% del ancho)
         # y terminal git libre (85%).
         local repo="''${1:-}"
         [[ -n "$repo" ]] && { cd "$repo" || return 1; }
-        local PANE_BOTTOM_BLOCK=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --bottom --percent 15)
+        local PANE_BOTTOM_BLOCK=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --bottom --percent 20)
         local PANE_OPENCODE=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 85 -- zsh -ic "opencode")
         local PANE_PIPES=$(wezterm cli split-pane --pane-id "$PANE_BOTTOM_BLOCK" --left --percent 15 -- zsh -ic "pipes-rs")
         echo "nvim\r" | wezterm cli send-text --pane-id "$WEZTERM_PANE"
