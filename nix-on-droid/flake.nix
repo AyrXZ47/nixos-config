@@ -3,10 +3,12 @@
 
   inputs = {
     # Pinchado a nixos-25.11: glibc >=2.42 (unstable >=26.05) rompe el proot
-    # 2024-05-04 bundleado del app (issue #495) incluso con el PR #529 si no se
-    # hace el swap manual de proot-static. Con 25.11 (glibc 2.40) el proot
-    # actual funciona y el switch activa sin pasos extra. Quitar el pin cuando
-    # el proot nuevo esté mergeado en upstream (PR #529).
+    # 2024-05-04 bundleado del app (issue #495): tcgetattr falla con
+    # 'Permission denied' al inicializar el build env de la activacion.
+    # Con 25.11 (glibc 2.40) el proot actual funciona y el switch activa sin
+    # pasos extra. Quitar el pin cuando el proot nuevo esté mergeado en
+    # upstream de forma utilizable (PR #529; ver comentario del input
+    # nix-on-droid).
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     # home-manager nuevo: el que bundlea nix-on-droid (2024) no entiende la API
@@ -18,15 +20,19 @@
     };
 
     nix-on-droid = {
-      # Pinchado al commit del PR #529 (update-proot): glibc>=2.42 (nixpkgs
-      # >=26.05) rompe el proot 2024-05-04 bundleado -> tcgetattr falla con
-      # Permission denied en la activacion (issue #495, abierto upstream).
-      # El PR sube proot-termux a 2026-02-20 que si funciona con glibc 2.42.
-      # OJO: al hacer switch por primera vez puede pedir el swap manual de
-      # proot-static (ver issue #495): nix-on-droid build + copiar
-      # result/filesystem/bin/proot-static a /bin/.proot-static.new,
-      # cerrar ventanas y reabrir antes del switch.
-      url = "github:nix-community/nix-on-droid/4f963e270e6dc7f3cfb412c73a0eb8c0c350bce2";
+      # Anclado al master pre-PR #529 (55b6449b): el PR (update-proot) hardcodea
+      # la ruta de store del proot nuevo que solo existe en la maquina del autor
+      # (/nix/store/dvf2ck9...-unstable-2026-02-20; no esta ni en cache.nixos.org
+      # ni en cachix) -> el switch muere con "path does not exist and cannot be
+      # created" aunque el resto evalue bien. Con el master pre-PR se usan las
+      # rutas del proot 2024-05-04 que el APK ya trae en el store del celular.
+      #
+      # El proot 2024-05-04 requiere glibc <2.42: por eso el pin de nixpkgs a
+      # 25.11 (glibc 2.40) de arriba; juntos, switch sin pasos extra.
+      #
+      # Volver al PR/master nuevo cuando el proot 2026-02-20 este mergeado de
+      # forma utilizable (con la ruta derivable, no hardcodeada) en upstream.
+      url = "github:nix-community/nix-on-droid/55b6449b4582a4ba3ce712543c973360a026db7d";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
