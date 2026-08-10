@@ -50,9 +50,10 @@ in
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
         hl.exec_cmd("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1")
-        -- kdeconnect como daemon de fondo (el autostart XDG de kdeconnect solo
-        -- se lanza en sesiones Plasma; en Hyprland hay que arrancarlo a mano).
-        hl.exec_cmd("kdeconnectd")
+        -- kdeconnect: el daemon corre como unidad systemd "app-org.kde.kdeconnect.
+        -- daemon-autostart" (ver abajo), no por exec-once: el portal RemoteDesktop
+        -- deriva el app id del llamador desde el nombre de su unidad systemd y sin
+        -- unidad queda vacio (el backend de hypr-kdeconnect lo rechaza).
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
         hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")
       end)
@@ -174,7 +175,9 @@ in
       -- kdeconnect presenter ("Presentation remote" del celular): ventana fullscreen
       -- transparente; con blur (ignore_opacity=true) se veia como un panel opaco
       -- borroso que tapa el escritorio. Sin blur solo queda el puntero dibujado.
-      hl.window_rule({ name = "kdeconnect-presenter", match = { class = "org.kde.kdeconnect" }, no_blur = true })
+      -- Clase: el app_id Wayland de Qt = applicationName del daemon (kdeconnect.daemon);
+      -- el id D-Bus org.kde.kdeconnect tambien se cubre por si cambia.
+      hl.window_rule({ name = "kdeconnect-presenter", match = { class = "org.kde.kdeconnect|kdeconnect.daemon" }, no_blur = true })
 
       -----------------------
       ---- LAYER RULES ------
@@ -340,6 +343,23 @@ in
       MemoryDenyWriteExecute = true;
       SystemCallArchitectures = "native";
     };
+  };
+
+  # kdeconnectd como unidad con nombre "app-<appid>-autostart": es el unico modo en
+  # que xdg-desktop-portal asigna app id a un proceso host (lee la unidad systemd del
+  # llamador y valida que exista <appid>.desktop). Sin eso, el backend RemoteDesktop
+  # rechaza la sesion ("refusing RemoteDesktop session for app id ''") y el remote
+  # input del celular no mueve nada. En Plasma lo lanza systemd con el mismo patron.
+  systemd.user.services."app-org.kde.kdeconnect.daemon-autostart" = {
+    Unit = {
+      Description = "KDE Connect daemon";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.kdePackages.kdeconnect-kde}/bin/kdeconnectd";
+      Restart = "on-failure";
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
   # cliphist: limite de historial en 18 items (config file, default 750).
