@@ -172,12 +172,16 @@ in
       hl.window_rule({ name = "mpv-solid", match = { class = "mpv" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "celluloid-solid", match = { class = "io.github.celluloid_player.Celluloid" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "vlc-solid", match = { class = "vlc" }, no_blur = true, opacity = "1 override" })
-      -- kdeconnect presenter ("Presentation remote" del celular): ventana fullscreen
-      -- transparente; con blur (ignore_opacity=true) se veia como un panel opaco
-      -- borroso que tapa el escritorio. Sin blur solo queda el puntero dibujado.
-      -- Clase real capturada con hyprctl clients: org.kde.kdeconnect.daemon (el
-      -- applicationName del daemon; anclada ^$ para que matchee exacta).
-      hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, no_blur = true })
+      -- kdeconnect presenter ("Presentation remote" del celular): overlay fullscreen
+      -- transparente que dibuja el puntero. Tres trampas de Hyprland descubiertas:
+      -- 1) clase real = org.kde.kdeconnect.daemon (applicationName de Qt; anclada ^$:
+      --    el match es de cadena completa y "org.kde.kdeconnect" no matcheaba).
+      -- 2) con blur (ignore_opacity=true) se veia como panel opaco -> no_blur.
+      -- 3) el fullscreen (solicitado por Qt o forzado) NO funciona con
+      --    no_initial_focus (bug); sin el, la ventana roba foco y las slides
+      --    pierden su fullscreen. Solucion: flotante a tamaño de monitor
+      --    (size/move con expresiones monitor_w/h), sin foco, sin animacion.
+      hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, float = true, size = { "(monitor_w)", "(monitor_h)" }, move = { 0, 0 }, no_initial_focus = true, no_blur = true, no_anim = true })
 
       -----------------------
       ---- LAYER RULES ------
