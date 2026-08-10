@@ -31,7 +31,7 @@
     openssl
     gnupg
     # LaTeX para escribir documentos desde el celular (pdflatex, amsmath, ...).
-    pkgs.texlive.scheme-medium
+    (pkgs.texlive.withPackages (ps: [ ps.scheme-medium ]))
   ];
 
   # Reutiliza los módulos home del repo (shell con powerlevel10k, nvim con

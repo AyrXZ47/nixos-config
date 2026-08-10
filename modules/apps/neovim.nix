@@ -205,7 +205,11 @@ in
     withNodeJs = true;
     withRuby = true;
 
-    initLua = ''
+    # extraConfig (no initLua): funciona en HM master y release-25.11 (el pin
+    # de nix-on-droid usa release-25.11 por el proot/glibc). El bootstrap de
+    # LazyVim es autocontenido, así que el orden respecto al init por defecto
+    # de HM no importa.
+    extraConfig = ''
       local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
       if not (vim.uv or vim.loop).fs_stat(lazypath) then
         local lazyrepo = "https://github.com/folke/lazy.nvim.git"
