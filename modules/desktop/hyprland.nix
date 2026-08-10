@@ -342,6 +342,18 @@ in
 
     # udisks2: Dolphin lista/monta los discos extra (sda/sdb) sin fstab
     services.udisks2.enable = true;
+    # Dolphin mostraba cada disco LUKS DOS veces: el contenedor (sda1/nvme0n1p2,
+    # StorageVolume.usage 'Encrypted', con el mismo nombre/mountpoint que el
+    # filesystem) y el volumen desencriptado (dm-*, 'FileSystem'). Ambos pasan
+    # el filtro de KFilePlacesModel. UDISKS_IGNORE marca HintIgnore en udisks2
+    # y Solid excluye el contenedor (StorageVolume.ignored=true). El unlock
+    # sigue disponible por CLI (udisksctl unlock) con el polkit de abajo.
+    # Los UUID son de los headers LUKS (ID_FS_UUID del crypto_LUKS).
+    services.udev.extraRules = ''
+      # root (nvme0n1p2) y Mikoshi (sda1): contenedores LUKS
+      SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="crypto_LUKS", ENV{ID_FS_UUID}=="b6a58d8d-5ccb-436d-8837-bbeebc89a57b", ENV{UDISKS_IGNORE}="1"
+      SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="crypto_LUKS", ENV{ID_FS_UUID}=="ab950c5c-59b2-4eac-9415-00849ad656bb", ENV{UDISKS_IGNORE}="1"
+    '';
     # Daemons runtime del dashboard de Wayle (red, bluetooth, batería)
     hardware.bluetooth.enable = true;
     services.upower.enable = true;
