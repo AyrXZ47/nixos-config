@@ -15,7 +15,13 @@ in
     # Lua config (hyprland.lua): hyprlang se depreca en Hyprland 0.57.
     configType = "lua";
     xwayland.enable = true;
-    systemd.enable = false;
+    # systemd.enable: sin la integración, graphical-session.target nunca se
+    # activa y xdg-desktop-portal (Requisite=graphical-session.target desde
+    # portal 1.22) no puede arrancar -> file dialogs/portales rotos tras el
+    # bump de nixpkgs (el 1.20 usaba Requires=dbus.service). El target
+    # hyprland-session de HM activa graphical-session.target al iniciar la
+    # sesión.
+    systemd.enable = true;
 
     extraConfig = ''
       -- Configuración Hyprland (lua) — generada por Home Manager.
@@ -627,7 +633,11 @@ EOF
   #
   # Previews REMOTOS (MTP/celular): FilePreviewJob salta los archivos remotos
   # con `size > MaximumRemoteSize`, y el default de MaximumRemoteSize es 0 ->
-  # sin previews de nada en mtp://. Se siembra 100 MiB + EnableRemoteFolderThumbnail.
+  # sin previews de nada en mtp://. Se siembra 256 GiB (cubre videos 4K/8K
+  # largos del celular) + EnableRemoteFolderThumbnail. El costo de generar es
+  # bajo: Dolphin usa kio-fuse (common-packages) que monta el archivo remoto
+  # via FUSE y el thumbnailer solo lee los primeros frames; sin kio-fuse el
+  # fallback descarga el archivo completo (lento para videos de GBs).
   home.activation.materializeDolphinPreview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     f="$HOME/.config/dolphinrc"
     write_seed() {
@@ -635,7 +645,7 @@ EOF
 
 [PreviewSettings]
 Plugins=imagethumbnail,jpegthumbnail,svgthumbnail,directorythumbnail,textthumbnail,audiothumbnail,ffmpegthumbs,comicbookthumbnail,djvu,ebook,exr,kraora,opendocument
-MaximumRemoteSize=104857600
+MaximumRemoteSize=274877906944
 EnableRemoteFolderThumbnail=true
 EOF
     }
@@ -649,7 +659,7 @@ EOF
     fi
     # Previews remotos: se garantizan las dos claves dentro del grupo (si el
     # seed ya las puso, los grep los saltan; si no, se insertan tras el header).
-    grep -q '^MaximumRemoteSize=' "$f" 2>/dev/null || sed -i '/^\[PreviewSettings\]/a MaximumRemoteSize=104857600' "$f"
+    grep -q '^MaximumRemoteSize=' "$f" 2>/dev/null || sed -i '/^\[PreviewSettings\]/a MaximumRemoteSize=274877906944' "$f"
     grep -q '^EnableRemoteFolderThumbnail=' "$f" 2>/dev/null || sed -i '/^\[PreviewSettings\]/a EnableRemoteFolderThumbnail=true' "$f"
   '';
 
