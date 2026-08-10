@@ -49,7 +49,6 @@ in
         hl.exec_cmd("kdeconnectd")
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
         hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")
-        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/caps-lock.sh")
       end)
 
       ------------------------
@@ -401,36 +400,6 @@ hwdec=vaapi" ALL "$f"
       }
     '';
 
-    # Banner temporal al togglear Caps Lock: el LED de /sys/class/leds refleja
-    # el estado real del teclado; se sondea cada 250ms (inotifywait no está
-    # instalado) y se avisa con notify-send (popup elegante de wayle). Si el
-    # teclado no expone el LED (ej. BT), el script termina sin hacer nada.
-    # ponytail: polling de un sysfs trivial; upgrade path: inotifywait.
-    "hypr/scripts/caps-lock.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        led=""
-        for l in /sys/class/leds/*capslock*/brightness; do
-          [ -e "$l" ] && led="$l" && break
-        done
-        [ -z "$led" ] && exit 0
-        state=$(cat "$led")
-        while :; do
-          sleep 0.25
-          new=$(cat "$led")
-          if [ "$new" != "$state" ]; then
-            state=$new
-            if [ "$state" = "1" ]; then
-              notify-send -t 1500 -a keyboard -u low "⇪ MAYÚS activadas"
-            else
-              notify-send -t 1500 -a keyboard -u low "⇪ mayúsculas desactivadas"
-            fi
-          fi
-        done
-      '';
-    };
-
     # hyprlock: la config debe existir o hyprlock sale con error y la sesión NO se
     # bloquea. Autenticación: PAM (contraseña, vía security.pam.services.hyprlock)
     # y huella nativa por fprintd (auth fingerprint:enabled), en paralelo.
@@ -655,6 +624,10 @@ EOF
   # (KConfigGroup::writeEntry(QStringList) serializa con ','). Una semilla con
   # ';' se lee como UN SOLO string -> ningun plugin coincide -> Dolphin no
   # genera NINGUN preview. Verificado: kwriteconfig6 escribe comas.
+  #
+  # Previews REMOTOS (MTP/celular): FilePreviewJob salta los archivos remotos
+  # con `size > MaximumRemoteSize`, y el default de MaximumRemoteSize es 0 ->
+  # sin previews de nada en mtp://. Se siembra 100 MiB + EnableRemoteFolderThumbnail.
   home.activation.materializeDolphinPreview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     f="$HOME/.config/dolphinrc"
     write_seed() {
@@ -662,6 +635,8 @@ EOF
 
 [PreviewSettings]
 Plugins=imagethumbnail,jpegthumbnail,svgthumbnail,directorythumbnail,textthumbnail,audiothumbnail,ffmpegthumbs,comicbookthumbnail,djvu,ebook,exr,kraora,opendocument
+MaximumRemoteSize=104857600
+EnableRemoteFolderThumbnail=true
 EOF
     }
     if grep -q '^Plugins=.*;' "$f" 2>/dev/null; then
@@ -672,6 +647,10 @@ EOF
     elif ! grep -q '\[PreviewSettings\]' "$f" 2>/dev/null; then
       write_seed
     fi
+    # Previews remotos: se garantizan las dos claves dentro del grupo (si el
+    # seed ya las puso, los grep los saltan; si no, se insertan tras el header).
+    grep -q '^MaximumRemoteSize=' "$f" 2>/dev/null || sed -i '/^\[PreviewSettings\]/a MaximumRemoteSize=104857600' "$f"
+    grep -q '^EnableRemoteFolderThumbnail=' "$f" 2>/dev/null || sed -i '/^\[PreviewSettings\]/a EnableRemoteFolderThumbnail=true' "$f"
   '';
 
 }
