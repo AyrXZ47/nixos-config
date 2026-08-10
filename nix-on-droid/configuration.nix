@@ -55,6 +55,13 @@
       ../modules/apps/git.nix
       ../modules/apps/neovim.nix
     ];
+
+    # JetBrainsMono Nerd Font (la misma de wezterm en la pc): la terminal de la
+    # app de nix-on-droid lee ~/.termux/font.ttf igual que termux. Sin ella los
+    # iconos de p10k/nerd fonts salen como cuadros. Reiniciar la app para que
+    # cargue la fuente.
+    home.file.".termux/font.ttf".source =
+      "${pkgs.nerd-fonts.jetbrains-mono}/share/fonts/truetype/NerdFonts/JetBrainsMono/JetBrainsMonoNerdFont-Regular.ttf";
   };
 
 
