@@ -45,6 +45,20 @@ in
     OLLAMA_GPU_OVERHEAD = "1073741824";
   };
 
+  environment.etc."xdg/menus/applications.menu".text = ''
+    <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+      "http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+    <Menu>
+      <Name>Applications</Name>
+      <DefaultAppDirs/>
+      <DefaultDirectoryDirs/>
+      <DefaultMergeDirs/>
+      <Layout>
+        <Merge type="all"/>
+      </Layout>
+    </Menu>
+  '';
+
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
