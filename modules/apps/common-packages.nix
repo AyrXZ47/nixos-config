@@ -116,6 +116,7 @@ in
     qpwgraph
 
     # Utility
+    qalculate-gtk
     usbutils
     scrcpy
     syncthing
