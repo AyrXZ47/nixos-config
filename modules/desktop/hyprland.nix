@@ -242,9 +242,15 @@ in
         icon-color = "#ffffff"
         left-click = "dropdown:dashboard"
         dropdown-lock-command = "loginctl lock-session"
-        dropdown-logout-command = "loginctl terminate-session $XDG_SESSION_ID"
-        dropdown-reboot-command = "systemctl reboot"
-        dropdown-poweroff-command = "systemctl poweroff"
+        # logout con hyprctl dispatch exit (exit limpio -> SDDM relanza el greeter).
+        # loginctl terminate-session mandaba SIGTERM al scope y el wrapper
+        # start-hyprland de nixpkgs aborta (SIGABRT) -> sddm-helper ve "Process
+        # crashed" y NO devuelve el greeter: pantalla negra. Antes de salir se
+        # aplica RGBRules2 (el servidor de la sesion sigue vivo -> --client).
+        # El openrgb-shutdown de systemd queda de respaldo para reboots externos.
+        dropdown-logout-command = "${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2; hyprctl dispatch exit"
+        dropdown-reboot-command = "${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2; systemctl reboot"
+        dropdown-poweroff-command = "${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2; systemctl poweroff"
         button-bg-color = "bg-elevated"
 
         [modules.volume]
