@@ -588,10 +588,17 @@ audio/mpeg=vlc.desktop
 audio/flac=vlc.desktop
 audio/ogg=vlc.desktop
 audio/wav=vlc.desktop
+audio/mp4=vlc.desktop
+audio/opus=vlc.desktop
+audio/aac=vlc.desktop
+audio/x-m4a=vlc.desktop
 video/mp4=vlc.desktop
 video/webm=vlc.desktop
 video/quicktime=vlc.desktop
 video/x-matroska=vlc.desktop
+video/3gpp=vlc.desktop
+video/x-msvideo=vlc.desktop
+video/avi=vlc.desktop
 application/zip=org.kde.ark.desktop
 application/x-7z-compressed=org.kde.ark.desktop
 application/x-rar=org.kde.ark.desktop
@@ -618,9 +625,11 @@ EOF
     fi
     # KDE ignora los caches ksycoca nuevos y sigue usando uno viejo (nixpkgs#292632):
     # sin esto, Dolphin resuelve las asociaciones contra un cache desactualizado
-    # y re-pregunta "abrir con" aunque ya haya default. Al limpiarlos, KDE los
-    # regenera con el entorno actual en el siguiente arranque/uso.
+    # y re-pregunta "abrir con" aunque ya haya default. Al limpiarlos Y
+    # reconstruirlos al vuelo con el entorno NUEVO, el cache queda correcto al
+    # instante (el kbuildsycoca6 headless no necesita display).
     rm -f "$HOME/.cache/ksycoca6_"*
+    "${pkgs.kdePackages.kservice}/bin/kbuildsycoca6" --noincremental >/dev/null 2>&1 || true
   '';
 
   # Previews de Dolphin para todo tipo de archivo (imágenes, vídeo, audio, pdfs...):
