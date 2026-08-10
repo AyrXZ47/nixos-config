@@ -242,10 +242,12 @@ in
       hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
       hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
 
-      -- Control de reproducción (MPD via mpc): F7 pausa/reanuda, F6/F8 prev/next
-      hl.bind("SUPER + F7", hl.dsp.exec_cmd("mpc toggle"))
-      hl.bind("SUPER + F6", hl.dsp.exec_cmd("mpc prev"))
-      hl.bind("SUPER + F8", hl.dsp.exec_cmd("mpc next"))
+      -- Control de reproducción: wayle media usa MPRIS, así que SUPER+F7 pausa
+      -- lo que sea que esté sonando (YouTube/Firefox, VLC, mpv...). El `|| mpc`
+      -- es el fallback para MPD cuando no hay reproductor MPRIS activo.
+      hl.bind("SUPER + F7", hl.dsp.exec_cmd("wayle media play-pause || mpc toggle"))
+      hl.bind("SUPER + F6", hl.dsp.exec_cmd("wayle media previous || mpc prev"))
+      hl.bind("SUPER + F8", hl.dsp.exec_cmd("wayle media next || mpc next"))
 
       -----------------------
       ---- GESTOS -----------
