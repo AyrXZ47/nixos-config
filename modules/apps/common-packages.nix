@@ -4,13 +4,23 @@ let
   # ponytail: mixxx crashea en el file dialog (QGtk3Theme → g_settings_set_property abort).
   # Trigger: QT_QPA_PLATFORMTHEME=gtk3 global. Desactivamos el platform theme solo para
   # mixxx; su theming no depende de él (qt.style/kdeglobals lo cubren).
+  #
+  # Mixxx 2.5.x tiene una fuga de memoria durante el análisis de librería (aquí
+  # llegó a ~53 GB de RSS → OOM global y 30s de congelamiento por el thrash de
+  # swap; en análisis normal con 6k canciones no pasa de unos GB). Se lanza
+  # dentro de un cgroup con MemoryMax=8G: si vuelve a fugarse, el OOM del
+  # cgroup lo mata limpio y rápido, sin tocar al resto del sistema. Subir el
+  # límite en este archivo si un uso legítimo lo llegara a necesitar.
   mixxx = pkgs.symlinkJoin {
     name = "mixxx";
     paths = [ pkgs.mixxx ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       mv $out/bin/mixxx $out/bin/.mixxx-wrapped
-      makeWrapper $out/bin/.mixxx-wrapped $out/bin/mixxx --unset QT_QPA_PLATFORMTHEME
+      makeWrapper ${pkgs.systemd}/bin/systemd-run $out/bin/mixxx \
+        --unset QT_QPA_PLATFORMTHEME \
+        --add-flags "--user --scope --quiet -p MemoryMax=8G" \
+        --add-flags "$out/bin/.mixxx-wrapped"
     '';
   };
 in
