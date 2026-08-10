@@ -49,6 +49,7 @@ in
         hl.exec_cmd("kdeconnectd")
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
         hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/caps-lock.sh")
       end)
 
       ------------------------
@@ -400,6 +401,36 @@ hwdec=vaapi" ALL "$f"
       }
     '';
 
+    # Banner temporal al togglear Caps Lock: el LED de /sys/class/leds refleja
+    # el estado real del teclado; se sondea cada 250ms (inotifywait no está
+    # instalado) y se avisa con notify-send (popup elegante de wayle). Si el
+    # teclado no expone el LED (ej. BT), el script termina sin hacer nada.
+    # ponytail: polling de un sysfs trivial; upgrade path: inotifywait.
+    "hypr/scripts/caps-lock.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        led=""
+        for l in /sys/class/leds/*capslock*/brightness; do
+          [ -e "$l" ] && led="$l" && break
+        done
+        [ -z "$led" ] && exit 0
+        state=$(cat "$led")
+        while :; do
+          sleep 0.25
+          new=$(cat "$led")
+          if [ "$new" != "$state" ]; then
+            state=$new
+            if [ "$state" = "1" ]; then
+              notify-send -t 1500 -a keyboard -u low "⇪ MAYÚS activadas"
+            else
+              notify-send -t 1500 -a keyboard -u low "⇪ mayúsculas desactivadas"
+            fi
+          fi
+        done
+      '';
+    };
+
     # hyprlock: la config debe existir o hyprlock sale con error y la sesión NO se
     # bloquea. Autenticación: PAM (contraseña, vía security.pam.services.hyprlock)
     # y huella nativa por fprintd (auth fingerprint:enabled), en paralelo.
@@ -594,14 +625,14 @@ application/x-bzip2=org.kde.ark.desktop
 EOF
     }
     # El diálogo "Open with" de KDE, al elegir un binario por "browse", genera
-    # .desktop NoDisplay en ~/.local/share/applications; KDE los descarta al
-    # resolver el default y re-pregunta siempre. Se limpian y se usa el id real.
-    rm -f "$HOME/.local/share/applications/firefox-2.desktop" \
-          "$HOME/.local/share/applications/inkscape.desktop"
+    # .desktop NoDisplay en ~/.local/share/applications (con sufijo -N); KDE los
+    # descarta al resolver el default y re-pregunta siempre. Se limpian TODOS
+    # los stubs -N (imv-2, firefox-2, ...) y se usa el id real.
+    rm -f "$HOME/.local/share/applications/"*-[0-9].desktop
     if [ -f "$f" ]; then
       # Migración única: si el archivo guarda ids de stubs rotos (generados por
       # el diálogo), se regenera desde el seed; si no, se respeta lo que haya.
-      if grep -qE 'firefox-2\.desktop|inkscape\.desktop' "$f"; then
+      if grep -qE -- '-[0-9]+\.desktop' "$f"; then
         cp "$f" "$f.bak"
         write_seed
       fi
@@ -619,14 +650,27 @@ EOF
   # se siembra [PreviewSettings] la primera vez. ffmpegthumbs (common-packages)
   # aporta el preview de vídeo; sin él, Dolphin no muestra miniaturas de vídeo
   # (ni siquiera del móvil por MTP).
+  #
+  # OJO: el formato de lista de KConfig es SEPARADA POR COMAS, no por ';'
+  # (KConfigGroup::writeEntry(QStringList) serializa con ','). Una semilla con
+  # ';' se lee como UN SOLO string -> ningun plugin coincide -> Dolphin no
+  # genera NINGUN preview. Verificado: kwriteconfig6 escribe comas.
   home.activation.materializeDolphinPreview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     f="$HOME/.config/dolphinrc"
-    if [ -f "$f" ] && ! grep -q '\[PreviewSettings\]' "$f"; then
+    write_seed() {
       cat >> "$f" <<'EOF'
 
 [PreviewSettings]
-Plugins=imagethumbnail;jpegthumbnail;svgthumbnail;directorythumbnail;textthumbnail;audiothumbnail;ffmpegthumbs;comicbookthumbnail;djvu;ebook;exr;kraora;opendocument;
+Plugins=imagethumbnail,jpegthumbnail,svgthumbnail,directorythumbnail,textthumbnail,audiothumbnail,ffmpegthumbs,comicbookthumbnail,djvu,ebook,exr,kraora,opendocument
 EOF
+    }
+    if grep -q '^Plugins=.*;' "$f" 2>/dev/null; then
+      # Migración única: la semilla antigua (pre-fix) usaba ';' y mataba todos
+      # los previews; se reemplaza la línea rota por el formato con comas.
+      cp "$f" "$f.bak"
+      sed -i 's|^Plugins=.*$|Plugins=imagethumbnail,jpegthumbnail,svgthumbnail,directorythumbnail,textthumbnail,audiothumbnail,ffmpegthumbs,comicbookthumbnail,djvu,ebook,exr,kraora,opendocument|' "$f"
+    elif ! grep -q '\[PreviewSettings\]' "$f" 2>/dev/null; then
+      write_seed
     fi
   '';
 
