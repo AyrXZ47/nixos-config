@@ -773,6 +773,12 @@ EOF
     # y re-pregunta "abrir con" aunque ya haya default. Al limpiarlos Y
     # reconstruirlos al vuelo con el entorno NUEVO, el cache queda correcto al
     # instante (el kbuildsycoca6 headless no necesita display).
+    #
+    # El rebuild SOLO produce servicios si existe /etc/xdg/menus/applications.menu
+    # (se provee en common-packages): sin el archivo, kbuildsycoca6 no indexa
+    # NINGUN .desktop (las apps entran via <DefaultAppDirs/> del menu; Plasma lo
+    # encuentra porque su sesion pone XDG_MENU_PREFIX=plasma-, Hyprland no) y
+    # ksycoca queda con 0 servicios -> Dolphin pregunta "abrir con" para todo.
     rm -f "$HOME/.cache/ksycoca6_"*
     "${pkgs.kdePackages.kservice}/bin/kbuildsycoca6" --noincremental >/dev/null 2>&1 || true
   '';
