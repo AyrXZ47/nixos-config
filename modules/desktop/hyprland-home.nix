@@ -175,9 +175,9 @@ in
       -- kdeconnect presenter ("Presentation remote" del celular): ventana fullscreen
       -- transparente; con blur (ignore_opacity=true) se veia como un panel opaco
       -- borroso que tapa el escritorio. Sin blur solo queda el puntero dibujado.
-      -- Clase: el app_id Wayland de Qt = applicationName del daemon (kdeconnect.daemon);
-      -- el id D-Bus org.kde.kdeconnect tambien se cubre por si cambia.
-      hl.window_rule({ name = "kdeconnect-presenter", match = { class = "org.kde.kdeconnect|kdeconnect.daemon" }, no_blur = true })
+      -- Clase real capturada con hyprctl clients: org.kde.kdeconnect.daemon (el
+      -- applicationName del daemon; anclada ^$ para que matchee exacta).
+      hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, no_blur = true })
 
       -----------------------
       ---- LAYER RULES ------
