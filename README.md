@@ -235,6 +235,24 @@ and only the local file is touched). First login uses `initialPassword` (see
 3. Register it in `flake.nix` under `nixosConfigurations` with `mkHost`.
 4. `./bootstrap.sh <name>`.
 
+## nix-on-droid (celular)
+
+Config independiente para Android (app de nix-on-droid / Termux), sincronizada
+desde el repo: flake propio en `nix-on-droid/` (`nixOnDroidConfigurations.default`),
+**no** entra en `nix flake check` de la raíz. Reutiliza los módulos home del repo
+(shell, git, neovim) via home-manager.
+
+Para aplicar cambios, en el celular, dentro del directorio del repo:
+
+```bash
+nix-on-droid switch --flake .#default
+```
+
+**Ojo con los pins** (ver comentarios en `nix-on-droid/flake.nix` antes de tocarlos):
+nixpkgs `nixos-25.11` + home-manager `release-25.11` (glibc <2.42) y nix-on-droid
+anclado al master pre-PR #529 (proot 2024-05-04 con rutas que el APK ya trae en el
+store). Juntos hacen que el switch active sin pasos extra.
+
 ## Day-to-Day
 
 ```bash
