@@ -2,14 +2,19 @@
   description = "nix-on-droid (Termux/celular) — config sincronizada con el repo";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Pinchado a nixos-25.11: glibc >=2.42 (unstable >=26.05) rompe el proot
+    # 2024-05-04 bundleado del app (issue #495) incluso con el PR #529 si no se
+    # hace el swap manual de proot-static. Con 25.11 (glibc 2.40) el proot
+    # actual funciona y el switch activa sin pasos extra. Quitar el pin cuando
+    # el proot nuevo esté mergeado en upstream (PR #529).
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     # home-manager nuevo: el que bundlea nix-on-droid (2024) no entiende la API
-    # de los módulos home del repo (ej. programs.git.settings). Se fuerza uno
-    # reciente para poder importarlos tal cual.
+    # de los módulos home del repo (ej. programs.git.settings). Se usa la rama
+    # release-25.11, la pareja del nixpkgs pinchado (master exigiría
+    # lib/services de nixpkgs post-25.11).
     home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/home-manager/release-25.11";
     };
 
     nix-on-droid = {
