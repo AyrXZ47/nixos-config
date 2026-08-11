@@ -2,16 +2,17 @@
 
 let
   terminalLogo = ../../assets/Terminal/nixTeminal.png;
+  # El logo ascii integrado de nixos no se puede redimensionar (ancho/alto
+  # fijos), asi que aqui se usa una version pre-escalada mas pequeña en raw.
+  asciiLogoFile = ../../assets/ascii/nixos-small.txt;
   cfg = config.modules.apps.fastfetch;
   # El celular (nix-on-droid) no soporta el protocolo kitty de la app de
-  # Termux, asi que ahi se usa el logo ascii integrado de nixos. La pc sigue
-  # con el PNG.
+  # Termux, asi que ahi se usa el logo ascii pequeño. La pc sigue con el PNG.
   logoJson = if cfg.asciiLogo then ''
     {
-      "type": "builtin",
-      "source": "nixos",
-      "width": 40,
-      "padding": { "top": 2, "left": 4 }
+      "type": "raw",
+      "source": "~/.config/fastfetch/nixos-small.txt",
+      "padding": { "top": 1, "left": 0 }
     }
   '' else ''
     {
@@ -35,6 +36,7 @@ in
   config = {
     home.packages = with pkgs; [ fastfetch ];
 
+    xdg.configFile."fastfetch/nixos-small.txt".source = asciiLogoFile;
     xdg.configFile."fastfetch/config.jsonc".text = ''
       {
         "$schema": "https://github.com/fastfetch/fastfetch/raw/dev/doc/config.schema.json",
