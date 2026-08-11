@@ -159,7 +159,7 @@ in
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
-      hl.window_rule({ name = "imv-float", match = { class = "imv" }, float = true })
+      hl.window_rule({ name = "swayimg-float", match = { class = "swayimg" }, float = true })
       -- wezterm: transparencia propia (window_background_opacity) sin blur del compositor.
       -- opacity "1 override": fuerza 1.0 absoluto (el multiplicador daría 1.0*0.75).
       hl.window_rule({ name = "wezterm-solid", match = { class = "org.wezfurlong.wezterm" }, no_blur = true, opacity = "1 override" })
@@ -291,7 +291,7 @@ in
     libnotify
     wl-clipboard
     hyprshot
-    imv
+    swayimg
     tree-sitter
     cliphist
     setxkbmap
@@ -610,11 +610,12 @@ hwdec=vaapi" ALL "$f"
   # el diálogo "abrir con" (obliga a "browse" a un binario, que genera stubs
   # NoDisplay que KDE descarta al resolver el default y re-pregunta siempre).
   # Se sobreescribe con una entrada visible que sombrea la del perfil.
-  xdg.desktopEntries.imv = {
-    name = "imv";
-    exec = "imv %F";
+  # swayimg (reemplazo de imv: zoom con la rueda del raton) hace lo mismo.
+  xdg.desktopEntries.swayimg = {
+    name = "Swayimg";
+    exec = "swayimg %F";
     type = "Application";
-    icon = "multimedia-photo-viewer";
+    icon = "swayimg";
     mimeType = [
       "image/avif"
       "image/bmp"
@@ -622,17 +623,22 @@ hwdec=vaapi" ALL "$f"
       "image/heif"
       "image/jpeg"
       "image/jpg"
+      "image/jxl"
+      "image/pbm"
+      "image/pjpeg"
       "image/png"
       "image/svg+xml"
       "image/tiff"
       "image/webp"
       "image/x-bmp"
+      "image/x-exr"
+      "image/x-png"
+      "image/x-portable-anymap"
       "image/x-portable-bitmap"
       "image/x-portable-graymap"
       "image/x-portable-pixmap"
+      "image/x-targa"
       "image/x-tga"
-      "image/x-xbitmap"
-      "image/x-xpixmap"
     ];
   };
 
@@ -669,23 +675,24 @@ application/pdf=org.kde.okular.desktop
 text/html=firefox.desktop
 x-scheme-handler/http=firefox.desktop
 x-scheme-handler/https=firefox.desktop
-image/avif=imv.desktop
-image/bmp=imv.desktop
-image/gif=imv.desktop
-image/heif=imv.desktop
-image/jpeg=imv.desktop
-image/jpg=imv.desktop
-image/png=imv.desktop
+image/avif=swayimg.desktop
+image/bmp=swayimg.desktop
+image/gif=swayimg.desktop
+image/heif=swayimg.desktop
+image/jpeg=swayimg.desktop
+image/jpg=swayimg.desktop
+image/jxl=swayimg.desktop
+image/pbm=swayimg.desktop
+image/png=swayimg.desktop
 image/svg+xml=org.inkscape.Inkscape.desktop
-image/tiff=imv.desktop
-image/webp=imv.desktop
-image/x-bmp=imv.desktop
-image/x-portable-bitmap=imv.desktop
-image/x-portable-graymap=imv.desktop
-image/x-portable-pixmap=imv.desktop
-image/x-tga=imv.desktop
-image/x-xbitmap=imv.desktop
-image/x-xpixmap=imv.desktop
+image/tiff=swayimg.desktop
+image/webp=swayimg.desktop
+image/x-bmp=swayimg.desktop
+image/x-exr=swayimg.desktop
+image/x-portable-bitmap=swayimg.desktop
+image/x-portable-graymap=swayimg.desktop
+image/x-portable-pixmap=swayimg.desktop
+image/x-tga=swayimg.desktop
 text/plain=nvim.desktop
 application/x-keepass2=org.keepassxc.KeePassXC.desktop
 audio/mpeg=vlc.desktop
@@ -824,7 +831,7 @@ EOF
     # El diálogo "Open with" de KDE, al elegir un binario por "browse", genera
     # .desktop NoDisplay en ~/.local/share/applications (con sufijo -N); KDE los
     # descarta al resolver el default y re-pregunta siempre. Se limpian TODOS
-    # los stubs -N (imv-2, firefox-2, ...) y se usa el id real.
+    # los stubs -N (swayimg-2, firefox-2, ...) y se usa el id real.
     rm -f "$HOME/.local/share/applications/"*-[0-9].desktop
     if [ -f "$f" ]; then
       # Migración única: si el archivo guarda ids de stubs rotos (generados por
