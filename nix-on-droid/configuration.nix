@@ -46,7 +46,11 @@
     procps
     killall
     # Herramientas de desarrollo y terminal completas.
-    opencode
+    # OJO: opencode NO va aqui — se instala por activacion de home-manager
+    # (ver abajo): el output nix del binario standalone no viene de la cache
+    # binaria, el store del celular lo pierde y el profile queda con symlink
+    # muerto ('command not found' sin error). La activacion lo extrae del
+    # tarball del flake source a ~/.opencode/bin en cada switch.
     gh
     jq
     nodejs
@@ -70,13 +74,25 @@
   # fastfetch tampoco: el config del pc usa logo PNG (protocolo kitty) y lineas
   # de 70+ chars que en la terminal angosta del celular envuelven y se pisan.
   # Aqui fastfetch corre con su config por defecto (logo ascii, ajusta ancho).
-  home-manager.config = { config, pkgs, lib, ... }: {
+  home-manager.config = { config, pkgs, lib, opencodeTarball, ... }: {
     home.stateVersion = "24.05";
     imports = [
       ../modules/apps/shell.nix
       ../modules/apps/git.nix
       ../modules/apps/neovim.nix
     ];
+
+    # opencode autocurable: el tarball viaja en el flake source (re-copiado
+    # fresco en cada switch, imposible que falte) y esta activacion lo extrae
+    # a ~/.opencode/bin — primer entrada del sessionPath de shell.nix. No hay
+    # store path nix que corromper ni symlink muerto posible: cada switch lo
+    # reinstala. OJO: sobreescribe el binario si opencode se auto-actualizo
+    # (version pinneada declarativa — feature, no bug).
+    home.activation.installOpencode = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      mkdir -p "$HOME/.opencode/bin"
+      ${pkgs.gnutar}/bin/tar -xzf "${opencodeTarball}" -C "$HOME/.opencode/bin"
+      chmod +x "$HOME/.opencode/bin/opencode"
+    '';
 
     # JetBrainsMono Nerd Font (la misma de wezterm en la pc): la terminal de la
     # app de nix-on-droid lee ~/.termux/font.ttf igual que termux. Sin ella los

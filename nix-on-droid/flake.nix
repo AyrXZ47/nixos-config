@@ -74,41 +74,22 @@
         system = "aarch64-linux";
         overlays = [
           androidUnpackFix
-          # opencode 1.1.14 (el único de nixpkgs 25.11) es wrapper de bun y se
-          # cuelga sin salida bajo proot en el celular. La 1.18.x empaqueta un
-          # binario standalone (bun --single) — el que traía unstable y
-          # funcionaba antes del pin a 25.11 — así que se usa el release
-          # precompilado arm64: solo pide glibc 2.17 (el store del celular
-          # trae 2.40), no arrastra glibc 2.42 de unstable (rompe el proot) y
-          # no se compila en el celular.
-            (final: prev: {
-            opencode = prev.stdenv.mkDerivation {
-              pname = "opencode";
-              version = "1.18.16";
-              # Tarball verificado (sha256-KA7pKr...) COMMITEADO al repo: el
-              # asset de anomalyco/opencode fue re-subido y el CDN de GitHub
-              # sirve hashes distintos por region/edge (el celular recibe
-              # T9zl... incluso de un release propio con solo KA7pKr...) -> el
-              # switch rompia con hash mismatch aleatorio. Un archivo local
-              # del flake es content-addressed: sin red, sin pin, imposible
-              # que no matchee. Al subir de version: reemplazar este archivo,
-              # ajustar version y borrar el viejo (60 MB).
-              src = ./opencode-1.18.16.tar.gz;
-              sourceRoot = ".";
-              dontConfigure = true;
-              dontBuild = true;
-              installPhase = ''
-                install -Dm755 opencode $out/bin/opencode
-              '';
-              meta.mainProgram = "opencode";
-            };
-          })
         ];
       };
     in
     {
       nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
         inherit pkgs;
+        # opencode NO se declara como derivacion nix: su output standalone no
+        # viene de la cache binaria y el store del celular lo pierde (path
+        # corrupto/parcial, el env cacheado nunca lo re-materializa y el
+        # symlink del profile queda muerto -> 'command not found' sin error).
+        # En su lugar el tarball (verificado, sha256-KA7pKr...) viaja en el
+        # flake source (re-copiado fresco en CADA switch) y home-manager lo
+        # extrae a ~/.opencode/bin (ya en sessionPath) como activation:
+        # autocurable, sin store path que se corrompa. Al subir de version:
+        # reemplazar este archivo y ajustar la version en configuration.nix.
+        extraSpecialArgs = { opencodeTarball = ./opencode-1.18.16.tar.gz; };
         modules = [ ./configuration.nix ];
       };
     };
