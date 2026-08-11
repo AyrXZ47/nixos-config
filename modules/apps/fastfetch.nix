@@ -8,7 +8,8 @@ let
   # con el PNG.
   logoJson = if cfg.asciiLogo then ''
     {
-      "type": "nixos",
+      "type": "builtin",
+      "source": "nixos",
       "width": 40,
       "padding": { "top": 2, "left": 4 }
     }
