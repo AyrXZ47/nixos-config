@@ -1,8 +1,13 @@
-{ pkgs, ... }:
+{ pkgs, opencodeTarball, ... }:
 
 {
   # No tocar sin leer el changelog de nix-on-droid antes de subir de version.
   system.stateVersion = "24.05";
+
+  # El tarball llega aqui via extraSpecialArgs del flake (module system top);
+  # home-manager.config se evalua como submódulo y NO hereda esos args — se
+  # re-expone con la opcion home-manager.extraSpecialArgs (ver abajo).
+  home-manager.extraSpecialArgs = { inherit opencodeTarball; };
 
   # OJO: el default de nix-on-droid es bash. Sin esto la terminal abre en bash:
   # sin p10k, sin aliases (tree/dev/ll), sin fastfetch al abrir, sin fzf. El
