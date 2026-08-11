@@ -94,6 +94,15 @@
     '';
   };
 
+  # NightCity (2TB, ext4): disco de datos interno, montado siempre en el boot.
+  # nofail: si algun dia falta el disco el boot no se cuelga. Con fstab Dolphin
+  # lo lista en Devices sin necesidad de click (udisks2 ya no lo toca).
+  fileSystems."/mnt/nightcity" = {
+    device = "/dev/disk/by-uuid/14c6cc67-3079-4434-b078-e29a7177dcf6";
+    fsType = "ext4";
+    options = [ "nofail" ];
+  };
+
   time.timeZone = "America/Mexico_City";
 
   i18n.defaultLocale = "en_US.UTF-8";
