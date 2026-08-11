@@ -26,10 +26,12 @@
     openssh
     ripgrep
     fd
-    # btop no: proot falsifica /proc/stat con un stub minimo (el changelog de
-    # nix-on-droid lo documenta: "allows unpatched htop to work") y el
-    # Cpu::collect() de btop revienta con 'Failed to parse /proc/stat'. htop
-    # es el monitoreo que el stub soporta.
+    # btop no (verificado bajo proot): 1) pide un terminal real — proot no
+    # expone /dev/tty usable y muere con 'No tty detected!' antes de hacer nada;
+    # 2) proot falsifica /proc/stat con un stub minimo (solo 'btime 0', el
+    # changelog de nix-on-droid documenta: "allows unpatched htop to work") y el
+    # Cpu::collect() de btop tampoco lo parsearia. htop es el monitoreo que el
+    # stub y la falta de tty soportan.
     htop
     # ping bajo proot: iputils funciona solo si el kernel deja abrir raw
     # sockets (SELinux del fabricante manda); si falla con 'Operation not
@@ -89,13 +91,16 @@
       ../modules/apps/shell.nix
       ../modules/apps/git.nix
       ../modules/apps/neovim.nix
+      ../modules/apps/fastfetch.nix
     ];
 
-    # fastfetch va como paquete home con su config por defecto (logo ascii,
-    # ajusta ancho): el config del pc (modules/apps/fastfetch.nix) usa logo PNG
-    # por protocolo kitty y lineas de 70+ chars que envuelven y se pisan en la
-    # terminal angosta del celular.
-    home.packages = with pkgs; [ fastfetch ];
+    # fastfetch con la MISMA config que la pc (separador, titulo, modulos),
+    # pero con logo ascii de nixos: el PNG va por protocolo kitty, que la app
+    # de Termux no soporta, y por defecto fastfetch detecta Android/linux y
+    # muestra un Tux. La lista de modulos de la pc imprime menos cosas que el
+    # default de fastfetch (que añade disk/battery/localip...) -> mas rapido
+    # bajo proot.
+    modules.apps.fastfetch.asciiLogo = true;
 
     # opencode autocurable: el tarball viaja en el flake source (re-copiado
     # fresco en cada switch, imposible que falte) y esta activacion lo extrae
