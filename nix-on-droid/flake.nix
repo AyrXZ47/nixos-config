@@ -80,7 +80,7 @@
               version = "1.18.16";
               src = prev.fetchurl {
                 url = "https://github.com/anomalyco/opencode/releases/download/v1.18.16/opencode-linux-arm64.tar.gz";
-                sha256 = "sha256-T9zl+byHfZdzBNccDJCtboPvo4H+Dt8KYeYUKmJeHEE=";
+                sha256 = "sha256-KA7pKrIhf5yBUT6owBIUq0lglrWdolTVORDGXxPG1MU=";
               };
               sourceRoot = ".";
               dontConfigure = true;
