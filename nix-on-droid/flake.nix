@@ -74,19 +74,19 @@
           # precompilado arm64: solo pide glibc 2.17 (el store del celular
           # trae 2.40), no arrastra glibc 2.42 de unstable (rompe el proot) y
           # no se compila en el celular.
-          (final: prev: {
+            (final: prev: {
             opencode = prev.stdenv.mkDerivation {
               pname = "opencode";
               version = "1.18.16";
-              src = prev.fetchurl {
-                # El asset upstream (anomalyco/opencode) fue re-subido en GitHub y
-                # su CDN sirve hashes distintos por region/edge (T9zl... vs
-                # KA7pKr...) -> el switch del celular rompia con hash mismatch
-                # aleatorio. Pin estable: el tarball vive en los releases de este
-                # repo (nadie lo re-subira). Verificado: sha256-KA7pKr...
-                url = "https://github.com/AyrXZ47/nixos-config/releases/download/opencode-1.18.16/opencode-linux-arm64.tar.gz";
-                sha256 = "sha256-KA7pKrIhf5yBUT6owBIUq0lglrWdolTVORDGXxPG1MU=";
-              };
+              # Tarball verificado (sha256-KA7pKr...) COMMITEADO al repo: el
+              # asset de anomalyco/opencode fue re-subido y el CDN de GitHub
+              # sirve hashes distintos por region/edge (el celular recibe
+              # T9zl... incluso de un release propio con solo KA7pKr...) -> el
+              # switch rompia con hash mismatch aleatorio. Un archivo local
+              # del flake es content-addressed: sin red, sin pin, imposible
+              # que no matchee. Al subir de version: reemplazar este archivo,
+              # ajustar version y borrar el viejo (60 MB).
+              src = ./opencode-1.18.16.tar.gz;
               sourceRoot = ".";
               dontConfigure = true;
               dontBuild = true;
