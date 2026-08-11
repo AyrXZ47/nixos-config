@@ -21,7 +21,15 @@
     openssh
     ripgrep
     fd
-    btop
+    # btop no: proot falsifica /proc/stat con un stub minimo (el changelog de
+    # nix-on-droid lo documenta: "allows unpatched htop to work") y el
+    # Cpu::collect() de btop revienta con 'Failed to parse /proc/stat'. htop
+    # es el monitoreo que el stub soporta.
+    htop
+    # ping bajo proot: iputils funciona solo si el kernel deja abrir raw
+    # sockets (SELinux del fabricante manda); si falla con 'Operation not
+    # permitted' no hay arreglo sin root. ponytail: ceiling del entorno.
+    iputils
     curl
     # Herramientas de desarrollo y terminal completas.
     opencode
