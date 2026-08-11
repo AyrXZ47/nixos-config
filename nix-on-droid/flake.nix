@@ -9,6 +9,13 @@
     # pasos extra. Quitar el pin cuando el proot nuevo esté mergeado en
     # upstream de forma utilizable (PR #529; ver comentario del input
     # nix-on-droid).
+    # ATENCION: cualquier cambio en este flake (incluido un comentario) cambia
+    # el hash del source y con el TODAS las derivaciones que referencian
+    # archivos locales (el tarball de opencode). Eso arregla "opencode: command
+    # not found" tras un garbage collect: el output de opencode se construye
+    # localmente (no viene de la cache binaria) y si el store lo pierde, el env
+    # cacheado no re-materializa la dependencia y el symlink del profile queda
+    # roto -> tocar este archivo y re-switch reconstruye todo.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     # home-manager nuevo: el que bundlea nix-on-droid (2024) no entiende la API
