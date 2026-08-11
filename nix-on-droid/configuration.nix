@@ -95,7 +95,10 @@
     # (version pinneada declarativa — feature, no bug).
     home.activation.installOpencode = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       mkdir -p "$HOME/.opencode/bin"
-      ${pkgs.gnutar}/bin/tar -xzf "${opencodeTarball}" -C "$HOME/.opencode/bin"
+      # La activacion corre con PATH minimo: tar no encuentra gzip (Cannot
+      # exec) y su propio gzip esta fuera del profile aun. Rutas absolutas y
+      # pipe explicito, sin -z.
+      ${pkgs.gzip}/bin/gzip -dc "${opencodeTarball}" | ${pkgs.gnutar}/bin/tar -xf - -C "$HOME/.opencode/bin"
       chmod +x "$HOME/.opencode/bin/opencode"
     '';
 
