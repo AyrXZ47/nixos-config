@@ -235,7 +235,7 @@ and only the local file is touched). First login uses `initialPassword` (see
 3. Register it in `flake.nix` under `nixosConfigurations` with `mkHost`.
 4. `./bootstrap.sh <name>`.
 
-## nix-on-droid (celular)
+## nix-on-droid (celular/tablet)
 
 Config independiente para Android (app de nix-on-droid / Termux), sincronizada
 desde el repo: flake propio en `nix-on-droid/` (`nixOnDroidConfigurations.default`),
@@ -245,13 +245,34 @@ desde el repo: flake propio en `nix-on-droid/` (`nixOnDroidConfigurations.defaul
 Para aplicar cambios, en el celular, dentro del directorio del repo:
 
 ```bash
+git pull
 nix-on-droid switch --flake .#default
 ```
 
 **Ojo con los pins** (ver comentarios en `nix-on-droid/flake.nix` antes de tocarlos):
 nixpkgs `nixos-25.11` + home-manager `release-25.11` (glibc <2.42) y nix-on-droid
 anclado al master pre-PR #529 (proot 2024-05-04 con rutas que el APK ya trae en el
-store). Juntos hacen que el switch active sin pasos extra.
+store). Juntos hacen que el switch active sin pasos extra. Unstable (glibc ≥2.42)
+rompe la activación del proot — no es conservadurismo, es el techo actual; se
+destraba cuando el PR #529 (proot nuevo) esté mergeado de forma utilizable.
+
+**opencode** no vive en el profile nix: el output standalone no viene de la
+caché binaria, el store del celular lo perdía y el profile quedaba con symlink
+muerto (`command not found` sin error). Se instala por activación de home-manager
+desde el tarball verificado commiteado al repo (`nix-on-droid/opencode-1.18.16.tar.gz`,
+60 MB — el asset upstream fue re-subido y su CDN servía hashes distintos por región),
+extrayéndolo a `~/.opencode/bin` con `patchelf` que re-apunta el interpreter ELF
+al loader de glibc del store (el binario standalone pide `/lib/ld-linux-aarch64.so.1`,
+inexistente en nix-on-droid). Autocurable: cada switch lo reinstala. Al subir de
+versión: reemplazar el tarball y ajustar la versión en `configuration.nix`.
+
+**Gotchas del entorno proot** (por qué algunas cosas del PC no van aquí):
+- `btop` no: proot falsifica `/proc/stat` con un stub mínimo que solo soporta `htop`.
+- `fastfetch` corre con su config por defecto (la del PC usa logo PNG y líneas anchas).
+- `dev`/`netrunner` requieren WezTerm — no existe en Android (usa la terminal de la app).
+- `ping` funciona solo si el SELinux del fabricante permite raw sockets.
+- El env default de nix-on-droid no trae ni `grep`: el flake añade gnugrep, gnused,
+  gnutar, gzip, bzip2, xz, zip, findutils, diffutils, procps, killall.
 
 ## Day-to-Day
 
