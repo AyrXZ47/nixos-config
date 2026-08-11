@@ -91,6 +91,12 @@
       ../modules/apps/neovim.nix
     ];
 
+    # fastfetch va como paquete home con su config por defecto (logo ascii,
+    # ajusta ancho): el config del pc (modules/apps/fastfetch.nix) usa logo PNG
+    # por protocolo kitty y lineas de 70+ chars que envuelven y se pisan en la
+    # terminal angosta del celular.
+    home.packages = with pkgs; [ fastfetch ];
+
     # opencode autocurable: el tarball viaja en el flake source (re-copiado
     # fresco en cada switch, imposible que falte) y esta activacion lo extrae
     # a ~/.opencode/bin — primer entrada del sessionPath de shell.nix. No hay
@@ -110,13 +116,6 @@
       ${pkgs.patchelf}/bin/patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-aarch64.so.1" "$HOME/.opencode/bin/opencode"
       chmod +x "$HOME/.opencode/bin/opencode"
     '';
-
-    # JetBrainsMono Nerd Font (la misma de wezterm en la pc): la terminal de la
-    # app de nix-on-droid lee ~/.termux/font.ttf igual que termux. Sin ella los
-    # iconos de p10k/nerd fonts salen como cuadros. Reiniciar la app para que
-    # cargue la fuente.
-    home.file.".termux/font.ttf".source =
-      "${pkgs.nerd-fonts.jetbrains-mono}/share/fonts/truetype/NerdFonts/JetBrainsMono/JetBrainsMonoNerdFont-Regular.ttf";
   };
 
 
@@ -132,28 +131,42 @@
       directory = *
   '';
 
-  # Terminal con el palette cyberpunk de wayle (styling.palette en hyprland.nix).
+  # Terminal con el esquema Cyberdyne, el mismo de wezterm en la pc
+  # (config.color_scheme = "Cyberdyne" en modules/apps/wezterm.nix): asi el
+  # celular es reflejo exacto de la pc. OJO: cambiar colores aqui (declarativo);
+  # termux-style no funciona porque colors.properties es un symlink de solo
+  # lectura al store de nix y cualquier edicion se pisa en el proximo switch.
   terminal.colors = {
-    background = "#0a0a12";
-    foreground = "#d4d4f0";
-    cursor = "#ff0066";
-    color0 = "#141428";
-    color1 = "#ff0040";
-    color2 = "#00ff88";
-    color3 = "#ffcc00";
-    color4 = "#00aaff";
-    color5 = "#ff0066";
-    color6 = "#8888aa";
-    color7 = "#d4d4f0";
-    color8 = "#0a0a12";
-    color9 = "#ff0040";
-    color10 = "#00ff88";
-    color11 = "#ffcc00";
-    color12 = "#00aaff";
-    color13 = "#ff0066";
-    color14 = "#8888aa";
-    color15 = "#d4d4f0";
+    background = "#151144";
+    foreground = "#00ff92";
+    cursor = "#00ff9c";
+    color0 = "#080808";
+    color1 = "#ff8373";
+    color2 = "#00c172";
+    color3 = "#d2a700";
+    color4 = "#0071cf";
+    color5 = "#ff90fd";
+    color6 = "#6bffdd";
+    color7 = "#f1f1f1";
+    color8 = "#2e2e2e";
+    color9 = "#ffc4be";
+    color10 = "#d6fcba";
+    color11 = "#fffed5";
+    color12 = "#c2e3ff";
+    color13 = "#ffb2fe";
+    color14 = "#e6e7fe";
+    color15 = "#ffffff";
   };
+
+  # JetBrainsMono Nerd Font (la misma de wezterm en la pc): la app de Termux lee
+  # ~/.termux/font.ttf igual que termux. OJO: debe ir aqui (terminal.font) y NO
+  # via home.file: la app corre FUERA del proot y un symlink a /nix/store apunta
+  # a una ruta que solo existe dentro del proot -> cae a su fuente default y los
+  # iconos de p10k salen como cuadros/simbolos raros. Este modulo reescribe el
+  # prefijo /nix a la ruta real del dispositivo (/data/data/.../usr/nix/store/...).
+  # Reiniciar la app de Termux (cerrar todas las sesiones y reabrirla) para que
+  # cargue la fuente.
+  terminal.font = "${pkgs.nerd-fonts.jetbrains-mono}/share/fonts/truetype/NerdFonts/JetBrainsMono/JetBrainsMonoNerdFont-Regular.ttf";
 
   # Integracion Android: symlinks a storage, abrir archivos/urls, wake-lock.
   android-integration.termux-setup-storage.enable = true;
