@@ -348,17 +348,19 @@ in
 
     # udisks2: Dolphin lista/monta los discos extra (sda/sdb) sin fstab
     services.udisks2.enable = true;
-    # Dolphin mostraba cada disco LUKS DOS veces: el contenedor (sda1/nvme0n1p2,
-    # StorageVolume.usage 'Encrypted', con el mismo nombre/mountpoint que el
-    # filesystem) y el volumen desencriptado (dm-*, 'FileSystem'). Ambos pasan
-    # el filtro de KFilePlacesModel. UDISKS_IGNORE marca HintIgnore en udisks2
-    # y Solid excluye el contenedor (StorageVolume.ignored=true). El unlock
-    # sigue disponible por CLI (udisksctl unlock) con el polkit de abajo.
-    # Los UUID son de los headers LUKS (ID_FS_UUID del crypto_LUKS).
+    # Solo el contenedor del root (nvme0n1p2) va con UDISKS_IGNORE
+    # (HintIgnore -> StorageVolume.ignored): lo monta el initrd, nunca se
+    # desbloquea desde el escritorio, y el volumen desencriptado ya aparece
+    # via fstab. El contenedor de Mikoshi se DEJA visible a proposito: es la
+    # unica forma de que Dolphin ofrezca el desbloqueo (click -> dialogo de
+    # passphrase de soliduiserver, kded de plasma-workspace). Al desbloquear
+    # KFilePlacesModel (kio) muestra contenedor + volumen duplicados (no hay
+    # dedup); se esconde el del volumen (/dev/mapper/...) una vez con click
+    # derecho -> Hide, y persiste en kfileplaces.xml (bookmark por uuid), asi
+    # el contenedor queda solo: desbloquea y navega al mountpoint.
     services.udev.extraRules = ''
-      # root (nvme0n1p2) y Mikoshi (sda1): contenedores LUKS
+      # root (nvme0n1p2): contenedor LUKS, siempre montado por el initrd
       SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="crypto_LUKS", ENV{ID_FS_UUID}=="b6a58d8d-5ccb-436d-8837-bbeebc89a57b", ENV{UDISKS_IGNORE}="1"
-      SUBSYSTEM=="block", ENV{ID_FS_TYPE}=="crypto_LUKS", ENV{ID_FS_UUID}=="ab950c5c-59b2-4eac-9415-00849ad656bb", ENV{UDISKS_IGNORE}="1"
     '';
     # Daemons runtime del dashboard de Wayle (red, bluetooth, batería)
     hardware.bluetooth.enable = true;
