@@ -50,6 +50,10 @@
     diffutils
     procps
     killall
+    # patchelf: solo lo usa la activacion de opencode para re-apuntar el
+    # interpreter ELF al loader de glibc de nix (el binario standalone pide
+    # /lib/ld-linux-aarch64.so.1, que no existe en nix-on-droid).
+    patchelf
     # Herramientas de desarrollo y terminal completas.
     # OJO: opencode NO va aqui — se instala por activacion de home-manager
     # (ver abajo): el output nix del binario standalone no viene de la cache
@@ -99,6 +103,11 @@
       # exec) y su propio gzip esta fuera del profile aun. Rutas absolutas y
       # pipe explicito, sin -z.
       ${pkgs.gzip}/bin/gzip -dc "${opencodeTarball}" | ${pkgs.gnutar}/bin/tar -xf - -C "$HOME/.opencode/bin"
+      # El binario standalone (bun --single) pide /lib/ld-linux-aarch64.so.1,
+      # que NO existe en nix-on-droid -> 'no such file or directory' al
+      # ejecutar aunque el archivo exista. patchelf re-apunta el interpreter
+      # al loader de glibc del store (el mismo que corre todo lo demas).
+      ${pkgs.patchelf}/bin/patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-aarch64.so.1" "$HOME/.opencode/bin/opencode"
       chmod +x "$HOME/.opencode/bin/opencode"
     '';
 
