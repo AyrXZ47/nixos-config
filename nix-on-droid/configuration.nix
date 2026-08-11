@@ -31,6 +31,20 @@
     # permitted' no hay arreglo sin root. ponytail: ceiling del entorno.
     iputils
     curl
+    # Coreutils de terminal que el env default de nix-on-droid NO trae (el
+    # template solo mete bashInteractive, coreutils, cacert, less y nix): sin
+    # esto no hay grep, sed, tar, zip ni find en el celular.
+    gnugrep
+    gnused
+    gnutar
+    gzip
+    bzip2
+    xz
+    zip
+    findutils
+    diffutils
+    procps
+    killall
     # Herramientas de desarrollo y terminal completas.
     opencode
     gh
