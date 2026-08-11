@@ -79,7 +79,12 @@
               pname = "opencode";
               version = "1.18.16";
               src = prev.fetchurl {
-                url = "https://github.com/anomalyco/opencode/releases/download/v1.18.16/opencode-linux-arm64.tar.gz";
+                # El asset upstream (anomalyco/opencode) fue re-subido en GitHub y
+                # su CDN sirve hashes distintos por region/edge (T9zl... vs
+                # KA7pKr...) -> el switch del celular rompia con hash mismatch
+                # aleatorio. Pin estable: el tarball vive en los releases de este
+                # repo (nadie lo re-subira). Verificado: sha256-KA7pKr...
+                url = "https://github.com/AyrXZ47/nixos-config/releases/download/opencode-1.18.16/opencode-linux-arm64.tar.gz";
                 sha256 = "sha256-KA7pKrIhf5yBUT6owBIUq0lglrWdolTVORDGXxPG1MU=";
               };
               sourceRoot = ".";
