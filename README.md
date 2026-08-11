@@ -242,10 +242,14 @@ desde el repo: flake propio en `nix-on-droid/` (`nixOnDroidConfigurations.defaul
 **no** entra en `nix flake check` de la raíz. Reutiliza los módulos home del repo
 (shell, git, neovim) via home-manager.
 
-Para aplicar cambios, en el celular, dentro del directorio del repo:
+Para aplicar cambios, en el celular, **dentro del directorio del flake**
+`nix-on-droid/` — la raíz del repo es el flake de NixOS y `--flake .` desde
+ahí evalúa el flake equivocado (falla con "does not provide attribute
+`nixOnDroidConfigurations...`"):
 
 ```bash
-git pull
+git -C ~/nixos-config pull
+cd ~/nixos-config/nix-on-droid
 nix-on-droid switch --flake .#default
 ```
 
