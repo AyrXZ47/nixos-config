@@ -102,6 +102,15 @@
     # bajo proot.
     modules.apps.fastfetch.asciiLogo = true;
 
+    # El modulo git compartido (modules/apps/git.nix) pone
+    # credential.helper = libsecret (el keyring de GNOME de los hosts de
+    # escritorio); en el celular no existe libsecret y git se cae a pedir
+    # usuario/contraseña en remotes HTTPS. Aqui se usa SSH (remote
+    # git@github.com, llave en el repo) y para HTTPS el helper de gh (ya
+    # instalado y autenticado). El tipo de settings NO admite null en este
+    # home-manager, asi que se sobrescribe con la cadena del helper.
+    programs.git.settings.credential.helper = lib.mkForce "!gh auth git-credential";
+
     # opencode autocurable: el tarball viaja en el flake source (re-copiado
     # fresco en cada switch, imposible que falte) y esta activacion lo extrae
     # a ~/.opencode/bin — primer entrada del sessionPath de shell.nix. No hay
