@@ -25,10 +25,18 @@ let
   };
 in
 {
-  imports = [ ./actual.nix ];
+  imports = [ ./actual.nix ./omnetpp.nix ];
 
   # Actual Budget desktop app (todos los hosts; firefox sigue siendo el browser default)
   modules.apps.actual.enable = true;
+
+  # Wireshark: el modulo de NixOS instala el wrapper setuid de dumpcap; el
+  # usuario va en el grupo "wireshark" (ver modules/core/user.nix) para poder
+  # capturar sin ser root.
+  programs.wireshark = {
+    enable = true;
+    package = pkgs.wireshark;
+  };
 
   services.ollama.enable = true;
 
@@ -85,6 +93,14 @@ in
     qucs-s
     simulide
     logisim-evolution
+
+    # Telecomunicaciones (universidad)
+    # 4nec2 es Windows-only; xnec2c es su equivalente libre en Linux (mismo
+    # motor NEC2, GUI con diagramas de radiacion y Smith). openems existe en
+    # nixpkgs pero es FDTD por consola (sin GUI): exagerado para el curso.
+    geogebra6
+    xnec2c
+    wireshark
 
     # Audio & Video Production
     audacity
