@@ -797,8 +797,11 @@ EOF
     # El diálogo "Open with" de KDE, al elegir un binario por "browse", genera
     # .desktop NoDisplay en ~/.local/share/applications (con sufijo -N); KDE los
     # descarta al resolver el default y re-pregunta siempre. Se limpian TODOS
-    # los stubs -N (gwenview-2, firefox-2, ...) y se usa el id real.
+    # los stubs -N (gwenview-2, firefox-2, ...) y se usa el id real. Tambien
+    # los atajos que el make de omnetpp registraba ahi (ide/shell apuntando a
+    # "setenv", rotos en NixOS): el paquete nuevo ya no los genera.
     rm -f "$HOME/.local/share/applications/"*-[0-9].desktop
+    rm -f "$HOME/.local/share/applications/"omnetpp-*.desktop
     if [ -f "$f" ]; then
       # Migración única: si el archivo guarda ids de stubs rotos (generados por
       # el diálogo) o ids de visores de imagen muertos (imv/swayimg, reemplazados
