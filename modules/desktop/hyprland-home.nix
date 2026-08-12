@@ -611,6 +611,17 @@ hwdec=vaapi" ALL "$f"
   # nvim no trae .desktop (nixpkgs no lo empaqueta): sin él, los defaults de
   # texto del seed (text/plain=nvim.desktop, etc.) apuntan a nada y Dolphin
   # vuelve a preguntar. Entrada visible en el perfil (mismo truco).
+  # gnuradio (nixpkgs) no empaqueta su .desktop: sin el, GRC no sale en el
+  # menu de aplicaciones. Mismo truco que nvim: entrada visible en el perfil.
+  xdg.desktopEntries.gnuradio-companion = {
+    name = "GNU Radio Companion";
+    exec = "gnuradio-companion %F";
+    type = "Application";
+    icon = "${pkgs.gnuradio}/${pkgs.python3.sitePackages}/gnuradio/grc/gui/icon.png";
+    categories = [ "Development" "Electronics" ];
+    mimeType = [ "application/x-gnuradio-grc" ];
+  };
+
   xdg.desktopEntries.nvim = {
     name = "Neovim";
     exec = "nvim %F";
