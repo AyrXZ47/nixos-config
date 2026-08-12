@@ -35,6 +35,7 @@ let
     stdenv.cc.cc.lib
     zlib
     elfutils
+    glib
     qt6.qtbase
     qt6.qtwayland
     qt6.qtsvg
@@ -43,6 +44,8 @@ let
     ffmpeg-headless
     pythonEnv
     gtk3
+    # fallback SWT de Eclipse (swt-pi4) si el de GTK3 falla
+    gtk4
     glib-networking
     libsecret
     cairo
@@ -74,6 +77,8 @@ let
     libxcb
   ];
 
+  omnetppLibPath = pkgs.lib.makeLibraryPath deps;
+
   omnetpp = pkgs.clangStdenv.mkDerivation {
     pname = "omnetpp";
     version = "6.4.0";
@@ -95,6 +100,8 @@ let
       lld
       patchelf
       makeWrapper
+      unzip
+      zip
       autoPatchelfHook
     ];
 
@@ -129,7 +136,21 @@ let
       # Herramientas intermedias del build (opp_msgtool, opp_msgc...) corren
       # apenas se compilan y necesitan libstdc++/Qt/libdw en runtime: mismo
       # LD_LIBRARY_PATH que el shellHook del flake oficial de OMNeT++.
-      export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath deps}:$LD_LIBRARY_PATH"
+      export LD_LIBRARY_PATH="${omnetppLibPath}:$LD_LIBRARY_PATH"
+      # SWT del IDE: sus nativos van DENTRO de un jar (autoPatchelf no los ve)
+      # y son de Ubuntu (sin rpath): System.loadLibrary falla en NixOS
+      # ("Failed to load swt-pi3"). Se les anade rpath a las deps del store y
+      # se reempaqueta el jar.
+      swtjar=$(ls $out/ide/plugins/org.eclipse.swt.gtk.linux.x86_64_*.jar)
+      swttmp=$(mktemp -d)
+      cd $swttmp
+      unzip -q "$swtjar"
+      for f in *.so; do
+        patchelf --add-rpath "${omnetppLibPath}" "$f"
+      done
+      zip -q -o "$swtjar" *.so
+      cd -
+      rm -rf "$swttmp"
       # Shebangs #!/usr/bin/env fallan en el sandbox (no hay /usr) y en NixOS
       # (no hay /usr/bin/env): se reescriben a los interpretes del store.
       patchShebangs $out
@@ -144,6 +165,29 @@ let
       # dragonflybsd, linux-arm...): autoPatchelf fallaria en los no-x86_64
       # (piden libc.so.8 de FreeBSD). En runtime solo se usa linux-x86-64.
       find $out -path '*com/sun/jna/*' -type f ! -path '*linux-x86-64*' -delete
+      # Atajos auto-generados del make (install-shortcuts): apuntan a "setenv
+      # opp_ide"/"setenv bash", que en NixOS intenta "nix develop .opp_shell"
+      # (descarga de inputs + error si hay otro nix corriendo). Se borran y se
+      # empaqueta una entrada propia debajo (share/applications/omnetpp.desktop).
+      rm -f $out/omnetpp-6.4.0-{ide,shell}.desktop
+      # setenv: el paquete ya trae todo el entorno horneado (rpaths y PATH van
+      # en el store), el bootstrap de "nix print-dev-env .opp_shell" es
+      # innecesario y rompe (mismo error de eval-cache). Ambas ramas NixOS del
+      # script (sourced y ejecutado) se desactivan.
+      sed -i 's|if \[\[ -f /etc/NIXOS && "\$name" != "opp_shell" \]\]; then|if false; then|' $out/setenv
+      sed -i 's|if \[\[ -f /etc/NIXOS \]\]; then|if false; then|' $out/setenv
+      # Un solo icono: el IDE, apuntando al launcher envuelto (envs GTK/schemas).
+      mkdir -p $out/share/applications
+      cat > $out/share/applications/omnetpp.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=OMNeT++ IDE
+GenericName=Discrete event simulator IDE
+Exec=omnetpp
+Path=$out
+Icon=$out/images/logo/logo128.png
+Categories=Development;IDE;
+EOF
       runHook postInstall
     '';
 
