@@ -101,6 +101,8 @@ in
     geogebra6
     xnec2c
     wireshark
+    # GNU Radio + GRC (gnuradio-companion): radio definida por software/SDR
+    gnuradio
 
     # Audio & Video Production
     audacity
