@@ -11,6 +11,13 @@ let
   # dentro de un cgroup con MemoryMax=8G: si vuelve a fugarse, el OOM del
   # cgroup lo mata limpio y rápido, sin tocar al resto del sistema. Subir el
   # límite en este archivo si un uso legítimo lo llegara a necesitar.
+  # KiCad completo: librerias, 3D, scripting, ngspice e i18n ya vienen en el
+  # default de nixpkgs. Los addons oficiales (kikit: panelizado y gerber,
+  # kikit-library) no, y el PCM de KiCad no puede instalarlos en el store de
+  # solo lectura; se montan con el override `addons` de nixpkgs.
+  kicad = pkgs.kicad.override {
+    addons = with pkgs.kicadAddons; [ kikit kikit-library ];
+  };
   mixxx = pkgs.symlinkJoin {
     name = "mixxx";
     paths = [ pkgs.mixxx ];
