@@ -201,8 +201,16 @@ EOF
     # Wrapper del launcher del IDE: sin estos envs el GTK del Eclipse no
     # encuentra schemas/modulos gio y el login al IDE se ve generico o falla
     # el TLS de glib-networking.
+    # GDK_BACKEND=x11: SWT GTK3 no mapea ventana bajo Wayland nativo
+    # (el proceso queda vivo pero no aparece nada); XWayland es el camino
+    # estandar de Eclipse.
     postFixup = ''
+      # El workspace default del make apunta a samples/ (store, read-only):
+      # el IDE fallaba al crear el workspace ahi. Se reescribe a un dir
+      # escribible del usuario ($HOME se expande en runtime).
+      sed -i 's|DEFAULT_WORKSPACE_ARGS="-vmargs -Dosgi.instance.area.default=\$IDEDIR/../samples"|DEFAULT_WORKSPACE_ARGS="-vmargs -Dosgi.instance.area.default=$HOME/omnetpp-workspace"|' $out/bin/opp_ide
       wrapProgram $out/bin/omnetpp \
+        --set GDK_BACKEND x11 \
         --prefix GIO_EXTRA_MODULES : "${pkgs.glib-networking}/lib/gio/modules" \
         --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}:${pkgs.adw-gtk3}/share/gsettings-schemas/${pkgs.adw-gtk3.name}"
     '';
