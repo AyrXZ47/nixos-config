@@ -173,9 +173,11 @@ in
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
-      -- wezterm: transparencia propia (window_background_opacity) sin blur del compositor.
-      -- opacity "1 override": fuerza 1.0 absoluto (el multiplicador daría 1.0*0.75).
-      hl.window_rule({ name = "wezterm-solid", match = { class = "org.wezfurlong.wezterm" }, no_blur = true, opacity = "1 override" })
+      -- wezterm: vidrio esmerilado — blur del compositor detrás de la transparencia
+      -- propia (window_background_opacity). opacity "1 override": fuerza 1.0 absoluto
+      -- (el multiplicador daría 1.0*0.75) para que el texto se mantenga opaco y no se
+      -- apile la opacidad de Hyprland con la de wezterm.
+      hl.window_rule({ name = "wezterm-glass", match = { class = "org.wezfurlong.wezterm" }, opacity = "1 override" })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
