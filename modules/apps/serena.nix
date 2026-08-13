@@ -4,6 +4,8 @@ let
   # Config conocida-buena de opencode (MCP de serena; el provider opencode-go es
   # nativo y su key vive en ~/.local/share/opencode/auth.json). Se copia a un
   # archivo normal (no symlink) para que serena/opencode puedan escribirlo.
+  # Los roles nativos build/plan se desactivan: el flujo usa los agentes
+  # propios (planner/executor/auditor/merger de modules/apps/opencode.nix).
   opencodeSeed = pkgs.writeText "opencode.json" ''
     {
       "$schema": "https://opencode.ai/config.json",
@@ -26,6 +28,14 @@ let
             "False"
           ],
           "enabled": true
+        }
+      },
+      "agent": {
+        "build": {
+          "disable": true
+        },
+        "plan": {
+          "disable": true
         }
       }
     }
@@ -62,7 +72,8 @@ in
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/opencode"
     if [ ! -f "$HOME/.config/opencode/opencode.json" ] || \
        ${pkgs.gnugrep}/bin/grep -q 'headroom' "$HOME/.config/opencode/opencode.json" || \
-       ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json"; then
+       ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json" || \
+       ! ${pkgs.gnugrep}/bin/grep -q '"disable": true' "$HOME/.config/opencode/opencode.json"; then
       cp ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
     fi
 
