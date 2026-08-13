@@ -82,13 +82,13 @@ This repo runs a multi-instance wave workflow. The plan and every handoff live i
 
 - **Planner** (fresh session, strongest available model): reads the project idea and this repo, writes `.workflow/plan.md` with the wave list and the file-ownership map, and writes one brief per executor under `.workflow/briefs/`. Details ONLY the next wave (rolling plan).
 - **Executor** (one per brief, cheaper model): `git worktree add` its own branch, reads its brief, implements, runs the brief's verify command, commits. Touches only the files it owns.
-- **Merger** (medium model): merges the wave branches into `main` in the order of the plan's integration plan, runs build + tests on the integrated tree, pushes `main`. On conflict: STOPS and reports — never resolves conflicts with its own criteria.
+- **Integrator** (medium model): merges the wave branches into `main` in the order of the plan's integration plan, runs build + tests on the integrated tree, pushes `main`. On conflict: STOPS and reports — never resolves conflicts with its own criteria.
 - **Auditor** (fresh session — never the planner's session — strongest model): reviews the INTEGRATED tree (merged worktrees) against `.workflow/audit-checklist.md`. Evidence over narration: every check is a command it runs; a claim without output is a failed check.
 
 ## Wave rules
 
 1. A wave = parallel executors with disjoint file ownership. Two executors never own the same file in the same wave; if they need it, sequence them.
-2. Every wave ends with: integration (the merger merges the wave branches into main, then build + tests) → audit. The next wave starts only after the audit passes or records explicit exceptions in `.workflow/plan.md`.
+2. Every wave ends with: integration (the integrator merges the wave branches into main, then build + tests) → audit. The next wave starts only after the audit passes or records explicit exceptions in `.workflow/plan.md`.
 3. Rolling plan: only the next wave is detailed. After each audit the planner re-plans the next wave from the decision log.
 4. Release gate: anything that will be distributed runs `skills/security-audit` first. Zero CRITICAL/HIGH findings, or documented exceptions. Never skip it.
 5. Lazy rules apply to everyone, including the auditor: the best audit is the smallest audit that catches the real failure.
@@ -100,6 +100,7 @@ This repo runs a multi-instance wave workflow. The plan and every handoff live i
 - One logical change per commit. `feat:`/`fix:` change behavior; `chore:` doesn't.
 - Executors commit ONLY their owned files, one commit per task.
 - **Branch isolation (mandatory):** every executor commits AND pushes ONLY to its own worktree branch. Never push to `main` or to another executor's branch; never merge, rebase, or fast-forward anyone else's branch. `git push origin <your-branch>` after each commit, so the work survives the session without touching parallel instances.
+- **Territory (mandatory):** an executor never leaves its worktree (`cd`) and never runs `git checkout`, `git switch`, `git branch`, `git worktree`, or `git stash`. It works on the branch its worktree was created with, and on no other — it does not invent or switch branches. Git itself blocks checking out a branch already used by another worktree; treat that error as "report, don't retry".
 - Committing is not a reward: if the diff can't be described in one short line, split it.
 
 ## Skills in this repo
