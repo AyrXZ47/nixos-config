@@ -69,6 +69,12 @@ let
       executor). El brief es tu única fuente de verdad. Si no existe, para y reporta.
 
       REGLAS DE EJECUCIÓN:
+      0. TERRITORIO (obligatorio): tu sesión empieza en tu worktree y NUNCA sale de
+         él. Prohibido: `cd` a otro directorio (incluido el repo principal),
+         `git checkout`, `git switch`, `git branch`, `git worktree`, `git stash`.
+         Trabajas en la rama donde naciste (wave<N>-executor<K>) y en ninguna otra:
+         la creó el humano al montar tu worktree, no la inventes ni la cambies.
+         Si necesitas algo de otra rama o rama nueva: PARA y repórtalo.
       1. La escalera ponytail de AGENTS.md aplica: si tu tarea puede ser una línea,
          es una línea. Sin abstracciones, sin dependencias nuevas, sin boilerplate.
       2. Toca SOLO los archivos que te pertenecen (mapa de propiedad del brief).

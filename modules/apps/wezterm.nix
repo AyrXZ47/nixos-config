@@ -21,7 +21,7 @@
         brightness = 1.0,
       }
 
-      config.window_background_opacity = 0.55
+      config.window_background_opacity = 0.4
       config.text_background_opacity = 1.0
 
       config.use_fancy_tab_bar = false
@@ -29,8 +29,9 @@
 
       config.colors = {
         tab_bar = {
-          -- Misma transparencia que el fondo de la ventana (window_background_opacity).
-          background = "rgba(21, 17, 68, 0.55)",
+          -- Misma transparencia que el fondo de la ventana (window_background_opacity = 0.4):
+          -- misma alpha para que la barra se funda con la terminal y "no exista".
+          background = "rgba(21, 17, 68, 0.4)",
           active_tab = {
             bg_color = "#00f0ff",
             fg_color = "#0b0814",
