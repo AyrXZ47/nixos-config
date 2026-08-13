@@ -65,7 +65,7 @@ in
         general = {
           gaps_in = 5,
           gaps_out = 10,
-          border_size = 2,
+          border_size = 4,
           layout = "dwindle",
           col = {
             active_border = { colors = { "rgba(ff0066ff)", "rgba(9900ffff)", "rgba(00aaffff)" }, angle = 45 },
@@ -75,21 +75,35 @@ in
 
         decoration = {
           rounding = 12,
-          -- Vidrio esmerilado con opacidad media: blur intacto pero el contenido
-          -- (texto/video) queda legible. Steam, wezterm y reproductores quedan
-          -- exentos via reglas (opacity "N override" fuerza opacidad absoluta).
+          -- Vidrio biselado: translúcido pero legible (0.8 activa / 0.6
+          -- inactiva). Steam, wezterm y reproductores quedan exentos via reglas
+          -- (opacity "N override" fuerza opacidad absoluta).
           active_opacity = 0.8,
-          inactive_opacity = 0.7,
+          inactive_opacity = 0.6,
           blur = {
             enabled = true,
-            size = 16,
-            passes = 4,
+            size = 12,
+            passes = 3,
             ignore_opacity = true,
           },
+          -- Neón: la sombra coloreada es el "destello" — glow difuminado (blur)
+          -- alrededor de la ventana, gradiente activo (ff0066→00aaff) vs azul
+          -- apagado inactivo.
           shadow = {
             enabled = true,
-            range = 12,
-            render_power = 3,
+            range = 20,
+            render_power = 2,
+            color = { colors = { "rgba(ff006677)", "rgba(9900ff77)", "rgba(00aaff77)" }, angle = 45 },
+            color_inactive = "rgba(1e1e3a44)",
+          },
+          -- Glow interior nativo: ilumina el vidrio desde el borde hacia dentro.
+          -- Gradiente activo (ff0066→00aaff) vs azul apagado inactivo.
+          glow = {
+            enabled = true,
+            range = 30,
+            render_power = 2,
+            color = { colors = { "rgba(ff006655)", "rgba(9900ff55)", "rgba(00aaff55)" }, angle = 45 },
+            color_inactive = "rgba(1e1e3a33)",
           },
         },
 
@@ -159,9 +173,11 @@ in
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
-      -- wezterm: transparencia propia (window_background_opacity) sin blur del compositor.
-      -- opacity "1 override": fuerza 1.0 absoluto (el multiplicador daría 1.0*0.75).
-      hl.window_rule({ name = "wezterm-solid", match = { class = "org.wezfurlong.wezterm" }, no_blur = true, opacity = "1 override" })
+      -- wezterm: vidrio esmerilado — blur del compositor detrás de la transparencia
+      -- propia (window_background_opacity). opacity "1 override": fuerza 1.0 absoluto
+      -- (el multiplicador daría 1.0*0.75) para que el texto se mantenga opaco y no se
+      -- apile la opacidad de Hyprland con la de wezterm.
+      hl.window_rule({ name = "wezterm-glass", match = { class = "org.wezfurlong.wezterm" }, opacity = "1 override" })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
@@ -219,6 +235,8 @@ in
       hl.bind("SUPER + N", hl.dsp.exec_cmd("wezterm start -- zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("loginctl lock-session"))
+      -- Esmerilado on/off (blur + transparencia) con notificación.
+      hl.bind("SUPER + B", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/toggle-frost.sh"))
 
       -- Screenshots (región / ventana / pantalla)
       hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("hyprshot -m region -o ~/Pictures/Screenshots"))
@@ -569,6 +587,30 @@ hwdec=vaapi" ALL "$f"
           fi
         fi
         [ -n "$layout" ] && notify-send -t 2000 -a layout -u low " $layout"
+      '';
+    };
+
+    "hypr/scripts/toggle-frost.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Alterna el esmerilado (blur + transparencia) en tiempo real. El estado
+        # vive en un marcador bajo XDG_RUNTIME_DIR (se limpia al cerrar sesión,
+        # volviendo al default esmerilado). Con config Lua "hyprctl keyword" no
+        # funciona: los cambios se aplican con "hyprctl eval" + hl.config.
+        state="$XDG_RUNTIME_DIR/frost-off"
+
+        if [ -f "$state" ]; then
+          # sólido -> esmerilado
+          rm -f "$state"
+          hyprctl eval 'hl.config({ decoration = { blur = { enabled = true }, active_opacity = 0.8, inactive_opacity = 0.6 } })'
+          notify-send -t 2000 -a hyprland -u low "Blur + transparencia ON"
+        else
+          # esmerilado -> sólido
+          touch "$state"
+          hyprctl eval 'hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0 } })'
+          notify-send -t 2000 -a hyprland -u low "Blur + transparencia OFF"
+        fi
       '';
     };
 
