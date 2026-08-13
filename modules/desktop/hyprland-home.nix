@@ -65,7 +65,7 @@ in
         general = {
           gaps_in = 5,
           gaps_out = 10,
-          border_size = 2,
+          border_size = 4,
           layout = "dwindle",
           col = {
             active_border = { colors = { "rgba(ff0066ff)", "rgba(9900ffff)", "rgba(00aaffff)" }, angle = 45 },
@@ -75,16 +75,15 @@ in
 
         decoration = {
           rounding = 12,
-          -- Vidrio biselado: la ventana enfocada queda translúcida (más vidrio,
-          -- no sólida) y el blur deja ver el fondo esmerilado. Steam, wezterm y
-          -- reproductores quedan exentos via reglas (opacity "N override" fuerza
-          -- opacidad absoluta).
-          active_opacity = 0.6,
-          inactive_opacity = 0.7,
+          -- Vidrio biselado: translúcido pero legible (0.7 activa / 0.6
+          -- inactiva). Steam, wezterm y reproductores quedan exentos via reglas
+          -- (opacity "N override" fuerza opacidad absoluta).
+          active_opacity = 0.7,
+          inactive_opacity = 0.6,
           blur = {
             enabled = true,
-            size = 16,
-            passes = 4,
+            size = 12,
+            passes = 3,
             ignore_opacity = true,
           },
           -- Neón: la sombra coloreada es el "destello" — glow difuminado (blur)
@@ -96,6 +95,15 @@ in
             render_power = 2,
             color = { colors = { "rgba(ff006677)", "rgba(9900ff77)", "rgba(00aaff77)" }, angle = 45 },
             color_inactive = "rgba(1e1e3a44)",
+          },
+          -- Glow interior nativo: ilumina el vidrio desde el borde hacia dentro.
+          -- Gradiente activo (ff0066→00aaff) vs azul apagado inactivo.
+          glow = {
+            enabled = true,
+            range = 30,
+            render_power = 2,
+            color = { colors = { "rgba(ff006655)", "rgba(9900ff55)", "rgba(00aaff55)" }, angle = 45 },
+            color_inactive = "rgba(1e1e3a33)",
           },
         },
 
