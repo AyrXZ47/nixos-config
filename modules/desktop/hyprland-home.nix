@@ -23,6 +23,10 @@ in
     # sesión.
     systemd.enable = true;
 
+    # borders-plus-plus: aro de luz (halo) adicional alrededor de cada ventana.
+    # Se configura en hl.config({ plugin = { borders_plus_plus ... } }) abajo.
+    plugins = [ pkgs.hyprlandPlugins.borders-plus-plus ];
+
     extraConfig = ''
       -- Configuración Hyprland (lua) — generada por Home Manager.
       -- https://wiki.hypr.land/Configuring/Start/
@@ -128,6 +132,26 @@ in
 
         misc = {
           disable_xdg_env_checks = true,
+        },
+      })
+
+      -- Neón: el borde principal ya es el "tubo" (gradiente activo ff0066→9900ff
+      -- →00aaff vs azul oscuro inactivo). borders-plus-plus suma un halo exterior
+      -- que lo hace emanar luz. El halo es global (se dibuja en todas las
+      -- ventanas; el matiz activo/inactivo lo aporta el borde principal, no el
+      -- halo) y de color sólido por anillo: se apilan 2 anillos con alpha
+      -- decreciente (magenta caliente → azul frío) para simular el falloff.
+      hl.config({
+        plugin = {
+          borders_plus_plus = {
+            add_borders = 2,
+            col = {
+              border_1 = "rgba(ff006688)", -- magenta, anillo interior (caliente)
+              border_2 = "rgba(00aaff44)", -- azul, anillo exterior (frío)
+            },
+            border_size_1 = 3,
+            border_size_2 = 8,
+          },
         },
       })
 
