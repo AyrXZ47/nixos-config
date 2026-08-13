@@ -10,6 +10,7 @@
     ../modules/apps/mpd.nix
     ../modules/apps/firefox.nix
     ../modules/apps/serena.nix
+    ../modules/apps/opencode.nix
   ];
 
   home.username = "yovick";
