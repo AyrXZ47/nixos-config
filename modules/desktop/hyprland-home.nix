@@ -23,10 +23,6 @@ in
     # sesión.
     systemd.enable = true;
 
-    # borders-plus-plus: aro de luz (halo) adicional alrededor de cada ventana.
-    # Se configura en hl.config({ plugin = { borders_plus_plus ... } }) abajo.
-    plugins = [ pkgs.hyprlandPlugins.borders-plus-plus ];
-
     extraConfig = ''
       -- Configuración Hyprland (lua) — generada por Home Manager.
       -- https://wiki.hypr.land/Configuring/Start/
@@ -79,10 +75,11 @@ in
 
         decoration = {
           rounding = 12,
-          -- Vidrio esmerilado con opacidad media: blur intacto pero el contenido
-          -- (texto/video) queda legible. Steam, wezterm y reproductores quedan
-          -- exentos via reglas (opacity "N override" fuerza opacidad absoluta).
-          active_opacity = 0.8,
+          -- Vidrio biselado: la ventana enfocada queda translúcida (más vidrio,
+          -- no sólida) y el blur deja ver el fondo esmerilado. Steam, wezterm y
+          -- reproductores quedan exentos via reglas (opacity "N override" fuerza
+          -- opacidad absoluta).
+          active_opacity = 0.6,
           inactive_opacity = 0.7,
           blur = {
             enabled = true,
@@ -90,10 +87,15 @@ in
             passes = 4,
             ignore_opacity = true,
           },
+          -- Neón: la sombra coloreada es el "destello" — glow difuminado (blur)
+          -- alrededor de la ventana, gradiente activo (ff0066→00aaff) vs azul
+          -- apagado inactivo.
           shadow = {
             enabled = true,
-            range = 12,
-            render_power = 3,
+            range = 20,
+            render_power = 2,
+            color = { colors = { "rgba(ff006677)", "rgba(9900ff77)", "rgba(00aaff77)" }, angle = 45 },
+            color_inactive = "rgba(1e1e3a44)",
           },
         },
 
@@ -132,26 +134,6 @@ in
 
         misc = {
           disable_xdg_env_checks = true,
-        },
-      })
-
-      -- Neón: el borde principal ya es el "tubo" (gradiente activo ff0066→9900ff
-      -- →00aaff vs azul oscuro inactivo). borders-plus-plus suma un halo exterior
-      -- que lo hace emanar luz. El halo es global (se dibuja en todas las
-      -- ventanas; el matiz activo/inactivo lo aporta el borde principal, no el
-      -- halo) y de color sólido por anillo: se apilan 2 anillos con alpha
-      -- decreciente (magenta caliente → azul frío) para simular el falloff.
-      hl.config({
-        plugin = {
-          borders_plus_plus = {
-            add_borders = 2,
-            col = {
-              border_1 = "rgba(ff006688)", -- magenta, anillo interior (caliente)
-              border_2 = "rgba(00aaff44)", -- azul, anillo exterior (frío)
-            },
-            border_size_1 = 3,
-            border_size_2 = 8,
-          },
         },
       })
 
