@@ -75,10 +75,10 @@ in
 
         decoration = {
           rounding = 12,
-          -- Vidrio biselado: translúcido pero legible (0.7 activa / 0.6
+          -- Vidrio biselado: translúcido pero legible (0.8 activa / 0.6
           -- inactiva). Steam, wezterm y reproductores quedan exentos via reglas
           -- (opacity "N override" fuerza opacidad absoluta).
-          active_opacity = 0.7,
+          active_opacity = 0.8,
           inactive_opacity = 0.6,
           blur = {
             enabled = true,
@@ -235,6 +235,8 @@ in
       hl.bind("SUPER + N", hl.dsp.exec_cmd("wezterm start -- zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("loginctl lock-session"))
+      -- Esmerilado on/off (blur + transparencia) con notificación.
+      hl.bind("SUPER + B", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/toggle-frost.sh"))
 
       -- Screenshots (región / ventana / pantalla)
       hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("hyprshot -m region -o ~/Pictures/Screenshots"))
@@ -585,6 +587,30 @@ hwdec=vaapi" ALL "$f"
           fi
         fi
         [ -n "$layout" ] && notify-send -t 2000 -a layout -u low " $layout"
+      '';
+    };
+
+    "hypr/scripts/toggle-frost.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Alterna el esmerilado (blur + transparencia) en tiempo real. El estado
+        # vive en un marcador bajo XDG_RUNTIME_DIR (se limpia al cerrar sesión,
+        # volviendo al default esmerilado). Con config Lua "hyprctl keyword" no
+        # funciona: los cambios se aplican con "hyprctl eval" + hl.config.
+        state="$XDG_RUNTIME_DIR/frost-off"
+
+        if [ -f "$state" ]; then
+          # sólido -> esmerilado
+          rm -f "$state"
+          hyprctl eval 'hl.config({ decoration = { blur = { enabled = true }, active_opacity = 0.8, inactive_opacity = 0.6 } })'
+          notify-send -t 2000 -a hyprland -u low "Blur + transparencia ON"
+        else
+          # esmerilado -> sólido
+          touch "$state"
+          hyprctl eval 'hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0 } })'
+          notify-send -t 2000 -a hyprland -u low "Blur + transparencia OFF"
+        fi
       '';
     };
 
