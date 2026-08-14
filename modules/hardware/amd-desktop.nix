@@ -3,13 +3,11 @@
 {
   imports = [
     ./amd-common.nix
+    ../../modules/apps/ollama-bin.nix
   ];
 
   # RX 7600 GPU
   services.xserver.videoDrivers = [ "amdgpu" "modesetting" ];
-
-  # Ollama en GPU: ROCm para RDNA3 (gfx1102). La laptop usa -vulkan en amd-laptop.nix.
-  services.ollama.package = pkgs.ollama-rocm;
 
   # Tuneado de rendimiento del escritorio (vivía en amd-common, ahora solo aquí):
   # laptop y server NO heredan esto. La laptop usa governor powersave + C-states
