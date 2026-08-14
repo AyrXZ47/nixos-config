@@ -26,13 +26,14 @@
   # ── Flags experimentales (centralizado) ──────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # ── Basura: mantener solo 3 generaciones atrás ───────────────────────────
+  # ── Basura: máximo 3 generaciones SIEMPRE (por conteo, no por edad) ──────
+  # "--delete-generations +3" conserva las 3 más nuevas de cada perfil.
+  # Antes era por edad ("--delete-older-than 3d") y 20 rebuilds en 3 días
+  # dejaban 20 generaciones (se llegó a 42 durante la puesta a punto).
   nix.gc = {
     automatic = true;
     dates = "daily";
-    # "3d" obligatorio: "--delete-older-than 3" (sin unidad) rompe nix-gc
-    # ("invalid number of days specifier '3', expected something like '14d'")
-    options = "--delete-older-than 3d";
+    options = "--delete-generations +3";
   };
   nix.optimise.automatic = true;
 
@@ -44,29 +45,6 @@
     Nice = 19;
     IOSchedulingClass = "idle";
     CPUSchedulingPolicy = "idle";
-  };
-
-  # ── Límite duro de generaciones: máx 3 por CONTEo, no por edad ────────────
-  # nix.gc es por EDAD: si haces 20 rebuilds en 3 días conserva 20 (pasó con
-  # 42 generaciones durante la puesta a punto). Este servicio semanal borra
-  # las generaciones más viejas hasta dejar exactamente las 3 más nuevas del
-  # perfil de sistema y luego recoge la basura de la store.
-  systemd.services.trim-generations = {
-    description = "Deja solo las 3 generaciones mas recientes";
-    serviceConfig = { Type = "oneshot"; };
-    script = ''
-      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +3
-      ${pkgs.nix}/bin/nix-collect-garbage -d
-    '';
-  };
-
-  systemd.timers.trim-generations = {
-    description = "Limpieza semanal de generaciones";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "weekly";
-      Persistent = true;
-    };
   };
 
   # ── Logs: journald acotado a 100M ─────────────────────────────────────────
