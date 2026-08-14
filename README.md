@@ -115,9 +115,9 @@ Fun: `cbonsai`.
 - `cores = 0`, `max-jobs = auto` — uses every core/thread.
 - CPU/IO scheduler `idle` while building → no freezes on the desktop.
 - Substituters: `cache.nixos.org` + `hyprland.cachix.org` (avoids compiling Hyprland).
-- Daily GC by COUNT keeping at most 3 generations (`--delete-generations +3`);
-  automatic store optimisation. Not age-based — 20 rebuilds in 3 days still
-  leaves exactly 3.
+- Daily GC (pure store GC) + daily `trim-generations` service keeping at most 3
+  generations by COUNT (`nix-env --delete-generations +3`); automatic store
+  optimisation. Not age-based — 20 rebuilds in 3 days still leaves exactly 3.
 
 ### Hardware (`modules/hardware/`)
 - Zen kernel everywhere, AMD microcode, `hardware.graphics` 32-bit.
