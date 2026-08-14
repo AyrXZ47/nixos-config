@@ -9,7 +9,7 @@ AMD-powered, Hyprland-driven. Same config runs on a VM, a desktop, a laptop and 
 headless server — the idea is that whatever works in the VM works identically on
 real hardware.
 
-Built on `nixos-unstable` (nixpkgs rev `624af665418d`), Nix flakes, Home Manager,
+Built on `nixos-unstable` (nixpkgs pinned in `flake.lock`), Nix flakes, Home Manager,
 and a hand-rolled cyberpunk theme (magenta `#ff0066` / cyan `#00f0ff` on deep navy).
 
 ## Hosts
@@ -17,7 +17,7 @@ and a hand-rolled cyberpunk theme (magenta `#ff0066` / cyan `#00f0ff` on deep na
 | Host     | Role      | Hardware                  | GPU          | Tuning                                    |
 | -------- | --------- | ------------------------- | ------------ | ----------------------------------------- |
 | `pc`     | Desktop   | Ryzen 5700X               | RX 7600      | `amd_pstate=active`, governor `performance` |
-| `laptop` | Mobile    | AMD laptop (ThinkPad-ish) | Integrated   | `amd_pstate=guided`, governor `schedutil`, power-profiles-daemon |
+| `laptop` | Mobile    | AMD laptop (ThinkPad-ish) | Integrated   | `amd_pstate=active` (común), governor `powersave`, EPP `balance_power` |
 | `server` | Headless  | AMD                       | (none)       | `amd-common` only, no desktop             |
 | `vm`     | Virtual   | QEMU/VMware               | virtio/vmwgfx| virtio initrd, LUKS + btrfs subvols      |
 
@@ -75,6 +75,12 @@ flake.nix              # Entry point — hosts & shared modules
   mason, rainbow-delimiters, treesitter-context, lsp_lines; LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.
 - **OpenCode** + **Ollama** + **aider-chat** (local AI stack, `OLLAMA_API_BASE` set).
+- **Ollama version pin** (`modules/apps/ollama-bin.nix`, solo pc): instala el
+  binario oficial v0.32.12 desde los tarballs de la release (base + addon ROCm)
+  porque nixpkgs-unstable va con días de retraso y modelos nuevos (ej. qwen3.8)
+  exigen releases recientes. Laptop sigue con `ollama-vulkan` de nixpkgs. Para
+  subir de versión: cambiar `version` y los dos `sha256` en el módulo (hashes del
+  API de GitHub).
 
 ### Gaming
 - **Steam** (gamescope session, Remote Play + dedicated server + LAN transfers
@@ -109,7 +115,9 @@ Fun: `cbonsai`.
 - `cores = 0`, `max-jobs = auto` — uses every core/thread.
 - CPU/IO scheduler `idle` while building → no freezes on the desktop.
 - Substituters: `cache.nixos.org` + `hyprland.cachix.org` (avoids compiling Hyprland).
-- Daily GC keeping 3 generations; automatic store optimisation.
+- Daily GC by COUNT keeping at most 3 generations (`--delete-generations +3`);
+  automatic store optimisation. Not age-based — 20 rebuilds in 3 days still
+  leaves exactly 3.
 
 ### Hardware (`modules/hardware/`)
 - Zen kernel everywhere, AMD microcode, `hardware.graphics` 32-bit.
@@ -117,8 +125,9 @@ Fun: `cbonsai`.
 - Common kernel params: `quiet splash loglevel=3 nowatchdog split_lock_detect=off`.
 - Desktop: `amd_pstate=active`, `mitigations=off`, `max_cstate=1`, `performance`
   governor, amdgpu in initrd (early KMS).
-- Laptop: `amd_pstate=guided`, `schedutil`, power-profiles-daemon, libinput
-  touchpad (clickfinger, natural scrolling), iio sensors, NetworkManager with iwd.
+- Laptop: `powersave` governor + EPP `balance_power` (boost bajo demanda, reposo
+  profundo), sin `max_cstate=1`, touchpad libinput (clickfinger, natural scrolling,
+  RMI4 via `psmouse.synaptics_intertouch=1`), iio sensors, NetworkManager with iwd.
 - VM: virtio/VMware guest modules, QEMU guest agent, SPICE.
 
 ### Fingerprint (`modules/hardware/fingerprint.nix`)
