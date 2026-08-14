@@ -39,6 +39,15 @@
 
   networking.hostName = "nixos-pc";
 
+  # MTU 1400 en el enlace ethernet: el camino hacia internet del PC no soporta
+  # MTU 1500 (probado: ping -M do -s 1472 falla 100%, -s 1400 OK). Con 1500,
+  # las descargas grandes (cache.nixos.org, >GBs) se cortan a mitad con
+  # "Failure when receiving data from the peer" / SSL_ERROR_SYSCALL mientras
+  # que ping y descargas pequeñas funcionan — paquetes grandes descartados en
+  # silencio (ISP con PPPoE/túnel). 1400 es margen seguro sobre el máximo
+  # estable medido (1460); no ir a 1500.
+  networking.interfaces.enp5s0.mtu = 1400;
+
   # ddcci: expone el monitor externo (DDC/CI) como /sys/class/backlight/ddcci0.
   # Asi wayle (modulo brightness nativo: dropdown + OSD) y brightnessctl pueden
   # controlar el brillo, sin depender de ddcutil por cada cambio. Sin esto no hay
