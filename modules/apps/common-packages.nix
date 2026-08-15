@@ -136,7 +136,9 @@ in
     shotcut
     obs-studio
     vlc
-    ffmpeg
+    # ffmpeg-full: incluye libplacebo (tonemap HDR por GPU vía Vulkan) y
+    # libzimg, necesarios para convertir clips HDR10+ a SDR sin lavarlos.
+    ffmpeg-full
 
     # AI & Development
     octave
