@@ -44,9 +44,9 @@ instala de nuevo (YAGNI: shotcut ya está en `common-packages.nix`).
 | Wave | Focus | Status |
 |------|-------|--------|
 | 1 | <ya integrada — historial previo> | done |
-| 2 | ollama 0.32.12 binario (pc) + límite duro 3 generaciones | in-flight |
-| 3 | Editor de vídeo: decisión documentada + verificación VA-API (Shotcut) | planned |
-| 4 | pull qwen3.8 y calibración tps en pc (tras aprobación humana) | planned |
+| 2 | ollama 0.32.12 binario (pc) + límite duro 3 generaciones | audited (excepciones P1–P4) |
+| 3 | Editor de vídeo: decisión documentada + verificación VA-API (Shotcut) | in-flight |
+| 4 | pull qwen3.8 y calibración tps en pc — **prioridad alta (R1 auditoría ola 2)** | planned |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -94,8 +94,9 @@ Dos ejecutores, archivos disjuntos. Nadie toca `flake.lock` ni
   - `nix flake check` pasa.
   - `nix eval .#nixosConfigurations.pc.config.services.ollama.package.version`
     → `"0.32.12"`.
-  - `nix eval .#nixosConfigurations.pc.config.nix.gc.options` → contiene
-    `--delete-generations` (conteo), no `--delete-older-than`.
+  - GC: `nix.gc` queda SIN options (GC puro) y el conteo vive en el servicio
+    diario `trim-generations` (`nix-env --delete-generations +3` +
+    `nix-collect-garbage`) — ver CORRECCIÓN del decision log y auditoría ola 2.
   - Ningún archivo fuera de los owned files fue modificado
     (`git diff main..HEAD --stat` vs mapa de propiedad).
   - Sin findings CRITICAL/HIGH en `skills/security-audit` si aplica
@@ -105,10 +106,10 @@ Dos ejecutores, archivos disjuntos. Nadie toca `flake.lock` ni
 
 ## Wave 3 (next) — editor de vídeo: decisión + verificación
 
-> Gate: arranca DESPUÉS de que la ola 2 pase auditoría, y tras la confirmación
-> humana de la decisión (el humano responde al chat del planner). Default
-> recomendado: **quedarse con Shotcut**. El branch B (Resolve) se activa solo si
-> el humano lo pide.
+> Gate: ola 2 auditada (APPROVED WITH EXCEPTIONS P1–P4, no bloquean — ver
+> `.workflow/audits/wave2.md`) y decisión humana confirmada el 2026-08-14:
+> **Shotcut**. Ambas condiciones cumplidas → ola en curso. El branch B (Resolve)
+> queda cancelado/archivado salvo que el humano lo pida explícitamente.
 
 ### Scope — evidencia recogida el 2026-08-14 en la máquina real (`nixos-pc`, RX 7600)
 
@@ -199,3 +200,6 @@ arregla color/efectos de Resolve, NO los codecs.
 | 2026-08-14 | Editor de vídeo: SE SIGUE CON SHOTCUT (recomendado; pendiente confirmación humana) | VA-API verificado en la RX 7600 real (`vainfo`: H.264/HEVC/VP9/AV1 VLD+EncSlice con radeonsi 26.2). Resolve free 21.0.4 existe en nixpkgs (`0e251e24`, `broken=false`) PERO H.264/H.265 quedan en CPU (hw accel = Studio, NVIDIA-only en Linux) → no resuelve los dolores del humano. Filmora no tiene build Linux (solo .exe/.dmg). kdenlive existe (`kdePackages.kdenlive` 26.04.3) pero el humano lo descartó |
 | 2026-08-14 | OpenCL está inoperativo en pc AHORA mismo: `clinfo` → 0 platforms (loader ocl-icd sí, ICD de proveedor no) | Explica el «no soporta mi GPU» previo del humano con Resolve. Vía corta si se activa branch B: `hardware.graphics.extraPackages = [ pkgs.mesa.opencl ]` (rusticl, mesa 26.2 lo compila). No se instala nada hasta que el humano decida (YAGNI) |
 | 2026-08-14 | La evaluación de paquetes de esta ola se hizo contra el lock ACTUAL (`0e251e24`, 2026-08-12, la «buena» tras el revert `33265c8`) | Si el lock cambia antes de activar branch B, re-evaluar davinci-resolve/mesa antes de escribir los briefs |
+| 2026-08-14 | Humano confirmó la decisión de editor de vídeo: **SHOTCUT** (ola 3 arranca; branch B Resolve archivado salvo petición explícita) | Tras leer la evidencia (VA-API verificado, Resolve free = H.264 por CPU, Filmora sin Linux) |
+| 2026-08-14 | Aprendizaje R1 (auditoría ola 2): `OLLAMA_CONTEXT_LENGTH=16384` NO aplica a modelos que definen `num_ctx` propio (qwen3.8:27b lo fija a 131072) → 10/66 capas en 8 GiB VRAM, 0.23 t/s, 154% CPU, 22.8 GB RSS, escritorio se traba | Ola 4 pasa a prioridad alta: forzar `num_ctx` por request/Modelfile (no por env var) y/o modelo ≤ 8B; medir tps tras el ajuste |
+| 2026-08-14 | P4 (auditoría ola 2): audit gate del plan y verify del brief executor-2 corregidos a la lógica real (nix.gc sin options + trim-generations diario) | El verify literal del brief quedó obsoleto frente a la CORRECCIÓN del GC; la implementación seguía el decision log (fuente más reciente) |
