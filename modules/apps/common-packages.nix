@@ -47,9 +47,13 @@ in
 
   services.ollama.enable = true;
 
-  # Contexto 16k: con el default de 4096, las sesiones largas de aider llenaban el
-  # contexto y MTP (decodificacion especulativa) se desactivaba ("speculative
-  # decoding not supported by this context") -> caia de ~44 a ~18 t/s.
+  # Contexto 16k por defecto (el default de ollama es 4096): sesiones largas
+  # llenaban el contexto y desactivaban MTP (decodificacion especulativa)
+  # ("speculative decoding not supported by this context") -> caia de ~44 a ~18 t/s.
+  # OJO (leccion R1): esta env var NO aplica a modelos con num_ctx propio en su
+  # Modelfile (qwen3.8:27b fija 131072 y la ignora). El control real es el num_ctx
+  # por request (cliente: Obsidian Copilot, `ollama run --num-ctx`). Con 8 GiB de
+  # VRAM usar num_ctx <= 8192: el KV cache de 131k no cabe y la maquina se traba.
   services.ollama.environmentVariables = {
     OLLAMA_CONTEXT_LENGTH = "16384";
     # Reserva VRAM para el escritorio: sin esto ollama se come los 8GiB completos
@@ -122,7 +126,6 @@ in
     # AI & Development
     octave
     ollama
-    aider-chat
 
       # Virtualization
     virt-manager

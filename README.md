@@ -74,7 +74,7 @@ flake.nix              # Entry point — hosts & shared modules
   obsidian.nvim (`~/Sync/Notes`), img-clip paste, ollama.nvim (`qwen3.6:35b-a3b-mtp-q4_K_M`),
   mason, rainbow-delimiters, treesitter-context, lsp_lines; LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.
-- **OpenCode** + **Ollama** + **aider-chat** (local AI stack, `OLLAMA_API_BASE` set).
+- **OpenCode** + **Ollama** (local AI stack, `OLLAMA_API_BASE` set).
 - **Ollama version pin** (`modules/apps/ollama-bin.nix`, solo pc): instala el
   binario oficial v0.32.12 desde los tarballs de la release (base + addon ROCm)
   porque nixpkgs-unstable va con días de retraso y modelos nuevos (ej. qwen3.8)
@@ -255,7 +255,6 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 - `estabilizar_clips` / `estabilizar_clips_gpu` — re-encode clips to CFR 30 (CPU x264
   or VA-API h264) for stable editing.
 - `subtitular <video>` — Whisper (whisper.cpp) Spanish subtitles with VAD.
-- `update-obsidian <version>` — rebuild & install the Obsidian RPM (Fedora tooling).
 
 ## Installation on a New Machine
 

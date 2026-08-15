@@ -196,22 +196,6 @@
         rm "$TEMP_WAV"
         echo "Listo."
       }
-
-      update-obsidian() {
-        if [ -z "$1" ]; then
-          echo "Error: Debes proporcionar la version. Ejemplo: update-obsidian 1.13.0"
-          return 1
-        fi
-        local VERSION=$1
-        cd ~/obsidian-rpm-fedora || return
-        wget "https://github.com/obsidianmd/obsidian-releases/releases/download/v''${VERSION}/obsidian-''${VERSION}.tar.gz" \
-          -O ~/rpmbuild/SOURCES/Obsidian-''${VERSION}.tar.gz
-        sed -i "s/^Version:.*/Version:        $VERSION/" obsidian.spec
-        cp obsidian.spec ~/rpmbuild/SPECS/
-        cd ~/rpmbuild/SPECS/ || return
-        rpmbuild -ba obsidian.spec
-        sudo dnf upgrade -y ~/rpmbuild/RPMS/x86_64/obsidian-''${VERSION}-*.rpm
-      }
     '';
   };
 
