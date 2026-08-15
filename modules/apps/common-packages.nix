@@ -65,11 +65,16 @@ in
     # y Hyprland renderiza desde GTT (ram del sistema) -> la UI se arrastra.
     # OLLAMA_GPU_OVERHEAD va en BYTES (envconfig/config.go): el valor previo de
     # 1024 era 1KiB, un no-op -> por eso el desktop seguía congelándose.
-    # 1073741824 = 1GiB reservados; el resto va a IA local.
-    # Subido a 2GiB (2147483648) tras medir 35 t/s con qwen3.6:35b-a3b-mtp:
-    # con 1GiB el desktop aún micro-congelaba (Hyprland caía a GTT). Coste:
-    # ~2-4 capas menos en GPU, t/s baja a ~25-30 (sigue > 22).
-    OLLAMA_GPU_OVERHEAD = "2147483648";
+    # 1073741824 = 1GiB reservados. Probado 2GiB (2147483648): NO eliminó los
+    # micro-congelamientos (la causa real es CPU, ver OLLAMA_CPU_THREADS) y
+    # costó ~8 t/s -> revertido a 1GiB.
+    OLLAMA_GPU_OVERHEAD = "1073741824";
+    # Micro-congelamientos = saturación de CPU, no VRAM: con 23 GB de modelo y
+    # 8 GiB de VRAM, ollama corre ~73% del cómputo en CPU (medido: 73%/27%
+    # CPU/GPU) y los 16 hilos se saturan -> Hyprland no tiene CPU y la UI se
+    # arrastra. Limitar a 12 hilos deja 4 garantizados al escritorio; coste
+    # ~10% de t/s, pero la UI deja de congelarse. Ajustar: nproc - 4.
+    OLLAMA_CPU_THREADS = "12";
   };
 
   environment.etc."xdg/menus/applications.menu".text = ''
