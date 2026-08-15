@@ -45,7 +45,7 @@ instala de nuevo (YAGNI: shotcut ya está en `common-packages.nix`).
 |------|-------|--------|
 | 1 | <ya integrada — historial previo> | done |
 | 2 | ollama 0.32.12 binario (pc) + límite duro 3 generaciones | audited (excepciones P1–P4) |
-| 3 | Editor de vídeo: decisión documentada + verificación VA-API (Shotcut) | in-flight |
+| 3 | Editor de vídeo: decisión documentada + verificación VA-API (Shotcut) | audited (excepción P1 menor) |
 | 4 | pull qwen3.8 y calibración tps en pc — **prioridad alta (R1 auditoría ola 2)** | planned |
 
 > Status legend: planned → in-flight → integrated → audited → done.
@@ -203,3 +203,4 @@ arregla color/efectos de Resolve, NO los codecs.
 | 2026-08-14 | Humano confirmó la decisión de editor de vídeo: **SHOTCUT** (ola 3 arranca; branch B Resolve archivado salvo petición explícita) | Tras leer la evidencia (VA-API verificado, Resolve free = H.264 por CPU, Filmora sin Linux) |
 | 2026-08-14 | Aprendizaje R1 (auditoría ola 2): `OLLAMA_CONTEXT_LENGTH=16384` NO aplica a modelos que definen `num_ctx` propio (qwen3.8:27b lo fija a 131072) → 10/66 capas en 8 GiB VRAM, 0.23 t/s, 154% CPU, 22.8 GB RSS, escritorio se traba | Ola 4 pasa a prioridad alta: forzar `num_ctx` por request/Modelfile (no por env var) y/o modelo ≤ 8B; medir tps tras el ajuste |
 | 2026-08-14 | P4 (auditoría ola 2): audit gate del plan y verify del brief executor-2 corregidos a la lógica real (nix.gc sin options + trim-generations diario) | El verify literal del brief quedó obsoleto frente a la CORRECCIÓN del GC; la implementación seguía el decision log (fuente más reciente) |
+| 2026-08-14 | Ola 3 aprobada por auditoría (APPROVED WITH EXCEPTIONS — solo P1 menor: mensaje de commit del executor de 86 chars > ~72, sugerido por el brief) | `.workflow/audits/wave3.md`: diff = solo README.md (+32), smoke test re-ejecutado y salida pegada genuina, `nix flake check` pasa, sin secretos, aislamiento de rama verificable (749bb54 = punta de wave3-executor-1) |
