@@ -1,4 +1,4 @@
-# Plan rodante: ola 2 ollama + GC (in-flight) · ola 3 editor de vídeo (detallada)
+# Plan rodante: ola 2 ollama + GC (done) · ola 3 editor de vídeo (detallada)
 
 > Single source of truth for the work. Committed, survives any session.
 > ONLY the next wave is detailed (rolling plan). When a session dies, a new
@@ -67,9 +67,9 @@ Dos ejecutores, archivos disjuntos. Nadie toca `flake.lock` ni
 
 ### Tasks
 
-- [ ] T1: override de ollama a 0.32.12 binario oficial (rocm) en pc →
+- [x] T1: override de ollama a 0.32.12 binario oficial (rocm) en pc →
       brief: `.workflow/briefs/wave2-executor-1.md`
-- [ ] T2: GC de Nix por conteo: máximo 3 generaciones siempre →
+- [x] T2: GC de Nix por conteo: máximo 3 generaciones siempre →
       brief: `.workflow/briefs/wave2-executor-2.md`
 
 ### Integration plan
