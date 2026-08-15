@@ -143,17 +143,21 @@
       ytsong() {
         local url=$(wl-paste)
         yt-dlp --no-warnings --no-playlist --extract-audio --audio-format opus --audio-quality 0 \
+          -f "bestaudio/best" \
           --embed-metadata --embed-thumbnail --js-runtimes node \
           --cookies-from-browser firefox \
+          --extractor-args "youtube:player_client=default,-android_vr" \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"
       }
 
       ytlist() {
         local url=$(wl-paste)
         yt-dlp --no-warnings --ignore-errors --extract-audio --audio-format opus --audio-quality 0 \
+          -f "bestaudio/best" \
           --embed-metadata --embed-thumbnail --js-runtimes node \
           --cookies-from-browser firefox --download-archive historial_descargas.txt \
-          --sleep-interval 3 --max-sleep-interval 8 \
+          --sleep-requests 1 --sleep-interval 3 --max-sleep-interval 8 \
+          --extractor-args "youtube:player_client=default,-android_vr" \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"
       }
 
