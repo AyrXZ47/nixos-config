@@ -1,4 +1,4 @@
-# Plan: ollama 0.32.12 (qwen3.8) + límite duro de 3 generaciones
+# Plan rodante: ola 2 ollama + GC (in-flight) · ola 3 editor de vídeo (detallada)
 
 > Single source of truth for the work. Committed, survives any session.
 > ONLY the next wave is detailed (rolling plan). When a session dies, a new
@@ -13,6 +13,12 @@ conteo, no por edad). Se considera hecho cuando `nixos-rebuild switch --flake .#
 aplica sin errores, `ollama --version` reporta 0.32.12 y el pull del modelo
 funciona, y tras un rebuild `nix-env -p /nix/var/nix/profiles/system
 --list-generations` muestra ≤ 3 generaciones.
+
+Segundo proyecto (ola 3): decidir con evidencia y dejar documentado el editor de
+vídeo de la pc (RX 7600). Se considera hecho cuando el README tiene una sección
+«Edición de vídeo» con la decisión (**Shotcut**) y la verificación VA-API real
+(H.264/HEVC/AV1 decode+encode por hardware), y `nix flake check` pasa. Nada se
+instala de nuevo (YAGNI: shotcut ya está en `common-packages.nix`).
 
 ## Stack & constraints
 
@@ -39,7 +45,8 @@ funciona, y tras un rebuild `nix-env -p /nix/var/nix/profiles/system
 |------|-------|--------|
 | 1 | <ya integrada — historial previo> | done |
 | 2 | ollama 0.32.12 binario (pc) + límite duro 3 generaciones | in-flight |
-| 3 | pull qwen3.8 y calibración tps en pc (tras aprobación humana) | planned |
+| 3 | Editor de vídeo: decisión documentada + verificación VA-API (Shotcut) | planned |
+| 4 | pull qwen3.8 y calibración tps en pc (tras aprobación humana) | planned |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -96,6 +103,91 @@ Dos ejecutores, archivos disjuntos. Nadie toca `flake.lock` ni
 
 ---
 
+## Wave 3 (next) — editor de vídeo: decisión + verificación
+
+> Gate: arranca DESPUÉS de que la ola 2 pase auditoría, y tras la confirmación
+> humana de la decisión (el humano responde al chat del planner). Default
+> recomendado: **quedarse con Shotcut**. El branch B (Resolve) se activa solo si
+> el humano lo pide.
+
+### Scope — evidencia recogida el 2026-08-14 en la máquina real (`nixos-pc`, RX 7600)
+
+- **Shotcut ya está instalado** (`modules/apps/common-packages.nix`) y su vía GPU
+  funciona: `vainfo` → VA-API 1.24, radeonsi 26.2.0 (Navi 33), perfiles
+  H.264/HEVC(Main+Main10)/VP9/AV1 con `VAEntrypointVLD` + `VAEntrypointEncSlice`
+  → decode Y encode por hardware. Es el ÚNICO NLE libre que usa la GPU de AMD
+  para H.264 en Linux (motor FFmpeg/MLT).
+- **DaVinci Resolve 21.0.4 (free) SÍ está en el nixpkgs pinneado** (rev
+  `0e251e24`): `broken=false`, unfree (ya permitido globalmente en
+  `modules/core/user.nix`), empaquetado (AppImage oficial + FHS env con ocl-icd).
+  **NO resuelve los dolores del humano**: H.264/H.265 en la versión free se
+  procesan por CPU (hardware encode/decode = feature de Studio y en Linux
+  NVIDIA-only), así que el flujo ProRes→mov→cientos de GB seguiría siendo
+  necesario. El «no soporta mi GPU» = OpenCL sin ICD: `clinfo` → 0 platforms en
+  este sistema AHORA. Arreglar OpenCL (rusticl) es posible, pero no arregla los
+  codecs — no existe «parche» para eso (es licencia de Blackmagic).
+- **Filmora: descartado** — oficialmente solo Windows/macOS/móvil (descargas
+  `.exe`/`.dmg`), no hay build Linux.
+- **kdenlive** existe (`kdePackages.kdenlive` 26.04.3; el attr `kdenlive` a secas
+  ya no existe) pero el humano lo descartó. Blender VSE: sin LUTs reales y export
+  por CPU (descartado por el humano). Olive está muerto; OpenShot/Pitivi/
+  Flowblade no son profesionales.
+- Decisión: **seguir con Shotcut**. Los cierres que sufrió el humano eran en
+  Fedora (otro build/drivers); en NixOS el stack es el de nixpkgs y VA-API está
+  vivo. Bonus: exportar a AV1 por hardware (RX 7600 lo soporta) → archivos mucho
+  más pequeños que H.264 a calidad similar.
+
+### File ownership map
+
+| File/glob | Owner |
+|-----------|-------|
+| `README.md` (solo la nueva subsección «Edición de vídeo» bajo `## Software`) | executor-1 |
+
+Ola de docs: un solo ejecutor, un solo archivo. Nadie más toca `README.md` y el
+executor no toca NADA más.
+
+### Tasks
+
+- [ ] T1: sección README «Edición de vídeo»: decisión (Shotcut), evidencia
+      (VA-API verificado + salida real del smoke test), por qué NO Resolve free /
+      Filmora / kdenlive / Blender VSE, tip AV1, y qué hacer si Shotcut crashea
+      en NixOS (desactivar hw decode en ajustes y reportar → ola futura). →
+      brief: `.workflow/briefs/wave3-executor-1.md`
+
+### Branch B (solo si el humano elige Resolve)
+
+Activar solo tras la decisión; el planner escribe los briefs en ese momento.
+Dos ejecutores, propietarios disjuntos:
+
+| File/glob | Owner |
+|-----------|-------|
+| `modules/apps/davinci-resolve.nix` (nuevo: paquete solo en pc) | executor-1 |
+| `modules/hardware/amd-desktop.nix` (`hardware.graphics.extraPackages = [ pkgs.mesa.opencl ]` → rusticl) | executor-2 |
+
+Advertencia explícita que debe quedar escrita: H.264 seguirá en CPU; el OpenCL
+arregla color/efectos de Resolve, NO los codecs.
+
+### Integration plan
+
+- Orden de merge: executor-1 sobre `main` (único).
+- Comandos en el árbol integrado:
+  ```bash
+  nix flake check
+  ```
+- La decisión ya quedó confirmada ANTES de la ola (gate); el README la registra.
+
+### Audit gate
+
+- Auditor corre en el árbol integrado:
+  - `nix flake check` pasa.
+  - `git diff main..HEAD --stat` = solo `README.md`.
+  - La sección «Edición de vídeo» existe, en español, y cita evidencia
+    verificable (vainfo / smoke test con su salida real) — sin claims
+    inventados.
+  - Decision log actualizado.
+
+---
+
 ## Decision log
 
 | Date | Decision | Why |
@@ -104,3 +196,6 @@ Dos ejecutores, archivos disjuntos. Nadie toca `flake.lock` ni
 | 2026-08-14 | Ollama vía binario oficial (tarball release) en vez de override de la derivación nixpkgs | nixpkgs-unstable solo tiene 0.32.7; compilar desde fuente con overrideAttrs implica re-pinear vendorHash + llama.cpp pin (frágil). El tarball oficial es 1 línea de fetchurl + copy |
 | 2026-08-14 | GC por conteo `--delete-generations +3` reemplaza al `--delete-older-than 3d` | Por edad conservaba 16 generaciones con rebuilds frecuentes; por conteo garantiza ≤ 3 siempre |
 | 2026-08-14 | CORRECCIÓN: `nix-collect-garbage` NO acepta `--delete-generations` (error `unrecognised flag`); el conteo va en un servicio `trim-generations` DIARIO con `nix-env --delete-generations +3` + GC, y `nix.gc` queda sin options (GC puro) | Verificado con `nix-collect-garbage --help` y dry-run en la máquina real |
+| 2026-08-14 | Editor de vídeo: SE SIGUE CON SHOTCUT (recomendado; pendiente confirmación humana) | VA-API verificado en la RX 7600 real (`vainfo`: H.264/HEVC/VP9/AV1 VLD+EncSlice con radeonsi 26.2). Resolve free 21.0.4 existe en nixpkgs (`0e251e24`, `broken=false`) PERO H.264/H.265 quedan en CPU (hw accel = Studio, NVIDIA-only en Linux) → no resuelve los dolores del humano. Filmora no tiene build Linux (solo .exe/.dmg). kdenlive existe (`kdePackages.kdenlive` 26.04.3) pero el humano lo descartó |
+| 2026-08-14 | OpenCL está inoperativo en pc AHORA mismo: `clinfo` → 0 platforms (loader ocl-icd sí, ICD de proveedor no) | Explica el «no soporta mi GPU» previo del humano con Resolve. Vía corta si se activa branch B: `hardware.graphics.extraPackages = [ pkgs.mesa.opencl ]` (rusticl, mesa 26.2 lo compila). No se instala nada hasta que el humano decida (YAGNI) |
+| 2026-08-14 | La evaluación de paquetes de esta ola se hizo contra el lock ACTUAL (`0e251e24`, 2026-08-12, la «buena» tras el revert `33265c8`) | Si el lock cambia antes de activar branch B, re-evaluar davinci-resolve/mesa antes de escribir los briefs |
