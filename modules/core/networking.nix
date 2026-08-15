@@ -24,13 +24,28 @@
     };
   };
 
-  # avahi crea /run/avahi-daemon y lo chown al usuario 'avahi' (make_runtime_dir).
-  # El bounding set del módulo de NixOS (CAP_SYS_CHROOT/SETUID/SETGID) NO incluye
-  # CAP_CHOWN, así que el chown falla en silencio (avahi ignora el return), el dir
-  # queda root:root y avahi aborta con "Failed to create runtime directory".
-  # Solo funcionaba mientras el dir pre-existía con dueño avahi (de un arranque
-  # anterior), por eso rompía al reiniciar el servicio en un switch.
-  # Se añade CAP_CHOWN al bounding set: avahi vuelve a crear/chownear el dir en
-  # cada arranque y el pid file stale se gestiona solo (dir avahi-owned).
-  systemd.services.avahi-daemon.serviceConfig.CapabilityBoundingSet = [ "CAP_CHOWN" ];
+  # El bucle de muerte del pid file stale — por esto avahi "se rompía y rompía"
+  # en los 4 hosts. El módulo de nixpkgs crea /run/avahi-daemon como avahi:avahi
+  # (tmpfiles `d /run/avahi-daemon - avahi avahi -`) y endurece el daemon con
+  # CapabilityBoundingSet SIN CAP_DAC_OVERRIDE: uid 0 dentro del sandbox NO puede
+  # borrar nada en un dir de avahi (cae a la clase "other" de un 755 = sin
+  # escritura). Cuando avahi muere de forma anómala (crash, kill -9, muerte rara
+  # al boot), queda el pid file stale. En el siguiente arranque libdaemon
+  # (daemon_pid_file_is_running) intenta borrarlo como root-sin-capacidad →
+  # EACCES, y el return del unlink() se IGNORA → el create() posterior con
+  # O_EXCL falla con EEXIST ("Failed to create PID file: File exists") → avahi no
+  # vuelve a arrancar NUNCA más salvo limpieza manual. Con la red de Telmex caída
+  # (eventos de interfaz a mansalva) la muerte anómala era continua → hosts
+  # rotos en cadena.
+  # Fix: que systemd gestione el dir (RuntimeDirectory). PID 1 lo crea avahi-owned
+  # en cada start y borra TODO el dir en cada stop (aunque el proceso muera con
+  # kill -9) → un pid stale NO PUEDE sobrevivir a un ciclo stop/start y avahi ni
+  # siquiera necesita su unlink. El socket de activación del módulo se desactiva:
+  # sin él, avahi crea su propio /run/avahi-daemon/socket (como avahi, en su dir)
+  # y no quedan sockets fantasma de systemd apuntando a un inode borrado (que al
+  # reiniciarse en cada switch chocaban con EADDRINUSE contra el socket vivo).
+  systemd.services.avahi-daemon.serviceConfig.RuntimeDirectory = "avahi-daemon";
+  systemd.services.avahi-daemon.serviceConfig.RuntimeDirectoryUser = "avahi";
+  systemd.sockets.avahi-daemon.enable = lib.mkForce false;
+  systemd.services.avahi-daemon.requires = lib.mkForce [];
 }
