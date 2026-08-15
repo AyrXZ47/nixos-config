@@ -11,6 +11,7 @@
     ../modules/apps/firefox.nix
     ../modules/apps/serena.nix
     ../modules/apps/opencode.nix
+    ../modules/apps/dolphin.nix
   ];
 
   home.username = "yovick";
