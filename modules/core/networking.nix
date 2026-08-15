@@ -37,15 +37,22 @@
   # vuelve a arrancar NUNCA más salvo limpieza manual. Con la red de Telmex caída
   # (eventos de interfaz a mansalva) la muerte anómala era continua → hosts
   # rotos en cadena.
-  # Fix: que systemd gestione el dir (RuntimeDirectory). PID 1 lo crea avahi-owned
-  # en cada start y borra TODO el dir en cada stop (aunque el proceso muera con
-  # kill -9) → un pid stale NO PUEDE sobrevivir a un ciclo stop/start y avahi ni
-  # siquiera necesita su unlink. El socket de activación del módulo se desactiva:
-  # sin él, avahi crea su propio /run/avahi-daemon/socket (como avahi, en su dir)
-  # y no quedan sockets fantasma de systemd apuntando a un inode borrado (que al
-  # reiniciarse en cada switch chocaban con EADDRINUSE contra el socket vivo).
+  # Fix: que systemd gestione el dir (RuntimeDirectory). PID 1 crea el dir en cada
+  # start y hace rm_rf de TODO el dir en cada stop (síncrono, "this needs to be
+  # gone when we start the service next" — funciona aunque avahi muera con kill
+  # -9) → un pid stale NO PUEDE sobrevivir a un ciclo stop/start y avahi ni
+  # siquiera necesita su unlink.
+  # OJO: NO usar RuntimeDirectoryUser — systemd 261 ya no lo reconoce (Unknown
+  # key, ignorada; se eliminó del parser hace años). El dir nace root:root 0755 y
+  # avahi lo re-chown a sí mismo en make_runtime_dir: por eso VA CAP_CHOWN en el
+  # bounding set (sin él, el stat-check de avahi ve root y aborta con "Failed to
+  # create runtime directory").
+  # El socket de activación del módulo se desactiva: sin él, avahi crea su propio
+  # /run/avahi-daemon/socket (como avahi, en su dir) y no quedan sockets fantasma
+  # de systemd apuntando a un inode borrado (que al reiniciarse en cada switch
+  # chocaban con EADDRINUSE contra el socket vivo).
   systemd.services.avahi-daemon.serviceConfig.RuntimeDirectory = "avahi-daemon";
-  systemd.services.avahi-daemon.serviceConfig.RuntimeDirectoryUser = "avahi";
+  systemd.services.avahi-daemon.serviceConfig.CapabilityBoundingSet = [ "CAP_CHOWN" ];
   systemd.sockets.avahi-daemon.enable = lib.mkForce false;
   systemd.services.avahi-daemon.requires = lib.mkForce [];
 }
