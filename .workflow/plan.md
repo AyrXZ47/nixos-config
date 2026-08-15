@@ -1,4 +1,4 @@
-# Plan rodante: olas 2–3 done · ola 4 ollama/Obsidian Copilot (detallada)
+# Plan rodante: olas 2–3 done · ola 4 resuelta directo (sin ola formal)
 
 > Single source of truth for the work. Committed, survives any session.
 > ONLY the next wave is detailed (rolling plan). When a session dies, a new
@@ -22,11 +22,12 @@ instala de nuevo (YAGNI: shotcut ya está en `common-packages.nix`).
 
 Tercer proyecto (ola 4): resolver la queja «los modelos locales en Obsidian
 Copilot tardan una eternidad y traban la PC». Diagnóstico cerrado (ver ola 2,
-R1): el fix es de configuración del PLUGIN, no del repo → la ola entrega docs
-(README) + comentario corregido en `common-packages.nix` (lección num_ctx), sin
-código nuevo. Se considera hecho cuando `nix flake check` pasa, el README tiene
-la tabla de calibración con evidencia real, y el humano aplica los ajustes en el
-plugin y ve respuestas en segundos sin freeze (`ollama ps` CONTEXT ≤ 8192).
+R1): el fix es de configuración del PLUGIN, no del repo. RESUELTO DIRECTO por
+el planner (el humano autorizó hacerlo sin ola formal): valores exactos dados
+en el chat, comentario R1 corregido en `common-packages.nix` (hecho), modelo
+recomendado para >22 t/s = **qwen3.6:35b-a3b-mtp-q4_K_M** (MoE 3B activos; los
+27b densos no llegan a 22 t/s con 8 GiB VRAM). SIN sección nueva en README (el
+humano no la quiere — feedback: demasiada burocracia para consultas triviales).
 
 ## Stack & constraints
 
@@ -54,7 +55,7 @@ plugin y ve respuestas en segundos sin freeze (`ollama ps` CONTEXT ≤ 8192).
 | 1 | <ya integrada — historial previo> | done |
 | 2 | ollama 0.32.12 binario (pc) + límite duro 3 generaciones | audited (excepciones P1–P4) |
 | 3 | Editor de vídeo: decisión documentada + verificación VA-API (Shotcut) | audited (excepción P1 menor) |
-| 4 | Calibración ollama en Obsidian Copilot: docs README + comentario R1 | in-flight |
+| 4 | Calibración ollama/Obsidian Copilot — resuelta directo (sin ola formal) | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -197,14 +198,15 @@ arregla color/efectos de Resolve, NO los codecs.
 
 ---
 
-## Wave 4 (current) — ollama en Obsidian Copilot: calibración + docs
+## Wave 4 (done — resuelta directo, sin ola formal)
 
-> Gate: ola 3 auditada (APPROVED, solo P1 menor de proceso) y R1 de la auditoría
-> ola 2 pendiente (prioridad alta). Queja del humano 2026-08-14: «los modelos
-> locales en Obsidian tardan una eternidad y traban toda la PC». Diagnóstico
-> cerrado con evidencia real — **el fix es de configuración del plugin, NO hay
-> código que escribir** (escalera ponytail, peldaño 1: ¿hay algo que construir?
-> No). La ola entrega docs + corrección de un comentario.
+> Queja del humano 2026-08-14: «los modelos locales en Obsidian tardan una
+> eternidad y traban toda la PC». Diagnóstico cerrado con evidencia real (ver
+> decision log) y **resuelto DIRECTO por el planner**: el humano autorizó
+> explícitamente hacerlo sin ola formal, sin executor ni auditoría — feedback:
+> «demasiado burocrático». Escalera ponytail peldaño 1: no hay nada que
+> construir; el fix es configuración del plugin (vive en el vault de Obsidian,
+> no en el repo).
 
 ### Diagnóstico (evidencia real, 2026-08-14)
 
@@ -220,61 +222,33 @@ arregla color/efectos de Resolve, NO los codecs.
   = decenas de minutos), Reasoning ON (qwen3 «piensa» miles de tokens antes de
   responder), Vision ON con modelos de texto, Websearch ON (más requests, prompt
   más gordo).
-- **Recomendado para modelos locales**: num_ctx **8192**, Token limit
-  **2048–4096**, Reasoning/Vision/Websearch **OFF**, Temperature 0.6–0.7 (0.66
-  está bien; top-p y frequency penalty desactivados está bien). Para chat
-  interactivo: **qwen3.5:9b** (37 t/s = instantáneo); el 27B para tareas largas
-  de terminal, no chat.
+- **Modelo para >22 t/s**: los qwen3.8:27b son DENSOS (18 GB) → ~5 t/s en esta
+  máquina, no llegan a 22. El que daba 22 t/s en Fedora es el **MoE
+  qwen3.6:35b-a3b** (solo 3B parámetros activos por token) → **pull
+  `qwen3.6:35b-a3b-mtp-q4_K_M`** (23 GB, 256k ctx) para >22 t/s sin colapsar.
 - **Modelos nube (API opencode-go)**: num_ctx lo decide el servidor (el valor
   del cliente es inerte ahí); Token limit 4–8k basta; Reasoning ON solo si el
-  modelo lo soporta. Copiar los valores de local no es dañino pero el num_ctx
-  no aporta nada.
+  modelo lo soporta.
 
-### Scope
+### Qué se hizo (directo, en esta sesión)
 
-La configuración del plugin vive en el vault de Obsidian (`.obsidian/`), NO en
-este repo → la ola no escribe código. Entregables: (a) subsección README con la
-tabla de calibración y la evidencia, (b) corrección del comentario de
-`OLLAMA_CONTEXT_LENGTH` en `common-packages.nix` para registrar la lección R1 —
-cero cambio de comportamiento. Sin Modelfile (YAGNI: los parámetros del request
-sobreescriben los del modelo igualmente, así que no arreglaría Obsidian).
+- [x] Comentario R1 corregido en `modules/apps/common-packages.nix` (lección
+      num_ctx; sin cambio de comportamiento — `OLLAMA_CONTEXT_LENGTH=16384` y
+      `OLLAMA_GPU_OVERHEAD=1073741824` intactos).
+- [x] Limpieza: `aider-chat` eliminado de `common-packages.nix` (el workflow usa
+      opencode, no aider — autorizado por el humano) y función `update-obsidian`
+      (herencia Fedora RPM) eliminada de `shell.nix`; referencias en README.
+- [x] NO se añadió subsección README de calibración (el humano no la quiere —
+      «solo dime los valores aquí en el chat»).
+- [x] Verificación: `nix flake check` pasa; `nix eval` de env vars de ollama
+      intactas.
 
-### File ownership map
+### Pendiente humano (fuera del repo)
 
-| File/glob | Owner |
-|-----------|-------|
-| `README.md` (nueva subsección bajo `## Software`) + `modules/apps/common-packages.nix` (SOLO comentarios) | executor-1 |
-
-Un ejecutor, dos archivos, nadie más toca nada.
-
-### Tasks
-
-- [ ] T1: subsección README «Ollama + Obsidian Copilot» (tabla recomendada,
-      porqués con evidencia, baselines tps, nota modelos nube) + comentario
-      corregido en common-packages.nix (lección R1) →
-      brief: `.workflow/briefs/wave4-executor-1.md`
-
-### Integration plan
-
-- Orden de merge: executor-1 sobre `main` (único).
-- Comandos en el árbol integrado:
-  ```bash
-  nix flake check
-  ```
-- El humano DESPUÉS aplica los ajustes en el plugin (acción fuera del repo) y
-  verifica: respuestas en segundos, sin freeze, `ollama ps` → CONTEXT ≤ 8192.
-
-### Audit gate
-
-- Auditor corre en el árbol integrado:
-  - `nix flake check` pasa.
-  - `git diff main..HEAD --stat` = solo `README.md` + `modules/apps/common-packages.nix`.
-  - Comportamiento intacto: `nix eval .#nixosConfigurations.pc.config.services.ollama.environmentVariables`
-    sigue dando `OLLAMA_CONTEXT_LENGTH=16384` y `OLLAMA_GPU_OVERHEAD=1073741824`
-    (solo cambiaron comentarios).
-  - La subsección existe, en español, con los números reales (4.85 / 37.6 /
-    0.23 t/s, 10/66 capas, 8 GiB VRAM) y la tabla de ajustes del plugin.
-  - Sin secretos; mensaje de commit ≤ ~72 chars (nit auditoría ola 3).
+1. Aplicar los valores exactos en Obsidian Copilot (local y nube) — dados en el
+   chat de la sesión.
+2. `ollama pull qwen3.6:35b-a3b-mtp-q4_K_M` y verificar con `ollama ps` →
+   CONTEXT ≤ 8192 y tps > 22.
 
 ---
 
@@ -298,3 +272,8 @@ Un ejecutor, dos archivos, nadie más toca nada.
 | 2026-08-14 | Modelos nube (API opencode-go): num_ctx lo gestiona el servidor (valor del cliente inerte), Token limit 4–8k basta, Reasoning solo si el modelo lo soporta | Mismos valores que local no dañan, pero el num_ctx ahí no aporta |
 | 2026-08-14 | Ola 4 = docs + corrección de comentario únicamente (escalera peldaño 1: nada que construir); SIN Modelfile | La config del plugin vive en el vault de Obsidian, no en el repo; un Modelfile no arregla Obsidian (los parámetros del request sobreescriben los del modelo) |
 | 2026-08-14 | Repo limpio al arrancar ola 4: `main` == `origin/main`, árbol limpio, `nix flake check` pasa; nada que arreglar | `.aider.chat.history.md` y `result` están gitignoreados y no trackeados |
+| 2026-08-14 | Modelo para >22 t/s en pc (8 GiB VRAM): **`qwen3.6:35b-a3b-mtp-q4_K_M`** (MoE, 3B activos, 23 GB, 256k ctx) — no los qwen3.8:27b densos | Los 27b densos (18 GB) hacen ~5 t/s en esta máquina (medido 4.85 t/s); el a3b es el que daba 22 t/s en Fedora; MTP añade decodificación especulativa. `ollama pull qwen3.6:35b-a3b-mtp-q4_K_M` |
+| 2026-08-14 | Ola 4 resuelta DIRECTO por el planner, sin executor ni auditoría (autorizado explícitamente por el humano) | Feedback humano: «demasiado burocrático» para consultas triviales (caso Shotcut). Regla nueva: tareas triviales/consultas → sesión directa, sin ola formal; olas solo para trabajo multi-archivo/paralelo |
+| 2026-08-14 | `aider-chat` eliminado de `common-packages.nix` y del README (referencias limpias) | El workflow de este repo usa opencode (AGENTS.md), no aider; el humano autorizó borrarlo («¿te sirve como opencode? si no, bórralo») |
+| 2026-08-14 | `update-obsidian` (función RPM de Fedora) eliminada de `shell.nix` y del README | Herencia Fedora inútil en NixOS; el humano autorizó limpiarla |
+| 2026-08-14 | NO se añade subsección README de calibración ollama | El humano no la quiere: «solo dime los valores exactos aquí en el chat». La lección R1 queda en el comentario de common-packages.nix (única doc persistente necesaria) |
