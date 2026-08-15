@@ -56,6 +56,11 @@ in
   # VRAM usar num_ctx <= 8192: el KV cache de 131k no cabe y la maquina se traba.
   services.ollama.environmentVariables = {
     OLLAMA_CONTEXT_LENGTH = "16384";
+    # Truco 1: flash attention -> menos VRAM para el KV cache y atencion mas rapida.
+    # Truco 2: KV cache en q8_0 (mitad de memoria que f16) -> mas capas caben en la
+    # GPU. Ambos suman ~5-15% de t/s; el 2x real viene de MoE a3b + num_ctx 8192.
+    OLLAMA_FLASH_ATTENTION = "1";
+    OLLAMA_KV_CACHE_TYPE = "q8_0";
     # Reserva VRAM para el escritorio: sin esto ollama se come los 8GiB completos
     # y Hyprland renderiza desde GTT (ram del sistema) -> la UI se arrastra.
     # OLLAMA_GPU_OVERHEAD va en BYTES (envconfig/config.go): el valor previo de
