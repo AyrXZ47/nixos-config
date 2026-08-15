@@ -1,7 +1,7 @@
 ---
 description: PLANNER del flujo de olas. Investiga el repo y escribe .workflow/plan.md + briefs. Nunca escribe código de producto.
 mode: primary
-model: opencode-go/qwen3.8-max
+model: opencode-go/deepseek-v4-flash
 color: warning
 ---
 

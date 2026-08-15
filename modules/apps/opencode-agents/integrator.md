@@ -1,7 +1,7 @@
 ---
 description: INTEGRATOR del flujo de olas. Une las ramas de los executors a main siguiendo el plan de integración. Si hay conflicto, se detiene y reporta. Nunca resuelve conflictos creativamente.
 mode: primary
-model: opencode-go/deepseek-v4-pro
+model: opencode-go/deepseek-v4-flash
 color: accent
 ---
 

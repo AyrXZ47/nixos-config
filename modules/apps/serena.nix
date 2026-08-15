@@ -9,6 +9,8 @@ let
   opencodeSeed = pkgs.writeText "opencode.json" ''
     {
       "$schema": "https://opencode.ai/config.json",
+      "default_agent": "planner",
+      "model": "opencode-go/deepseek-v4-flash",
       "mcp": {
         "serena": {
           "type": "local",
@@ -73,7 +75,8 @@ in
     if [ ! -f "$HOME/.config/opencode/opencode.json" ] || \
        ${pkgs.gnugrep}/bin/grep -q 'headroom' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json" || \
-       ! ${pkgs.gnugrep}/bin/grep -q '"disable": true' "$HOME/.config/opencode/opencode.json"; then
+       ! ${pkgs.gnugrep}/bin/grep -q '"disable": true' "$HOME/.config/opencode/opencode.json" || \
+       ! ${pkgs.gnugrep}/bin/grep -q '"default_agent"' "$HOME/.config/opencode/opencode.json"; then
       cp ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
     fi
 
