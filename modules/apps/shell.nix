@@ -52,16 +52,17 @@
       # Solo si está instalado: el celular (nix-on-droid) no trae fastfetch.
       command -v fastfetch >/dev/null && fastfetch
 
-      # Parte la terminal en dos: btop (izquierda) y nvtop (derecha). La versión
-      # con hyprctl dispatch layoutmsg/exec dejó de funcionar con la config Lua
-      # (el dispatch legacy no se parsea) y solo abría btop.
+      # Parte la terminal en dos: btop (55%, izquierda, con sudo para poder
+      # matar procesos) y nvtop (45%, derecha). La versión con hyprctl
+      # dispatch layoutmsg/exec dejó de funcionar con la config Lua (el
+      # dispatch legacy no se parsea) y solo abría btop.
       netrunner() {
         if [[ -z "$WEZTERM_PANE" ]]; then
           echo "Error: Se requiere WezTerm activo."
           return 1
         fi
-        wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 50 -- zsh -ic nvtop
-        exec btop
+        wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 45 -- zsh -ic nvtop
+        exec sudo btop
       }
 
       dev() {
@@ -170,8 +171,9 @@
         mkdir -p listos_para_editar
         for f in *.mp4(N); do
           if [[ ! -f "listos_para_editar/$f" ]]; then
-            ffmpeg -vaapi_device /dev/dri/renderD128 -i "$f" \
-              -vf "format=nv12,hwupload" -c:v h264_vaapi -qp 18 \
+            ffmpeg -hwaccel vaapi -hwaccel_output_format vaapi \
+              -vaapi_device /dev/dri/renderD128 -i "$f" \
+              -vf "scale_vaapi=format=nv12" -c:v h264_vaapi -qp 18 \
               -fps_mode cfr -r 30 -c:a copy "listos_para_editar/$f"
           fi
         done

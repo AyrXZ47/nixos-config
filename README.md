@@ -216,12 +216,12 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 
 - `dev [repo]` — full dev workspace in WezTerm panes (editor, AI, cava, pipes);
   con directorio opcional entra al repo antes de partir paneles.
-- `netrunner` — nvtop + btop split.
+- `netrunner` — btop 55% (izquierda, con sudo) + nvtop 45% (derecha).
 - `SecDesk` / `Mirror` (+ `_WiFi <ip>`) — scrcpy tablet mirroring, 85 fps,
   h265/opus, virtual 1920x1080 display for a secure desk setup.
 - `ytsong` / `ytlist` — download audio from clipboard (yt-dlp, cookies from Firefox).
-- `estabilizar_clips` / `estabilizar_clips_gpu` — re-encode clips to CFR 30 (CPU x264
-  or VA-API h264) for stable editing.
+- `estabilizar_clips` / `estabilizar_clips_gpu` — re-encode clips to CFR 30
+  (CPU x264 or full-VAAPI h264: decode + encode on GPU) for stable editing.
 - `subtitular <video>` — Whisper (whisper.cpp) Spanish subtitles with VAD.
 
 ## Installation on a New Machine
