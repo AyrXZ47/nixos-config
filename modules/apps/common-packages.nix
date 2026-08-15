@@ -66,7 +66,10 @@ in
     # OLLAMA_GPU_OVERHEAD va en BYTES (envconfig/config.go): el valor previo de
     # 1024 era 1KiB, un no-op -> por eso el desktop seguía congelándose.
     # 1073741824 = 1GiB reservados; el resto va a IA local.
-    OLLAMA_GPU_OVERHEAD = "1073741824";
+    # Subido a 2GiB (2147483648) tras medir 35 t/s con qwen3.6:35b-a3b-mtp:
+    # con 1GiB el desktop aún micro-congelaba (Hyprland caía a GTT). Coste:
+    # ~2-4 capas menos en GPU, t/s baja a ~25-30 (sigue > 22).
+    OLLAMA_GPU_OVERHEAD = "2147483648";
   };
 
   environment.etc."xdg/menus/applications.menu".text = ''
