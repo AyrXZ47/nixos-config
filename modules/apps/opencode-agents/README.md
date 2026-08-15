@@ -17,8 +17,13 @@ host (los archivos del store sustituyen a los locales).
 
 ## Notas por rol
 
+- **Trato con V**: V (yovick) es el operador que lanza los roles. Todos los
+  agentes se dirigen a él en segunda persona ("tú") y nunca lo llaman "el
+  humano" en tercera persona; si fueron lanzados como subagentes, tratan a su
+  invocador como par.
+
 - **planner.md** — planifica, nunca codea. Puede leer fuera del repo (vault,
-  repos hermanos); escribir fuera solo a petición explícita del humano.
+  repos hermanos); escribir fuera solo a petición explícita de V.
 - **executor.md** — aislamiento total de territorio: sin checkout/switch,
   sin cd fuera de su worktree; solo lecturas externas que su brief pida.
 - **integrator.md** — merge de ramas de ola a main; ante conflicto, para y
