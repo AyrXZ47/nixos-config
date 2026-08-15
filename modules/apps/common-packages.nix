@@ -65,15 +65,17 @@ in
     # y Hyprland renderiza desde GTT (ram del sistema) -> la UI se arrastra.
     # OLLAMA_GPU_OVERHEAD va en BYTES (envconfig/config.go): el valor previo de
     # 1024 era 1KiB, un no-op -> por eso el desktop seguía congelándose.
-    # 1073741824 = 1GiB reservados. Probado 2GiB (2147483648): NO eliminó los
-    # micro-congelamientos (la causa real es CPU, ver OLLAMA_CPU_THREADS) y
-    # costó ~8 t/s -> revertido a 1GiB.
-    OLLAMA_GPU_OVERHEAD = "1073741824";
-    # Micro-congelamientos = saturación de CPU, no VRAM: con 23 GB de modelo y
+    # Medido en la máquina real: escritorio en reposo = 0.9 GiB de VRAM; con
+    # overhead 1GiB ollama llega a 7.8 GiB totales -> headroom real 0.2 GiB ->
+    # Hyprland cae a GTT -> micro-congelamientos. El overhead debe cubrir el uso
+    # del escritorio (0.9 GiB) + margen: 2GiB = ~1.1 GiB libres de verdad.
+    # 2147483648 = 2GiB. Coste: ~8 t/s (27 vs 35 medidos) - aceptado.
+    OLLAMA_GPU_OVERHEAD = "2147483648";
+    # Micro-congelamientos parte 2: saturación de CPU. Con 23 GB de modelo y
     # 8 GiB de VRAM, ollama corre ~73% del cómputo en CPU (medido: 73%/27%
-    # CPU/GPU) y los 16 hilos se saturan -> Hyprland no tiene CPU y la UI se
-    # arrastra. Limitar a 12 hilos deja 4 garantizados al escritorio; coste
-    # ~10% de t/s, pero la UI deja de congelarse. Ajustar: nproc - 4.
+    # CPU/GPU) y los 16 hilos se saturan -> Hyprland no tiene CPU. Limitar a 12
+    # hilos deja 4 garantizados al escritorio; coste ~10% de t/s.
+    # La combinación 2GiB overhead + 12 hilos es la que elimina AMBAS causas.
     OLLAMA_CPU_THREADS = "12";
   };
 
