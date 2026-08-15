@@ -109,38 +109,6 @@ Utilities: 1Password CLI, `gh`, btop, cava, pipes-rs, scrcpy, virt-manager,
 proton-vpn, openrgb, qpwgraph, dolphin, kdeconnect, tor-browser, yt-dlp.
 Fun: `cbonsai`.
 
-### Edición de vídeo
-- **Editor: Shotcut** (ya en `modules/apps/common-packages.nix`). Aceleración GPU
-  verificada en `pc` (RX 7600): VA-API con radeonsi — H.264/HEVC/VP9/AV1 con
-  decode Y encode por hardware.
-- **Por qué NO DaVinci Resolve (free)**: H.264/H.265 se procesan por CPU (el
-  hardware accel es de Studio y en Linux NVIDIA-only). Por eso el flujo previo
-  exigía convertir a mov (ProRes → cientos de GB). Instalarlo en NixOS es
-  posible (existe en nixpkgs) pero no arregla los codecs.
-- **Por qué NO** Filmora (no existe build Linux — solo Windows/macOS/móvil),
-  ni kdenlive (descartado), ni Blender VSE (sin LUTs reales, export por CPU).
-- Verificación VA-API (smoke test real en esta máquina):
-
-```bash
-$ ffmpeg -hide_banner -f lavfi -i testsrc=duration=1:size=640x360:rate=30 \
-    -vaapi_device /dev/dri/renderD128 -vf 'format=nv12,hwupload' \
-    -c:v h264_vaapi -f null -
-Output #0, null, to 'pipe:':
-  Metadata:
-    encoder         : Lavf62.12.102
-  Stream #0:0: Video: h264 (High), vaapi(tv, progressive), 640x360 [SAR 1:1 DAR 16:9], q=2-31, 30 fps, 30 tbn
-    Metadata:
-      encoder         : Lavc62.28.102 h264_vaapi
-[out#0/null @ 0x5fc4b4c0f280] video:16KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
-frame=   30 fps=0.0 q=-0.0 Lsize=N/A time=00:00:00.96 bitrate=N/A speed=28.3x elapsed=0:00:00.03
-```
-
-- Tip: exportar a **AV1 por hardware** (la RX 7600 lo soporta) → archivos mucho
-  más pequeños a calidad similar.
-- Si Shotcut crasheara en NixOS: primero desactivar hardware decode en
-  **Ajustes → Reproductor** y reportarlo al planner (ola futura) — no parchear
-  a mano ni cambiar de editor.
-
 ## Performance & Tuning
 
 ### Nix daemon (`modules/core/nix-optimization.nix`)
