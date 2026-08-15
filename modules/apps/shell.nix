@@ -52,17 +52,17 @@
       # Solo si está instalado: el celular (nix-on-droid) no trae fastfetch.
       command -v fastfetch >/dev/null && fastfetch
 
-      # Parte la terminal en dos: btop (55%, izquierda, con sudo para poder
-      # matar procesos) y nvtop (45%, derecha). La versión con hyprctl
-      # dispatch layoutmsg/exec dejó de funcionar con la config Lua (el
-      # dispatch legacy no se parsea) y solo abría btop.
+      # Parte la terminal en dos: btop (55%, izquierda) y nvtop (45%,
+      # derecha). La versión con hyprctl dispatch layoutmsg/exec dejó de
+      # funcionar con la config Lua (el dispatch legacy no se parsea) y solo
+      # abría btop.
       netrunner() {
         if [[ -z "$WEZTERM_PANE" ]]; then
           echo "Error: Se requiere WezTerm activo."
           return 1
         fi
         wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 45 -- zsh -ic nvtop
-        exec sudo btop
+        exec btop
       }
 
       dev() {
@@ -142,7 +142,7 @@
 
       ytsong() {
         local url=$(wl-paste)
-        yt-dlp --no-playlist --extract-audio --audio-format opus --audio-quality 0 \
+        yt-dlp --no-warnings --no-playlist --extract-audio --audio-format opus --audio-quality 0 \
           --embed-metadata --embed-thumbnail --js-runtimes node \
           --cookies-from-browser firefox \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"
@@ -150,7 +150,7 @@
 
       ytlist() {
         local url=$(wl-paste)
-        yt-dlp --ignore-errors --extract-audio --audio-format opus --audio-quality 0 \
+        yt-dlp --no-warnings --ignore-errors --extract-audio --audio-format opus --audio-quality 0 \
           --embed-metadata --embed-thumbnail --js-runtimes node \
           --cookies-from-browser firefox --download-archive historial_descargas.txt \
           --sleep-interval 3 --max-sleep-interval 8 \
@@ -171,10 +171,20 @@
         mkdir -p listos_para_editar
         for f in *.mp4(N); do
           if [[ ! -f "listos_para_editar/$f" ]]; then
-            ffmpeg -hwaccel vaapi -hwaccel_output_format vaapi \
-              -vaapi_device /dev/dri/renderD128 -i "$f" \
-              -vf "scale_vaapi=format=nv12" -c:v h264_vaapi -qp 18 \
-              -fps_mode cfr -r 30 -c:a copy "listos_para_editar/$f"
+            if ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer \
+              -of csv=p=0 "$f" | grep -qE "smpte2084|arib-std-b67"; then
+              echo "HDR ($f): tonemap por GPU (libplacebo)"
+              ffmpeg -hwaccel vaapi -vaapi_device /dev/dri/renderD128 \
+                -init_hw_device vaapi=va:/dev/dri/renderD128 -filter_hw_device va -i "$f" \
+                -vf "libplacebo=tonemapping=hable:format=nv12:colorspace=bt709:color_primaries=bt709:color_trc=bt709,hwupload" \
+                -c:v h264_vaapi -qp 18 -fps_mode cfr -r 30 -c:a copy "listos_para_editar/$f"
+            else
+              echo "SDR ($f): conversión directa por GPU"
+              ffmpeg -hwaccel vaapi -hwaccel_output_format vaapi \
+                -vaapi_device /dev/dri/renderD128 -i "$f" \
+                -vf "scale_vaapi=format=nv12" -c:v h264_vaapi -qp 18 \
+                -fps_mode cfr -r 30 -c:a copy "listos_para_editar/$f"
+            fi
           fi
         done
       }
