@@ -66,7 +66,10 @@ in
   home.activation.ensureSerena = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.serena"
     if [ ! -f "$HOME/.serena/serena_config.yml" ]; then
-      cp ${serenaSeed} "$HOME/.serena/serena_config.yml"
+      # install -m 600 (no cp): cp copia el modo 444 del store y con umask 077
+      # el archivo queda 400, sin escritura; el re-seed siguiente muere con
+      # "Permission denied" al abrir el archivo existente.
+      ${pkgs.coreutils}/bin/install -m 600 ${serenaSeed} "$HOME/.serena/serena_config.yml"
     elif ! ${pkgs.gnugrep}/bin/grep -q '^projects:' "$HOME/.serena/serena_config.yml"; then
       printf '\nprojects: []\n' >> "$HOME/.serena/serena_config.yml"
     fi
@@ -77,7 +80,8 @@ in
        ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q '"disable": true' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q '"default_agent"' "$HOME/.config/opencode/opencode.json"; then
-      cp ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
+      # Mismo motivo que arriba: cp dejaria 400 y romperia el re-seed.
+      ${pkgs.coreutils}/bin/install -m 600 ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
     fi
 
     # Limpieza de la integracion vieja: headroom ya no esta en el config, se
