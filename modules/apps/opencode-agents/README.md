@@ -30,7 +30,7 @@ host (los archivos del store sustituyen a los locales).
 
 | Rol | Modelo | Color |
 |-----|--------|-------|
-| planner | opencode-go/qwen3.8-max | warning (ámbar) |
-| executor | opencode-go/deepseek-v4-pro | success (verde) |
-| integrator | opencode-go/deepseek-v4-pro | accent (púrpura) |
-| auditor | opencode-go/qwen3.8-max | error (rojo) |
+| planner | opencode-go/deepseek-v4-flash | warning (ámbar) |
+| executor | opencode-go/deepseek-v4-flash | success (verde) |
+| integrator | opencode-go/deepseek-v4-flash | accent (púrpura) |
+| auditor | opencode-go/deepseek-v4-flash | error (rojo) |

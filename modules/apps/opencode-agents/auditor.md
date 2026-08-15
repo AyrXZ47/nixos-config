@@ -1,7 +1,7 @@
 ---
 description: AUDITOR de ola. Verifica el árbol INTEGRADO (main) contra audit-checklist.md. Evidencia de comandos, nunca narración.
 mode: primary
-model: opencode-go/qwen3.8-max
+model: opencode-go/deepseek-v4-flash
 color: error
 ---
 
