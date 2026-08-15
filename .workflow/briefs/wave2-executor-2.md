@@ -47,13 +47,19 @@ actualizándolos a la nueva lógica.
 ## Verify command
 
 ```bash
-nix flake check && nix eval --raw .#nixosConfigurations.pc.config.nix.gc.options
+nix flake check \
+  && nix eval --raw .#nixosConfigurations.pc.config.nix.gc.options   # debe ser vacío
+  && nix eval --raw .#nixosConfigurations.pc.config.systemd.services.trim-generations.script \
+     | grep -q "nix-env -p /nix/var/nix/profiles/system --delete-generations +3"
 ```
 
-Debe terminar sin errores e imprimir `--delete-generations +3`. Nota: el GC
-se aplica en el próximo `nixos-rebuild switch` (el humano lo corre tras el
-commit). Tras el switch, `nix-env -p /nix/var/nix/profiles/system
---list-generations` debe mostrar ≤ 3 tras el GC diario.
+Debe terminar sin errores: `nix.gc.options` VACÍO (GC puro) y el servicio diario
+`trim-generations` con `nix-env --delete-generations +3` + `nix-collect-garbage`
+(CORRECCIÓN del decision log 2026-08-14: `nix-collect-garbage` no acepta
+`--delete-generations`). Nota: el GC se aplica en el próximo `nixos-rebuild
+switch` (el humano lo corre tras el commit). Tras el switch,
+`nix-env -p /nix/var/nix/profiles/system --list-generations` debe mostrar ≤ 3
+tras el GC diario.
 
 ## Commit
 
