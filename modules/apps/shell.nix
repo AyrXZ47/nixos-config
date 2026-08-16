@@ -216,6 +216,28 @@
         rm "$TEMP_WAV"
         echo "Listo."
       }
+
+      # ONE-SHOT de actualización: flake update + build seco + switch, con
+      # guardas. Regla del repo: nunca rebuild sin commit previo y nunca dejar
+      # trabajo sin commitear. Con el ISP lento, el build seco avisa ANTES de
+      # tocar el sistema si hay descargas gigantes o paquetes rotos.
+      update-nixos() {
+        local HOST="$1"
+        if [ -z "$HOST" ]; then HOST="$(hostname -s | tr -d '0-9')"; fi
+        if [ "$HOST" = "nixos" ]; then HOST="pc"; fi
+        echo "==> Host: $HOST"
+        if [ -n "$(git -C ~/workspaces/nixos-config status --porcelain)" ]; then
+          echo "Error: working tree sucio — commit o stash antes de actualizar."
+          return 1
+        fi
+        echo "==> nix flake update..."
+        nix flake update nixpkgs || return 1
+        echo "==> Build seco (sin tocar el sistema)..."
+        sudo nix build --no-link .#nixosConfigurations."$HOST".config.system.build.toplevel \
+          || return 1
+        echo "==> Switch..."
+        sudo nixos-rebuild switch --flake .#"$HOST"
+      }
     '';
   };
 

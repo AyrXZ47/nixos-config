@@ -30,6 +30,25 @@ let
         --add-flags "$out/bin/.mixxx-wrapped"
     '';
   };
+  # Shotcut busca `ffmpeg` y `whisper-cli` EN EL MISMO DIRECTORIO que su propio
+  # binario (applicationDirPath): subtitlesdock.cpp:666 y settings.cpp:2049.
+  # En nixpkgs no viven ahí, así que "Import Subtitles" dice "ffmpeg not found"
+  # y el Speech-to-Text invoca al propio shotcut (que rechaza los flags de
+  # whisper). Fix: symlinkJoin que los coloca junto a shotcut.
+  # REGLA GENERAL GPU: whisper-cpp va con vulkanSupport (RX 7600).
+  # ponytail: si nixpkgs algún día empaqueta shotcut con ambos adyacentes,
+  # borrar el wrapper y volver al paquete plano.
+  shotcut = pkgs.symlinkJoin {
+    name = "shotcut";
+    paths = [ pkgs.shotcut ];
+    buildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      ln -s ${pkgs.ffmpeg_8}/bin/ffmpeg $out/bin/ffmpeg
+      ln -s ${
+        (pkgs.whisper-cpp.override { vulkanSupport = true; })
+      }/bin/whisper-cli $out/bin/whisper-cli
+    '';
+  };
 in
 {
   imports = [ ./actual.nix ./omnetpp.nix ./python.nix ];
@@ -143,12 +162,11 @@ in
     # AI & Development
     octave
     ollama
-    # whisper-cpp: transcripción local (STT) para `subtitular` (shell.nix).
-    # REGLA GENERAL GPU (decidida por el humano): si la tarea puede ir por GPU,
-    # va por GPU — para eso se compró. RX 7600 = backend VULKAN (hay libggml-vulkan).
-    # Los modelos (ggml-large-v3-turbo + ggml-silero VAD) viven en
-    # ~/whisper.cpp/models/ y no se empaquetan (grandes).
-    (whisper-cpp.override { vulkanSupport = true; })
+    # whisper-cpp con GPU ya va DENTRO del wrapper de shotcut (mismo bin/).
+    # Aquí NO se instala suelto para no duplicar el binario en el system path:
+    # el wrapper de shotcut ya expone whisper-cli adyacente a shotcut, que es
+    # donde Shotcut lo busca. `subtitular` (shell.nix) usa el mismo whisper-cli
+    # del PATH, y el wrapper lo provee vía systemPackages.
 
       # Virtualization
     virt-manager
