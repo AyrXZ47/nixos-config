@@ -209,7 +209,9 @@
         fi
         ffmpeg -y -v error -i "$FILE" -ar 16000 -ac 1 -c:a pcm_s16le \
           -af "highpass=f=200,afftdn" "$TEMP_WAV"
-        "$BIN" -m "$MODEL" -f "$TEMP_WAV" -osrt -l es \
+        # -of nombra el srt con el nombre ORIGINAL del archivo (sin extensión),
+        # no con el del wav temporal: "$FILE.srt" directamente listo para Shotcut.
+        "$BIN" -m "$MODEL" -f "$TEMP_WAV" -osrt -of "''${FILE%.*}" -l es \
           --vad -vm "$VAD_MODEL" -vt 0.50 --max-len 1 --split-on-word
         rm "$TEMP_WAV"
         echo "Listo."
