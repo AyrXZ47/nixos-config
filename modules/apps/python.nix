@@ -23,6 +23,14 @@ let
       sha256 = "sha256-eXyza14eF456PaX08hXkae8Tk1/YyZ0c0gES6Qu6fiI=";
     };
     build-system = [ pkgs.python3.pkgs.hatchling ];
+    # mplcyberpunk 0.7.6 usa mpl.style.core.* — removido en matplotlib 3.11
+    # (ahora son funciones públicas de mpl.style). Sin parche, import falla en
+    # el pythonImportsCheck y en runtime. ponytail: techo conocido — cuando
+    # mplcyberpunk publique versión con el fix upstream, borrar patchPhase.
+    patchPhase = ''
+      sed -i 's/mpl\.style\.core\.read_style_directory/mpl.style.read_style_directory/' src/mplcyberpunk/__init__.py
+      sed -i 's/mpl\.style\.core\.update_nested_dict/mpl.style.update_nested_dict/' src/mplcyberpunk/__init__.py
+    '';
     dependencies = with pkgs.python3.pkgs; [ matplotlib numpy ];
     pythonImportsCheck = [ "mplcyberpunk" ];
   };
