@@ -101,8 +101,8 @@ in
         center = ["hyprland-workspaces"]
         right = [
           { name = "system", modules = [
-            "custom-wallpaper",
             "custom-picker",
+            "custom-wallpaper",
             "custom-clipboard",
           ] },
           { name = "bottom", modules = [
