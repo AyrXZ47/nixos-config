@@ -34,21 +34,19 @@ let
   # binario (applicationDirPath): subtitlesdock.cpp:666 y settings.cpp:2049.
   # En nixpkgs no viven ahí, así que "Import Subtitles" dice "ffmpeg not found"
   # y el Speech-to-Text invoca al propio shotcut (que rechaza los flags de
-  # whisper). Fix: symlinkJoin que los coloca junto a shotcut.
+  # whisper). Fix: overrideAttrs que los instala DENTRO del mismo $out del
+  # paquete (NOTA: symlinkJoin NO sirve — Qt resuelve applicationDirPath al
+  # destino real del symlink y apunta al store plano, sin los binarios).
   # REGLA GENERAL GPU: whisper-cpp va con vulkanSupport (RX 7600).
   # ponytail: si nixpkgs algún día empaqueta shotcut con ambos adyacentes,
-  # borrar el wrapper y volver al paquete plano.
-  shotcut = pkgs.symlinkJoin {
-    name = "shotcut";
-    paths = [ pkgs.shotcut ];
-    buildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
+  # borrar el override y volver al paquete plano.
+  whisperVulkan = pkgs.whisper-cpp.override { vulkanSupport = true; };
+  shotcut = pkgs.shotcut.overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
       ln -s ${pkgs.ffmpeg_8}/bin/ffmpeg $out/bin/ffmpeg
-      ln -s ${
-        (pkgs.whisper-cpp.override { vulkanSupport = true; })
-      }/bin/whisper-cli $out/bin/whisper-cli
+      ln -s ${whisperVulkan}/bin/whisper-cli $out/bin/whisper-cli
     '';
-  };
+  });
 in
 {
   imports = [ ./actual.nix ./omnetpp.nix ./python.nix ];
