@@ -143,7 +143,9 @@ in
     # 4nec2 es Windows-only; xnec2c es su equivalente libre en Linux (mismo
     # motor NEC2, GUI con diagramas de radiacion y Smith). openems existe en
     # nixpkgs pero es FDTD por consola (sin GUI): exagerado para el curso.
-    geogebra6
+    # geogebra6 ELIMINADO (2026-08-16): upstream borró la URL del tarball
+    # 6-0-794 (404) y el humano no lo usa — YAGNI. Si vuelve a necesitarse,
+    # verificar version actual en download.geogebra.org/installers/6.0/.
     xnec2c
     wireshark
     # GNU Radio + GRC (gnuradio-companion): radio definida por software/SDR
