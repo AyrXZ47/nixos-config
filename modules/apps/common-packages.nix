@@ -143,6 +143,11 @@ in
     # AI & Development
     octave
     ollama
+    # whisper-cpp: transcripción local (STT) para `subtitular` (shell.nix).
+    # Solo backend CPU — los clips cortos de TikTok sobran con CPU. Los modelos
+    # (ggml-large-v3-turbo + ggml-silero VAD) viven en ~/whisper.cpp/models/ y no
+    # se empaquetan (grandes); descargar con download-ggml-model.sh o copiar.
+    whisper-cpp
 
       # Virtualization
     virt-manager

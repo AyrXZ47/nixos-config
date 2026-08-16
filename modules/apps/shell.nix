@@ -198,7 +198,9 @@
         if [ -z "$FILE" ]; then echo "Falto el archivo"; return 1; fi
         local TEMP_WAV="''${FILE%.*}_temp.wav"
         local WHISPER_DIR="$HOME/whisper.cpp"
-        local BIN="$WHISPER_DIR/build/bin/whisper-cli"
+        # BIN = whisper-cli del PATH (pkgs.whisper-cpp); el build manual
+        # (~/whisper.cpp/build) ya no existe en estas máquinas.
+        local BIN="$(command -v whisper-cli || echo "$WHISPER_DIR/build/bin/whisper-cli")"
         local MODEL="$WHISPER_DIR/models/ggml-large-v3-turbo.bin"
         local VAD_MODEL="$WHISPER_DIR/models/ggml-silero-v6.2.0.bin"
         if [ ! -f "$VAD_MODEL" ]; then
