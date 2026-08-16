@@ -22,7 +22,7 @@ let
       inherit pname version;
       sha256 = "sha256-eXyza14eF456PaX08hXkae8Tk1/YyZ0c0gES6Qu6fiI=";
     };
-    build-system = [ pkgs.python3.pkgs.setuptools ];
+    build-system = [ pkgs.python3.pkgs.hatchling ];
     dependencies = with pkgs.python3.pkgs; [ matplotlib numpy ];
     pythonImportsCheck = [ "mplcyberpunk" ];
   };
@@ -34,6 +34,8 @@ let
     ps.matplotlib
     ps.ipython
     ps.pip
+    # sympy = el Symbolic Math Toolbox de MATLAB (álgebra simbólica)
+    ps.sympy
     mplcyberpunk
   ]);
 in
