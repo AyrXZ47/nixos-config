@@ -389,6 +389,11 @@ in
       wl-clipboard
       hyprlock
       hypridle
+      # Color picker del portal: xdg-desktop-portal-hyprland necesita hyprpicker
+      # (o slurp) para implementar PickColor (el "eyedropper" del Chroma Key de
+      # Shotcut y cualquier app que use el portal Screenshot). Sin él:
+      # "[ERR] Neither slurp nor hyprpicker found. We can't pick colors."
+      hyprpicker
       polkit_gnome
       brightnessctl
       ddcutil
