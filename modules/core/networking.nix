@@ -11,6 +11,29 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
+  # ── DNS declarativo (a prueba de DHCP) ─────────────────────────────────────
+  # Nombres de servidor FIJOS: Cloudflare primario, Google fallback. El DHCP del
+  # router ya los anunciaba así, pero ahora NO dependemos de lo que el router
+  # diga: es declarativo y aplica a los 4 hosts.
+  networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
+
+  # DNS cifrado: systemd-resolved como resolvedor local + DoT (DNS-over-TLS) a
+  # Cloudflare y Google. NM delega en resolved; cada query va por TLS (puerto
+  # 853), nadie en la red (ni el ISP) puede espiar qué dominios consultamos.
+  # `FallbackDNS` cubre el caso de que ambos DoT fallen (ej. red corporativa
+  # que bloquea 853): cae a Telmex en claro, mejor que DNS roto.
+  networking.networkmanager.dns = "systemd-resolved";
+  services.resolved = {
+    enable = true;
+    settings.Resolve = {
+      DNS = "1.1.1.1#cloudflare-dns.com 8.8.8.8#dns.google";
+      DNSOverTLS = "yes";
+      DNSSEC = "true";
+      Domains = "~.";
+      FallbackDNS = "200.33.146.1 200.33.148.1"; # Telmex (solo si DoT muere)
+    };
+  };
+
   # avahi (mDNS): KDE Connect lo usa para descubrir dispositivos en la misma
   # LAN, indistintamente de si van por ethernet, Wi-Fi 2.4G o 5G. Sin este, el
   # daemon corre pero no anuncia/ve a los móviles vía DNS-SD.
