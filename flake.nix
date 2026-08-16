@@ -44,11 +44,42 @@
         };
       };
 
+      # Overlay de paquetes rotos en la punta de nixos-unstable: cuando el canal
+      # pinna un hash que ya no coincide con el tarball real (GitHub re-genero el
+      # tarball del tag, PyPI re-subio el sdist), un paquete bloquea TODO el
+      # toplevel del sistema. En vez de esperar al fix upstream, se re-pinea el
+      # hash localmente desde el fix de master (misma filosofia que un PKGBUILD
+      # de AUR en Arch: paquete roto de upstream => parche local, sin esperar).
+      # ponytail: techo conocido — cuando nixos-unstable publique el fix, el
+      # override es redundante e inofensivo (mismo hash => misma derivacion);
+      # borrarlo para no arrastrar mantenimiento muerto.
+      unstableFixesOverlay = final: prev: let
+        # Re-pinea SOLO el hash del source de nanoemoji al valor real del tarball
+        # (el que el master de nixpkgs usa hoy). El resto de la derivación queda
+        # igual; fetchFromGitHub es overridable.
+        fixNanoemoji = p: p.overrideAttrs (old: {
+          src = old.src.override {
+            hash = "sha256-FysyKC01XBnRiur5RR9fcsTxQqE8x0JJHSoe3q6JtKc=";
+          };
+        });
+      in {
+        # jetbrains-mono (fuente de ${pkgs.jetbrains-mono}) construye con
+        # python313Packages.gftools -> nanoemoji. Sin tocar python313Packages el
+        # override no surte efecto (visto en la practica: hash mismatch persiste).
+        nanoemoji = fixNanoemoji prev.nanoemoji;
+        python313Packages = prev.python313Packages.overrideScope (pfinal: pprev: {
+          nanoemoji = fixNanoemoji pprev.nanoemoji;
+        });
+        python3Packages = prev.python3Packages.overrideScope (pfinal: pprev: {
+          nanoemoji = fixNanoemoji pprev.nanoemoji;
+        });
+      };
+
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
