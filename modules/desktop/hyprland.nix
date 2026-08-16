@@ -102,6 +102,7 @@ in
         right = [
           { name = "system", modules = [
             "custom-wallpaper",
+            "custom-picker",
             "custom-clipboard",
           ] },
           { name = "bottom", modules = [
@@ -290,6 +291,21 @@ in
         tooltip-format = "Wallpaper"
         left-click = "~/.config/hypr/scripts/wallpaper-menu.sh"
         right-click = "~/.config/hypr/scripts/wallpaper-cycle.sh"
+        button-bg-color = "bg-elevated"
+
+        # Color picker de pantalla: lanza hyprpicker (el picker nativo de
+        # Hyprland). Copia el color al portapapeles en hex y muestra un OSD con
+        # el valor. Notify es de wayle: `wayle notify`. Depende de hyprpicker
+        # en systemPackages (mismo archivo, más abajo).
+        [[modules.custom]]
+        id = "picker"
+        icon-name = "color-select-symbolic"
+        icon-show = true
+        icon-color = "#ff0066"
+        icon-bg-color = "transparent"
+        label-show = false
+        tooltip-format = "Color picker"
+        left-click = "hyprpicker -a -f hex && wayle notify \"Color copiado: $(wl-paste)\""
         button-bg-color = "bg-elevated"
 
         [[modules.custom]]
