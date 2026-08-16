@@ -32,7 +32,7 @@ let
   };
 in
 {
-  imports = [ ./actual.nix ./omnetpp.nix ];
+  imports = [ ./actual.nix ./omnetpp.nix ./python.nix ];
 
   # Actual Budget desktop app (todos los hosts; firefox sigue siendo el browser default)
   modules.apps.actual.enable = true;
@@ -144,10 +144,11 @@ in
     octave
     ollama
     # whisper-cpp: transcripción local (STT) para `subtitular` (shell.nix).
-    # Solo backend CPU — los clips cortos de TikTok sobran con CPU. Los modelos
-    # (ggml-large-v3-turbo + ggml-silero VAD) viven en ~/whisper.cpp/models/ y no
-    # se empaquetan (grandes); descargar con download-ggml-model.sh o copiar.
-    whisper-cpp
+    # REGLA GENERAL GPU (decidida por el humano): si la tarea puede ir por GPU,
+    # va por GPU — para eso se compró. RX 7600 = backend VULKAN (hay libggml-vulkan).
+    # Los modelos (ggml-large-v3-turbo + ggml-silero VAD) viven en
+    # ~/whisper.cpp/models/ y no se empaquetan (grandes).
+    (whisper-cpp.override { vulkanSupport = true; })
 
       # Virtualization
     virt-manager
