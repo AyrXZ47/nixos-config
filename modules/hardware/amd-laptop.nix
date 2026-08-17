@@ -2,16 +2,34 @@
 
 let
   # Script compartido por el servicio de arranque y la regla udev: aplica el EPP
-  # del CPU segun el cargador. Medido 2026-08-17: la iGPU (wallpaper) drenaba
-  # 22W -> 12.6W al pausarla; el wallpaper se pausa POR MPV NATIVO (pause IPC,
-  # ver wallpaper-set.sh y el timer wallpaper-power-state en hyprland-home.nix),
-  # no con señales: este script solo gestiona los watts del SoC.
+  # del CPU segun el cargador Y pausa/reanuda el wallpaper por IPC nativo de mpv
+  # (el socket lo abre el propio mpv con input-ipc-server en wallpaper-set.sh).
+  # Puro eventos: se corre al enchufar/desenchufar (udev) y una vez al boot; NADA
+  # escucha en bucle. Medido 2026-08-17: wallpaper pausado = 22W -> 12.6W rate.
+  # Sin senales: los procesos NO se tocan (mpv se pausa por su propia API).
   eppSwitch = pkgs.writeShellScript "epp-switch" ''
     online=$(cat /sys/class/power_supply/AC/online 2>/dev/null)
-    if [ "$online" = 1 ]; then epp=performance; else epp=power; fi
+    if [ "$online" = 1 ]; then
+      epp=performance; paused=no
+    else
+      epp=power; paused=yes
+    fi
     for d in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
       echo "$epp" > "$d" 2>/dev/null || true
     done
+    sock=/run/user/1000/mpvpaper.sock
+    if [ -S "$sock" ]; then
+      ${pkgs.python3}/bin/python3 - "$paused" "$sock" <<'PY'
+    import json, socket, sys
+    s = socket.socket(socket.AF_UNIX)
+    try:
+        s.connect(sys.argv[2])
+        s.sendall((json.dumps({"command": ["set_property", "pause", sys.argv[1] == "yes"]}) + "\n").encode())
+        s.close()
+    except OSError:
+        pass
+    PY
+    fi
   '';
 in
 {
