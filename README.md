@@ -111,59 +111,40 @@ Fun: `cbonsai`.
 
 ### Cisco Packet Tracer (redes — universidad)
 
-Simulador de redes de Cisco (Cisco Networking Academy). Módulo **opt-in**
-(`modules/apps/packettracer.nix`, flag `modules.apps.packetTracer.enable`),
-**desactivado por defecto en todos los hosts**: así el repo clonado en una
-instalación limpia (sin WM ni nada) construye sin el `.deb` — packet tracer se
-activa DESPUÉS, cuando quieras, con un prefetch + un flag (~2 minutos).
-El paquete es **el de nixpkgs** (`cisco-packet-tracer_9`, **9.0.0**, un AppImage
-estándar que `appimageTools` empaqueta sin hacks) y es unfree (`allowUnfree`
-ya está en `modules/core/user.nix`). NO usar el 9.0.1 de NetAcad: su
-"AppImage" viene en un formato roto (ELF stub + squashfs sin footer AI + ABI
-viejas `libjpeg.so.8`/`libtiff.so.5` que nixpkgs ya no provee) — está
-documentado en el historial del repo si algún día hay que atacarlo de nuevo.
+Simulador de redes de Cisco (Cisco Networking Academy). Paquete de nixpkgs
+(`cisco-packet-tracer_9`, **9.0.0**, AppImage estándar que `appimageTools`
+empaqueta sin hacks), **activo en los hosts gráficos** (pc/laptop/vm) con el
+flag `modules.apps.packetTracer.enable`. El `.deb` del 9.0.0 se sirve
+**públicamente** en Archive.org (sin login de NetAcad) y el módulo lo descarga
+**solo** en cada rebuild (`fetchurl`): una instalación limpia (clone →
+`bootstrap.sh`) construye todo — incl. Packet Tracer — sin tocar nada a mano,
+y N máquinas con el mismo repo reconstruyen idénticas. Es unfree
+(`allowUnfree` ya está en `modules/core/user.nix`).
 
-El `.deb` 9.0.0 se sirve **públicamente** en Archive.org (sin login de
-NetAcad) — es EL MISMO archivo que nixpkgs pineó:
+Por qué la fuente es `fetchurl` y no `requireFile`: nixpkgs pineó el `.deb` con
+`requireFile` (obligaba a bajarlo a mano, política de no-redistribución de
+Cisco), pero el archivo está publicado en Archive.org con hash conocido — el
+override del módulo solo cambia la fuente. Si Archive.org moviera el item, el
+rebuild falla con un fetch: actualizar la URL en
+`modules/apps/packettracer.nix` (1 línea).
 
-```bash
-# 1. Descarga (mirror publico; verifica el sha256):
-curl -L -o ~/CiscoPacketTracer_900_Ubuntu_64bit.deb \
-  https://ia601409.us.archive.org/7/items/packettracer900/CiscoPacketTracer_900_Ubuntu_64bit.deb
-sha256sum ~/CiscoPacketTracer_900_Ubuntu_64bit.deb   # dd9ac0d4c7fc37dcb68f627fd7c7e6fa6d4200c14492526e5618b9bd172ed920
+NO usar el 9.0.1 de NetAcad: su "AppImage" viene en un formato roto (ELF stub +
+squashfs sin footer AI + ABI viejas `libjpeg.so.8`/`libtiff.so.5` que nixpkgs
+ya no provee) — quedó documentado en el historial del repo si algún día hay que
+atacarlo de nuevo.
 
-# 2. Mételo al store con ese NOMBRE (file:// es obligatorio):
-nix-prefetch-url --type sha256 file:///home/yovick/CiscoPacketTracer_900_Ubuntu_64bit.deb
-
-# 3. En el host: importar modules/apps/packettracer.nix + marcar el flag:
-#      imports = [ ... ../../modules/apps/packettracer.nix ];
-#      modules.apps.packetTracer.enable = true;
-
-# 4. Rebuild:
-sudo nixos-rebuild switch --flake .#<host>
-```
-
-Después del rebuild puedes **borrar el `.deb`**: el store lo conserva como parte
-del system profile (el GC no lo toca mientras el profile exista). Consejo: guarda
-una copia (ej. `/mnt/nightcity/packet-tracer/`) — otra máquina necesita repetir el
-prefetch.
-
-**Instalación limpia (modo TTY / sin NetAcad a mano):** el host con el flag
-activo necesita el `.deb` en el store para rebuildar. Con el archivo en un medio
-local basta un paso extra, sin red:
-
-```bash
-sudo nix-store --add-fixed sha256 /mnt/nightcity/packet-tracer/CiscoPacketTracer_900_Ubuntu_64bit.deb
-sudo nixos-rebuild switch --flake .#<host>
-```
+Verificación (opcional): el `.deb` en Archive.org
+(`https://archive.org/download/packettracer900/CiscoPacketTracer_900_Ubuntu_64bit.deb`)
+tiene sha256 `dd9ac0d4c7fc37dcb68f627fd7c7e6fa6d4200c14492526e5618b9bd172ed920`
+(equivalente flat al hash del módulo).
 
 Gotchas (vistos en la práctica):
 
-- `requireFile` localiza el archivo por `hash` + `name`: el basename tiene que ser
-  `CiscoPacketTracer_900_Ubuntu_64bit.deb` (si NetAcad sirve otra versión, renombra
-  antes del prefetch, y si el hash impreso por `nix-prefetch-url` difiere del
-  declarado, el build seguirá pidiendo "download it yourself" — hay que re-pinear
-  el hash en un overlay de `flake.nix`, mismo patrón que `unstableFixesOverlay`).
+- El 9.0.0 de Archive.org y su hash flat coinciden con lo que nixpkgs pineó,
+  así que el `fetchurl` del módulo es estable; si Cisco/Cisco-archive mueve o
+  re-empaqueta el archivo, el rebuild falla con "hash mismatch" y se actualiza
+  el hash en `modules/apps/packettracer.nix` (1 línea, igual que
+  `unstableFixesOverlay` en `flake.nix`).
 - Las descargas grandes de NetAcad se estancan a mitad (quedan archivos
   `*.deb.part` gigantes en `~/Downloads`): retomar el `.part` o traer el `.deb`
   desde otra máquina por LAN (misma red) es más rápido que reintentar desde cero.
