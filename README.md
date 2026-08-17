@@ -111,31 +111,42 @@ Fun: `cbonsai`.
 
 ### Cisco Packet Tracer (redes — universidad)
 
-Simulador de redes de Cisco (Cisco Networking Academy). Viene en `nixpkgs`
-(`cisco-packet-tracer_9`, binario `packettracer9`) y entra por
-`common-packages.nix` en los 4 hosts; es unfree (`allowUnfree` ya está en
-`modules/core/user.nix`).
+Simulador de redes de Cisco (Cisco Networking Academy). Módulo **opt-in**
+(`modules/apps/packettracer.nix`, flag `modules.apps.packetTracer.enable`),
+activado en los hosts gráficos (pc/laptop/vm) — **intencionalmente fuera de
+`common-packages`**: el paquete usa `requireFile` (Cisco no permite descarga
+automática del `.deb`, solo detrás del login de NetAcad) y sin el archivo en el
+store el build de ese host falla; opt-in significa que un host sin el flag
+construye sin él. El paquete es unfree (`allowUnfree` ya está en
+`modules/core/user.nix`) y replica el empaquetado de nixpkgs re-pineado al
+**9.0.1** (lo que NetAcad sirve hoy; las reglas oficiales hardcodean 9.0.0 y
+fallarían).
 
 Cisco **no permite la descarga automática**: el `.deb` vive detrás del login de
 NetAcad y hay que introducirlo al store a mano, una vez por máquina:
 
 ```bash
 # 1. Descarga el .deb desde https://www.netacad.com/resources/lab-downloads
-#    (cuenta de estudiante NetAcad).
-# 2. Mételo al store (calcula el hash y lo deja en /nix/store):
+#    (cuenta de estudiante NetAcad; NetAcad hoy sirve la 9.0.1).
+# 2. Mételo al store NOMBRADO como CiscoPacketTracer_900_Ubuntu_64bit.deb
+#    (el hash del repo asume ese basename; file:// es obligatorio):
 nix-prefetch-url --type sha256 file:///ruta/CiscoPacketTracer_900_Ubuntu_64bit.deb
 # 3. Rebuild del host que quieras:
 sudo nixos-rebuild switch --flake .#<host>
 ```
+
+Si Cisco re-empaqueta el `.deb`, `nix-prefetch-url` imprime un hash distinto y
+el build volverá a pedir "download it yourself": pega el hash nuevo en
+`modules/apps/packettracer.nix` (misma filosofía que `unstableFixesOverlay`).
 
 Después del rebuild puedes **borrar el `.deb`**: el store lo conserva como parte
 del system profile (el GC no lo toca mientras el profile exista). Consejo: guarda
 una copia (ej. `/mnt/nightcity/packet-tracer/`) — otra máquina necesita repetir el
 prefetch y NetAcad cambia el archivo con cada release.
 
-**Instalación limpia (modo TTY / sin NetAcad a mano):** como el paquete vive en
-`common-packages`, TODO rebuild necesita el `.deb` en el store. Con el archivo en
-un medio local basta un paso extra, sin red:
+**Instalación limpia (modo TTY / sin NetAcad a mano):** el host con el flag
+activo necesita el `.deb` en el store para rebuildar. Con el archivo en un medio
+local basta un paso extra, sin red:
 
 ```bash
 sudo nix-store --add-fixed sha256 /mnt/nightcity/packet-tracer/CiscoPacketTracer_900_Ubuntu_64bit.deb

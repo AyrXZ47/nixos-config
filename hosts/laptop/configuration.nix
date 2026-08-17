@@ -15,7 +15,10 @@
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
     ../../modules/apps/rust-dev.nix
+    ../../modules/apps/packettracer.nix
   ];
+
+  modules.apps.packetTracer.enable = true;
 
   modules.desktop.hyprland.enable = true;
 
