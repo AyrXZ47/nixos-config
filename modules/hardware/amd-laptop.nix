@@ -2,13 +2,20 @@
 
 let
   # Script compartido por el servicio de arranque y la regla udev: aplica el EPP
-  # de CPU segun el cargador. Medido 2026-08-17: la iGPU (wallpaper de video)
-  # consume ~20% de busy constante sin importar el EPP - se deja correr incluso
-  # en bateria (decision explicita del user: el wallpaper vale ese precio). El
-  # EPP de CPU gestiona los watts del SoC (~15-20W de cap del EC).
+  # de CPU y el estado del wallpaper segun el cargador. Medido 2026-08-17 con
+  # mpvpaper congelado (SIGSTOP): GPU 72%->50%, descarga 22.0W->12.6W (-9.4W,
+  # ~40% del drenaje total), temp 59->50C. En AC el precio es cero (enchufado),
+  # asi que el wallpaper de video solo se congela en bateria; queda la ultima
+  # frame fija (pantalla estatica) y se reanuda solo al conectar el cargador.
   eppSwitch = pkgs.writeShellScript "epp-switch" ''
     online=$(cat /sys/class/power_supply/AC/online 2>/dev/null)
-    if [ "$online" = 1 ]; then epp=performance; else epp=power; fi
+    if [ "$online" = 1 ]; then
+      epp=performance
+      pkill -CONT -u yovick -f mpvpaper 2>/dev/null || true
+    else
+      epp=power
+      pkill -STOP -u yovick -f mpvpaper 2>/dev/null || true
+    fi
     for d in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
       echo "$epp" > "$d" 2>/dev/null || true
     done
