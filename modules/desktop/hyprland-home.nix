@@ -437,9 +437,16 @@ in
         #!/usr/bin/env bash
         # Pausa/reanuda el wallpaper via IPC nativo de mpv (mpvpaper es un
         # wrapper de mpv; el socket lo abre el propio mpv via input-ipc-server).
-        # Arg: on|off. No hacer nada si el socket no existe (aun no spawn).
+        # Arg: on|off. Espera hasta 5s a que el socket exista: al cambiar de
+        # wallpaper el nuevo mpv nace justo antes del unpause y el socket puede
+        # no estar listo todavia (sin el retry, el wallpaper quedaba estatico
+        # en AC hasta el siguiente evento del cargador - visto 2026-08-17).
         [ $# -eq 1 ] || exit 1
         sock="/run/user/$(id -u)/mpvpaper.sock"
+        for _ in $(seq 10); do
+          [ -S "$sock" ] && break
+          sleep 0.5
+        done
         [ -S "$sock" ] || exit 0
         paused=0; [ "$1" = on ] && paused=1
         ${pkgs.python3}/bin/python3 - "$paused" "$sock" <<'PY'
