@@ -13,8 +13,8 @@ in
   # Timer de usuario: re-enforza el estado del wallpaper segun el cargador cada
   # 90s (15s tras arrancar la sesion). Cubre CUALQUIER spawn de mpvpaper (exec
   # de boot, wayle, wallpaper-set.sh) que la regla udev raiz no ve - esa solo
-  # reacciona a eventos del cargador, no a un mpvpaper recien nacido. El script
-  # es trivial (<5ms) y el SIGCONT en AC es no-op.
+  # reacciona a eventos del cargador, no a un mpvpaper recien nacido. Pausa via
+  # IPC nativo de mpv (set_property pause), sin senales.
   systemd.user.services."wallpaper-power-state" = {
     Unit = { Description = "Wallpaper acorde al estado del cargador"; };
     # OJO: en home-manager las secciones del unit llevan el nombre de seccion
