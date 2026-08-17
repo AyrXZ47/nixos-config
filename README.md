@@ -113,25 +113,26 @@ Fun: `cbonsai`.
 
 Simulador de redes de Cisco (Cisco Networking Academy). Módulo **opt-in**
 (`modules/apps/packettracer.nix`, flag `modules.apps.packetTracer.enable`),
-activado en los hosts gráficos (pc/laptop/vm) — **intencionalmente fuera de
-`common-packages`**: el paquete usa `requireFile` (Cisco no permite descarga
-automática del `.deb`, solo detrás del login de NetAcad) y sin el archivo en el
-store el build de ese host falla; opt-in significa que un host sin el flag
-construye sin él. El paquete es unfree (`allowUnfree` ya está en
-`modules/core/user.nix`) y replica el empaquetado de nixpkgs re-pineado al
-**9.0.1** (lo que NetAcad sirve hoy; las reglas oficiales hardcodean 9.0.0 y
-fallarían).
+**desactivado por defecto en todos los hosts**: así el repo clonado en una
+instalación limpia (sin WM ni nada) construye sin el `.deb` — packet tracer se
+activa DESPUÉS, cuando quieras, con un prefetch + un flag (2 minutos).
+Intencionalmente fuera de `common-packages`: el paquete usa `requireFile`
+(Cisco no permite descarga automática del `.deb`, solo detrás del login de
+NetAcad) y sin el archivo en el store el build de ese host fallaría. El paquete
+es unfree (`allowUnfree` ya está en `modules/core/user.nix`) y replica el
+empaquetado de nixpkgs re-pineado al **9.0.1** (lo que NetAcad sirve hoy; las
+reglas oficiales hardcodean 9.0.0 y fallarían).
 
-Cisco **no permite la descarga automática**: el `.deb` vive detrás del login de
-NetAcad y hay que introducirlo al store a mano, una vez por máquina:
+Para activarlo en el host que quieras (ej. pc):
 
 ```bash
-# 1. Descarga el .deb desde https://www.netacad.com/resources/lab-downloads
-#    (cuenta de estudiante NetAcad; NetAcad hoy sirve la 9.0.1).
-# 2. Mételo al store NOMBRADO como CiscoPacketTracer_900_Ubuntu_64bit.deb
-#    (el hash del repo asume ese basename; file:// es obligatorio):
+# 1. (en una máquina con el .deb a mano) mételo al store NOMBRADO como
+#    CiscoPacketTracer_900_Ubuntu_64bit.deb (file:// es obligatorio):
 nix-prefetch-url --type sha256 file:///ruta/CiscoPacketTracer_900_Ubuntu_64bit.deb
-# 3. Rebuild del host que quieras:
+# 2. En el host: importar modules/apps/packettracer.nix + marcar el flag:
+#      imports = [ ... ../../modules/apps/packettracer.nix ];
+#      modules.apps.packetTracer.enable = true;
+# 3. Rebuild:
 sudo nixos-rebuild switch --flake .#<host>
 ```
 

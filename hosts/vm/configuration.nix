@@ -16,8 +16,6 @@
     ../../modules/apps/packettracer.nix
   ];
 
-  modules.apps.packetTracer.enable = true;
-
   modules.desktop.hyprland.enable = true;
 
   modules.hardware.fingerprint.enable = true;

@@ -30,6 +30,43 @@
 { config, pkgs, lib, ... }:
 
 let
+  # El AppImage trae Qt6 adentro, pero NO las libs del "sistema" (Mesa/GL,
+  # X11/xcb, glib/dbus/udev, fontconfig/harfbuzz, NSS, zstd/png/jpeg/tiff,
+  # pulse...): en Ubuntu viven en el OS, en el store hay que dárselas. Lista
+  # sacada de la salida de `ldd` (las 34 faltantes); mismo patron que
+  # omnetpp.nix.
+  systemLibs = with pkgs; lib.makeLibraryPath [
+    stdenv.cc.cc.lib
+    libGL
+    libdrm
+    zlib
+    zstd
+    brotli
+    libpng
+    libjpeg
+    libtiff
+    fontconfig
+    harfbuzz
+    expat
+    glib
+    pcre2
+    dbus
+    systemdLibs
+    libxkbcommon
+    xorg.libxkbfile
+    nspr
+    nss
+    libpulseaudio
+    xorg.libX11
+    xorg.libxcb
+    xorg.libXcomposite
+    xorg.libXdamage
+    xorg.libXext
+    xorg.libXfixes
+    xorg.libXrandr
+    xorg.libXtst
+  ];
+
   pkg = pkgs.stdenvNoCC.mkDerivation {
     pname = "cisco-packet-tracer";
     version = "9.0.1";
@@ -90,7 +127,7 @@ let
       makeWrapper $out/opt/pt/bin/PacketTracer $out/bin/packettracer9 \
         --set QT_QPA_PLATFORM xcb \
         --prefix LD_LIBRARY_PATH : $out/opt/pt/bin \
-        --prefix LD_LIBRARY_PATH : ${pkgs.stdenv.cc.cc.lib}/lib \
+        --prefix LD_LIBRARY_PATH : ${systemLibs} \
         --chdir $out/opt/pt/bin
 
       # 6. entradas de escritorio + icono (los nombres 9.0.1 viven en el AppDir)
