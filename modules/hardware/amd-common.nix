@@ -52,11 +52,9 @@
     # NVMe sin DRAM: el APST apagado (nvme_core.default_ps_max_latency_us=0) y el
     # writeback corto (vm.dirty_*) viven en nvme-dramless.nix, que importa SOLO la
     # laptop (la S20G pasa alli tras el swap pc<->laptop). La pc tiene disco con DRAM.
-    # ASPM apagado en todo el PCIe: con APST ya off, el freeze (btrfs endio-write en
-    # wait_current_trans, journald en watchdog timeout) volvió a ocurrir el 2026-08-01
-    # con escritura sostenida. En estos ADATA DRAM-less (SATA, siguen en la pc) la
-    # gestión de enlace PCIe (ASPM L0s/L1) también produce stalls de I/O silenciosos en AMD.
-    "pcie_aspm=off"
+    # pcie_aspm=off ya NO vive aqui: es solo para pc (ADATA SATA) y server — ver
+    # amd-desktop.nix y hosts/server/configuration.nix. En la laptop ASPM off
+    # costaria bateria sin beneficio (la S20G esta cubierta por el APST off).
   ];
 
   # Con el watchdog activo, volcar los backtraces de TODAS las CPUs al

@@ -27,7 +27,10 @@
   # Preserva el comportamiento que heredaba de amd-common antes de mover el
   # tuneado de rendimiento a amd-desktop.nix (server sigue a tope).
   powerManagement.cpuFreqGovernor = "performance";
-  boot.kernelParams = [ "processor.max_cstate=1" ];
+  # pcie_aspm=off tambien lo heredaba de amd-common; se re-declara aqui porque
+  # amd-common ya no lo incluye (es solo para los hosts de escritorio/servidor
+  # con ADATA SATA; la laptop lo perdio a proposito, le costaria bateria).
+  boot.kernelParams = [ "processor.max_cstate=1" "pcie_aspm=off" ];
 
   services.openssh.enable = true;
 
