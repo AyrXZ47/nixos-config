@@ -13,7 +13,17 @@
   # laptop y server NO heredan esto. La laptop usa governor powersave + C-states
   # profundos + GPU dpm auto para batería/temperatura.
   powerManagement.cpuFreqGovernor = "performance";
-  boot.kernelParams = [ "processor.max_cstate=1" ];
+  boot.kernelParams = [
+    "processor.max_cstate=1"
+    # ASPM apagado en todo el PCIe (vivia en amd-common, es SOLO pc/server): con
+    # APST ya off, el freeze (btrfs endio-write en wait_current_trans, journald
+    # en watchdog timeout) volvio a ocurrir el 2026-08-01 con escritura sostenida.
+    # En los ADATA DRAM-less (SATA, siguen en la pc) la gestion de enlace PCIe
+    # (ASPM L0s/L1) tambien produce stalls de I/O silenciosos en AMD. La laptop NO
+    # lo hereda: ASPM off le costaria bateria sin beneficio (la S20G la cubre el
+    # default_ps_max_latency_us=0 de nvme-dramless.nix).
+    "pcie_aspm=off"
+  ];
 
   # GPU AMD a tope desde el arranque: power_dpm_force_performance_level=high (clocks
   # máximos) + pp_power_profile=1 (3D fullscreen). Sin cuello de botella por throttling.
