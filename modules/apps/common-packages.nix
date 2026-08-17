@@ -148,10 +148,6 @@ in
     wireshark
     # GNU Radio + GRC (gnuradio-companion): radio definida por software/SDR
     gnuradio
-    # Cisco Packet Tracer (universidad, Cisco Networking Academy): simulador de
-    # redes. ciscoPacketTracer8 fue REMOVIDO de nixpkgs (vendia Qt5 webengine);
-    # cisco-packet-tracer_9 (9.0.0) lo reemplaza. Binario: packettracer9.
-    cisco-packet-tracer_9
 
     # Audio & Video Production
     audacity
