@@ -7,26 +7,30 @@
 #   modules.apps.packetTracer.enable = true
 # y seguir el README (sección Cisco Packet Tracer) para el prefetch del .deb.
 #
-# Re-pin del .deb: nixpkgs pineó el tarball "900" original (3ZrA1...), pero
+# EMPAQUETADO (estado real, agosto 2026): el .deb 9.0.1 de NetAcad trae un
+# "AppImage" NO estandar (ELF stub + squashfs SIN footer AI; appimageTools lo
+# rechaza). Se extrae el squashfs a mano y se envuelve el binario con las libs
+# del sistema de nixpkgs. FRAGILIDAD CONOCIDA: el binario encadena ABI viejas
+# de Ubuntu (libjpeg.so.8, libtiff.so.5) que nixpkgs ya no provee (perdi ~1h
+# intentando compilar libjpeg-turbo 2.1.4/2.1.5.1 — ninguna genera .so.8) →
+# el plugin de imagenes de Qt no cargara y GUI puede fallar en esos usos.
+# OPCION ESTABLE PENDIENTE: NetAcad tambien sirve el AppImage Linux Desktop
+# (autocontenido, type-2 estandar): con ese archivo el modulo se reduce a
+# requireFile + appimageTools.wrapType2 (10 lineas, cero libs). Si el curso lo
+# exige de forma frecuente, bajar ese archivo y rehacer el modulo sobre el.
+# El host sin el flag construye SIEMPRE aunque falte el .deb (requireFile solo
+# se evalua al construir el paquete activado).
+# Activacion: modules.apps.packetTracer.enable = true + prefetch (README).
+#
+# Re-pin del .deb: nixpkgs pineo el tarball "900" original (3ZrA1...), pero
 # NetAcad ya solo sirve el 9.0.1: el .deb prefetecheado el 2026-08-17 es
 # Version: 9.0.1 (verificado con dpkg-deb). hash real (MODO FLAT, el que
 # requireFile espera; el hash NAR de `nix hash path` NO sirve):
 #   sha256-NoPdh+d5iFNyrpo1wabllNEvST5knnxpdAhynBRZR5s=
 # Si Cisco re-empaqueta: correr `nix-prefetch-url --type sha256
 # file:///ruta/CiscoPacketTracer_900_Ubuntu_64bit.deb`, tomar el hash impreso
-# y comprobar con `nix build pkgs.requireFile {...}` antes de pegarlo aquí
+# y comprobar con `nix build pkgs.requireFile {...}` antes de pegarlo aqui
 # (misma filosofia que unstableFixesOverlay en flake.nix).
-#
-# El 9.0.1 NO es un AppImage estandar: es un ELF (stub) seguido del squashfs
-# con el árbol de la app, SIN el footer "AI\x02" que appimageTools espera
-# (por eso el extractor de nixpkgs lo rechaza con "Not an AppImage file", y su
-# wrapper tampoco puede ejecutarlo: el stub pide /lib64/ld-linux inexistente).
-# Se extrae el squashfs a mano: el superblock "hsqs" es la ÚLTIMA ocurrencia
-# en el archivo (la primera es una coincidencia falsa en el stub).
-# El launcher del propio .deb es el contrato de runtime:
-#   export LD_LIBRARY_PATH=/opt/pt/bin && cd opt/pt/bin && ./PacketTracer
-# (el AppRun del AppImage además copia la app a ~/.local/.packettracer — se
-# ignora: el store es de solo lectura y el plan es el launcher directo).
 { config, pkgs, lib, ... }:
 
 let
