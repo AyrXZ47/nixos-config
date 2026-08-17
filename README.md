@@ -109,6 +109,41 @@ Utilities: 1Password CLI, `gh`, btop, cava, pipes-rs, scrcpy, virt-manager,
 proton-vpn, openrgb, qpwgraph, dolphin, kdeconnect, tor-browser, yt-dlp.
 Fun: `cbonsai`.
 
+### Cisco Packet Tracer (redes — universidad)
+
+Simulador de redes de Cisco (Cisco Networking Academy). Viene en `nixpkgs`
+(`cisco-packet-tracer_9`, binario `packettracer9`) y entra por
+`common-packages.nix` en los 4 hosts; es unfree (`allowUnfree` ya está en
+`modules/core/user.nix`).
+
+Cisco **no permite la descarga automática**: el `.deb` vive detrás del login de
+NetAcad y hay que introducirlo al store a mano, una vez por máquina:
+
+```bash
+# 1. Descarga el .deb desde https://www.netacad.com/resources/lab-downloads
+#    (cuenta de estudiante NetAcad).
+# 2. Mételo al store (calcula el hash y lo deja en /nix/store):
+nix-prefetch-url --type sha256 file:///ruta/CiscoPacketTracer_900_Ubuntu_64bit.deb
+# 3. Rebuild del host que quieras:
+sudo nixos-rebuild switch --flake .#<host>
+```
+
+Después del rebuild puedes **borrar el `.deb`**: el store lo conserva como parte
+del system profile (el GC no lo toca mientras el profile exista). Consejo: guarda
+una copia (ej. `/mnt/nightcity`) — otra máquina necesita repetir el prefetch y
+NetAcad cambia el archivo con cada release.
+
+Gotchas (vistos en la práctica):
+
+- `requireFile` localiza el archivo por `hash` + `name`: el basename tiene que ser
+  `CiscoPacketTracer_900_Ubuntu_64bit.deb` (si NetAcad sirve otra versión, renombra
+  antes del prefetch, y si el hash impreso por `nix-prefetch-url` difiere del
+  declarado, el build seguirá pidiendo "download it yourself" — hay que re-pinear
+  el hash en un overlay de `flake.nix`, mismo patrón que `unstableFixesOverlay`).
+- Las descargas grandes de NetAcad se estancan a mitad (quedan archivos
+  `*.deb.part` gigantes en `~/Downloads`): retomar el `.part` o traer el `.deb`
+  desde otra máquina por LAN (misma red) es más rápido que reintentar desde cero.
+
 ## Performance & Tuning
 
 ### Nix daemon (`modules/core/nix-optimization.nix`)
