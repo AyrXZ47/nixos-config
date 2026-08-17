@@ -208,7 +208,7 @@ in
       ---- KEYBINDINGS ------
       -----------------------
       hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("wezterm"))
-      hl.bind("SUPER + G", hl.dsp.exec_cmd("~/.local/bin/touchpad-toggle.sh"))
+      hl.bind("SUPER + F2", hl.dsp.exec_cmd("~/.local/bin/touchpad-toggle.sh"))
       hl.bind("SUPER + A", hl.dsp.exec_cmd("rofi -show drun -show-icons"))
       hl.bind("SUPER + Delete", hl.dsp.window.close())
       hl.bind("SUPER + M", hl.dsp.exit())
