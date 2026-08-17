@@ -26,6 +26,11 @@ let
         hash = "sha256-3ZrA1Mf8N9y2j2J/18fm+m1CAMFEklJuVhi5vRcu2SA=";
       };
     });
+    # Entrada de escritorio del "PTSA" (agente de sesion de Cisco): inutil para
+    # el humano, solo ensucia el lanzador con un icono duplicado.
+    postInstall = (old.postInstall or "") + ''
+      rm -f $out/share/applications/cisco-packet-tracer-ptsa-9.desktop
+    '';
   });
 in
 {
