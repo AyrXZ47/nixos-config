@@ -33,8 +33,11 @@
     ip6tables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452
   '';
   networking.firewall.extraStopCommands = ''
-    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN ! -d 192.168.1.0/24 -j TCPMSS --set-mss 1452
-    ip6tables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452
+    # || true: el reload del firewall corre los -D aunque la regla no exista
+    # aun (primer reload tras el switch) y un iptables -D con regla ausente
+    # aborta TODO el reload con "Bad rule".
+    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN ! -d 192.168.1.0/24 -j TCPMSS --set-mss 1452 || true
+    ip6tables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452 || true
   '';
 
   # ── DNS declarativo (a prueba de DHCP) ─────────────────────────────────────

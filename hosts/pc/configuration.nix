@@ -19,8 +19,6 @@
     ../../modules/apps/packettracer.nix
   ];
 
-  modules.apps.packetTracer.enable = true;
-
   modules.desktop.hyprland = {
     enable = true;
   };
@@ -51,6 +49,23 @@
   # LAN local, que sí lo soporta. No volver a 1400: era un parche sintomático
   # que pagaba ~7% de overhead por paquete.
   networking.interfaces.enp5s0.mtu = 1500;
+
+  # NM no refleja networking.interfaces.*.mtu en su profile regenerado (el
+  # switch lo perde al reiniciar NM y la interfaz se queda con el MTU viejo).
+  # Oneshot determinista post-NM: fuerza el 1500 del camino LAN (el limite
+  # real del ISP es 1492 por PPPoE y lo cubre el MSS clamping del firewall).
+  systemd.services.enp5s0-mtu = {
+    description = "Fija el MTU de enp5s0 a 1500 (post-NetworkManager)";
+    wantedBy = [ "network-online.target" ];
+    after = [ "NetworkManager.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      ${pkgs.iproute2}/bin/ip link set enp5s0 mtu 1500
+    '';
+  };
 
   # ddcci: expone el monitor externo (DDC/CI) como /sys/class/backlight/ddcci0.
   # Asi wayle (modulo brightness nativo: dropdown + OSD) y brightnessctl pueden
