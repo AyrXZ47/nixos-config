@@ -48,13 +48,32 @@
     CPUSchedulingPolicy = "idle";
   };
 
+  # nix-gc y trim-generations tienen el MISMO catch-up al primer boot del dia
+  # (timers daily + Persistent=true y la maquina apagada en el horario), pero
+  # corrian a prioridad plena: el GC borrando miles de paths del store mientras
+  # arranca la sesion = escritura sostenida justo sobre la NVMe sin DRAM de la
+  # laptop (S20G) -> el controlador se cuelga en silencio (freeze sin traza,
+  # ver nvme-dramless.nix; ocurrio el 2026-08-17 a las 02:50, GC + rebuild al
+  # mismo tiempo). Mismo tratamiento idle que nix-optimise: borran en los
+  # huecos, nunca compitiendo con el arranque.
+  systemd.services.nix-gc.serviceConfig = {
+    Nice = 19;
+    IOSchedulingClass = "idle";
+    CPUSchedulingPolicy = "idle";
+  };
+
   # ── Límite duro de generaciones: máx 3 por CONTEo, no por edad ────────────
   # nix-env --delete-generations +3 conserva exactamente las 3 más nuevas del
   # perfil de sistema; luego GC del store. Diario (antes semanal) para que
   # NUNCA se acumulen más de 3, ni con 20 rebuilds en un día.
   systemd.services.trim-generations = {
     description = "Deja solo las 3 generaciones mas recientes";
-    serviceConfig = { Type = "oneshot"; };
+    serviceConfig = {
+      Type = "oneshot";
+      Nice = 19;
+      IOSchedulingClass = "idle";
+      CPUSchedulingPolicy = "idle";
+    };
     script = ''
       ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +3
       ${pkgs.nix}/bin/nix-collect-garbage
