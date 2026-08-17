@@ -1,5 +1,16 @@
 { config, pkgs, lib, ... }:
 
+let
+  # Script compartido por el servicio de arranque y la regla udev: lee el estado
+  # del cargador y aplica el EPP correspondiente en cada policy de CPU.
+  eppSwitch = pkgs.writeShellScript "epp-switch" ''
+    online=$(cat /sys/class/power_supply/AC/online 2>/dev/null)
+    if [ "$online" = 1 ]; then epp=performance; else epp=power; fi
+    for d in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
+      echo "$epp" > "$d" 2>/dev/null || true
+    done
+  '';
+in
 {
   imports = [
     ./amd-common.nix
@@ -17,22 +28,27 @@
   powerManagement.cpuFreqGovernor = "powersave";
   services.power-profiles-daemon.enable = lib.mkForce false;
 
-  # EPP balance_power: punto medio entre balanced y power. Ahorra en reposo pero
-  # conserva el boost cuando hay carga, sin el corte agresivo de "power". Se
-  # escribe por núcleo porque amd-pstate expone el EPP por policy (cpufreq dir).
+  # EPP por estado de energia (medido 2026-08-17): balance_power dejaba el CPU
+  # clavado en ~1.4GHz en TODOS los escenarios (idle quemando watts sin bajar de
+  # P-state y sin boost bajo carga) - lo peor de ambos mundos: ni ahorro ni
+  # rendimiento. performance en AC devuelve el boost real (single-core ~2.9GHz
+  # con sha256) y power en bateria lleva el idle al minimo. El EC/BIOS ya capa
+  # el presupuesto del SoC (~15-20W), el EPP solo decide como gastarlo.
   systemd.services.cpu-epp = {
-    description = "Fija EPP de la CPU a balance_power";
+    description = "Fija el EPP de la CPU segun el estado del cargador";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      ExecStart = eppSwitch;
     };
-    script = ''
-      for d in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
-        echo balance_power > "$d" 2>/dev/null || true
-      done
-    '';
   };
+
+  # Re-evalua el EPP al instante al conectar/desconectar el cargador
+  # (KERNEL=="AC": el supply de Mains de esta laptop se llama "AC").
+  services.udev.extraRules = ''
+    SUBSYSTEM=="power_supply", KERNEL=="AC", ACTION=="change", RUN+="${eppSwitch}"
+  '';
 
   # Touchpad Synaptics LEN2073: en protocolo PS/2 (synps/2) libinput detecta el
   # swipe de 3 dedos pero lo descarta al instante ("Touch jump", sin updates de
