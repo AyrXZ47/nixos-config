@@ -83,6 +83,18 @@ in
       # Mismo motivo que arriba: cp dejaria 400 y romperia el re-seed.
       ${pkgs.coreutils}/bin/install -m 600 ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
     fi
+    # El CLI de uvx exige un python del store: el seed lleva el path cocido en
+    # build-time y un rebuild+GC lo invalida (serena moría con "MCP error
+    # -32000: Connection closed" / "No interpreter found at path ..."). En cada
+    # activacion se re-apunta el interpretes al path ACTUAL (heredado del build
+    # de este switch): sed reemplaza cualquier /nix/store/xxx-python3.*/bin/
+    # python3.13 del json por el de este sistema.
+    CUR_PY=$(${pkgs.coreutils}/bin/readlink -f ${pkgs.python313}/bin/python3.13)
+    if ! ${pkgs.gnugrep}/bin/grep -q "$CUR_PY" "$HOME/.config/opencode/opencode.json"; then
+      ${pkgs.gnused}/bin/sed -i \
+        "s#/nix/store/[a-z0-9]*-python3[^/]*/bin/python3.13#$CUR_PY#" \
+        "$HOME/.config/opencode/opencode.json"
+    fi
 
     # Limpieza de la integracion vieja: headroom ya no esta en el config, se
     # eliminan el binario de uv tool install y su backup si quedaron de antes.

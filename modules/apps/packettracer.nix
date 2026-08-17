@@ -90,6 +90,7 @@ let
       makeWrapper $out/opt/pt/bin/PacketTracer $out/bin/packettracer9 \
         --set QT_QPA_PLATFORM xcb \
         --prefix LD_LIBRARY_PATH : $out/opt/pt/bin \
+        --prefix LD_LIBRARY_PATH : ${pkgs.stdenv.cc.cc.lib}/lib \
         --chdir $out/opt/pt/bin
 
       # 6. entradas de escritorio + icono (los nombres 9.0.1 viven en el AppDir)
