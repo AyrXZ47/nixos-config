@@ -24,9 +24,9 @@ in
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "wallpaper-power-state" ''
         if [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1 ]; then
-          pkill -CONT -x .mpvpaper-wrapp 2>/dev/null || true
+          ~/.local/bin/mpvpaper-pause.sh off
         else
-          pkill -STOP -x .mpvpaper-wrapp 2>/dev/null || true
+          ~/.local/bin/mpvpaper-pause.sh on
         fi
       '';
     };
@@ -455,6 +455,29 @@ in
         fi
       '';
     };
+    ".local/bin/mpvpaper-pause.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Pausa/reanuda el wallpaper via IPC nativo de mpv (mpvpaper es un
+        # wrapper de mpv; el socket lo abre el propio mpv via input-ipc-server).
+        # Arg: on|off. No hacer nada si el socket no existe (aun no spawn).
+        [ $# -eq 1 ] || exit 1
+        sock="/run/user/$(id -u)/mpvpaper.sock"
+        [ -S "$sock" ] || exit 0
+        paused=0; [ "$1" = on ] && paused=1
+        ${pkgs.python3}/bin/python3 - "$paused" "$sock" <<'PY'
+        import json, socket, sys
+        s = socket.socket(socket.AF_UNIX)
+        try:
+            s.connect(sys.argv[2])
+            s.sendall((json.dumps({"command": ["set_property", "pause", sys.argv[1] == "1"]}) + "\n").encode())
+            s.close()
+        except OSError:
+            pass
+        PY
+      '';
+    };
     ".local/bin/touchpad-toggle.sh" = {
       executable = true;
       text = ''
@@ -490,13 +513,18 @@ in
         # hwdec=vaapi: descodifica el video en la GPU (VCN/Radeon), no en la CPU.
         # Sin esto el fondo animado costaba ~274% de CPU en la laptop. -p pausa el
         # video cuando lo tapa una ventana (ahorra CPU/batería).
+        # pause=yes + input-ipc-server: el wallpaper nace SIEMPRE congelado
+        # (foto del primer frame) y el reproductor queda a la escucha del IPC;
+        # mpvpaper-pause.sh lo reanuda si estamos en AC. Asi en bateria NUNCA
+        # descodifica ni un frame desde el boot (era el drenaje de 22W->12.6W
+        # medido; el arranque reproduciendo drenaba la sesion completa).
         mpvpaper -f -p -o "no-audio
 loop-file=inf
-hwdec=vaapi" ALL "$f"
-        # En bateria el wallpaper se congela al nacer (la regla udev de
-        # epp-switch solo cubre eventos del cargador, un mpvpaper recien nacido
-        # se le escaparia). Medido: -9.4W, -9C con la iGPU libre.
-        [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" != 1 ] && pkill -STOP -x .mpvpaper-wrapp 2>/dev/null || true
+hwdec=vaapi
+pause=yes
+input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
+        # En AC el wallpaper vive: lo despierta el mismo estado que setea el EPP.
+        [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1 ] && ~/.local/bin/mpvpaper-pause.sh off || true
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
