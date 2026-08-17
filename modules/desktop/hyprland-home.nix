@@ -120,8 +120,13 @@ in
           sensitivity = 0.0,
         },
 
-        -- Pantalla tactil: el swipe de 3 dedos/gestos quedaron desactivados
-        -- 2026-08-17 (el user no los usa y nunca funcionaron; ver amd-laptop.nix).
+        -- Pantalla tactil: swipe con UN dedo por el borde superior/inferior de la
+        -- pantalla = cambiar de workspace. ES el gesto que el user SI usa
+        -- (restaurado 2026-08-17; el gesto de 3 dedos del TRACKPAD que no
+        -- usaba sigue fuera: intertouch + hl.gesture eliminados).
+        gestures = {
+          workspace_swipe_touch = true,
+        },
 
         render = {
           -- fp16: la mitad de bandwidth de composicion; clave para sostener
@@ -208,7 +213,7 @@ in
       ---- KEYBINDINGS ------
       -----------------------
       hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("wezterm"))
-      hl.bind("SUPER + F2", hl.dsp.exec_cmd("~/.local/bin/touchpad-toggle.sh"))
+      hl.bind("SUPER + F2", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/touchpad-toggle.sh"))
       hl.bind("SUPER + A", hl.dsp.exec_cmd("rofi -show drun -show-icons"))
       hl.bind("SUPER + Delete", hl.dsp.window.close())
       hl.bind("SUPER + M", hl.dsp.exit())
@@ -426,7 +431,7 @@ in
         fi
       '';
     };
-    ".local/bin/mpvpaper-pause.sh" = {
+    "hypr/scripts/mpvpaper-pause.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
@@ -449,7 +454,7 @@ in
         PY
       '';
     };
-    ".local/bin/touchpad-toggle.sh" = {
+    "hypr/scripts/touchpad-toggle.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
@@ -462,11 +467,11 @@ in
 
         if [ -f "$state" ]; then
           rm -f "$state"
-          hyprctl keyword "device:$dev:enabled" false
+          hyprctl eval 'hl.device({ name = "synps/2-synaptics-touchpad", enabled = false })'
           notify-send -t 2000 -a hyprland -u low "Touchpad OFF"
         else
           touch "$state"
-          hyprctl keyword "device:$dev:enabled" true
+          hyprctl eval 'hl.device({ name = "synps/2-synaptics-touchpad", enabled = true })'
           notify-send -t 2000 -a hyprland -u low "Touchpad ON"
         fi
       '';
@@ -498,7 +503,7 @@ hwdec=vaapi
 pause=yes
 input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
         # En AC el wallpaper vive: lo despierta el mismo estado que setea el EPP.
-        [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1 ] && ~/.local/bin/mpvpaper-pause.sh off || true
+        [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1 ] && ~/.config/hypr/scripts/mpvpaper-pause.sh off || true
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
@@ -537,9 +542,9 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
         #!/usr/bin/env bash
         hyprlock &
         _hyprlock_pid=$!
-        [ -x "$HOME/.local/bin/openrgb-lock-before" ] && "$HOME/.local/bin/openrgb-lock-before"
+        [ -x "$HOME/.config/hypr/scripts/openrgb-lock-before" ] && "$HOME/.config/hypr/scripts/openrgb-lock-before"
         wait "$_hyprlock_pid"
-        [ -x "$HOME/.local/bin/openrgb-lock-after" ] && "$HOME/.local/bin/openrgb-lock-after"
+        [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
       '';
     };
     # hypridle (daemon de idle nativo de Hyprland) escucha las señales de logind:

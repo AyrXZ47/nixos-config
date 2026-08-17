@@ -53,14 +53,14 @@ in
 
       # Hooks que consume hypr/scripts/lock.sh (ver hyprland-home.nix): perfil
       # "apagado" al bloquear, normal al desbloquear.
-      home.file.".local/bin/openrgb-lock-before" = {
+      home.file."hypr/scripts/openrgb-lock-before" = {
         executable = true;
         text = ''
           #!/usr/bin/env bash
           exec ${openrgb} --client --nodetect -p ${profileOff}
         '';
       };
-      home.file.".local/bin/openrgb-lock-after" = {
+      home.file."hypr/scripts/openrgb-lock-after" = {
         executable = true;
         text = ''
           #!/usr/bin/env bash
