@@ -130,8 +130,17 @@ sudo nixos-rebuild switch --flake .#<host>
 
 Después del rebuild puedes **borrar el `.deb`**: el store lo conserva como parte
 del system profile (el GC no lo toca mientras el profile exista). Consejo: guarda
-una copia (ej. `/mnt/nightcity`) — otra máquina necesita repetir el prefetch y
-NetAcad cambia el archivo con cada release.
+una copia (ej. `/mnt/nightcity/packet-tracer/`) — otra máquina necesita repetir el
+prefetch y NetAcad cambia el archivo con cada release.
+
+**Instalación limpia (modo TTY / sin NetAcad a mano):** como el paquete vive en
+`common-packages`, TODO rebuild necesita el `.deb` en el store. Con el archivo en
+un medio local basta un paso extra, sin red:
+
+```bash
+sudo nix-store --add-fixed sha256 /mnt/nightcity/packet-tracer/CiscoPacketTracer_900_Ubuntu_64bit.deb
+sudo nixos-rebuild switch --flake .#<host>
+```
 
 Gotchas (vistos en la práctica):
 
