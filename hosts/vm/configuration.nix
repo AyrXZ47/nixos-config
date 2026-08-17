@@ -16,6 +16,9 @@
     ../../modules/apps/packettracer.nix
   ];
 
+  # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.
+  modules.apps.packetTracer.enable = true;
+
   modules.desktop.hyprland.enable = true;
 
   modules.hardware.fingerprint.enable = true;
