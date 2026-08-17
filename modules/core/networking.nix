@@ -11,6 +11,32 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
+  # ── MSS clamping (PPPoE / MTU 1492 del ISP) ────────────────────────────────
+  # El ISP (Telmex) usa PPPoE: el camino hacia internet limita a MTU 1492
+  # (verificado: el gateway responde "Frag needed and DF set (mtu = 1492)").
+  # NixOS (como Arch) NO hace nada por defecto: la interfaz anuncia MSS 1460,
+  # el servidor responde paquetes de 1500 y 8 bytes no caben en el túnel →
+  # paquetes caídos en silencio → descargas que se cortan a mitad
+  # (SSL_ERROR_SYSCALL). Fedora resuelve esto con MSS clamping en el firewall;
+  # aquí se replica, pero con el valor exacto del camino:
+  #   MSS = MTU_interface(1500) − 8 (PPPoE) − 40 (IP+TCP) = 1452.
+  # NO usar `--clamp-mss-to-pmtu`: clampea contra el MTU de la RUTA (1500) y
+  # da 1460 — que sigue excediendo los 1492 reales. Los SYNs salientes a
+  # internet anuncian 1452, los datos del servidor llegan de 1492 exactos y
+  # caben, sin depender del PMTUD (bug clásico del RTL8168 que no lo absorbe).
+  # El tráfico LAN local se excluye: las máquinas de casa sí usan 1500 completo.
+  # ponytail: si algún día el ISP migra a fibra simétrica sin PPPoE (MTU 1500),
+  # subir el --set-mss a 1460 o borrar el bloque — el techo es el camino, no
+  # esta regla.
+  networking.firewall.extraCommands = ''
+    iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN ! -d 192.168.1.0/24 -j TCPMSS --set-mss 1452
+    ip6tables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452
+  '';
+  networking.firewall.extraStopCommands = ''
+    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN ! -d 192.168.1.0/24 -j TCPMSS --set-mss 1452
+    ip6tables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452
+  '';
+
   # ── DNS declarativo (a prueba de DHCP) ─────────────────────────────────────
   # Nombres de servidor FIJOS: Cloudflare primario, Google fallback. El DHCP del
   # router ya los anunciaba así, pero ahora NO dependemos de lo que el router
