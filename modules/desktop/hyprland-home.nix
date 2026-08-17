@@ -17,7 +17,10 @@ in
   # es trivial (<5ms) y el SIGCONT en AC es no-op.
   systemd.user.services."wallpaper-power-state" = {
     Unit = { Description = "Wallpaper acorde al estado del cargador"; };
-    serviceConfig = {
+    # OJO: en home-manager las secciones del unit llevan el nombre de seccion
+    # (Service, no serviceConfig como NixOS) - un serviceConfig aqui hizo que
+    # systemd reventara con BadUnitSetting en el switch del 2026-08-17.
+    Service = {
       Type = "oneshot";
       ExecStart = pkgs.writeShellScript "wallpaper-power-state" ''
         if [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1 ]; then
@@ -178,6 +181,9 @@ in
       -- ambos (los que no matcheen se ignoran).
       hl.device({ name = "2.4g-dongle-1", scroll_method = "on_button_down", scroll_button = 2 })
       hl.device({ name = "2.4g-mouse", scroll_method = "on_button_down", scroll_button = 2 })
+      -- Touchpad desactivado por defecto (el user no lo usa; el trackpoint va
+      -- por su propio dispositivo, no se toca). Toggle con SUPER+B.
+      hl.device({ name = "synps/2-synaptics-touchpad", enabled = false })
 
       ------------------------
       ---- ANIMACIONES -------
@@ -231,6 +237,7 @@ in
       ---- KEYBINDINGS ------
       -----------------------
       hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("wezterm"))
+      hl.bind("SUPER + B", hl.dsp.exec_cmd("~/.local/bin/touchpad-toggle.sh"))
       hl.bind("SUPER + A", hl.dsp.exec_cmd("rofi -show drun -show-icons"))
       hl.bind("SUPER + Delete", hl.dsp.window.close())
       hl.bind("SUPER + M", hl.dsp.exit())
@@ -445,6 +452,25 @@ in
             up)   exec flock -w 1 "$lock" ddcutil setvcp 10 + 5 ;;
             down) exec flock -w 1 "$lock" ddcutil setvcp 10 - 5 ;;
           esac
+        fi
+      '';
+    };
+    ".local/bin/touchpad-toggle.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Toggle del touchpad (SUPER+B). Default: OFF (config hl.device el
+        # touchpad es el user no usa; el trackpoint es otro dispositivo y no
+        # se toca). El estado vive en ~/.cache para que el bind conozca el
+        # lado actual sin depender de la API de hyprctl.
+        dev="synps/2-synaptics-touchpad"
+        state="$HOME/.cache/touchpad-enabled"
+        if [ -f "$state" ] && [ "$(cat "$state")" = "on" ]; then
+          echo off > "$state"
+          hyprctl keyword "device:$dev:enabled" false 2>/dev/null || true
+        else
+          echo on > "$state"
+          hyprctl keyword "device:$dev:enabled" true 2>/dev/null || true
         fi
       '';
     };
