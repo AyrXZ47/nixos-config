@@ -1,173 +1,22 @@
-# Cisco Packet Tracer (universidad, Cisco Networking Academy) — simulador de
-# redes de Cisco. Módulo OPT-IN a propósito: el paquete usa `requireFile`
-# (Cisco no permite descarga automática del .deb, solo detrás del login de
-# NetAcad), así que sin el archivo en el store el build de ESE host falla. Si
-# viviera en common-packages, secuestraría el rebuild de todos los hosts;
-# con el flag, un host sin el módulo construye sin el archivo. Activación:
-#   modules.apps.packetTracer.enable = true
-# y seguir el README (sección Cisco Packet Tracer) para el prefetch del .deb.
+# Cisco Packet Tracer 9.0.0 (Cisco Networking Academy, universidad) — simulador
+# de redes. Módulo OPT-IN a propósito: usa `requireFile` (el .deb hay que
+# meterlo al store a mano) y sin el archivo el build del host que lo active
+# fallaría — default false en todos los hosts, así un repo clonado en una
+# instalación limpia construye sin el archivo.
 #
-# EMPAQUETADO (estado real, agosto 2026): el .deb 9.0.1 de NetAcad trae un
-# "AppImage" NO estandar (ELF stub + squashfs SIN footer AI; appimageTools lo
-# rechaza). Se extrae el squashfs a mano y se envuelve el binario con las libs
-# del sistema de nixpkgs. FRAGILIDAD CONOCIDA: el binario encadena ABI viejas
-# de Ubuntu (libjpeg.so.8, libtiff.so.5) que nixpkgs ya no provee (perdi ~1h
-# intentando compilar libjpeg-turbo 2.1.4/2.1.5.1 — ninguna genera .so.8) →
-# el plugin de imagenes de Qt no cargara y GUI puede fallar en esos usos.
-# OPCION ESTABLE PENDIENTE: NetAcad tambien sirve el AppImage Linux Desktop
-# (autocontenido, type-2 estandar): con ese archivo el modulo se reduce a
-# requireFile + appimageTools.wrapType2 (10 lineas, cero libs). Si el curso lo
-# exige de forma frecuente, bajar ese archivo y rehacer el modulo sobre el.
-# El host sin el flag construye SIEMPRE aunque falte el .deb (requireFile solo
-# se evalua al construir el paquete activado).
-# Activacion: modules.apps.packetTracer.enable = true + prefetch (README).
-#
-# Re-pin del .deb: nixpkgs pineo el tarball "900" original (3ZrA1...), pero
-# NetAcad ya solo sirve el 9.0.1: el .deb prefetecheado el 2026-08-17 es
-# Version: 9.0.1 (verificado con dpkg-deb). hash real (MODO FLAT, el que
-# requireFile espera; el hash NAR de `nix hash path` NO sirve):
-#   sha256-NoPdh+d5iFNyrpo1wabllNEvST5knnxpdAhynBRZR5s=
-# Si Cisco re-empaqueta: correr `nix-prefetch-url --type sha256
-# file:///ruta/CiscoPacketTracer_900_Ubuntu_64bit.deb`, tomar el hash impreso
-# y comprobar con `nix build pkgs.requireFile {...}` antes de pegarlo aqui
-# (misma filosofia que unstableFixesOverlay en flake.nix).
+# El paquete ES el de nixpkgs (cisco-packet-tracer_9, 9.0.0): appimageTools
+# maneja el AppImage estándar del 9.0.0 sin hacks. El 9.0.1 que NetAcad sirve
+# hoy trae un "AppImage" roto (ELF stub + squashfs sin footer AI, ABI viejas
+# libjpeg.so.8/libtiff.so.5 que nixpkgs ya no provee) — NO se usa; quedó
+# documentado en el historial del repo. Ver README (sección Cisco Packet
+# Tracer) para la activación y la URL pública del 9.0.0.
 { config, pkgs, lib, ... }:
 
-let
-  # El AppImage trae Qt6 adentro, pero NO las libs del "sistema" (Mesa/GL,
-  # X11/xcb, glib/dbus/udev, fontconfig/harfbuzz, NSS, zstd/png/jpeg/tiff,
-  # pulse...): en Ubuntu viven en el OS, en el store hay que dárselas. Lista
-  # sacada de la salida de `ldd` (las 34 faltantes); mismo patron que
-  # omnetpp.nix.
-  systemLibs = with pkgs; lib.makeLibraryPath [
-    stdenv.cc.cc.lib
-    libGL
-    libdrm
-    zlib
-    zstd
-    brotli
-    libpng
-    libjpeg
-    libtiff
-    fontconfig
-    harfbuzz
-    expat
-    glib
-    pcre2
-    dbus
-    systemdLibs
-    libxkbcommon
-    xorg.libxkbfile
-    nspr
-    nss
-    libpulseaudio
-    xorg.libX11
-    xorg.libxcb
-    xorg.libXcomposite
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXrandr
-    xorg.libXtst
-  ];
-
-  pkg = pkgs.stdenvNoCC.mkDerivation {
-    pname = "cisco-packet-tracer";
-    version = "9.0.1";
-
-    src = pkgs.requireFile {
-      name = "CiscoPacketTracer_900_Ubuntu_64bit.deb";
-      hash = "sha256-NoPdh+d5iFNyrpo1wabllNEvST5knnxpdAhynBRZR5s=";
-      url = "https://www.netacad.com/resources/lab-downloads";
-    };
-
-    nativeBuildInputs = [
-      pkgs.dpkg
-      pkgs.squashfsTools
-      pkgs.patchelf
-      pkgs.makeWrapper
-    ];
-
-    # El .deb NO se desempaqueta con el unpackPhase por defecto (crea un árbol
-    # "root/" que choca con la extracción manual del squashfs); todo se extrae
-    # a mano en installPhase.
-    dontUnpack = true;
-
-    # El .deb se extrae, del AppImage se corta el squashfs y el árbol resultante
-    # se instala completo en $out/opt. El binario (105MB, ELF dinámico con
-    # interp de distro genérica) se re-apunta al loader del store: en NixOS no
-    # existe /lib64/ld-linux-x86-64.so.2 y el arranque fallaría de una.
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p $out/bin $out/share/applications \
-        $out/share/icons/hicolor/48x48/apps
-
-      # 1. del .deb al AppImage
-      dpkg-deb -x $src $TMPDIR/deb
-      APP=$TMPDIR/deb/opt/pt/packettracer.AppImage
-
-      # 2. del AppImage al squashfs (ultima "hsqs" = superblock real)
-      OFF=$(grep -abo "hsqs" "$APP" | tail -1 | cut -d: -f1)
-      [ -n "$OFF" ] || { echo "sin superblock squashfs en $APP"; exit 1; }
-      tail -c +$((OFF + 1)) "$APP" > $TMPDIR/pt.sqfs
-
-      # 3. del squashfs al árbol de la app ($out/opt/)
-      # -no-xattrs: el sandbox no puede escribir xattrs de SELinux y sin el flag
-      # unsquashfs aborta el scan ("FATAL ERROR: dir_scan ... File exists").
-      unsquashfs -no-xattrs -d $TMPDIR/approot $TMPDIR/pt.sqfs > /dev/null
-      ROOT=$TMPDIR/approot
-      cp -a $ROOT/opt $out/
-
-      # 4. interp del binario -> loader del store
-      patchelf --set-interpreter "$(cat ${pkgs.stdenv.cc}/nix-support/dynamic-linker)" \
-        $out/opt/pt/bin/PacketTracer
-
-      # 5. launcher: contrato del .deb + Wayland (Qt no mapea ventana bajo
-      # Wayland nativo; xcb vía XWayland es el camino estable, igual que el
-      # wrapper oficial de nixpkgs). QtWebEngine (Chromium) no tiene sandbox
-      # setuid en NixOS: los user namespaces suelen bastar; si PT crashea con
-      # "Failed to create sandbox", quitar el comentario de abajo.
-      makeWrapper $out/opt/pt/bin/PacketTracer $out/bin/packettracer9 \
-        --set QT_QPA_PLATFORM xcb \
-        --prefix LD_LIBRARY_PATH : $out/opt/pt/bin \
-        --prefix LD_LIBRARY_PATH : ${systemLibs} \
-        --chdir $out/opt/pt/bin
-
-      # 6. entradas de escritorio + icono (los nombres 9.0.1 viven en el AppDir)
-      substitute $ROOT/CiscoPacketTracer-9.0.1.desktop \
-        $out/share/applications/cisco-packet-tracer-9.desktop \
-        --replace-fail "@EXEC_PATH@" "packettracer9" \
-        --replace-fail "Icon=app" "Icon=cisco-packet-tracer-9"
-      substitute $ROOT/CiscoPacketTracerPtsa-9.0.1.desktop \
-        $out/share/applications/cisco-packet-tracer-ptsa-9.desktop \
-        --replace-fail "@EXEC_PATH@" "packettracer9" \
-        --replace-fail "Icon=app" "Icon=cisco-packet-tracer-9"
-      install -Dm444 $ROOT/app.png \
-        $out/share/icons/hicolor/48x48/apps/cisco-packet-tracer-9.png
-      # mimetypes del AppImage (iconos de .pkt) si el AppDir los trae
-      cp -r $ROOT/usr/share/icons/gnome/48x48/mimetypes \
-        $out/share/icons/hicolor/48x48/ 2>/dev/null || true
-
-      runHook postInstall
-    '';
-
-    # Self-check mínimo: el binario existe, el launcher enlaza y el interp quedó
-    # re-apuntado (sin él, la app muere con "No such file or directory" al
-    # cargar el PT_INTERP de la distro genérica).
-    installCheckPhase = ''
-      test -x $out/opt/pt/bin/PacketTracer
-      test -x $out/bin/packettracer9
-      patchelf --print-interpreter $out/opt/pt/bin/PacketTracer \
-        | grep -q "^/nix/store" || { echo "interp sin re-apuntar"; exit 1; }
-    '';
-  };
-in
 {
   options.modules.apps.packetTracer.enable =
     lib.mkEnableOption "Cisco Packet Tracer (simulador de redes de Cisco)";
 
   config = lib.mkIf config.modules.apps.packetTracer.enable {
-    environment.systemPackages = [ pkg ];
+    environment.systemPackages = [ pkgs.cisco-packet-tracer_9 ];
   };
 }
