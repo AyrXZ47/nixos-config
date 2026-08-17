@@ -10,6 +10,33 @@ let
   wallpapersDir = ../../assets/wallpapers;
 in
 {
+  # Timer de usuario: re-enforza el estado del wallpaper segun el cargador cada
+  # 90s (15s tras arrancar la sesion). Cubre CUALQUIER spawn de mpvpaper (exec
+  # de boot, wayle, wallpaper-set.sh) que la regla udev raiz no ve - esa solo
+  # reacciona a eventos del cargador, no a un mpvpaper recien nacido. El script
+  # es trivial (<5ms) y el SIGCONT en AC es no-op.
+  systemd.user.services."wallpaper-power-state" = {
+    Unit = { Description = "Wallpaper acorde al estado del cargador"; };
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "wallpaper-power-state" ''
+        if [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1 ]; then
+          pkill -CONT -x .mpvpaper-wrapp 2>/dev/null || true
+        else
+          pkill -STOP -x .mpvpaper-wrapp 2>/dev/null || true
+        fi
+      '';
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
+  systemd.user.timers."wallpaper-power-state" = {
+    Timer = {
+      OnActiveSec = "15s";
+      OnUnitActiveSec = "90s";
+    };
+    Install = { WantedBy = [ "timers.target" ]; };
+  };
+
   wayland.windowManager.hyprland = {
     enable = true;
     # Lua config (hyprland.lua): hyprlang se depreca en Hyprland 0.57.
