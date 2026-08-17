@@ -120,11 +120,8 @@ in
           sensitivity = 0.0,
         },
 
-        -- Pantalla tactil: deslizar desde el borde lateral de la pantalla cambia
-        -- de workspace (equivalente al swipe de 3 dedos de GNOME en la pantalla).
-        gestures = {
-          workspace_swipe_touch = true,
-        },
+        -- Pantalla tactil: el swipe de 3 dedos/gestos quedaron desactivados
+        -- 2026-08-17 (el user no los usa y nunca funcionaron; ver amd-laptop.nix).
 
         render = {
           -- fp16: la mitad de bandwidth de composicion; clave para sostener
@@ -280,10 +277,9 @@ in
       -----------------------
       ---- GESTOS -----------
       -----------------------
-      -- Trackpad: 3 dedos en horizontal = cambiar de escritorio.
-      -- API nueva (Hyprland 0.51+): hl.gesture; las claves gestures:workspace_swipe
-      -- quedaron deprecadas/eliminadas.
-      hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+      -- Gesto de 3 dedos del trackpad (workspaces) ELIMINADO 2026-08-17: nunca
+      -- funciono (requeria el param psmouse.synaptics_intertouch del kernel,
+      -- tambien quitado) y el user no lo usa ni lo quiere.
     '';
   };
 
@@ -444,6 +440,10 @@ in
         mpvpaper -f -p -o "no-audio
 loop-file=inf
 hwdec=vaapi" ALL "$f"
+        # En bateria el wallpaper se congela al nacer (la regla udev de
+        # epp-switch solo cubre eventos del cargador, un mpvpaper recien nacido
+        # se le escaparia). Medido: -9.4W, -9C con la iGPU libre.
+        [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" != 1 ] && pkill -STOP -x .mpvpaper-wrapp 2>/dev/null || true
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {

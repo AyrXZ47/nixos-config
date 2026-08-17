@@ -60,11 +60,13 @@ in
     SUBSYSTEM=="power_supply", KERNEL=="AC", ACTION=="change", RUN+="${eppSwitch}"
   '';
 
-  # Touchpad Synaptics LEN2073: en protocolo PS/2 (synps/2) libinput detecta el
-  # swipe de 3 dedos pero lo descarta al instante ("Touch jump", sin updates de
-  # movimiento) -> el gesto de workspaces nunca disparaba. Este touchpad soporta
-  # RMI4 por SMBus; forzarlo da multitouch real con seguimiento de 3+ dedos.
-  boot.kernelParams = [ "psmouse.synaptics_intertouch=1" ];
+  # Touchpad Synaptics LEN2073: SIN psmouse.synaptics_intertouch (quitado
+  # 2026-08-17). Ese param solo servia para el gesto de 3 dedos de workspaces,
+  # que jamas funciono y el user no usa ni quiere (no toca el touchpad). Sin el,
+  # el touchpad vuelve a PS/2 simple y el trackpoint (que cuelga del mismo
+  # controlador por pass-through) pierde la ruta SMBus por donde se le colgaba
+  # el estado de los clicks (drag/seleccion pegados; se destrababan con ESC,
+  # evidencia 2026-08-17: era un grab de la UI, no del kernel).
 
   # ThinkPad specific
   services.libinput = {
