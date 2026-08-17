@@ -19,6 +19,10 @@
     ../../modules/apps/packettracer.nix
   ];
 
+  # Packet Tracer (universidad): con el .deb en el store el rebuild construye;
+  # si algún día falta, se puede apagar con false y el host vuelve a construir.
+  modules.apps.packetTracer.enable = true;
+
   modules.desktop.hyprland = {
     enable = true;
   };
