@@ -39,14 +39,15 @@
 
   networking.hostName = "nixos-pc";
 
-  # MTU 1400 en el enlace ethernet: el camino hacia internet del PC no soporta
-  # MTU 1500 (probado: ping -M do -s 1472 falla 100%, -s 1400 OK). Con 1500,
-  # las descargas grandes (cache.nixos.org, >GBs) se cortan a mitad con
-  # "Failure when receiving data from the peer" / SSL_ERROR_SYSCALL mientras
-  # que ping y descargas pequeñas funcionan — paquetes grandes descartados en
-  # silencio (ISP con PPPoE/túnel). 1400 es margen seguro sobre el máximo
-  # estable medido (1460); no ir a 1500.
-  networking.interfaces.enp5s0.mtu = 1400;
+  # MTU 1500 en ethernet: el "corte a mitad" (SSL_ERROR_SYSCALL, probado con
+  # 1500 en su día) NO era la interfaz sino el camino PPPoE del ISP, limitado a
+  # 1492 (el gateway responde "Frag needed (mtu = 1492)"). El RTL8168 no
+  # absorbe el PMTUD, así que el fix real es el MSS clamping a 1452 que vive en
+  # modules/core/networking.nix: los SYNs anuncian 1452, los datos del servidor
+  # llegan de 1492 exactos y caben — sin PMTUD de por medio. 1500 queda para la
+  # LAN local, que sí lo soporta. No volver a 1400: era un parche sintomático
+  # que pagaba ~7% de overhead por paquete.
+  networking.interfaces.enp5s0.mtu = 1500;
 
   # ddcci: expone el monitor externo (DDC/CI) como /sys/class/backlight/ddcci0.
   # Asi wayle (modulo brightness nativo: dropdown + OSD) y brightnessctl pueden
