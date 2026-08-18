@@ -8,11 +8,22 @@ let
   # escucha en bucle. Medido 2026-08-17: wallpaper pausado = 22W -> 12.6W rate.
   # Sin senales: los procesos NO se tocan (mpv se pausa por su propia API).
   eppSwitch = pkgs.writeShellScript "epp-switch" ''
-    online=$(cat /sys/class/power_supply/AC/online 2>/dev/null)
-    if [ "$online" = 1 ]; then
-      epp=performance; paused=no
-    else
+    # Bateria = un supply de SISTEMA (scope=System) descargandose. Antes se
+    # miraba AC/online, que depende del nombre del supply. El predicado es el
+    # mismo de wallpaper-set.sh: una sola semantica en todo el repo.
+    on_battery() {
+      for s in /sys/class/power_supply/*/status; do
+        [ -f "$s" ] || continue
+        sc="''${s%/status}/scope"
+        { [ ! -f "$sc" ] || [ "$(cat "$sc" 2>/dev/null)" = System ]; } || continue
+        [ "$(cat "$s" 2>/dev/null)" = Discharging ] && return 0
+      done
+      return 1
+    }
+    if on_battery; then
       epp=power; paused=yes
+    else
+      epp=performance; paused=no
     fi
     for d in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
       echo "$epp" > "$d" 2>/dev/null || true
