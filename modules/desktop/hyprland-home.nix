@@ -501,16 +501,30 @@ in
         # video cuando lo tapa una ventana (ahorra CPU/batería).
         # pause=yes + input-ipc-server: el wallpaper nace SIEMPRE congelado
         # (foto del primer frame) y el reproductor queda a la escucha del IPC;
-        # mpvpaper-pause.sh lo reanuda si estamos en AC. Asi en bateria NUNCA
-        # descodifica ni un frame desde el boot (era el drenaje de 22W->12.6W
+        # mpvpaper-pause.sh lo reanuda si no estamos en bateria. Asi en bateria
+        # NUNCA descodifica ni un frame desde el boot (era el drenaje de 22W->12.6W
         # medido; el arranque reproduciendo drenaba la sesion completa).
+        rm -f /run/user/$(id -u)/mpvpaper.sock
         mpvpaper -f -p -o "no-audio
 loop-file=inf
 hwdec=vaapi
 pause=yes
 input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
-        # En AC el wallpaper vive: lo despierta el mismo estado que setea el EPP.
-        [ "$(cat /sys/class/power_supply/AC/online 2>/dev/null)" = 1 ] && ~/.config/hypr/scripts/mpvpaper-pause.sh off || true
+        # Bateria = un supply de SISTEMA (scope=System, excluye ratones/teclados
+        # inalambricos) descargandose. Un desktop sin bateria (o tras UPS) no la
+        # tiene => el wallpaper vive siempre. Antes se miraba /supply/AC/online,
+        # que solo existe en la laptop: en el PC el cat devolvia vacio y el
+        # wallpaper quedaba congelado para siempre.
+        on_battery() {
+          for s in /sys/class/power_supply/*/status; do
+            [ -f "$s" ] || continue
+            sc="''${s%/status}/scope"
+            { [ ! -f "$sc" ] || [ "$(cat "$sc" 2>/dev/null)" = System ]; } || continue
+            [ "$(cat "$s" 2>/dev/null)" = Discharging ] && return 0
+          done
+          return 1
+        }
+        on_battery || ~/.config/hypr/scripts/mpvpaper-pause.sh off
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
