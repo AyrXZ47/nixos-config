@@ -199,6 +199,7 @@ in
     qpwgraph
 
     # Utility
+    openssl
     qalculate-gtk
     usbutils
     scrcpy
