@@ -45,6 +45,11 @@ let
     # sympy = el Symbolic Math Toolbox de MATLAB (álgebra simbólica)
     ps.sympy
     mplcyberpunk
+    # termcolor: lo importa check_supported.py (buscador de la librería SPICE).
+    # tkinter: lo usa el GUI form_spice.py (SPICE Model Viewer) de la misma
+    # librería. Ambos scripts vienen en pkgs.kicad-spice-library (ver flake.nix).
+    ps.termcolor
+    ps.tkinter
   ]);
 in
 {

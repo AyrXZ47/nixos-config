@@ -20,6 +20,22 @@
         "type": "github"
       }
     },
+    "kicad-spice-library": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1747683932,
+        "narHash": "sha256-QflKfAvRtcGzzzh3TlRYFaUXsA+grZUGHKxiPzfKu2s=",
+        "owner": "kicad-spice-library",
+        "repo": "KiCad-Spice-Library",
+        "rev": "a8688952bcaab19f567bc4db237b60bde03ef310",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kicad-spice-library",
+        "repo": "KiCad-Spice-Library",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1786599213,
@@ -39,6 +55,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "kicad-spice-library": "kicad-spice-library",
         "nixpkgs": "nixpkgs"
       }
     }
