@@ -25,6 +25,11 @@
 
   home.file."Pictures/Screenshots/.keep".text = "";
 
+  # Estilo neón de mplcyberpunk aplicado a TODAS las gráficas de matplotlib
+  # (matplotlib carga este rc automáticamente en cada import). El contenido es
+  # el stylesheet cyberpunk.mplstyle; .source = se versiona como asset.
+  xdg.configFile."matplotlib/matplotlibrc".source = ../assets/matplotlib/matplotlibrc;
+
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
