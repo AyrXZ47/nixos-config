@@ -180,7 +180,8 @@ in
     ffmpeg-full
 
     # AI & Development
-    octave
+    # octaveFull trae la GUI Qt; el octave base viene sin GUI (solo CLI).
+    octaveFull
     ollama
     # whisper-cpp con GPU ya va DENTRO del wrapper de shotcut (mismo bin/).
     # Aquí NO se instala suelto para no duplicar el binario en el system path:
