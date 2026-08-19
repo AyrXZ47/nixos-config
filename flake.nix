@@ -87,8 +87,9 @@
       };
 
       # Librería SPICE de la comunidad (~50k modelos) como paquete de datos:
-      # copia el repo a $out/share/kicad-spice-library y empaqueta el buscador
-      # como `spice-find`. El repo original no es un build, solo datos + scripts.
+      # copia el repo a $out/share/kicad-spice-library y empaqueta los buscador
+      # `spice-find` (buscar) y `spice-get` (buscar + extraer al proyecto). El
+      # repo original no es un build, solo datos + scripts.
       # Se parchea el GUI (form_spice.py) para Linux: upstream escribe
       # config.json JUNTO al script (store = solo lectura) y trae rutas Windows
       # de fábrica (D:/... crashea el __init__ al hacer makedirs del output).
@@ -106,6 +107,213 @@
             $out/share/kicad-spice-library/
           makeWrapper ${spicePython}/bin/python3 $out/bin/spice-find \
             --add-flags "$out/share/kicad-spice-library/Scripts/check_supported.py"
+          # spice-get: buscador + extractor en un comando, pensado para correr
+          # DENTRO de la carpeta de un proyecto KiCad. Elige la misma variante
+          # recomendada que el GUI (Manufacturer > spice_complete > uncategorized),
+          # sane los params metadata que ngspice rechaza (mfg=/type=/SRC=/SYM=),
+          # verifica la carga real en ngspice y acumula en localSpice.lib sin
+          # duplicar modelos ya extraidos.
+          mkdir -p $out/libexec
+          cat > $out/libexec/spice-get.py <<'PYEOF'
+#!/usr/bin/env python3
+"""spice-get: extrae un modelo de la libreria SPICE al proyecto actual.
+
+Uso: spice-get <modelo> [<modelo> ...]   (correr dentro del proyecto KiCad)
+
+Busca <modelo> en la libreria comunitaria (~50k modelos), elige la variante
+recomendada (Manufacturer > spice_complete > uncategorized) y la extrae a
+localSpice.lib en el directorio actual. Si el modelo ya esta definido en
+localSpice.lib, no lo duplica.
+
+Flujo tipico en un proyecto:
+  spice-find lm741         # confirmar que existe y ver variantes
+  spice-get lm741          # extrae a localSpice.lib del proyecto
+  # en KiCad: directiva SPICE ".include localSpice.lib" + nombre del modelo
+  # en el campo SPICE model del simbolo (o Model de su prop. SPICE).
+
+Ademas, spice-get sane lo que el repo upstream no: quita parametros metadata
+de PSpice/LTspice que ngspice rechaza (mfg=, type=, SRC=, SYM=), verifica que
+el modelo carga de verdad en ngspice (lo usa en un .op minimo) y si la
+variante top falla, cae a la siguiente.
+"""
+import os
+import pickle
+import re
+import subprocess
+import sys
+import tempfile
+
+LIB_ROOT = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+    "share",
+    "kicad-spice-library",
+)
+SCRIPTS_DIR = os.path.join(LIB_ROOT, "Scripts")
+PICKLE = os.path.join(LIB_ROOT, "Supported.pickle")
+EXTRACTOR = os.path.join(SCRIPTS_DIR, "extractModels.pl")
+OUTPUT = "localSpice.lib"
+
+
+def priority(path):
+    if path.startswith("Manufacturer"):
+        return 0
+    if "spice_complete" in path:
+        return 1
+    return 2
+
+
+def already_defined(model, text):
+    # La definicion extraida puede diferir en mayusculas del nombre pedido.
+    pattern = r"^\.(model|subckt)\s+" + re.escape(model) + r"\b"
+    return re.search(pattern, text, re.IGNORECASE | re.MULTILINE) is not None
+
+
+def extract_manual(model, path):
+    # Fallback cuando extractModels.pl no matchea (p.ej. librerias que cierran
+    # el .subckt con .ends sin nombre). Lee el .lib original con regex simple,
+    # case-insensitive, y cubre continuaciones "+" de los .model.
+    lib_path = os.path.join(LIB_ROOT, "Models", path)
+    with open(lib_path, "r", encoding="utf-8", errors="replace") as f:
+        text = f.read()
+    name = re.escape(model)
+    sub = re.search(
+        r"^\.subckt\s+" + name + r"\b.*?(?=^\.ends\b)",
+        text,
+        re.IGNORECASE | re.DOTALL | re.MULTILINE,
+    )
+    if sub:
+        return sub.group(0) + "\n.ends\n"
+    mod = re.search(
+        r"^\.model\s+" + name + r"\b[^\n]*(?:\n\+\s*[^\n]*)*",
+        text,
+        re.IGNORECASE | re.MULTILINE,
+    )
+    if mod:
+        return mod.group(0) + "\n"
+    return None
+
+
+def sanitize(body):
+    # Quita params metadata con valor no numerico (mfg=Philips, type=NPN,
+    # SRC=..., SYM=...): ngspice los rechaza y descarta el modelo completo.
+    # Los valores numericos (100P, 1E-14, .7, -2.5m) no se tocan. El bucle
+    # cubre varios junk encadenados (mfg=A SRC=B, ...) que un solo pase deja.
+    pattern = r"\s*,\s*\w+=[A-Za-z][^,)]*|\s+\w+=[A-Za-z][^,)]*(?=\s*[,)])"
+    prev = None
+    while prev != body:
+        prev = body
+        body = re.sub(pattern, "", body)
+    return body
+
+
+def guess_usage(model, body):
+    # Dispositivo de prueba minimo segun el tipo de definicion extraida.
+    m = re.search(r"^\.model\s+\S+\s+(\S+)", body, re.MULTILINE)
+    if m:
+        t = m.group(1).upper()
+        if t == "D":
+            return "D1 1 0 {}".format(model)
+        if t in ("NPN", "PNP"):
+            return "Q1 1 1 0 {}".format(model)
+        if t in ("NJF", "PJF"):
+            return "J1 1 1 0 {}".format(model)
+        if t in ("NMOS", "PMOS"):
+            return "M1 1 1 0 0 {}".format(model)
+        return None  # tipo desconocido: confiar en sanitize
+    m = re.search(r"^\.subckt\s+\S+(.*)$", body, re.MULTILINE)
+    if m:
+        pins = [w for w in m.group(1).split() if not w.startswith("*")]
+        if pins:
+            nodes = " ".join("n{}".format(i) for i in range(len(pins)))
+            return "X1 {} {}".format(nodes, model)
+    return None
+
+
+def model_loads(model, body):
+    # Verifica que el modelo realmente carga en ngspice usandolo en un .op
+    # minimo: los modelos con params basura se descartan SILENCIOSAMENTE y el
+    # error solo aparece al usarlos ("can't find model").
+    usage = guess_usage(model, body)
+    if usage is None:
+        return True
+    fd, path = tempfile.mkstemp(suffix=".cir")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(body + "\n" + usage + "\n.op\n.end\n")
+        r = subprocess.run(["ngspice", "-b", path], capture_output=True, text=True)
+    finally:
+        os.unlink(path)
+    out = (r.stdout + r.stderr).lower()
+    bad = (
+        "can't find model" in out
+        or "undefined parameter" in out
+        or "expression err" in out
+        or "error" in out
+    )
+    return not bad
+
+
+def main(argv):
+    if len(argv) < 2:
+        print("Uso: spice-get <modelo> [<modelo> ...]  (dentro del proyecto)")
+        return 1
+    with open(PICKLE, "rb") as f:
+        supported = pickle.load(f)
+
+    existing = ""
+    if os.path.exists(OUTPUT):
+        with open(OUTPUT, "r", encoding="utf-8", errors="replace") as f:
+            existing = f.read()
+
+    for raw in argv[1:]:
+        model = raw.lower()
+        if model not in supported:
+            print("{}: no encontrado. Prueba 'spice-find {}' para ver sugerencias.".format(raw, raw))
+            continue
+        if already_defined(model, existing):
+            print("{}: ya esta en {}. Nada que hacer.".format(model, OUTPUT))
+            continue
+        candidates = sorted(supported[model], key=priority)
+        chosen = None
+        body = None
+        for cand in candidates:
+            cand = cand.replace("\\", "/")
+            try:
+                out = subprocess.run(
+                    ["perl", EXTRACTOR, "{}#{}".format(model, cand)],
+                    cwd=SCRIPTS_DIR,
+                    capture_output=True,
+                    check=True,
+                    text=True,
+                ).stdout
+            except subprocess.CalledProcessError:
+                continue
+            b = out.split("\n*\n", 1)[1] if "\n*\n" in out else out
+            if not re.search(r"^\.(model|subckt)\s", b, re.MULTILINE):
+                # extractModels.pl no siempre matchea (librerias que cierran
+                # con .ends sin nombre): fallback con regex sobre el .lib.
+                b = extract_manual(model, cand) or ""
+            b = sanitize(b.strip())
+            if b and model_loads(model, b):
+                chosen, body = cand, b
+                break
+        if body is None:
+            print("{}: ninguna variante usable. Usa .include directo del .lib o revisa spice-find.".format(model))
+            continue
+        with open(OUTPUT, "a", encoding="utf-8") as f:
+            f.write("* {} (extraido por spice-get desde {})\n".format(model, chosen))
+            f.write(body + "\n")
+        existing += body + "\n"
+        print("{}: extraido de '{}' -> {} en {}".format(model, chosen, OUTPUT, os.getcwd()))
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
+PYEOF
+          makeWrapper ${spicePython}/bin/python3 $out/bin/spice-get \
+            --add-flags "$out/libexec/spice-get.py"
           substituteInPlace $out/share/kicad-spice-library/Scripts/form_spice.py \
             --replace-fail "os.path.join(os.path.dirname(__file__), 'config.json')" \
               "os.path.expanduser('~/.config/kicad-spice/form_spice.json')" \
