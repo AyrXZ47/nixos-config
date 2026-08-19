@@ -11,10 +11,13 @@ let
   # dentro de un cgroup con MemoryMax=8G: si vuelve a fugarse, el OOM del
   # cgroup lo mata limpio y rápido, sin tocar al resto del sistema. Subir el
   # límite en este archivo si un uso legítimo lo llegara a necesitar.
-  # KiCad completo: librerias, 3D, scripting, ngspice e i18n ya vienen en el
-  # default de nixpkgs. Los addons oficiales (kikit: panelizado y gerber,
+  # KiCad completo: librerias, 3D, scripting, i18n y el simulador SPICE embebido
+  # (libngspice: KICAD_SPICE=true con withNgspice por defecto en Linux) ya vienen
+  # en el default de nixpkgs. Los addons oficiales (kikit: panelizado y gerber,
   # kikit-library) no, y el PCM de KiCad no puede instalarlos en el store de
   # solo lectura; se montan con el override `addons` de nixpkgs.
+  # NOTA: el simulador embebido NO expone el binario `ngspice` en el PATH; el
+  # CLI standalone va en systemPackages (bloque Engineering & Simulation).
   kicad = pkgs.kicad.override {
     addons = with pkgs.kicadAddons; [ kikit kikit-library ];
   };
@@ -110,6 +113,13 @@ in
     </Menu>
   '';
 
+  # El system-path de NixOS (buildEnv) solo enlaza los share/ cubiertos por
+  # environment.pathsToLink; sin esto share/kicad-spice-library NO aparece en
+  # /run/current-system/sw/share (igual que share/kicad del propio KiCad, que
+  # resuelve sus librerias por rutas compiladas). Este es el unico "share de
+  # datos" que necesitamos visible a ruta estable en todos los hosts.
+  environment.pathsToLink = [ "/share/kicad-spice-library" ];
+
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
@@ -130,6 +140,16 @@ in
 
     # Engineering & Simulation
     kicad
+    # ngspice CLI: el mismo motor SPICE que KiCad embebe, pero como binario
+    # standalone para correr netlists .cir por terminal (practicas de
+    # universidad: scripts de simulación, análisis .tran/.ac/.dc).
+    ngspice
+    # Librería comunitaria ~50k modelos SPICE (overlay spiceLibraryOverlay):
+    # datos en share/kicad-spice-library + `spice-find <modelo>` para buscar.
+    # En KiCad: `.include /run/current-system/sw/share/kicad-spice-library/
+    # Models/...` como directiva SPICE del esquemático (o extraer al proyecto
+    # con Scripts/extractModels.pl; el GUI form_spice.py tambien extrae).
+    kicad-spice-library
     freecad
     openrocket
     openmotor

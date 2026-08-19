@@ -8,10 +8,21 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Librería comunitaria de ~50k modelos SPICE (transistores, opamps, diodos,
+    # lógica digital, manufacturas...). Se distribuye a todos los hosts como
+    # pkgs.kicad-spice-library (overlay spiceLibraryOverlay, ver abajo) e
+    # incluye los scripts de búsqueda/extracción. `flake = false`: repo de
+    # datos puro (sin flake.nix propio). Actualizar modelos:
+    # `nix flake update kicad-spice-library`.
+    kicad-spice-library = {
+      url = "github:kicad-spice-library/KiCad-Spice-Library";
+      flake = false;
+    };
   };
 
   outputs =
-    { nixpkgs, home-manager, ... }:
+    { nixpkgs, home-manager, kicad-spice-library, ... }:
     let
       system = "x86_64-linux";
       # Backend del portal RemoteDesktop para el remote input de KDE Connect en Hyprland.
@@ -75,11 +86,41 @@
         });
       };
 
+      # Librería SPICE de la comunidad (~50k modelos) como paquete de datos:
+      # copia el repo a $out/share/kicad-spice-library y empaqueta el buscador
+      # como `spice-find`. El repo original no es un build, solo datos + scripts.
+      # Se parchea el GUI (form_spice.py) para Linux: upstream escribe
+      # config.json JUNTO al script (store = solo lectura) y trae rutas Windows
+      # de fábrica (D:/... crashea el __init__ al hacer makedirs del output).
+      # ponytail: techo conocido — si upstream arregla Linux, quitar el parche.
+      spiceLibraryOverlay = final: prev: let
+        spiceSrc = kicad-spice-library;
+        spicePython = final.python3.withPackages (ps: [ ps.termcolor ]);
+      in {
+        kicad-spice-library = final.runCommand "kicad-spice-library" {
+          nativeBuildInputs = [ final.makeWrapper ];
+        } ''
+          mkdir -p $out/share/kicad-spice-library $out/bin
+          cp -r ${spiceSrc}/Models ${spiceSrc}/Scripts ${spiceSrc}/Supported.pickle \
+            ${spiceSrc}/Supported.txt ${spiceSrc}/README.md ${spiceSrc}/LICENSE \
+            $out/share/kicad-spice-library/
+          makeWrapper ${spicePython}/bin/python3 $out/bin/spice-find \
+            --add-flags "$out/share/kicad-spice-library/Scripts/check_supported.py"
+          substituteInPlace $out/share/kicad-spice-library/Scripts/form_spice.py \
+            --replace-fail "os.path.join(os.path.dirname(__file__), 'config.json')" \
+              "os.path.expanduser('~/.config/kicad-spice/form_spice.json')" \
+            --replace-fail "'scripts_dir': r'D:/kicad/library/KiCad-Spice-Library/Scripts'," \
+              "'scripts_dir': '$out/share/kicad-spice-library/Scripts'," \
+            --replace-fail "'output_dir':  r'D:/kicad/library/my-lib'" \
+              "'output_dir':  os.path.expanduser('~/spice-output')"
+        '';
+      };
+
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
