@@ -103,11 +103,50 @@ Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Firefox (autohide
 toolbox via userChrome.css).
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
-Engineering: KiCad, FreeCAD, OpenRocket, OpenMotor, Qucs-S, SimulIDE,
-Logisim-Evolution, Octave.
+Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
+`spice-find` y `spice-get`, ver "KiCad + SPICE" abajo), ngspice, FreeCAD,
+OpenRocket, OpenMotor, Qucs-S, SimulIDE, Logisim-Evolution, Octave.
 Utilities: 1Password CLI, `gh`, btop, cava, pipes-rs, scrcpy, virt-manager,
 proton-vpn, openrgb, qpwgraph, dolphin, kdeconnect, tor-browser, yt-dlp.
 Fun: `cbonsai`.
+
+### KiCad + SPICE (circuitos — universidad)
+
+KiCad 10 con simulador SPICE embebido (ngspice via `libngspice`) + la librería
+comunitaria [kicad-spice-library](https://github.com/kicad-spice-library/KiCad-Spice-Library)
+(~50k modelos: transistores, opamps, diodos, digital, manufacturas). Todo se
+instala en los 4 hosts desde `modules/apps/common-packages.nix` (input
+`kicad-spice-library` en flake.nix, `flake = false` por ser repo de datos).
+
+- **Ruta fija de la librería** (idéntica en todos los hosts):
+  `/run/current-system/sw/share/kicad-spice-library/` (existe por
+  `environment.pathsToLink`; el buildEnv de NixOS solo enlaza los share que
+  estén listados ahí).
+- **Buscar un componente:** `spice-find 2n2222` — muestra variantes y de qué
+  `.lib` salen. GUI alternativo: `python3
+  /run/current-system/sw/share/kicad-spice-library/Scripts/form_spice.py`
+  (config en `~/.config/kicad-spice/`, salidas en `~/spice-output`).
+- **Extraer al proyecto:** `cd <proyecto-kicad> && spice-get 2n2222` — crea
+  `localSpice.lib` en la carpeta (acumulativo: no duplica modelos ya
+  extraídos; corre dentro de cualquier repo con su propia carpeta). Además
+  **sanea** los modelos que ngspice rechaza (params metadata de PSpice/LTspice
+  tipo `mfg=Philips`, `type=`, `SRC=`, `SYM=` — el motor de KiCad es ngspice,
+  mismo error) y **verifica** que el modelo cargue de verdad en ngspice antes
+  de escribirlo; si la variante top falla, cae a la siguiente.
+- **En KiCad:** directiva SPICE `.include localSpice.lib` en el esquemático y
+  el nombre del modelo (ej. `2N2222`) como SPICE model del símbolo. Alternativa
+  sin extraer: `.include
+  /run/current-system/sw/share/kicad-spice-library/Models/Transistor/BJT/BJT.lib`
+  con la misma directiva.
+- **ngspice CLI** (v45) instalado para netlists `.cir` por terminal
+  (`.tran/.ac/.dc`); KiCad usa el mismo motor embebido.
+- **Actualizar la librería** cuando el repo upstream agregue modelos:
+  `nix flake update kicad-spice-library && sudo nixos-rebuild switch
+  --flake .#<host>`.
+- El GUI upstream se parchea al empaquetar (config.json → home y rutas Linux;
+  el original escribe junto al script —store de solo lectura— y trae rutas
+  Windows). `ponytail:` techo conocido — si upstream lo arregla, quitar el
+  parche en el overlay `spiceLibraryOverlay`.
 
 ### Cisco Packet Tracer (redes — universidad)
 
@@ -265,6 +304,14 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
   `estabilizar_clips_gpu` detects HDR10+ clips (ffprobe) and applies libplacebo
   tone-mapping via Vulkan before the VA-API encode.
 - `subtitular <video>` — Whisper (whisper.cpp) Spanish subtitles with VAD.
+- `spice-find <modelo>` — busca un componente en la librería SPICE (~50k
+  modelos de kicad-spice-library) y muestra las variantes con su archivo.
+  Equivale al "buscador" de la librería, sin entrar al repo.
+- `spice-get <modelo>` — desde la carpeta de un proyecto KiCad, busca y
+  extrae el modelo a `localSpice.lib` del proyecto (no duplica). Sanea
+  params incompatibles con ngspice (mfg=/type=/SRC=/SYM=) y verifica que el
+  modelo carga antes de escribirlo. Equivale al "generador/extractor", en un
+  solo comando. Detalles en "KiCad + SPICE".
 
 ## Installation on a New Machine
 
