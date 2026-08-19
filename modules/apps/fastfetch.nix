@@ -63,7 +63,6 @@ in
           { "type": "host",     "key": "${key "Host"}",      "keyColor": "magenta" },
           { "type": "kernel",   "key": "${key "Kernel"}",    "keyColor": "magenta" },
           { "type": "uptime",   "key": "${key "Uptime"}",    "keyColor": "magenta" },
-          { "type": "packages", "key": "${key "Packages"}",  "keyColor": "magenta" },
           { "type": "shell",    "key": "${key "Shell"}",     "keyColor": "magenta" },
           { "type": "display",  "key": "${key "Display"}",   "keyColor": "magenta" },
           { "type": "de",       "key": "${key "DE"}",        "keyColor": "magenta" },
