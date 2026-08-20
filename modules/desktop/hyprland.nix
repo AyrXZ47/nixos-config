@@ -320,7 +320,9 @@ in
 
         [[modules.custom]]
         id = "clipboard"
-        icon-name = "ld-file-text-symbolic"
+        # Icono "clip" propio (assets/wayle-clip.svg -> hicolor ld-clip-symbolic):
+        # el set ld-* que bundlea wayle solo trae el documento (ld-file-text).
+        icon-name = "ld-clip-symbolic"
         icon-show = true
         icon-color = "#ff0066"
         icon-bg-color = "transparent"
@@ -361,6 +363,9 @@ in
             animation-timing-function: cubic-bezier(0.28, 0.84, 0.42, 1);
         }
       '';
+      # Icono del clipboard de wayle: va al hicolor del user, dentro del camino
+      # de busqueda de GTK (hicolor es el fallback universal de todos los temas).
+      xdg.dataFile."icons/hicolor/scalable/actions/ld-clip-symbolic.svg".source = ../../assets/wayle-clip.svg;
     };
 
     services.displayManager.sddm = {
