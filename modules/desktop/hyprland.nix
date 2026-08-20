@@ -24,11 +24,11 @@ in
         # Cursor por gsettings: GTK y el platform theme gtk3 de Qt (QT_QPA_...
         # = gtk3, ver abajo) leen gtk-cursor-theme-name, NO el XCURSOR_THEME de
         # entorno. Sin esto apps Qt como KeepassXC se quedan con el cursor de
-        # fábrica aunque XCURSOR_THEME diga Qogir-white. Es el mismo paquete que
+        # fábrica aunque XCURSOR_THEME diga Qogir. Es el mismo paquete que
         # theme-base.nix usa en home.pointerCursor.
         cursorTheme = {
-          name = "Qogir-white";
-          package = pkgs.qogir-dark-cursor;
+          name = "Qogir";
+          package = pkgs.qogir-cursor;
           size = 24;
         };
         gtk3.extraConfig = {

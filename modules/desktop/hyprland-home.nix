@@ -55,10 +55,11 @@ in
         -- deriva el app id del llamador desde el nombre de su unidad systemd y sin
         -- unidad queda vacio (el backend de hypr-kdeconnect lo rechaza).
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
-        -- Forzar cursor Qogir-white tambien en la sesion Hyprland (ademas del
-        -- XCURSOR_THEME global de home-manager): hyprcursor a veces no pilla el
-        -- tema del sistema y deja el default; esto lo fija al arrancar.
-        hl.exec_cmd("hyprctl setcursor Qogir-white 24")
+        -- Forzar cursor Qogir (negro, variante dist) tambien en la sesion
+        -- Hyprland (ademas del XCURSOR_THEME global de home-manager):
+        -- hyprcursor a veces no pilla el tema del sistema y deja el default;
+        -- esto lo fija al arrancar.
+        hl.exec_cmd("hyprctl setcursor Qogir 24")
       end)
 
       ------------------------
