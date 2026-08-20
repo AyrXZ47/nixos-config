@@ -59,7 +59,7 @@ in
         -- Hyprland (ademas del XCURSOR_THEME global de home-manager):
         -- hyprcursor a veces no pilla el tema del sistema y deja el default;
         -- esto lo fija al arrancar.
-        hl.exec_cmd("hyprctl setcursor Bibata-Material-Deep-Blue 24")
+        hl.exec_cmd("hyprctl setcursor Bibata-Material-Deep-Blue 30")
       end)
 
       ------------------------

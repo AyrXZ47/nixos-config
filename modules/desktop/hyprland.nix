@@ -29,7 +29,7 @@ in
         cursorTheme = {
           name = "Bibata-Material-Deep-Blue";
           package = pkgs.bibata-material-deep-blue;
-          size = 24;
+          size = 30;
         };
         gtk3.extraConfig = {
           gtk-application-prefer-dark-theme = 1;
