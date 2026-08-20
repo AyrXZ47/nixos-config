@@ -1,15 +1,15 @@
 { config, pkgs, lib, ... }:
 
 {
-  # Cursor del sistema: Breeze Dark (repo polirritmico/Breeze-Dark-Cursor),
+  # Cursor del sistema: Qogir (vinceliuice/Qogir-icon-theme, variante dist-Dark),
   # forzado a nivel de sistema vía home-manager pointerCursor (XCURSOR_THEME)
   # para que TODAS las apps (GTK/Qt/X11/Wayland) lo usen. El paquete
-  # `breeze-dark-cursor` viene del overlay breezeDarkCursorOverlay en flake.nix.
+  # `qogir-dark-cursor` viene del overlay qogirDarkCursorOverlay en flake.nix.
   home-manager.users.yovick = {
     home.pointerCursor = {
       enable = true;
-      name = "Breeze_Dark";
-      package = pkgs.breeze-dark-cursor;
+      name = "Qogir-white";
+      package = pkgs.qogir-dark-cursor;
       size = 24;
       # Xcursor respeta esto y GTK/Qt lo recogen via xsettings/gsettings.
       gtk.enable = true;
