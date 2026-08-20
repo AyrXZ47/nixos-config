@@ -21,6 +21,16 @@ in
           name = "Papirus-Dark";
           package = pkgs.papirus-icon-theme;
         };
+        # Cursor por gsettings: GTK y el platform theme gtk3 de Qt (QT_QPA_...
+        # = gtk3, ver abajo) leen gtk-cursor-theme-name, NO el XCURSOR_THEME de
+        # entorno. Sin esto apps Qt como KeepassXC se quedan con el cursor de
+        # fábrica aunque XCURSOR_THEME diga Breeze_Dark. Es el mismo paquete que
+        # theme-base.nix usa en home.pointerCursor.
+        cursorTheme = {
+          name = "Breeze_Dark";
+          package = pkgs.breeze-dark-cursor;
+          size = 24;
+        };
         gtk3.extraConfig = {
           gtk-application-prefer-dark-theme = 1;
         };
