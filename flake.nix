@@ -324,21 +324,21 @@ PYEOF
         '';
       };
 
-      # Tema de cursor Breeze Dark (polirritmico/Breeze-Dark-Cursor) como
-      # paquete de datos: el repo trae la carpeta `Breeze_Dark/` YA precompilada
-      # (cursors/*.xcur + index.theme + symlinks), así que no se construye nada,
-      # solo se copia a $out/share/icons/Breeze_Dark. Estándar Xcursor lo recoge
-      # cualquier app. Se fuerza via home-manager pointerCursor (theme-base.nix).
-      # Frozen en 339089d (2023-08-23) al que probé y compila/evalua.
-      breezeDarkCursorOverlay = final: prev: {
-        breeze-dark-cursor = final.runCommand "breeze-dark-cursor" { } ''
+      # Tema de cursor Qogir (vinceliuice/Qogir-icon-theme), variante `dist-Dark`
+      # ("Qogir-white Cursors"), como paquete de datos: el repo trae la carpeta
+      # YA precompilada (cursors/*.xcur + index.theme + symlinks), así que no se
+      # construye nada, solo se copia a $out/share/icons/Qogir-white. Estándar
+      # Xcursor lo recoge cualquier app. Se fuerza via home-manager pointerCursor
+      # (theme-base.nix). Frozen en c633057.
+      qogirDarkCursorOverlay = final: prev: {
+        qogir-dark-cursor = final.runCommand "qogir-dark-cursor" { } ''
           mkdir -p $out/share/icons
           cp -r ${prev.fetchFromGitHub {
-            owner = "polirritmico";
-            repo = "Breeze-Dark-Cursor";
-            rev = "339089d04729ec6ebd823b5f5f8f10943979d6a4";
-            hash = "sha256-R2u6hfnA24nIlrAL9MAGpBz83CwRkQeckjkduH2FYn8=";
-          }}/Breeze_Dark $out/share/icons/Breeze_Dark
+            owner = "vinceliuice";
+            repo = "Qogir-icon-theme";
+            rev = "c633057ba0d27a504b3255144071c9691ed0264a";
+            hash = "sha256-VJHhyKk1f/25CNkqNM7+WQqQRdqBNgWD3XrJ+whOcd0=";
+          }}/src/cursors/dist-Dark $out/share/icons/Qogir-white
         '';
       };
 
@@ -346,7 +346,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay breezeDarkCursorOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay qogirDarkCursorOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
