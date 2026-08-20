@@ -324,21 +324,26 @@ PYEOF
         '';
       };
 
-      # Tema de cursor Qogir (vinceliuice/Qogir-icon-theme), variante `dist`
-      # ("Qogir Cursors", negro), como paquete de datos: el repo trae la carpeta
-      # YA precompilada (cursors/*.xcur + index.theme + symlinks), así que no se
-      # construye nada, solo se copia a $out/share/icons/Qogir. Estándar
-      # Xcursor lo recoge cualquier app. Se fuerza via home-manager pointerCursor
-      # (theme-base.nix). Frozen en c633057.
-      qogirCursorOverlay = final: prev: {
-        qogir-cursor = final.runCommand "qogir-cursor" { } ''
+      # Tema de cursor Material Bibata (SakibShahariar/material-bibata-cursor),
+      # variante Deep Blue (Material 3: cuerpo oscuro + contorno azul vibrante),
+      # como paquete de datos: extrae solo la carpeta del tema deep blue del
+      # tar.gz precompilado del release v1.3.0 (bibata-material-dark, ya trae
+      # cursors/*.xcur + index.theme + symlinks, no se construye nada) y la
+      # copia a $out/share/icons/Bibata-Material-Deep-Blue. Estándar Xcursor lo
+      # recoge cualquier app. Se fuerza via home-manager pointerCursor
+      # (theme-base.nix).
+      bibataCursorOverlay = final: prev: {
+        bibata-material-deep-blue = final.runCommand "bibata-material-deep-blue" {
+          nativeBuildInputs = [ prev.gnutar ];
+        } ''
           mkdir -p $out/share/icons
-          cp -r ${prev.fetchFromGitHub {
-            owner = "vinceliuice";
-            repo = "Qogir-icon-theme";
-            rev = "c633057ba0d27a504b3255144071c9691ed0264a";
-            hash = "sha256-VJHhyKk1f/25CNkqNM7+WQqQRdqBNgWD3XrJ+whOcd0=";
-          }}/src/cursors/dist $out/share/icons/Qogir
+          tar xzf ${prev.fetchurl {
+            url = "https://github.com/SakibShahariar/material-bibata-cursor/releases/download/v1.3.0/bibata-material-dark-v1.3.0.tar.gz";
+            hash = "sha256-8M/aOIy+b819lQemyKIaAfYKjCgmDIO4WzLyB3G752s=";
+          }} -C $out/share/icons bibata-material-dark-v1.3.0/Bibata-Material-Deep-Blue
+          mv $out/share/icons/bibata-material-dark-v1.3.0/Bibata-Material-Deep-Blue \
+             $out/share/icons/Bibata-Material-Deep-Blue
+          rm -rf $out/share/icons/bibata-material-dark-v1.3.0
         '';
       };
 
@@ -346,7 +351,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay qogirCursorOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay bibataCursorOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
