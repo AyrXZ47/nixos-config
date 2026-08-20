@@ -55,7 +55,6 @@ in
         -- deriva el app id del llamador desde el nombre de su unidad systemd y sin
         -- unidad queda vacio (el backend de hypr-kdeconnect lo rechaza).
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
-        hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")
       end)
 
       ------------------------
