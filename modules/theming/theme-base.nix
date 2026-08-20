@@ -11,7 +11,7 @@
       enable = true;
       name = "Bibata-Material-Deep-Blue";
       package = pkgs.bibata-material-deep-blue;
-      size = 24;
+      size = 30;
       # Xcursor respeta esto y GTK/Qt lo recogen via xsettings/gsettings.
       gtk.enable = true;
     };
