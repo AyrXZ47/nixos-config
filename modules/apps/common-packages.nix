@@ -157,6 +157,21 @@ in
     simulide
     logisim-evolution
 
+    # HDL / FPGA simulation (universidad, arquitectura de computadoras):
+    # alternativa 100% Linux al Active-HDL (Windows-only) del profe. Cubre
+    # ambos lenguajes por si la clase es VHDL o Verilog.
+    #   ghdl     -> simulador VHDL (el estandar libre en Linux)
+    #   iverilog -> simulador Verilog
+    #   verilator-> compilador Verilog/SV rapidisimo (industria real)
+    #   gtkwave  -> visor de formas de onda (VCD/FST) = la "GUI" que falta
+    # Flujo tipico VHDL: ghdl -a foo.vhd && ghdl -e top && ghdl -r top --vcd=x.vcd
+    # luego `gtkwave x.vcd`. Los .vcd producidos son estandar, el profe los abre
+    # en cualquier visor.
+    ghdl
+    iverilog
+    verilator
+    gtkwave
+
     # Telecomunicaciones (universidad)
     # 4nec2 es Windows-only; xnec2c es su equivalente libre en Linux (mismo
     # motor NEC2, GUI con diagramas de radiacion y Smith). openems existe en
