@@ -324,21 +324,21 @@ PYEOF
         '';
       };
 
-      # Tema de cursor Qogir (vinceliuice/Qogir-icon-theme), variante `dist-Dark`
-      # ("Qogir-white Cursors"), como paquete de datos: el repo trae la carpeta
+      # Tema de cursor Qogir (vinceliuice/Qogir-icon-theme), variante `dist`
+      # ("Qogir Cursors", negro), como paquete de datos: el repo trae la carpeta
       # YA precompilada (cursors/*.xcur + index.theme + symlinks), así que no se
-      # construye nada, solo se copia a $out/share/icons/Qogir-white. Estándar
+      # construye nada, solo se copia a $out/share/icons/Qogir. Estándar
       # Xcursor lo recoge cualquier app. Se fuerza via home-manager pointerCursor
       # (theme-base.nix). Frozen en c633057.
-      qogirDarkCursorOverlay = final: prev: {
-        qogir-dark-cursor = final.runCommand "qogir-dark-cursor" { } ''
+      qogirCursorOverlay = final: prev: {
+        qogir-cursor = final.runCommand "qogir-cursor" { } ''
           mkdir -p $out/share/icons
           cp -r ${prev.fetchFromGitHub {
             owner = "vinceliuice";
             repo = "Qogir-icon-theme";
             rev = "c633057ba0d27a504b3255144071c9691ed0264a";
             hash = "sha256-VJHhyKk1f/25CNkqNM7+WQqQRdqBNgWD3XrJ+whOcd0=";
-          }}/src/cursors/dist-Dark $out/share/icons/Qogir-white
+          }}/src/cursors/dist $out/share/icons/Qogir
         '';
       };
 
@@ -346,7 +346,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay qogirDarkCursorOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay qogirCursorOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
