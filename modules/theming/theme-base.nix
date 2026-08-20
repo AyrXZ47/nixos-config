@@ -1,15 +1,16 @@
 { config, pkgs, lib, ... }:
 
 {
-  # Cursor del sistema: Qogir (vinceliuice/Qogir-icon-theme, variante `dist`,
-  # "Qogir Cursors" negros), forzado a nivel de sistema vía home-manager
+  # Cursor del sistema: Material Bibata Deep Blue (SakibShahariar/
+  # material-bibata-cursor), forzado a nivel de sistema vía home-manager
   # pointerCursor (XCURSOR_THEME) para que TODAS las apps (GTK/Qt/X11/Wayland)
-  # lo usen. El paquete `qogir-cursor` viene del overlay qogirCursorOverlay.
+  # lo usen. El paquete `bibata-material-deep-blue` viene del overlay
+  # bibataCursorOverlay.
   home-manager.users.yovick = {
     home.pointerCursor = {
       enable = true;
-      name = "Qogir";
-      package = pkgs.qogir-cursor;
+      name = "Bibata-Material-Deep-Blue";
+      package = pkgs.bibata-material-deep-blue;
       size = 24;
       # Xcursor respeta esto y GTK/Qt lo recogen via xsettings/gsettings.
       gtk.enable = true;
