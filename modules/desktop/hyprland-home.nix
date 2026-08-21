@@ -68,7 +68,11 @@ in
       hl.config({
         general = {
           gaps_in = 5,
-          gaps_out = 10,
+          -- gaps_out por-lado (css): direito=0 porque la barra de wayle
+          -- (exclusive a la derecha) ya reserva su espacio; si sumamos gap
+          -- derecho queda hueco doble entre la última ventana y la barra.
+          -- Formato css igual al que reporta `hyprctl getoption`.
+          gaps_out = "10 0 10 10",
           border_size = 4,
           layout = "dwindle",
           col = {
@@ -150,13 +154,6 @@ in
           disable_xdg_env_checks = true,
         },
       })
-
-      -- Sin gap a la derecha: wayle (exclusive a la derecha) ya reserva su
-      -- espacio y gaps_out se suma encima => doble hueco entre la última
-      -- ventana y la barra. Se anula el gap derecho y se mantienen los otros.
-      -- ponytail: `.` aplica a todos los workspaces; con un solo monitor (pc)
-      -- es exacto, con multi-monitor habría que matchear por nombre.
-      hl.workspace_rule({ workspace = ".*", gaps_out = { top = 10, right = 0, bottom = 10, left = 10 } })
 
       -------------------------
       ---- AUTOSCROLL MOUSE ----
