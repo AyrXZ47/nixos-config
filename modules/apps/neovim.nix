@@ -133,9 +133,14 @@ let
       text = ''
         return {
           "isakbm/gitgraph.nvim",
-          dependencies = { "nvim-lua/plenary.nvim" },
           keys = {
-            { "<leader>gg", "<cmd>GitGraph<cr>", desc = "Git graph" },
+            {
+              "<leader>gg",
+              function()
+                require("gitgraph").draw({}, { all = true, max_count = 5000 })
+              end,
+              desc = "Git graph",
+            },
           },
         }
       '';
