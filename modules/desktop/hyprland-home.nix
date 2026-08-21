@@ -151,6 +151,13 @@ in
         },
       })
 
+      -- Sin gap a la derecha: wayle (exclusive a la derecha) ya reserva su
+      -- espacio y gaps_out se suma encima => doble hueco entre la última
+      -- ventana y la barra. Se anula el gap derecho y se mantienen los otros.
+      -- ponytail: `.` aplica a todos los workspaces; con un solo monitor (pc)
+      -- es exacto, con multi-monitor habría que matchear por nombre.
+      hl.workspace_rule({ workspace = ".*", gaps_out = { top = 10, right = 0, bottom = 10, left = 10 } })
+
       -------------------------
       ---- AUTOSCROLL MOUSE ----
       -------------------------
@@ -393,8 +400,11 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # cliphist: limite de historial en 18 items (config file, default 750).
-  xdg.configFile."cliphist/config".text = "max-items 18\n";
+  # cliphist: limite de historial en 6 items. Pequeño a propósito: al ser un
+  # clipboard manager captura TODO lo copiado (incluido el "copiar" de
+  # contraseñas desde KeepassXC/otras apps), y menos items = menos superficie
+  # de leaks + menos ruido al elegir.
+  xdg.configFile."cliphist/config".text = "max-items 6\n";
 
   xdg.configFile = {
     "hypr/scripts/time-to-work.sh" = {
@@ -565,6 +575,11 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
       executable = true;
       text = ''
         #!/usr/bin/env bash
+        # Al bloquear se borra el historial de clipboard (cliphist wipe): captura
+        # TODO lo copiado, incluidos passwords de KeepassXC, y quedaban en claro en
+        # ~/.cache/cliphist. Solo quedan los max-items post-rebuild; esto los deja
+        # en cero cada vez que se bloquea la sesión.
+        cliphist wipe
         hyprlock &
         _hyprlock_pid=$!
         [ -x "$HOME/.config/hypr/scripts/openrgb-lock-before" ] && "$HOME/.config/hypr/scripts/openrgb-lock-before"
