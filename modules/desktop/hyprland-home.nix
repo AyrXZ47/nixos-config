@@ -68,11 +68,11 @@ in
       hl.config({
         general = {
           gaps_in = 5,
-          -- gaps_out por-lado (css): direito=0 porque la barra de wayle
-          -- (exclusive a la derecha) ya reserva su espacio; si sumamos gap
-          -- derecho queda hueco doble entre la última ventana y la barra.
-          -- Formato css igual al que reporta `hyprctl getoption`.
-          gaps_out = "10 0 10 10",
+          -- gaps_out por-lado en formato TABLA (la config lua NO acepta string
+          -- css para hl.config: exige entero o tabla). right negativo para
+          -- absorber el hueco que deja la reserva exclusive de wayle; en
+          -- 0.56 puede clampar a 0 segun discusion 12880, se valida en vivo.
+          gaps_out = { top = 10, right = -10, bottom = 10, left = 10 },
           border_size = 4,
           layout = "dwindle",
           col = {
