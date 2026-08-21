@@ -129,6 +129,17 @@ let
         }
       '';
     };
+    ".config/nvim/lua/plugins/gitgraph.lua" = {
+      text = ''
+        return {
+          "Isaksson/git-graph.nvim",
+          dependencies = { "nvim-lua/plenary.nvim" },
+          keys = {
+            { "<leader>gg", "<cmd>GitGraph<cr>", desc = "Git graph" },
+          },
+        }
+      '';
+    };
     ".config/nvim/lua/plugins/visuals.lua" = {
       text = ''
         return {
