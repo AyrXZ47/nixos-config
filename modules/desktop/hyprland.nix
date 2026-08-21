@@ -64,14 +64,19 @@ in
       };
       xdg.configFile."wayle/config.toml".text = ''
         [bar]
+        # Valores tuneados en vivo en pc (wayle los persiste en runtime.toml,
+        # que es per-host y no se comparte): horneados aquí para que TODOS los
+        # hosts rendericen la barra igual. Editar aquí, no en runtime.toml.
         location = "right"
         exclusive = true
         layer = "top"
         rounding = "none"
-        module-gap = 0.3
-        padding = 0.1
-        padding-ends = 0.2
-        inset-edge = 0.25
+        scale = 0.85
+        inset-edge = 0.0
+        inset-ends = 0.7
+        module-gap = 0.5
+        padding = 0.3
+        padding-ends = 0.0
         bg = "transparent"
         border-location = "none"
         border-width = 0
@@ -80,24 +85,26 @@ in
         button-variant = "block-prefix"
         button-rounding = "full"
         button-icon-size = 1.0
-        button-icon-padding = 0.6
+        button-icon-padding = 1.0
         button-label-size = 1.35
         button-label-weight = "bold"
-        button-label-padding = 1.0
+        button-label-padding = 0.25
         button-gap = 0.5
-        button-bg-opacity = 100
+        button-bg-opacity = 66
         button-opacity = 100
         button-border-location = "none"
         button-border-width = 0
-        button-group-module-gap = 0.15
-        button-group-padding = 0.15
+        button-group-module-gap = 0.0
+        button-group-padding = 0.75
         button-group-rounding = "full"
         button-group-background = "bg-elevated"
         button-group-opacity = 100
-        button-group-border-location = "none"
+        button-group-border-location = "all"
+        button-group-border-width = 2
+        button-group-border-color = "status-info"
 
         dropdown-shadow = true
-        dropdown-opacity = 100
+        dropdown-opacity = 88
         dropdown-autohide = true
         dropdown-freeze-label = true
 
