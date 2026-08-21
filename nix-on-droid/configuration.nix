@@ -74,8 +74,6 @@
     openssl
     gnupg
     cmatrix
-    # LaTeX para escribir documentos desde el celular (pdflatex, amsmath, ...).
-    (pkgs.texlive.withPackages (ps: [ ps.scheme-medium ]))
   ];
 
   # Reutiliza los módulos home del repo (shell con powerlevel10k, nvim con
@@ -131,6 +129,20 @@
       # al loader de glibc del store (el mismo que corre todo lo demas).
       ${pkgs.patchelf}/bin/patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-aarch64.so.1" "$HOME/.opencode/bin/opencode"
       chmod +x "$HOME/.opencode/bin/opencode"
+    '';
+
+    # Máximo 3 generaciones SIEMPRE (por conteo, no por edad), igual que
+    # trim-generations de modules/core/nix-optimization.nix en los hosts de
+    # escritorio: allí lo fuerza un timer systemd diario; aquí no hay systemd,
+    # así que se poda en CADA switch y después se lanza el GC. `|| true` por si
+    # algún perfil todavía no existe (primer switch).
+    home.activation.trimGenerations = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/nix-on-droid --delete-generations +3 || true
+      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/per-user/nix-on-droid/profile --delete-generations +3 || true
+      ${pkgs.nix}/bin/nix-env -p "$HOME/.local/state/nix/profiles/home-manager" --delete-generations +3 || true
+      ${pkgs.nix}/bin/nix-collect-garbage || true
+      # (El store ya queda liberado: al podar generaciones, sus closures pasan a
+      # ser basura y el GC de la línea anterior la recoge.)
     '';
   };
 
