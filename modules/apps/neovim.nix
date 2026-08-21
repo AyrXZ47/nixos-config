@@ -132,7 +132,7 @@ let
     ".config/nvim/lua/plugins/gitgraph.lua" = {
       text = ''
         return {
-          "Isaksson/git-graph.nvim",
+          "isakbm/gitgraph.nvim",
           dependencies = { "nvim-lua/plenary.nvim" },
           keys = {
             { "<leader>gg", "<cmd>GitGraph<cr>", desc = "Git graph" },
