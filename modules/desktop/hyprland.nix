@@ -326,7 +326,10 @@ in
         icon-bg-color = "transparent"
         label-show = false
         tooltip-format = "Clipboard"
-        left-click = "cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"
+        # Lista (no cuadrícula): sin `listview { columns: 1 }` rofi hereda del
+        # tema cyberpunk (type-3) el grid y trunca cada entrada -> no se lee ni
+        # la primera palabra. Se fuerza 1 columna + más padding/ancho.
+        left-click = "cliphist list | rofi -dmenu -p clipboard -theme-str 'window {width: 700px;} listview {columns: 1; spacing: 6px;} element {padding: 8px;}' | cliphist decode | wl-copy"
         button-bg-color = "bg-elevated"
 
         # --- Wallpaper (mpvpaper, no awww engine) ---
