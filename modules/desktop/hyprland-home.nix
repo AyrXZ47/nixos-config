@@ -554,14 +554,14 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
         #!/usr/bin/env bash
         dir="${wallpapersDir}"
         set="$HOME/.config/hypr/scripts/wallpaper-set.sh"
-        action=$(printf "Next wallpaper\nSet wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1;} element-icon {size: 0px;}')
+        action=$(printf "Next wallpaper\nSet wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1; spacing: 6px;} element {padding: 8px;} element-icon {size: 0px;}')
         [ -z "$action" ] && exit 0
         case "$action" in
           "Next wallpaper")
             "$set"
             ;;
           "Set wallpaper")
-            pick=$(find "$dir" -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) | sort | while read f; do basename "$f"; done | rofi -dmenu -p "wallpaper" -theme-str 'window {width: 600px;} listview {lines: 15; columns: 1;} element-icon {size: 0px;}')
+            pick=$(find "$dir" -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) | sort | while read f; do basename "$f"; done | rofi -dmenu -p "wallpaper" -theme-str 'window {width: 700px;} listview {columns: 1; lines: 15; spacing: 6px;} element {padding: 8px;} element-icon {size: 0px;}')
             [ -z "$pick" ] && exit 0
             "$set" "$dir/$pick"
             ;;
