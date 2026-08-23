@@ -69,4 +69,8 @@
     "d /nix/var/nix/profiles/per-user/yovick 1777 root root"
   ];
 
+  # Email de git por host (NO en modules/apps/git.nix) para no filtrar identidad
+  # a quien clone el repo. Default null -> home-manager omite la clave.
+  home-manager.users.yovick.modules.apps.git.email = "66042604+AyrXZ47@users.noreply.github.com";
+
 }

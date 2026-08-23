@@ -391,8 +391,10 @@ nix flake check                               # evaluate all hosts
   never overrides an existing password.
 - **For people cloning this repo:** the config builds the `yovick` user with that
   initial password — rename the user (`flake.nix`, `modules/core/user.nix`), hostname,
-  and `git remote` to your own, then change the password after first login. Only the
-  repo owner (or granted collaborators) can push; anyone can clone and fork.
+  and `git remote` to your own, then change the password after first login. The git
+  email is **not** hardcoded: it's set per-host via `home-manager.users.<you>.modules.apps.git.email`
+  (default `null`, so it's omitted unless you set it). Only the repo owner (or granted
+  collaborators) can push; anyone can clone and fork.
 
 ## License
 
