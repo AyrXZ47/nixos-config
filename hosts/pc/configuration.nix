@@ -153,9 +153,12 @@
   # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
   programs.kdeconnect.enable = true;
 
-  # Email de git: se define aquí (por host), NO en modules/apps/git.nix, para que
-  # quien clone este repo no herede la identidad del autor. Quien haga fork debería
-  # cambiar esto (la opción es null por default y home-manager omite la clave).
-  home-manager.users.yovick.modules.apps.git.email = "66042604+AyrXZ47@users.noreply.github.com";
+  # Identidad de git: se define aquí (por host), NO en modules/apps/git.nix, para
+  # que quien clone este repo no herede la identidad del autor (default null ->
+  # home-manager omite la clave). Quien haga fork debería cambiar estos valores.
+  home-manager.users.yovick.modules.apps.git = {
+    name = "Yovick R. Z.";
+    email = "66042604+AyrXZ47@users.noreply.github.com";
+  };
 
 }

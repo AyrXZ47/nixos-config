@@ -7,6 +7,11 @@
       default = null;
       description = "Email para los commits de git. Por host, no hardcodeado acá.";
     };
+    name = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Nombre para los commits de git. Por host, no hardcodeado acá.";
+    };
   };
 
   config = {
@@ -14,7 +19,7 @@
       enable = true;
 
       settings = {
-        user.name = "Yovick R. Z.";
+        user.name = lib.mkIf (config.modules.apps.git.name != null) config.modules.apps.git.name;
         user.email = lib.mkIf (config.modules.apps.git.email != null) config.modules.apps.git.email;
         init.defaultBranch = "main";
         pull.rebase = true;
