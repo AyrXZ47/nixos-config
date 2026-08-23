@@ -6,7 +6,7 @@
 
     settings = {
       user.name = "Yovick R. Z.";
-      user.email = "yovickrz@gmail.com";
+      user.email = "66042604+AyrXZ47@users.noreply.github.com";
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;

@@ -70,6 +70,7 @@ in
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/opencode"
     if [ ! -f "$HOME/.config/opencode/opencode.json" ] || \
        ${pkgs.gnugrep}/bin/grep -q 'headroom' "$HOME/.config/opencode/opencode.json" || \
+       ${pkgs.gnugrep}/bin/grep -q '"disable"' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q '"default_agent"' "$HOME/.config/opencode/opencode.json"; then
       # Mismo motivo que arriba: cp dejaria 400 y romperia el re-seed.
