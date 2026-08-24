@@ -136,11 +136,15 @@
     # escritorio: allí lo fuerza un timer systemd diario; aquí no hay systemd,
     # así que se poda en CADA switch y después se lanza el GC. `|| true` por si
     # algún perfil todavía no existe (primer switch).
+    # OJO proot: nix escanea /proc/*/fd buscando GC roots y proot responde
+    # read_symlink: EPERM — es no-fatal, lo imprime como "error:" y ensucia el
+    # final de cada rebuild. El filtro quita SOLO esa línea (Operation not
+    # permitted), no otros errores reales de nix.
     home.activation.trimGenerations = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/nix-on-droid --delete-generations +3 || true
-      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/per-user/nix-on-droid/profile --delete-generations +3 || true
-      ${pkgs.nix}/bin/nix-env -p "$HOME/.local/state/nix/profiles/home-manager" --delete-generations +3 || true
-      ${pkgs.nix}/bin/nix-collect-garbage || true
+      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/nix-on-droid --delete-generations +3 2>&1 | ${pkgs.gnugrep}/bin/grep -v "Operation not permitted" || true
+      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/per-user/nix-on-droid/profile --delete-generations +3 2>&1 | ${pkgs.gnugrep}/bin/grep -v "Operation not permitted" || true
+      ${pkgs.nix}/bin/nix-env -p "$HOME/.local/state/nix/profiles/home-manager" --delete-generations +3 2>&1 | ${pkgs.gnugrep}/bin/grep -v "Operation not permitted" || true
+      ${pkgs.nix}/bin/nix-collect-garbage 2>&1 | ${pkgs.gnugrep}/bin/grep -v "Operation not permitted" || true
       # (El store ya queda liberado: al podar generaciones, sus closures pasan a
       # ser basura y el GC de la línea anterior la recoge.)
     '';
@@ -151,7 +155,7 @@
   # Identidad git sincronizada con modules/apps/git.nix del repo.
   environment.etc."gitconfig".text = ''
     [user]
-      name = Yovick R. Z.
+      name = Yovick RZ
       email = 66042604+AyrXZ47@users.noreply.github.com
     [init]
       defaultBranch = main
