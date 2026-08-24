@@ -60,7 +60,7 @@
   # Identidad de git por host (NO en modules/apps/git.nix) para no filtrar
   # identidad a quien clone el repo. Default null -> home-manager omite la clave.
   home-manager.users.yovick.modules.apps.git = {
-    name = "Yovick R. Z.";
+    name = "Yovick RZ";
     email = "66042604+AyrXZ47@users.noreply.github.com";
   };
 

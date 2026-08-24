@@ -5,7 +5,7 @@
 
   users.users.yovick = {
     isNormalUser = true;
-    description = "Yovick R. Z.";
+    description = "Yovick RZ";
     extraGroups = [ "wheel" "networkmanager" "video" "audio" "i2c" "input" "wireshark" ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;

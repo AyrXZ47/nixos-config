@@ -157,7 +157,7 @@
   # que quien clone este repo no herede la identidad del autor (default null ->
   # home-manager omite la clave). Quien haga fork debería cambiar estos valores.
   home-manager.users.yovick.modules.apps.git = {
-    name = "Yovick R. Z.";
+    name = "Yovick RZ";
     email = "66042604+AyrXZ47@users.noreply.github.com";
   };
 
