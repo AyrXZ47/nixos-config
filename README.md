@@ -318,11 +318,13 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 1. Install NixOS with the official installer (any partitioning).
 2. `git clone https://github.com/<you>/nixos-config && cd nixos-config`
 3. `./bootstrap.sh <host>` — regenerates `hardware-configuration.nix` from the real
-   disks, runs `sudo nixos-rebuild switch --flake .#<host>`, and commits the file.
+   disks, runs `sudo nixos-rebuild --impure switch --flake .#<host>`, and commits the file.
 
 That's it — no manual hardware step, no `gh`/GitHub auth required (the repo is public
-and only the local file is touched). First login uses `initialPassword` (see
-`modules/core/user.nix`); change it with `passwd`.
+and only the local file is touched). On first boot the `yovick` user is created with a
+password read from `/etc/nixos-secrets/yovick-password` (created by `./bootstrap.sh`,
+never committed; skip it and the user is created without one). Change it after boot
+with `passwd`.
 
 ## Adding a New Host
 
@@ -378,23 +380,27 @@ versión: reemplazar el tarball y ajustar la versión en `configuration.nix`.
 ## Day-to-Day
 
 ```bash
-sudo nixos-rebuild switch --flake .#<host>   # apply system + home changes
-home-manager switch --flake .#<host>          # Home Manager only
+sudo nixos-rebuild --impure switch --flake .#<host>   # apply system + home changes
+home-manager switch --flake .#<host>                  # Home Manager only
 nix flake update                              # bump inputs
 nix flake check                               # evaluate all hosts
 ```
 
 ## Security Notes
 
-- **Nothing secret is committed**: no SSH keys, no tokens, no credentials.
-- `initialPassword` only applies when the `yovick` user is created (first boot) and
+- **Nothing secret is committed**: no SSH keys, no tokens, no credentials, and no
+  default password. The initial password lives in `/etc/nixos-secrets/yovick-password`
+  (root-only, created by `bootstrap.sh`, never in git).
+- The initial password only applies when the `yovick` user is created (first boot) and
   never overrides an existing password.
-- **For people cloning this repo:** the config builds the `yovick` user with that
-  initial password — rename the user (`flake.nix`, `modules/core/user.nix`), hostname,
-  and `git remote` to your own, then change the password after first login. The git
-  email is **not** hardcoded: it's set per-host via `home-manager.users.<you>.modules.apps.git.email`
-  (default `null`, so it's omitted unless you set it). Only the repo owner (or granted
-  collaborators) can push; anyone can clone and fork.
+- **For people cloning this repo:** the config builds the `yovick` user (with a password
+  only if you set the secret file); rename the user (`flake.nix`, `modules/core/user.nix`),
+  hostname, and `git remote` to your own, then change the password after first login. The
+  git identity is **not** hardcoded: it's set per-host via
+  `home-manager.users.<you>.modules.apps.git.name` / `.email` (default `null`, so both are
+  omitted unless you set them). Only the repo owner (or granted collaborators) can push;
+  anyone can clone and fork.
+- Rebuilds use `--impure` because `user.nix` reads the local password file at eval time.
 
 ## License
 
