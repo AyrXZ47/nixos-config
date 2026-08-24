@@ -152,7 +152,7 @@
   environment.etc."gitconfig".text = ''
     [user]
       name = Yovick R. Z.
-      email = yovickrz@gmail.com
+      email = 66042604+AyrXZ47@users.noreply.github.com
     [init]
       defaultBranch = main
     [safe]
