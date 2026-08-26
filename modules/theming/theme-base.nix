@@ -23,5 +23,9 @@
     nerd-fonts.symbols-only
     inter
     noto-fonts
+    lato
+    quicksand
+    rubik
+    (pkgs.callPackage ../../fonts/custom { })
   ];
 }
