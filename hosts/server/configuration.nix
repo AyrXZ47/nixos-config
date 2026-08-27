@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ../../modules/core/user.nix
     ../../modules/core/networking.nix
+    ../../modules/core/tailscale.nix
     ../../modules/hardware/amd-common.nix
     ../../modules/hardware/fingerprint.nix
     ../../modules/apps/common-packages.nix

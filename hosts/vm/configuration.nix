@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ../../modules/core/user.nix
     ../../modules/core/networking.nix
+    ../../modules/core/tailscale.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
