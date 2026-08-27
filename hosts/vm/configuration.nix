@@ -14,6 +14,7 @@
     ../../modules/apps/gaming.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/packettracer.nix
+    ../../modules/apps/syncthing.nix
   ];
 
   # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.
@@ -55,15 +56,6 @@
   security.rtkit.enable = true;
 
   services.openssh.enable = true;
-
-  # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384.
-  # Corre como yovick (el user por defecto "syncthing" no tiene permisos
-  # sobre /home/yovick) con config en /home/yovick/.config/syncthing.
-  services.syncthing = {
-    enable = true;
-    user = "yovick";
-    dataDir = "/home/yovick";
-  };
 
   systemd.tmpfiles.rules = [
     "d /nix/var/nix/profiles/per-user/yovick 1777 root root"

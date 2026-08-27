@@ -17,6 +17,7 @@
     ../../modules/apps/gaming.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/packettracer.nix
+    ../../modules/apps/syncthing.nix
   ];
 
   # Packet Tracer (universidad): con el .deb en el store el rebuild construye;
@@ -140,15 +141,6 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   services.openssh.enable = true;
-
-  # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384.
-  # Corre como yovick (el user por defecto "syncthing" no tiene permisos
-  # sobre /home/yovick) con config en /home/yovick/.config/syncthing.
-  services.syncthing = {
-    enable = true;
-    user = "yovick";
-    dataDir = "/home/yovick";
-  };
 
   # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
   programs.kdeconnect.enable = true;

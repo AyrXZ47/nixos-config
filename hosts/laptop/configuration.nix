@@ -16,6 +16,7 @@
     ../../modules/apps/gaming.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/packettracer.nix
+    ../../modules/apps/syncthing.nix
   ];
 
   # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.
@@ -47,15 +48,6 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   services.openssh.enable = true;
-
-  # syncthing: arranca el daemon + Web UI en 127.0.0.1:8384.
-  # Corre como yovick (el user por defecto "syncthing" no tiene permisos
-  # sobre /home/yovick) con config en /home/yovick/.config/syncthing.
-  services.syncthing = {
-    enable = true;
-    user = "yovick";
-    dataDir = "/home/yovick";
-  };
 
   # Identidad de git por host (NO en modules/apps/git.nix) para no filtrar
   # identidad a quien clone el repo. Default null -> home-manager omite la clave.
