@@ -86,6 +86,37 @@
         });
       };
 
+      # nixpkgs congela openrocket en 23.09 (formato de fichero viejo, 3D roto
+      # en NixOS: JOGL sin libGL en LD_LIBRARY_PATH) mientras upstream distribuye
+      # 24.12 como jar autocontenido (trae sus JOGL natives, ya no compila:
+      # 24.12 migro de Ant a Gradle). Overlay con el jar oficial de la release
+      # + wrapper con las libs GL/X11 que JOGL no encuentra en NixOS.
+      # ponytail: techo conocido — si nixpkgs sube a 24.12+, borrar el override.
+      openrocketOverlay = final: prev: {
+        openrocket = final.stdenvNoCC.mkDerivation {
+          pname = "openrocket";
+          version = "24.12";
+          src = final.fetchurl {
+            url = "https://github.com/openrocket/openrocket/releases/download/release-24.12/OpenRocket-24.12.jar";
+            hash = "sha256-SVm3L1L19geUHpciq7t7fwxKOOu7+EIEoynbnzHE+Jc=";
+          };
+          dontUnpack = true;
+          nativeBuildInputs = [ final.makeWrapper ];
+          installPhase = ''
+            install -Dm644 $src $out/share/openrocket/OpenRocket.jar
+            makeWrapper ${final.jdk17}/bin/java $out/bin/openrocket \
+              --add-flags "-jar $out/share/openrocket/OpenRocket.jar" \
+              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.xorg.libX11}/lib:${final.xorg.libXext}/lib:${final.xorg.libXi}/lib
+          '';
+          meta = {
+            description = "Model-rocketry aerodynamics and trajectory simulation software (jar oficial 24.12)";
+            homepage = "https://openrocket.info";
+            license = final.lib.licenses.gpl3Plus;
+            platforms = final.lib.platforms.linux;
+          };
+        };
+      };
+
       # Librería SPICE de la comunidad (~50k modelos) como paquete de datos:
       # copia el repo a $out/share/kicad-spice-library y empaqueta los buscador
       # `spice-find` (buscar) y `spice-get` (buscar + extraer al proyecto). El
@@ -351,7 +382,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay spiceLibraryOverlay bibataCursorOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
@@ -366,6 +397,8 @@ PYEOF
       };
     in
     {
+      packages.x86_64-linux.openrocket = (import nixpkgs { inherit system; overlays = [ openrocketOverlay ]; }).openrocket;
+
       nixosConfigurations = {
         pc = mkHost "pc" [ ./hosts/pc/configuration.nix ];
         laptop = mkHost "laptop" [ ./hosts/laptop/configuration.nix ];
