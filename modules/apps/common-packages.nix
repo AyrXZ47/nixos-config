@@ -126,7 +126,9 @@ in
     brave-origin
 
     # Office & Productivity
-    libreoffice-fresh
+    # libreoffice-stable: upstream cambio su esquema de versiones y nixpkgs
+    # deprecó el attr viejo (libreoffice-fresh emite evaluation warning).
+    libreoffice-stable
     keepassxc
 
     # LaTeX completo (scheme-full: todas las colecciones, fuentes y utilidades)
