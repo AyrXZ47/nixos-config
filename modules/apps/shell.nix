@@ -95,11 +95,26 @@
           return 1
         fi
         local repo="''${1:-$PWD}"
-        # nvim al final: la última ventana en mapear toma el foco (como dev).
-        wezterm start --cwd "$repo" --class hyprdev-opencode -- zsh -ic "opencode" &
-        wezterm start --cwd "$repo" --class hyprdev-pipes -- zsh -ic "pipes-rs" &
-        wezterm start --cwd "$repo" --class hyprdev-free &
-        wezterm start --cwd "$repo" --class hyprdev-nvim -- zsh -ic "nvim; exec zsh" &
+        # setsid: los clientes de wezterm start son niñeros de su ventana
+        # (bloquean hasta que cierra) y mueren con el panel que los lanzó,
+        # arrastrando a la ventana con ellos (probado con kill -HUP). En sesión
+        # propia sobreviven al kill del panel de origen. nvim al final: la
+        # última ventana en mapear toma el foco (como dev). >/dev/null: el tty
+        # del panel muere antes que los clientes y un write a pty cerrado los
+        # mataría por SIGPIPE.
+        setsid wezterm start --cwd "$repo" --class hyprdev-opencode -- zsh -ic "opencode" >/dev/null 2>&1 &
+        setsid wezterm start --cwd "$repo" --class hyprdev-pipes -- zsh -ic "pipes-rs" >/dev/null 2>&1 &
+        setsid wezterm start --cwd "$repo" --class hyprdev-free >/dev/null 2>&1 &
+        setsid wezterm start --cwd "$repo" --class hyprdev-nvim -- zsh -ic "nvim; exec zsh" >/dev/null 2>&1 &
+        # La ventana que invocó queda estorbando detrás del mosaico: se elimina
+        # su panel (solo si hyprdev corrió dentro de wezterm). El sleep da
+        # tiempo a que los 4 spawns lleguen al GUI: si el panel de origen es la
+        # última ventana, matarlo antes dejaría el GUI en 0 ventanas y se
+        # cerraría entero con el mosaico dentro.
+        sleep 1
+        if [[ -n "$WEZTERM_PANE" ]]; then
+          wezterm cli kill-pane --pane-id "$WEZTERM_PANE"
+        fi
       }
 
       SecDesk() {
