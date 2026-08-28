@@ -82,6 +82,26 @@
         echo "nvim\r" | wezterm cli send-text --pane-id "$WEZTERM_PANE"
       }
 
+      # `dev` pero con VENTANAS wezterm flotantes de Hyprland en vez de paneles:
+      # misma proporción (nvim 15% izq + opencode 85% der arriba; pipes 15% +
+      # git libre 85% abajo) y aprovechando los gaps. La geometría la fijan las
+      # reglas estáticas hyprdev-* de hyprland-home.nix (aplican al mapear la
+      # ventana, sin carreras) y el directorio se hereda con --cwd: las 4
+      # ventanas nacen en el repo, sin navegar a mano.
+      # Uso: hyprdev [directorio-repo] (sin argumento: el directorio actual).
+      hyprdev() {
+        if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
+          echo "Error: Se requiere sesión Hyprland activa."
+          return 1
+        fi
+        local repo="''${1:-$PWD}"
+        # nvim al final: la última ventana en mapear toma el foco (como dev).
+        wezterm start --cwd "$repo" --class hyprdev-opencode -- zsh -ic "opencode" &
+        wezterm start --cwd "$repo" --class hyprdev-pipes -- zsh -ic "pipes-rs" &
+        wezterm start --cwd "$repo" --class hyprdev-free &
+        wezterm start --cwd "$repo" --class hyprdev-nvim -- zsh -ic "nvim; exec zsh" &
+      }
+
       SecDesk() {
         adb disconnect
         adb -d shell am kill-all
