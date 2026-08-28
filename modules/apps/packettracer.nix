@@ -8,7 +8,14 @@
 # El paquete es el de nixpkgs (cisco-packet-tracer_9): appimageTools maneja el
 # AppImage estándar del 9.0.0 sin hacks; aquí solo se reemplaza la fuente (el
 # .deb) por la URL pública (requireFile upstream obliga a bajarlo a mano).
-# El hash es EL MISMO que pineó nixpkgs (sha256-3ZrA1... = flat del .deb).
+#
+# nixpkgs (26.11) reestructuró el paquete: el requireFile ya no es el src
+# directo del AppImage, vive en una derivación intermedia y el extraInstall-
+# Commands del wrapType2 arrastra una extracción del original — el viejo truco
+# de overrideAttrs sobre el src dejaba el requireFile en el grafo y el rebuild
+# moría. Fix: override del requireFile que el paquete recibe por callPackage —
+# para el .deb del 9.0.0 devuelve el fetchurl de Archive.org con EL MISMO hash
+# que pinea nixpkgs; cualquier otro requireFile queda intacto.
 # NO usar el 9.0.1 de NetAcad: su "AppImage" viene en formato roto (ELF stub +
 # squashfs sin footer AI + ABI viejas libjpeg.so.8/libtiff.so.5 que nixpkgs ya
 # no provee); documentado en el historial del repo.
@@ -19,13 +26,15 @@
 { config, pkgs, lib, ... }:
 
 let
-  pt = pkgs.cisco-packet-tracer_9.overrideAttrs (old: {
-    src = old.src.overrideAttrs (o: {
-      src = pkgs.fetchurl {
-        url = "https://archive.org/download/packettracer900/CiscoPacketTracer_900_Ubuntu_64bit.deb";
-        hash = "sha256-3ZrA1Mf8N9y2j2J/18fm+m1CAMFEklJuVhi5vRcu2SA=";
-      };
-    });
+  pt = (pkgs.cisco-packet-tracer_9.override {
+    requireFile = args:
+      if args.name == "CiscoPacketTracer_900_Ubuntu_64bit.deb"
+      then pkgs.fetchurl {
+        inherit (args) name hash;
+        url = "https://archive.org/download/packettracer900/${args.name}";
+      }
+      else pkgs.requireFile args;
+  }).overrideAttrs (old: {
     # Entrada de escritorio del "PTSA" (agente de sesion de Cisco): inutil para
     # el humano, solo ensucia el lanzador con un icono duplicado.
     postInstall = (old.postInstall or "") + ''
