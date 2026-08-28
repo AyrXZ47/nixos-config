@@ -327,7 +327,6 @@
   home.sessionPath = [
     "$HOME/.local/bin"
     "$HOME/.cargo/bin"
-    "$HOME/.opencode/bin"
     "$HOME/.local/share/pnpm/bin"
   ];
 
