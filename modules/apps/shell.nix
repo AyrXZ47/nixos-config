@@ -335,6 +335,22 @@
     enableZshIntegration = true;
   };
 
+  # pipes-rs (los tubos del layout dev/hyprdev): modo rgb con hue cíclico
+  # (lo más cerca de neón que el programa ofrece; glow real no existe
+  # nativamente), tubos gruesos curvos y reset tardío — el default
+  # (reset_threshold 0.5) reiniciaba a media pantalla.
+  xdg.configFile."pipes-rs/config.toml".text = ''
+    bold = true
+    color_mode = "rgb"
+    rainbow = 4
+    delay_ms = 20
+    inherit_style = false
+    kinds = ["curved", "heavy"]
+    num_pipes = 3
+    reset_threshold = 0.95
+    turn_chance = 0.12
+  '';
+
   home.shellAliases = {
     ls = "ls --color=auto";
     ll = "ls -lah";
