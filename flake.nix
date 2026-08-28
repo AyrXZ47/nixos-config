@@ -107,7 +107,7 @@
             hash = "sha256-SVm3L1L19geUHpciq7t7fwxKOOu7+EIEoynbnzHE+Jc=";
           };
           dontUnpack = true;
-          nativeBuildInputs = [ final.makeWrapper ];
+          nativeBuildInputs = [ final.makeWrapper final.unzip ];
           installPhase = ''
             install -Dm644 $src $out/share/openrocket/OpenRocket.jar
             install -Dm644 ${openrocketIcon} $out/share/icons/hicolor/256x256/apps/openrocket.png
@@ -122,14 +122,23 @@
             Terminal=false
             Categories=Science;Education;Engineering;
             EOF
-            # JOGL dlopen-ea con el linker dinamico: necesita libGL.so.1 (glvnd,
-            # NO vive en /run/opengl-driver — ahi solo estan los vendors mesa) y
-            # las X11 que piden jogl_desktop/nativewindow/newt (ldd sobre las
-            # natives del jar: X11, Xext, Xi, Xxf86vm, Xrender, Xrandr, Xcursor).
-            # ponytail: siJOGL agrega natives con deps nuevas, sumarla aqui.
+            # NixOS no es FHS y el loader de JogAmp (JOGL) lo exige dos veces:
+            # 1) su exec-test escribe un script con shebang FIJO "#!/usr/bin/true"
+            #    y lo ejecuta para validar el temp dir; sin /usr/bin/true falla en
+            #    todo candidato y el TempJarCache no puede extraer las natives.
+            # 2) tras ese fallo, el loader CAE a buscar lib<native>.so en
+            #    java.library.path (heredado de LD_LIBRARY_PATH). Fix: extraer
+            #    las natives del jar al store y sumarlas al LD_LIBRARY_PATH —
+            #    el 3D funciona sin tocar nada del sistema.
+            # ponytail: si gluegen upstream arregla su exec-test para no-FHS,
+            # borrar la extraccion (el LD_LIBRARY_PATH de GL/X11 se queda).
+            unzip -q -o $src 'natives/linux-amd64/*' -d $out/share/openrocket
+            # Deps del linker dinamico que JOGL dlopen-ea: libGL.so.1 (glvnd, NO
+            # vive en /run/opengl-driver — ahi solo estan los vendors mesa) y las
+            # X11 que piden jogl_desktop/nativewindow/newt (ldd sobre las natives).
             makeWrapper ${final.jdk17}/bin/java $out/bin/openrocket \
               --add-flags "-jar $out/share/openrocket/OpenRocket.jar" \
-              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.libGL}/lib:${final.libx11}/lib:${final.libxext}/lib:${final.libxi}/lib:${final.libxxf86vm}/lib:${final.libxrender}/lib:${final.libxrandr}/lib:${final.libxcursor}/lib
+              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.libGL}/lib:${final.libx11}/lib:${final.libxext}/lib:${final.libxi}/lib:${final.libxxf86vm}/lib:${final.libxrender}/lib:${final.libxrandr}/lib:${final.libxcursor}/lib:$out/share/openrocket/natives/linux-amd64
           '';
           meta = {
             description = "Model-rocketry aerodynamics and trajectory simulation software (jar oficial 24.12)";
