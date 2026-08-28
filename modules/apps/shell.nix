@@ -82,19 +82,15 @@
         echo "nvim\r" | wezterm cli send-text --pane-id "$WEZTERM_PANE"
       }
 
-      # `dev` pero con 4 ventanas wezterm independientes en un PLANO
-      # CARTESIANO fijo: Q2 nvim (arriba-izq), Q1 opencode (arriba-der), Q3
-      # pipes-rs (abajo-izq), Q4 libre (abajo-der). Las reglas dinámicas
-      # (float+size+move por clase-runid) hacen que cada ventana NASCA en su
-      # cuadrante final: cero resizes en el lanzamiento — el segfault de
-      # opencode en resize (bug upstream Bun/OpenTUI #38199) no tiene
-      # oportunidad de dispararse — y el layout sale idéntico siempre, sin
-      # importar qué otras ventanas haya en el workspace (la cascada dwindle
-      # no puede prometer eso: la ventana que invocó y las demás interfieren
-      # en el árbol de splits). Flotantes: si mueves una, las demás no se
-      # re-acomodan (costo asumido a cambio del determinismo). La opacidad la
-      # cubre la regla wezterm-glass (alternador hyprdev-*). El directorio se
-      # hereda con --cwd.
+      # `dev` pero con VENTANAS wezterm independientes que Hyprland TILEA
+      # (dwindle): el mismo feel de WM que cualquier ventana — se reparten la
+      # pantalla sin solaparse y se redimensionan con SUPER+clic — sin el modo
+      # DE de un mosaico flotante. El orden del spawn ES el layout: cada
+      # ventana parte a la anterior (cascada dwindle) y cada spawn ESPERA a
+      # que la anterior mapée (poll por clase-runid, sin sleeps a ciegas: esa
+      # era la fragilidad del hyprdev viejo). opencode→free→pipes→nvim:
+      # opencode hereda la mitad grande y nvim cierra la cascada con el foco
+      # (como dev, donde acabas en nvim). El directorio se hereda con --cwd.
       # Uso: hyprdev [directorio-repo] (sin argumento: el directorio actual).
       hyprdev() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
@@ -105,16 +101,6 @@
         local runid="$(date +%s)$RANDOM"
         local pidfile="/tmp/hyprdev-pids-$runid"
         (
-          # Reglas de nacimiento: gaps de 20px al borde (seams de 40 entre
-          # cuadrantes). 49 = exclusive zone de wayle (barra derecha, medida
-          # en DP-1; ponytail: si cambia el ancho de la barra, revisar).
-          rule() { # $1 app  $2 par Lua de move
-            hyprctl eval "hl.window_rule({ name = \"hyprdev-$1-$runid\", match = { class = \"^hyprdev-$1-$runid\$\" }, float = true, size = { \"((monitor_w - 49)/2 - 40)\", \"(monitor_h/2 - 40)\" }, move = { $2 } })" >/dev/null
-          }
-          rule nvim     '20, 20'
-          rule opencode '"((monitor_w - 49)/2 + 20)", 20'
-          rule pipes    '20, "(monitor_h/2 + 20)"'
-          rule free     '"((monitor_w - 49)/2 + 20)", "(monitor_h/2 + 20)"'
           # spawn: el wrapper apunta su pid ANTES del exec (sin carreras de
           # captura) y setsid le da sesión propia: los clientes de wezterm
           # start son niñeros de su ventana (bloquean hasta que cierra y
@@ -133,12 +119,10 @@
               (( n++ ))
             done
           }
-          # nvim al final (con waitmap entre spawns): la última ventana en
-          # mapear toma el foco, como en dev donde acabas en nvim.
           spawn opencode 'zsh -ic "opencode"'; waitmap opencode
-          spawn pipes    'zsh -ic "pipes-rs"'; waitmap pipes
-          spawn free     'zsh';                waitmap free
-          spawn nvim     'zsh -ic "nvim; exec zsh"'; waitmap nvim
+          spawn free 'zsh';                   waitmap free
+          spawn pipes 'zsh -ic "pipes-rs"';   waitmap pipes
+          spawn nvim 'zsh -ic "nvim; exec zsh"'; waitmap nvim
           # Cierre en cadena gobernado por la terminal free: su cierre (exit/
           # ctrl-d) mata a los clientes supervivientes (matar el cliente mata
           # su ventana). Los crashes o salidas de opencode/pipes/nvim SOLO
