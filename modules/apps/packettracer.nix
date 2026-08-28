@@ -36,8 +36,10 @@ let
       else pkgs.requireFile args;
   }).overrideAttrs (old: {
     # Entrada de escritorio del "PTSA" (agente de sesion de Cisco): inutil para
-    # el humano, solo ensucia el lanzador con un icono duplicado.
-    postInstall = (old.postInstall or "") + ''
+    # el humano, solo ensucia el lanzador con un icono duplicado. Se borra en
+    # extraInstallCommands (no postInstall): upstream instala los .desktop ahi,
+    # y postInstall corria ANTES dejando el PTSA de vuelta en cada rebuild.
+    extraInstallCommands = (old.extraInstallCommands or "") + ''
       rm -f $out/share/applications/cisco-packet-tracer-ptsa-9.desktop
     '';
   });
