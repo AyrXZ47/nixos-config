@@ -122,9 +122,14 @@
             Terminal=false
             Categories=Science;Education;Engineering;
             EOF
+            # JOGL dlopen-ea con el linker dinamico: necesita libGL.so.1 (glvnd,
+            # NO vive en /run/opengl-driver — ahi solo estan los vendors mesa) y
+            # las X11 que piden jogl_desktop/nativewindow/newt (ldd sobre las
+            # natives del jar: X11, Xext, Xi, Xxf86vm, Xrender, Xrandr, Xcursor).
+            # ponytail: siJOGL agrega natives con deps nuevas, sumarla aqui.
             makeWrapper ${final.jdk17}/bin/java $out/bin/openrocket \
               --add-flags "-jar $out/share/openrocket/OpenRocket.jar" \
-              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.libx11}/lib:${final.libxext}/lib:${final.libxi}/lib
+              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.libGL}/lib:${final.libx11}/lib:${final.libxext}/lib:${final.libxi}/lib:${final.libxxf86vm}/lib:${final.libxrender}/lib:${final.libxrandr}/lib:${final.libxcursor}/lib
           '';
           meta = {
             description = "Model-rocketry aerodynamics and trajectory simulation software (jar oficial 24.12)";
