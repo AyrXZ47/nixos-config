@@ -123,19 +123,27 @@
           spawn free 'zsh';                   waitmap free
           spawn pipes 'zsh -ic "pipes-rs"';   waitmap pipes
           spawn nvim 'zsh -ic "nvim; exec zsh"'; waitmap nvim
-          # Cierre en cadena: si muere una ventana del mosaico, el watcher
-          # mata a los clientes supervivientes (matar el cliente mata su
-          # ventana) y se autolimpia. Se arma solo cuando las 4 están mapeadas
-          # y expira solo si nunca se armaron (spawn fallido).
+          # Cierre en cadena gobernado por la terminal free: su cierre (exit/
+          # ctrl-d) mata a los clientes supervivientes (matar el cliente mata
+          # su ventana). Los crashes o salidas de opencode/pipes/nvim SOLO
+          # cierran su propia ventana: opencode tiene un bug upstream de
+          # segfault en resize (Bun/OpenTUI, issue #38199) y no debe tumbar la
+          # sesión. Se arma cuando las 4 están mapeadas y expira si nunca se
+          # armaron (spawn fallido).
           setsid zsh -f -c '
             run=$1 pids=$2 armed=0 n=0
             while :; do
               sleep 1
-              alive=$(hyprctl -j clients 2>/dev/null | grep -c "\"class\": \"hyprdev-[a-z]*-$run\"")
+              out=$(hyprctl -j clients 2>/dev/null)
+              alive=$(grep -c "\"class\": \"hyprdev-[a-z]*-$run\"" <<<"$out")
+              free=$(grep -c "\"class\": \"hyprdev-free-$run\"" <<<"$out")
               if (( alive == 4 )); then armed=1
               elif (( armed == 1 )); then
-                (( alive > 0 )) && kill $(cat "$pids") 2>/dev/null
-                exit 0
+                if (( free == 0 && alive > 0 )); then
+                  kill $(cat "$pids") 2>/dev/null
+                  exit 0
+                fi
+                (( alive == 0 )) && exit 0
               elif (( ++n > 30 )); then
                 exit 0
               fi
