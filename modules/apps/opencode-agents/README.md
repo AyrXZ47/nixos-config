@@ -35,7 +35,7 @@ host (los archivos del store sustituyen a los locales).
 
 | Rol | Modelo | Color |
 |-----|--------|-------|
-| planner | opencode-go/deepseek-v4-flash | warning (ámbar) |
-| executor | opencode-go/deepseek-v4-flash | success (verde) |
-| integrator | opencode-go/deepseek-v4-flash | accent (púrpura) |
-| auditor | opencode-go/deepseek-v4-flash | error (rojo) |
+| planner | opencode-go/glm-5.3-flash | warning (ámbar) |
+| executor | opencode-go/glm-5.3-flash | success (verde) |
+| integrator | opencode-go/glm-5.3-flash | accent (púrpura) |
+| auditor | opencode-go/glm-5.3-flash | error (rojo) |

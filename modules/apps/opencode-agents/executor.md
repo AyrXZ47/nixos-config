@@ -1,7 +1,7 @@
 ---
 description: EXECUTOR de ola. Aplica UN brief en su worktree/rama. Commitea y pushea SOLO a su rama, nunca a main ni a ramas ajenas.
 mode: primary
-model: opencode-go/deepseek-v4-flash
+model: opencode-go/glm-5.3-flash
 color: success
 ---
 

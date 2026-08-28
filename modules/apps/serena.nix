@@ -11,7 +11,7 @@ let
     {
       "$schema": "https://opencode.ai/config.json",
       "default_agent": "planner",
-      "model": "opencode-go/deepseek-v4-flash",
+      "model": "opencode-go/glm-5.3-flash",
       "mcp": {
         "serena": {
           "type": "local",
