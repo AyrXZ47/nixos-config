@@ -190,8 +190,12 @@ in
       -- wezterm: vidrio esmerilado — blur del compositor detrás de la transparencia
       -- propia (window_background_opacity). opacity "1 override": fuerza 1.0 absoluto
       -- (el multiplicador daría 1.0*0.75) para que el texto se mantenga opaco y no se
-      -- apile la opacidad de Hyprland con la de wezterm.
-      hl.window_rule({ name = "wezterm-glass", match = { class = "org.wezfurlong.wezterm" }, opacity = "1 override" })
+      -- apile la opacidad de Hyprland con la de wezterm. El alternador cubre también
+      -- las ventanas de `hyprdev` (clase hyprdev-<app>-<runid>, modules/apps/shell.nix):
+      -- con --class propio perderían este match y la opacidad inactiva (0.6) se
+      -- apilaría sobre su fondo 0.4. El match de clase es de cadena COMPLETA
+      -- (regex_match), por eso el .* antes del $.
+      hl.window_rule({ name = "wezterm-glass", match = { class = "^(org.wezfurlong.wezterm|hyprdev-.*)$" }, opacity = "1 override" })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
@@ -211,31 +215,6 @@ in
       --    pierden su fullscreen. Solucion: flotante a tamaño de monitor
       --    (size/move con expresiones monitor_w/h), sin foco, sin animacion.
       hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, float = true, size = { "(monitor_w)", "(monitor_h)" }, move = { 0, 0 }, no_initial_focus = true, no_blur = true, no_anim = true })
-      -- HyprDev: geometría FIJA de las 4 ventanas wezterm del comando `hyprdev`
-      -- (modules/apps/shell.nix). Misma proporción que los paneles de `dev`
-      -- (15/85 horizontal, 80/20 vertical) pero como ventanas flotantes que
-      -- aprovechan los gaps. Las reglas estáticas aplican float/size/move
-      -- ATÓMICAMENTE al mapear la ventana: sin la carrera exec+layoutmsg+resize
-      -- que mataba al hyprdev viejo (tamaños peleados contra dwindle). El cwd
-      -- lo hereda cada ventana via `wezterm start --cwd` (nunca /home/yovick).
-      -- 10 = hueco entre ventanas y contra el borde; -59 = exclusive zone de
-      -- wayle (49, hyprctl monitors -> reserved) + hueco. opacity "1 override":
-      -- con --class propio pierden el match de wezterm-glass y la opacidad
-      -- inactiva (0.6) se apilaría sobre el fondo 0.4 de wezterm.
-      -- ponytail: 49 medido en DP-1 1920x1080 con wayle; si cambia el ancho de
-      -- la barra o el host usa otra resolución/escala, revisar.
-      local function hyprdev(cls, x, y, w, h)
-        hl.window_rule({
-          name = "hyprdev-" .. cls,
-          match = { class = "^hyprdev-" .. cls .. "$" },
-          float = true, size = { w, h }, move = { x, y },
-          opacity = "1 override",
-        })
-      end
-      hyprdev("nvim", 10, 10, "(monitor_w*15/100 - 20)", "(monitor_h*80/100 - 20)")
-      hyprdev("opencode", "(monitor_w*15/100)", 10, "(monitor_w*85/100 - 59)", "(monitor_h*80/100 - 20)")
-      hyprdev("pipes", 10, "(monitor_h*80/100)", "(monitor_w*15/100 - 20)", "(monitor_h*20/100 - 10)")
-      hyprdev("free", "(monitor_w*15/100)", "(monitor_h*80/100)", "(monitor_w*85/100 - 59)", "(monitor_h*20/100 - 10)")
 
       -----------------------
       ---- LAYER RULES ------

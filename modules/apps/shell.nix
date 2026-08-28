@@ -82,12 +82,15 @@
         echo "nvim\r" | wezterm cli send-text --pane-id "$WEZTERM_PANE"
       }
 
-      # `dev` pero con VENTANAS wezterm flotantes de Hyprland en vez de paneles:
-      # misma proporción (nvim 15% izq + opencode 85% der arriba; pipes 15% +
-      # git libre 85% abajo) y aprovechando los gaps. La geometría la fijan las
-      # reglas estáticas hyprdev-* de hyprland-home.nix (aplican al mapear la
-      # ventana, sin carreras) y el directorio se hereda con --cwd: las 4
-      # ventanas nacen en el repo, sin navegar a mano.
+      # `dev` pero con VENTANAS wezterm independientes que Hyprland TILEA
+      # (dwindle): el mismo feel de WM que cualquier ventana — se reparten la
+      # pantalla sin solaparse y se redimensionan con SUPER+clic — sin el modo
+      # DE de un mosaico flotante. El orden del spawn ES el layout: cada
+      # ventana parte a la anterior (cascada dwindle) y cada spawn ESPERA a
+      # que la anterior mapée (poll por clase-runid, sin sleeps a ciegas: esa
+      # era la fragilidad del hyprdev viejo). opencode→free→pipes→nvim:
+      # opencode hereda la mitad grande y nvim cierra la cascada con el foco
+      # (como dev, donde acabas en nvim). El directorio se hereda con --cwd.
       # Uso: hyprdev [directorio-repo] (sin argumento: el directorio actual).
       hyprdev() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
@@ -95,23 +98,54 @@
           return 1
         fi
         local repo="''${1:-$PWD}"
-        # setsid: los clientes de wezterm start son niñeros de su ventana
-        # (bloquean hasta que cierra) y mueren con el panel que los lanzó,
-        # arrastrando a la ventana con ellos (probado con kill -HUP). En sesión
-        # propia sobreviven al kill del panel de origen. nvim al final: la
-        # última ventana en mapear toma el foco (como dev). >/dev/null: el tty
-        # del panel muere antes que los clientes y un write a pty cerrado los
-        # mataría por SIGPIPE.
-        setsid wezterm start --cwd "$repo" --class hyprdev-opencode -- zsh -ic "opencode" >/dev/null 2>&1 &
-        setsid wezterm start --cwd "$repo" --class hyprdev-pipes -- zsh -ic "pipes-rs" >/dev/null 2>&1 &
-        setsid wezterm start --cwd "$repo" --class hyprdev-free >/dev/null 2>&1 &
-        setsid wezterm start --cwd "$repo" --class hyprdev-nvim -- zsh -ic "nvim; exec zsh" >/dev/null 2>&1 &
-        # La ventana que invocó queda estorbando detrás del mosaico: se elimina
-        # su panel (solo si hyprdev corrió dentro de wezterm). El sleep da
-        # tiempo a que los 4 spawns lleguen al GUI: si el panel de origen es la
-        # última ventana, matarlo antes dejaría el GUI en 0 ventanas y se
-        # cerraría entero con el mosaico dentro.
-        sleep 1
+        local runid="$(date +%s)$RANDOM"
+        local pidfile="/tmp/hyprdev-pids-$runid"
+        (
+          # spawn: el wrapper apunta su pid ANTES del exec (sin carreras de
+          # captura) y setsid le da sesión propia: los clientes de wezterm
+          # start son niñeros de su ventana (bloquean hasta que cierra y
+          # mueren con el panel que los lanzó, arrastrándola); en sesión
+          # propia sobreviven al kill del panel de origen. >/dev/null: el tty
+          # del panel muere antes que los clientes y un write a pty cerrado
+          # mataría por SIGPIPE.
+          spawn() {
+            setsid zsh -c "echo \$\$ >> '$pidfile'; exec wezterm start --cwd '$repo' --class hyprdev-$1-$runid -- $2" >/dev/null 2>&1 &
+          }
+          waitmap() {
+            local n=0
+            while (( n < 100 )); do
+              hyprctl -j clients 2>/dev/null | grep -q "\"class\": \"hyprdev-$1-$runid\"" && return 0
+              sleep 0.1
+              (( n++ ))
+            done
+          }
+          spawn opencode 'zsh -ic "opencode"'; waitmap opencode
+          spawn free 'zsh';                   waitmap free
+          spawn pipes 'zsh -ic "pipes-rs"';   waitmap pipes
+          spawn nvim 'zsh -ic "nvim; exec zsh"'; waitmap nvim
+          # Cierre en cadena: si muere una ventana del mosaico, el watcher
+          # mata a los clientes supervivientes (matar el cliente mata su
+          # ventana) y se autolimpia. Se arma solo cuando las 4 están mapeadas
+          # y expira solo si nunca se armaron (spawn fallido).
+          setsid zsh -f -c '
+            run=$1 pids=$2 armed=0 n=0
+            while :; do
+              sleep 1
+              alive=$(hyprctl -j clients 2>/dev/null | grep -c "\"class\": \"hyprdev-[a-z]*-$run\"")
+              if (( alive == 4 )); then armed=1
+              elif (( armed == 1 )); then
+                (( alive > 0 )) && kill $(cat "$pids") 2>/dev/null
+                exit 0
+              elif (( ++n > 30 )); then
+                exit 0
+              fi
+            done
+          ' hyprdev-watch "$runid" "$pidfile" >/dev/null 2>&1 &
+        )
+        # El panel que invocó el comando quedaría estorbando detrás de las
+        # ventanas: se elimina (solo si hyprdev corrió dentro de wezterm).
+        # Los waitmap ya garantizan que las 4 ventanas están en el GUI, así
+        # que matarlo no puede dejar el GUI en 0 ventanas.
         if [[ -n "$WEZTERM_PANE" ]]; then
           wezterm cli kill-pane --pane-id "$WEZTERM_PANE"
         fi
