@@ -92,7 +92,13 @@
       # 24.12 migro de Ant a Gradle). Overlay con el jar oficial de la release
       # + wrapper con las libs GL/X11 que JOGL no encuentra en NixOS.
       # ponytail: techo conocido — si nixpkgs sube a 24.12+, borrar el override.
-      openrocketOverlay = final: prev: {
+      openrocketOverlay = final: prev: let
+        # Icono oficial del repo upstream (el jar no trae icono de app).
+        openrocketIcon = final.fetchurl {
+          url = "https://raw.githubusercontent.com/openrocket/openrocket/release-24.12/snap/gui/openrocket.png";
+          hash = "sha256-lI07IUsnvWep7mdfz2392aRPW1qpe5kT7SmR48x4fE8=";
+        };
+      in {
         openrocket = final.stdenvNoCC.mkDerivation {
           pname = "openrocket";
           version = "24.12";
@@ -104,9 +110,21 @@
           nativeBuildInputs = [ final.makeWrapper ];
           installPhase = ''
             install -Dm644 $src $out/share/openrocket/OpenRocket.jar
+            install -Dm644 ${openrocketIcon} $out/share/icons/hicolor/256x256/apps/openrocket.png
+            mkdir -p $out/share/applications
+            cat > $out/share/applications/openrocket.desktop <<EOF
+            [Desktop Entry]
+            Type=Application
+            Name=OpenRocket
+            Comment=Model-rocketry aerodynamics and trajectory simulation
+            Exec=openrocket
+            Icon=openrocket
+            Terminal=false
+            Categories=Science;Education;Engineering;
+            EOF
             makeWrapper ${final.jdk17}/bin/java $out/bin/openrocket \
               --add-flags "-jar $out/share/openrocket/OpenRocket.jar" \
-              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.xorg.libX11}/lib:${final.xorg.libXext}/lib:${final.xorg.libXi}/lib
+              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.libx11}/lib:${final.libxext}/lib:${final.libxi}/lib
           '';
           meta = {
             description = "Model-rocketry aerodynamics and trajectory simulation software (jar oficial 24.12)";
