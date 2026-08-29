@@ -26,10 +26,12 @@
     lato
     quicksand
     rubik
-    # Fuentes core de Microsoft (Arial real, Times New Roman, Verdana...):
-    # la "arial.ttf" de la coleccion Mikoshi era en realidad una Italic que
-    # secuestraba el nombre Arial en fontconfig y todo salia inclinado.
-    corefonts
+    # Liberation Sans: sustituta libre y metricamente identica de Arial (y
+    # Serif/Times, Mono/Courier) — adios Microsoft. Fontconfig aliasa
+    # Arial->Liberation Sans; la arial.ttf italic de la coleccion Mikoshi que
+    # secuestraba el nombre en fontconfig (todo salia inclinado) fue borrada.
+    # Fijada explicita: antes llegaba transitiva via LibreOffice.
+    liberation_ttf_v2
     (pkgs.callPackage ../../fonts/custom { })
   ];
 }
