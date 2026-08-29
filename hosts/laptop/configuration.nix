@@ -17,11 +17,16 @@
     ../../modules/apps/gaming.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/packettracer.nix
+    ../../modules/apps/vivado.nix
     ../../modules/apps/syncthing.nix
   ];
 
   # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.
   modules.apps.packetTracer.enable = true;
+
+  # Vivado (FPGA/Arquitectura de computadoras): wrapper FHS en el PATH; la
+  # instalación vive en ~/opt/Xilinx (hecha a mano con xsetup, cuenta AMD).
+  modules.apps.vivado.enable = true;
 
   modules.desktop.hyprland.enable = true;
 
