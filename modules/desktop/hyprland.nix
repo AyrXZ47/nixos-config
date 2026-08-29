@@ -187,6 +187,10 @@ in
         icon-size = 1.0
         label-size = 0.85
         icon-gap = 0.2
+        # Ventanas de hyprdev (clase hyprdev-<app>-<runid>): sin mapeo, wayle
+        # intuye la app por substrings del class (nvim→Neovim, opencode→VSCode,
+        # resto→fallbacks aleatorios). Todas son wezterm: un solo glob basta.
+        app-icon-map = { "*hyprdev*" = "si-wezterm-symbolic" }
 
         [modules.notifications]
         icon-show = true
