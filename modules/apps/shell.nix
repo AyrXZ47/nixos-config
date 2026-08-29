@@ -121,7 +121,11 @@
           }
           spawn opencode 'zsh -ic "opencode"'; waitmap opencode
           spawn free 'zsh';                   waitmap free
-          spawn pipes 'zsh -ic "pipes-rs"';   waitmap pipes
+          # Estilo elegido a mano: mezcla heavy/dots/sus, paleta darker sin
+          # ciclo de hue, más lento (-d 50) y SIN auto-reset (-r 0; el 0 lo
+          # desactiva: en paneles chicos el umbral reiniciaba cada ~30s).
+          # `r` o redimensionar reinician a mano; q/Ctrl+C salen.
+          spawn pipes 'zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0"'; waitmap pipes
           spawn nvim 'zsh -ic "nvim; exec zsh"'; waitmap nvim
           # Cierre en cadena gobernado por la terminal free: su cierre (exit/
           # ctrl-d) mata a los clientes supervivientes (matar el cliente mata
@@ -335,8 +339,9 @@
     enableZshIntegration = true;
   };
 
-  # pipes-rs (los tubos del layout dev/hyprdev): modo rgb con hue cíclico
-  # (lo más cerca de neón que el programa ofrece; glow real no existe
+  # pipes-rs (los tubos del layout dev; hyprdev lanza con flags propios que
+  # sobreescriben estilo y reset, ver hyprdev arriba): modo rgb con hue
+  # cíclico (lo más cerca de neón que el programa ofrece; glow real no existe
   # nativamente), tubos gruesos curvos y reset tardío — el default
   # (reset_threshold 0.5) reiniciaba a media pantalla.
   xdg.configFile."pipes-rs/config.toml".text = ''
