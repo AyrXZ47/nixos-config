@@ -36,15 +36,6 @@
 
   services.openssh.enable = true;
 
-  # Exit node: la laptop puede enrutar TODO su trafico de internet a traves de
-  # este host (VPN casera; salta los bloqueos de la red de la uni). Pasos unicos:
-  # aqui `sudo tailscale up --advertise-exit-node` + aprobar la ruta como exit
-  # node en la consola admin de Tailscale; en la laptop
-  # `sudo tailscale up --exit-node=nixos-server --exit-node-allow-lan-access`.
-  # Apagarlo desde la laptop: `sudo tailscale set --exit-node=""`.
-  services.tailscale.useRoutingFeatures = "server";
-  services.tailscale.extraSetFlags = [ "--advertise-exit-node" ];
-
   # Identidad de git por host (NO en modules/apps/git.nix) para no filtrar
   # identidad a quien clone el repo. Default null -> home-manager omite la clave.
   home-manager.users.yovick.modules.apps.git = {
