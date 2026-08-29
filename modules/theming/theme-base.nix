@@ -26,6 +26,10 @@
     lato
     quicksand
     rubik
+    # Fuentes core de Microsoft (Arial real, Times New Roman, Verdana...):
+    # la "arial.ttf" de la coleccion Mikoshi era en realidad una Italic que
+    # secuestraba el nombre Arial en fontconfig y todo salia inclinado.
+    corefonts
     (pkgs.callPackage ../../fonts/custom { })
   ];
 }
