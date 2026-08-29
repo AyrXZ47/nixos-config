@@ -1,3 +1,8 @@
+# Backend QtAgg: Tk (el default) dibuja cursores X11 core que ignoran el
+# tema del cursor (Bibata). Qt en Wayland sí lo respeta. Requiere PySide6
+# en TODOS los pythonEnv que lean este rc (python.nix y omnetpp.nix).
+backend: QtAgg
+
 # from seaborn dark
 legend.frameon: False
 legend.numpoints: 1

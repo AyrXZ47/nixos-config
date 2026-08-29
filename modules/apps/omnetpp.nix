@@ -27,6 +27,9 @@ let
     ps.pandas
     ps.scipy
     ps.ipython
+    # PySide6: el matplotlibrc compartido fija backend QtAgg (para que las
+    # gráficas respeten el cursor Bibata); sin binding Qt matplotlib ni importa.
+    ps.pyside6
   ]);
 
   # Qt6 (Qtenv) + Python embebido (pyeval) + dependencias del IDE (Eclipse:

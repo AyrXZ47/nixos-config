@@ -50,6 +50,10 @@ let
     # librería. Ambos scripts vienen en pkgs.kicad-spice-library (ver flake.nix).
     ps.termcolor
     ps.tkinter
+    # PySide6: binding Qt para el backend QtAgg del matplotlibrc compartido.
+    # TkAgg usa cursores X11 core que no respetan el tema del cursor (Bibata);
+    # Qt corre nativo en Wayland y sí lo respeta.
+    ps.pyside6
   ]);
 in
 {
