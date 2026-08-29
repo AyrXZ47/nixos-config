@@ -114,10 +114,21 @@ with open(f, "w") as out:
     out.write("\n".join(lines) + "\n")
     '';
   };
-  logisimDark = pkgs.writeShellScriptBin "logisim-evolution" ''
-    ${pkgs.python3}/bin/python3 ${logisimDarkSeed}
-    exec ${pkgs.logisim-evolution}/bin/logisim-evolution "$@"
-  '';
+  logisimDark = pkgs.symlinkJoin {
+    name = "logisim-evolution";
+    paths = [ pkgs.logisim-evolution ];
+    postBuild = ''
+      # El .desktop e iconos del paquete original siguen en share/ (rofi los
+      # encuentra porque Exec=logisim-evolution resuelve a este wrapper).
+      mv $out/bin/logisim-evolution $out/bin/.logisim-evolution-real
+      cat > $out/bin/logisim-evolution <<EOF
+#!/bin/sh
+${pkgs.python3}/bin/python3 ${logisimDarkSeed}
+exec $out/bin/.logisim-evolution-real "\$@"
+EOF
+      chmod +x $out/bin/logisim-evolution
+    '';
+  };
 in
 {
   imports = [ ./actual.nix ./omnetpp.nix ./python.nix ];
