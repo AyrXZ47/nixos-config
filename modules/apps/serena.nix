@@ -53,9 +53,13 @@ in
   # escribe su config global (registra proyectos) y opencode puede reescribir
   # su json, asi que un symlink al store los romperia. En su lugar se siembra
   # una copia escribible solo cuando falta, o se repara la clave `projects`.
-  # opencode.json se re-siembra si aun conserva headroom (semilla vieja) o la
+  # opencode.json se re-siembra si aun conserva headroom (semilla vieja), la
   # invocacion vieja de uvx sin el python de nix (uv descargaba su propio
-  # python 3.14 que no corre en NixOS y el MCP moria con "Connection closed").
+  # python 3.14 que no corre en NixOS y el MCP moria con "Connection closed"),
+  # o si el modelo default diverge del del repo (el default lo dicta ESTE
+  # archivo para todas las maquinas; si el json local lo cambia a mano o una
+  # version vieja lo dejo sin clave, el switch lo repara — para cambiar el
+  # default global, cambia el seed aqui, no el archivo local).
   home.activation.ensureSerena = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.serena"
     if [ ! -f "$HOME/.serena/serena_config.yml" ]; then
@@ -72,7 +76,8 @@ in
        ${pkgs.gnugrep}/bin/grep -q 'headroom' "$HOME/.config/opencode/opencode.json" || \
        ${pkgs.gnugrep}/bin/grep -q '"disable"' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json" || \
-       ! ${pkgs.gnugrep}/bin/grep -q '"default_agent"' "$HOME/.config/opencode/opencode.json"; then
+       ! ${pkgs.gnugrep}/bin/grep -q '"default_agent"' "$HOME/.config/opencode/opencode.json" || \
+       ! ${pkgs.gnugrep}/bin/grep -q '"model": "opencode-go/glm-5.3-flash"' "$HOME/.config/opencode/opencode.json"; then
       # Mismo motivo que arriba: cp dejaria 400 y romperia el re-seed.
       ${pkgs.coreutils}/bin/install -m 600 ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
     fi
