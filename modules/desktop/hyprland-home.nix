@@ -191,7 +191,7 @@ in
       -- propia (window_background_opacity). opacity "1 override": fuerza 1.0 absoluto
       -- (el multiplicador daría 1.0*0.75) para que el texto se mantenga opaco y no se
       -- apile la opacidad de Hyprland con la de wezterm. El alternador cubre también
-      -- las ventanas de `hyprdev` (clase hyprdev-<app>-<runid>, modules/apps/shell.nix):
+      -- las ventanas de `hyprdev` (clase compartida hyprdev-<runid>, modules/apps/shell.nix):
       -- con --class propio perderían este match y la opacidad inactiva (0.6) se
       -- apilaría sobre su fondo 0.4. El match de clase es de cadena COMPLETA
       -- (regex_match), por eso el .* antes del $.
