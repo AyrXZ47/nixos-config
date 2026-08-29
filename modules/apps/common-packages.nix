@@ -50,6 +50,74 @@ let
       ln -s ${whisperVulkan}/bin/whisper-cli $out/bin/whisper-cli
     '';
   });
+  # Logisim-Evolution: dark mode forzado de forma declarativa. La Look and Feel
+  # vive en java.util.prefs (Preferences.userNodeForPackage(Main) = nodo
+  # /com/cburch/logisim -> ~/.java/.userPrefs/com/cburch/logisim/prefs.xml), no
+  # en el config de NixOS, y los temas oscuros de 4.1.0 vienen a medio arreglar.
+  # El wrapper siembra la preferencia (FlatLaf Dark + canvas/grid oscuros) en
+  # cada lanzamiento y luego exec al binario real: así el dark mode es inmune a
+  # que el humano o un flush del propio Logisim lo revierta.
+  # ponytail: si una versión futura arregla los temas oscuros y el usuario se
+  # cansa del dark forzado, borrar este wrapper y usar Preferences -> Window ->
+  # Look and Feel del GUI.
+  logisimDarkSeed = pkgs.writeTextFile {
+    name = "logisim-dark-seed.py";
+    text = ''
+import os
+import xml.etree.ElementTree as ET
+
+d = os.path.expanduser("~/.java/.userPrefs/com/cburch/logisim")
+os.makedirs(d, exist_ok=True)
+f = os.path.join(d, "prefs.xml")
+# OJO: java.util.prefs (JDK moderno) guarda <map MAP_XML_VERSION="1.0"> con
+# doctype EXACTO y colores como int ARGB con signo (0xFF000000|rgb en signed
+# 32-bit), NO hex — Preferences.getInt hace Integer.parseInt (base 10) y un
+# "0x..." lanzaria y caeria al default. ElementTree no puede emitir el doctype,
+# asi que se serializa a mano en el formato byte-a-byte que escribe el JVM.
+prefs = {
+    "LookAndFeel": "com.formdev.flatlaf.FlatDarkLaf",
+    "canvasBgColor": "-13948117",  # 0xFF2B2B2B
+    "gridBgColor": "-13948117",
+    "gridDotColor": "-9539986",  # 0xFF6E6E6E
+    "gridZoomedDotColor": "-9539986",
+    "componentColor": "-1",  # 0xFFFFFFFF
+    "componentSecondaryColor": "-1",
+    "componentGhostColor": "-7697782",  # 0xFF8A8A8A
+    "componentIconColor": "-1",
+    # verde claro: el SimFalseColor default (0x006400) es invisible sobre canvas oscuro
+    "SimFalseColor": "-16733696",  # 0xFF00AA00
+}
+
+
+def esc(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;")
+
+
+entries = {}
+if os.path.exists(f):
+    try:
+        for e in ET.parse(f).getroot():
+            if e.tag == "entry":
+                entries[e.get("key")] = e.get("value")
+    except Exception:
+        entries = {}
+entries.update(prefs)
+lines = [
+    '<?xml version="1.0" encoding="UTF-8" standalone="no"?>',
+    '<!DOCTYPE map SYSTEM "http://java.sun.com/dtd/preferences.dtd">',
+    '<map MAP_XML_VERSION="1.0">',
+]
+for k in sorted(entries):
+    lines.append('  <entry key="{}" value="{}"/>'.format(esc(k), esc(entries[k])))
+lines.append("</map>")
+with open(f, "w") as out:
+    out.write("\n".join(lines) + "\n")
+    '';
+  };
+  logisimDark = pkgs.writeShellScriptBin "logisim-evolution" ''
+    ${pkgs.python3}/bin/python3 ${logisimDarkSeed}
+    exec ${pkgs.logisim-evolution}/bin/logisim-evolution "$@"
+  '';
 in
 {
   imports = [ ./actual.nix ./omnetpp.nix ./python.nix ];
@@ -157,7 +225,7 @@ in
     openmotor
     qucs-s
     simulide
-    logisim-evolution
+    logisimDark
 
     # HDL / FPGA simulation (universidad, arquitectura de computadoras):
     # alternativa 100% Linux al Active-HDL (Windows-only) del profe. Cubre
