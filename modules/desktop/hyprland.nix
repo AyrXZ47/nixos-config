@@ -43,7 +43,19 @@ except Exception:
       sleep 0.1
       new=$(comm -13 <(printf '%s\n' "$before") <(snap) | head -1)
       if [ -n "''${new:-}" ]; then
-        hyprctl dispatch movetoworkspacesilent "$(nextws),address:$new" >/dev/null
+        # Hyprland 0.57 elimino el dispatcher legacy movetoworkspacesilent y
+        # hyprctl dispatch evalua la string como Lua (los nombres viejos son
+        # nil y una direccion pelada es syntax error). El camino oficial es
+        # hl.dispatch(<closure>) con la clousure de hl.dsp.window.move;
+        # follow=false = silent (no cambia la vista). Se reintentan 3 veces:
+        # la ventana recien mapeada a veces rechaza el primer move.
+        ws=$(nextws)
+        for _ in 1 2 3; do
+          if hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = \"$ws\", follow = false, window = \"address:$new\" }))" >/dev/null 2>&1; then
+            break
+          fi
+          sleep 0.2
+        done
         exit 0
       fi
     done
