@@ -215,12 +215,13 @@ in
       --    pierden su fullscreen. Solucion: flotante a tamaño de monitor
       --    (size/move con expresiones monitor_w/h), sin foco, sin animacion.
       hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, float = true, size = { "(monitor_w)", "(monitor_h)" }, move = { 0, 0 }, no_initial_focus = true, no_blur = true, no_anim = true })
-      -- GUIs de simulacion/HDL (gtkwave, plots de matplotlib, logisim) y las
-      -- que lanza el agente opencode: van al workspace "guis" sin robar el
-      -- foco ni tocar el layout del workspace activo (opencode se rompe si su
-      -- terminal se redimensiona; bug documentado). El "silent" del windowrule
-      -- viejo dejo de existir en el motor de reglas nuevo: el equivalente es
-      -- no_initial_focus. guirun cubre cualquier otra app ad-hoc (vivado...).
+      -- Red de seguridad para GUIs de simulacion/HDL lanzadas FUERA de los
+      -- scripts (rofi, python3 a pelo): van al workspace "guis" sin robar el
+      -- foco. El camino dinamico (workspace nuevo consecutivo) lo hacen los
+      -- scripts vhdlrun y guirun, que mueven la ventana a max+1 despues de
+      -- abrir (un windowrule no puede computar "workspace siguiente libre").
+      -- El "silent" del windowrule viejo dejo de existir en el motor nuevo:
+      -- el equivalente es no_initial_focus.
       hl.window_rule({ name = "sims-guis", match = { class = "^(gtkwave|python3|python|Tk|matplotlib|logisim-evolution)$" }, workspace = "guis", no_initial_focus = true })
 
       -----------------------

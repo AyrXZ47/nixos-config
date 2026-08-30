@@ -3,18 +3,19 @@
 let
   cfg = config.modules.desktop.hyprland;
 
-  # Lanzador de GUIs "no intrusivas": abre la app en el workspace "guis" sin
-  # robar el foco ni tocar el workspace actual. Motivacion: las GUIs que lanza
-  # el agente opencode (gtkwave, matplotlib, logisim) nacian EN el workspace
-  # activo y su terminal se redimensionaba -> opencode se rompe (bug
-  # documentado). Mecanica: snapshot de clientes hyprctl, lanza la app
-  # desasociada (setsid), espera la primera ventana nueva (hasta 10s: una JVM
-  # tarda) y la mueve con movetoworkspacesilent (no cambia la vista).
+  # Lanzador de GUIs "no intrusivas": abre la app en un workspace NUEVO
+  # consecutivo (max en uso + 1) sin robar el foco ni tocar el workspace
+  # actual. Motivacion: las GUIs que lanza el agente opencode (gtkwave,
+  # matplotlib, logisim) nacian EN el workspace activo y su terminal se
+  # redimensionaba -> opencode se rompe (bug documentado). El workspace es
+  # dinamico (si hay 3 en uso abre el 4; si hay 10, el 11). Mecanica:
+  # snapshot de clientes hyprctl, lanza la app desasociada (setsid), espera
+  # la primera ventana nueva (hasta 10s: una JVM tarda) y la mueve con
+  # movetoworkspacesilent (no cambia la vista).
   # ponytail: si la app abre MULTIPLES ventanas solo se mueve la primera; si
   # eso pasa con gtkwave/matplotlib, cambiar a windowrule por class.
   guirun = pkgs.writeShellScriptBin "guirun" ''
     set -euo pipefail
-    WS="guis"
     # fuera de Hyprland (tty/ssh): lanzar normal
     command -v hyprctl >/dev/null 2>&1 || exec "$@"
 
@@ -26,6 +27,15 @@ try:
 except Exception:
     pass' | sort
     }
+    nextws() {
+      hyprctl -j workspaces 2>/dev/null | ${pkgs.python3}/bin/python3 -c '
+import json, sys
+try:
+    ids = [w["id"] for w in json.load(sys.stdin) if w["id"] > 0]
+    print((max(ids) + 1) if ids else 1)
+except Exception:
+    print(1)'
+    }
 
     before=$(snap)
     setsid "$@" >/dev/null 2>&1 &
@@ -33,7 +43,7 @@ except Exception:
       sleep 0.1
       new=$(comm -13 <(printf '%s\n' "$before") <(snap) | head -1)
       if [ -n "''${new:-}" ]; then
-        hyprctl dispatch movetoworkspacesilent "$WS,address:$new" >/dev/null
+        hyprctl dispatch movetoworkspacesilent "$(nextws),address:$new" >/dev/null
         exit 0
       fi
     done
