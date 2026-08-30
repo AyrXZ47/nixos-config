@@ -20,19 +20,22 @@
 
 let
   vivadoDeps = with pkgs; [
-    ncurses5
+    ncurses5  # libncurses.so.5 / libtinfo.so.5 (abi5 compat)
+    ncurses   # libtinfo.so.6: la pide libxv_tcltasks
+    pixman    # libpixman-1.so.0 (la piden los libxv_*)
+    libpng    # libpng16.so.16
     zlib
     libuuid
     bash
     coreutils
     stdenv.cc.cc
-    xorg.libXext
-    xorg.libX11
-    xorg.libXrender
-    xorg.libXtst
-    xorg.libXi
-    xorg.libXft
-    xorg.libxcb
+    libxext
+    libx11
+    libxrender
+    libxtst
+    libxi
+    libxft
+    libxcb
     freetype
     fontconfig
     glib
@@ -50,7 +53,9 @@ let
     targetPkgs = pkgs: vivadoDeps;
     # 2026.1 unifico el layout: el binario vive en <install>/2026.1/Vivado/bin,
     # no en <install>/Vivado/2026.1/bin como en 2019.2 (la guia del blog es vieja).
-    runScript = "$HOME/opt/Xilinx/2026.1/Vivado/bin/vivado";
+    # Los dlopen de Vivado no buscan en /usr/lib64 (donde nixpkgs deja las libs
+    # del abi5 compat), se les pasa explicito por LD_LIBRARY_PATH.
+    runScript = "env LD_LIBRARY_PATH=/usr/lib64:/usr/lib\${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} $HOME/opt/Xilinx/2026.1/Vivado/bin/vivado";
   };
 in
 {
