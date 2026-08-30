@@ -141,16 +141,10 @@ in
     package = pkgs.firefox;
   };
 
-  # Links clickeados desde la terminal (opencode, gh, etc.): firefox como
-  # handler de http/https y BROWSER para las TUIs que lo consultan.
-  xdg.mimeApps = {
-    enable = true;
-    defaultApplications = {
-      "x-scheme-handler/http" = "firefox.desktop";
-      "x-scheme-handler/https" = "firefox.desktop";
-      "text/html" = "firefox.desktop";
-    };
-  };
+  # Links clickeados desde la terminal: las TUIs (opencode, gh...) consultan
+  # BROWSER. El handler de http/https ya lo siembra materializeMimeapps en
+  # hyprland-home.nix (mimeApps de HM va excluido: symlink read-only, Dolphin
+  # necesita el archivo escribible).
   home.sessionVariables.BROWSER = "firefox";
 
   home.file.".firefox-chrome/userChrome.css" = { text = userChrome; };
