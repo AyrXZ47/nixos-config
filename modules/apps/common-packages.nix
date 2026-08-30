@@ -241,7 +241,7 @@ for raw in open(sys.argv[1]):
             scopes.pop()
     elif line.startswith("$var"):
         p = line.split()
-        kind = "signalname" if int(p[3]) == 1 else "pattern"
+        kind = "signalname" if int(p[2]) == 1 else "pattern"
         lines.append(" {} {}.{}".format(kind, ".".join(scopes), p[4]))
 print("\n".join(lines))
 PYEOF
