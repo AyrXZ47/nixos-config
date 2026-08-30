@@ -26,5 +26,14 @@ in
     security.pam.services.sudo.fprintAuth = true;
     security.pam.services.login.fprintAuth = false;
     security.pam.services.sddm.fprintAuth = false;
+
+    # El Synaptics no despierta limpio del autosuspend USB: queda suspendido
+    # (`power/control = auto`) y cada ~15 min xhci lo resetea por timeout
+    # ("usb 3-3: reset full-speed USB device"), dejando la huella colgada
+    # esperando dedo. Sin autosuspend el sensor queda estable; el costo en
+    # bateria de UN device full-speed es despreciable.
+    services.udev.extraRules = ''
+      SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{idProduct}=="00bd", ATTR{power/control}="on"
+    '';
   };
 }
