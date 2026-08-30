@@ -197,10 +197,10 @@ EOF
   vhdlrun = pkgs.writeShellScriptBin "vhdlrun" ''
     set -euo pipefail
     if [ $# -lt 1 ]; then
-      echo "uso: vhdlrun <tb_sin_.vhd> [fuente.vhd ...]" >&2
+      echo "uso: vhdlrun <tb_sin_.vhd> [fuente.vhd ...]   (DENTRO de la carpeta de la practica)" >&2
       exit 1
     fi
-    tb="$1"
+    tb="''${1%.vhd}"; tb="''${tb%.vcd}"   # tolera que le pases la extension
     shift
     if [ $# -gt 0 ]; then
       src=("$@")
@@ -211,12 +211,42 @@ EOF
         case "$f" in tb_*) continue ;; esac
         src+=("$f")
       done
-      [ ''${#src[@]} -gt 0 ] || { echo "sin fuentes *.vhd en el directorio" >&2; exit 1; }
+      [ ''${#src[@]} -gt 0 ] || {
+        echo "sin fuentes *.vhd en '$(pwd)'." >&2
+        echo "vhdlrun se corre DENTRO de la carpeta de la practica, ej:" >&2
+        echo "  cd arquitecturaDeComputadoras/practica02-demux1x4 && vhdlrun tb_demux1x4" >&2
+        exit 1
+      }
     fi
     ghdl -a "''${src[@]}" "$tb.vhd"
     ghdl -e "$tb"
     ghdl -r "$tb" --vcd="$tb.vcd"
-    gtkwave "$tb.vcd" >/dev/null 2>&1 &
+    # Save file (.gtkw) con TODAS las senales del VCD para que GTKWave abra
+    # mostrando las ondas de una vez (sin esto abre vacio y hay que arrastrar
+    # senales a mano). Formato: seccion " Signals" con "signalname <ruta>"
+    # (escalares) o "pattern <ruta>" (vectores); rutas = scopes del VCD unidos
+    # por puntos, tomados del propio archivo para no duplicar la jerarquia.
+    ${pkgs.python3}/bin/python3 "$tb.vcd" > "$tb.gtkw" <<'PYEOF'
+import sys
+lines = ["[timestart] 0", "[size] 1600 900", "[pos_x] 0", "[pos_y] 0",
+         "[sst_width] 260", "[signals_width] 240", "[sst_expanded] 1",
+         "[sst_vpaned_height] 420", " Signals"]
+scopes = []
+for raw in open(sys.argv[1]):
+    line = raw.strip()
+    if line.startswith("$scope"):
+        scopes.append(line.split()[2])
+    elif line.startswith("$upscope"):
+        if scopes:
+            scopes.pop()
+    elif line.startswith("$var"):
+        p = line.split()
+        kind = "signalname" if int(p[3]) == 1 else "pattern"
+        lines.append(" {} {}.{}".format(kind, ".".join(scopes), p[4]))
+print("\n".join(lines))
+PYEOF
+    # a workspace NUEVO consecutivo sin robar foco (ver guirun)
+    guirun gtkwave "$tb.vcd" "$tb.gtkw" >/dev/null 2>&1 &
   '';
 in
 {
