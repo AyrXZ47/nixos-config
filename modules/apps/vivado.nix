@@ -48,7 +48,9 @@ let
   vivadoEnv = pkgs.buildFHSEnv {
     name = "vivado";
     targetPkgs = pkgs: vivadoDeps;
-    runScript = "$HOME/opt/Xilinx/Vivado/2026.1/bin/vivado";
+    # 2026.1 unifico el layout: el binario vive en <install>/2026.1/Vivado/bin,
+    # no en <install>/Vivado/2026.1/bin como en 2019.2 (la guia del blog es vieja).
+    runScript = "$HOME/opt/Xilinx/2026.1/Vivado/bin/vivado";
   };
 in
 {
