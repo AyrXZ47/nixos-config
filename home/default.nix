@@ -12,6 +12,7 @@
     ../modules/apps/serena.nix
     ../modules/apps/opencode.nix
     ../modules/apps/dolphin.nix
+    ../modules/apps/gtkwave.nix
   ];
 
   home.username = "yovick";
