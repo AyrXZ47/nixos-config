@@ -2,6 +2,43 @@
 
 let
   cfg = config.modules.desktop.hyprland;
+
+  # Lanzador de GUIs "no intrusivas": abre la app en el workspace "guis" sin
+  # robar el foco ni tocar el workspace actual. Motivacion: las GUIs que lanza
+  # el agente opencode (gtkwave, matplotlib, logisim) nacian EN el workspace
+  # activo y su terminal se redimensionaba -> opencode se rompe (bug
+  # documentado). Mecanica: snapshot de clientes hyprctl, lanza la app
+  # desasociada (setsid), espera la primera ventana nueva (hasta 10s: una JVM
+  # tarda) y la mueve con movetoworkspacesilent (no cambia la vista).
+  # ponytail: si la app abre MULTIPLES ventanas solo se mueve la primera; si
+  # eso pasa con gtkwave/matplotlib, cambiar a windowrule por class.
+  guirun = pkgs.writeShellScriptBin "guirun" ''
+    set -euo pipefail
+    WS="guis"
+    # fuera de Hyprland (tty/ssh): lanzar normal
+    command -v hyprctl >/dev/null 2>&1 || exec "$@"
+
+    snap() {
+      hyprctl -j clients 2>/dev/null | ${pkgs.python3}/bin/python3 -c '
+import json, sys
+try:
+    print("\n".join(w["address"] for w in json.load(sys.stdin)))
+except Exception:
+    pass' | sort
+    }
+
+    before=$(snap)
+    setsid "$@" >/dev/null 2>&1 &
+    for _ in $(seq 1 100); do
+      sleep 0.1
+      new=$(comm -13 <(printf '%s\n' "$before") <(snap) | head -1)
+      if [ -n "''${new:-}" ]; then
+        hyprctl dispatch movetoworkspacesilent "$WS,address:$new" >/dev/null
+        exit 0
+      fi
+    done
+    echo "guirun: sin ventana nueva tras 10s (no es una app GUI?)" >&2
+  '';
 in
 {
   options.modules.desktop.hyprland = {
@@ -422,6 +459,7 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+      guirun
       mpvpaper
       cliphist
       (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
