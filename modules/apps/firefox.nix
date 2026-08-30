@@ -141,6 +141,18 @@ in
     package = pkgs.firefox;
   };
 
+  # Links clickeados desde la terminal (opencode, gh, etc.): firefox como
+  # handler de http/https y BROWSER para las TUIs que lo consultan.
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications = {
+      "x-scheme-handler/http" = "firefox.desktop";
+      "x-scheme-handler/https" = "firefox.desktop";
+      "text/html" = "firefox.desktop";
+    };
+  };
+  home.sessionVariables.BROWSER = "firefox";
+
   home.file.".firefox-chrome/userChrome.css" = { text = userChrome; };
 
   home.activation.installFirefoxChrome = lib.hm.dag.entryAfter ["writeBoundary"] ''${applyFirefoxChrome}'';
