@@ -226,7 +226,7 @@ EOF
     # senales a mano). Formato: seccion " Signals" con "signalname <ruta>"
     # (escalares) o "pattern <ruta>" (vectores); rutas = scopes del VCD unidos
     # por puntos, tomados del propio archivo para no duplicar la jerarquia.
-    ${pkgs.python3}/bin/python3 "$tb.vcd" > "$tb.gtkw" <<'PYEOF'
+    ${pkgs.python3}/bin/python3 - "$tb.vcd" > "$tb.gtkw" <<'PYEOF'
 import sys
 lines = ["[timestart] 0", "[size] 1600 900", "[pos_x] 0", "[pos_y] 0",
          "[sst_width] 260", "[signals_width] 240", "[sst_expanded] 1",
