@@ -37,29 +37,38 @@ except Exception:
     print(1)'
     }
 
-    before=$(snap)
-    setsid "$@" >/dev/null 2>&1 &
-    for _ in $(seq 1 100); do
-      sleep 0.1
-      new=$(comm -13 <(printf '%s\n' "$before") <(snap) | head -1)
-      if [ -n "''${new:-}" ]; then
-        # Hyprland 0.57 elimino el dispatcher legacy movetoworkspacesilent y
-        # hyprctl dispatch evalua la string como Lua (los nombres viejos son
-        # nil y una direccion pelada es syntax error). El camino oficial es
-        # hl.dispatch(<closure>) con la clousure de hl.dsp.window.move;
-        # follow=false = silent (no cambia la vista). Se reintentan 3 veces:
-        # la ventana recien mapeada a veces rechaza el primer move.
-        ws=$(nextws)
-        for _ in 1 2 3; do
-          if hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = \"$ws\", follow = false, window = \"address:$new\" }))" >/dev/null 2>&1; then
-            break
-          fi
-          sleep 0.2
-        done
-        exit 0
+    pid=$(setsid "$@" >/dev/null 2>&1 & echo $!)
+    pgid=$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' ')
+    [ -z "$pgid" ] && pgid=$pid
+    ws=$(nextws)
+    # Vigilia de 12s: mueve al workspace nuevo TODAS las ventanas del proceso
+    # lanzado (por pgid), no solo la primera. Necesario para apps con splash
+    # (gtkwave abre splash + ventana principal, y la principal nace ~2s
+    # despues, ya en el workspace activo). follow=false = no cambia la vista.
+    # ponytail: apps que re-hacen setsid (se salen del pgid) escapan del
+    # rastreo; si alguna dia pasa, caer de vuelta al diff de direcciones.
+    declare -A moved
+    for _ in $(seq 1 60); do
+      pids=$(pgrep -g "$pgid" 2>/dev/null | paste -sd,)
+      if [ -n "$pids" ]; then
+        while read -r a; do
+          [ -z "$a" ] && continue
+          [ -n "''${moved[$a]:-}" ] && continue
+          moved[$a]=1
+          hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = \"$ws\", follow = false, window = \"address:$a\" }))" >/dev/null 2>&1 || true
+        done < <(hyprctl -j clients | ${pkgs.python3}/bin/python3 -c '
+import json, sys
+want = set(sys.argv[1].split(",")) if sys.argv[1] else set()
+try:
+    for w in json.load(sys.stdin):
+        if str(w.get("pid")) in want:
+            print(w["address"])
+except Exception:
+    pass' "$pids")
       fi
+      sleep 0.2
     done
-    echo "guirun: sin ventana nueva tras 10s (no es una app GUI?)" >&2
+    exit 0
   '';
 in
 {
