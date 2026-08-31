@@ -52,7 +52,7 @@
         split = "#ff003c",
       }
 
-      config.window_padding = { left = 30, right = 30, top = 30, bottom = 30 }
+      config.window_padding = { left = 6, right = 6, top = 6, bottom = 6 }
       config.initial_cols = 110
       config.initial_rows = 30
 
