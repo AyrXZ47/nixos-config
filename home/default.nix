@@ -4,6 +4,7 @@
   imports = [
     ../modules/apps/shell.nix
     ../modules/apps/wezterm.nix
+    ../modules/apps/pantalla.nix
     ../modules/apps/neovim.nix
     ../modules/apps/fastfetch.nix
     ../modules/apps/git.nix
