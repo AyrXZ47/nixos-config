@@ -258,6 +258,13 @@ in
         hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = i }))
       end
 
+      -- SUPER+ALT+SHIFT+N: mover TODAS las ventanas del workspace ACTIVO al N
+      -- (follow=false, no cambia la vista). Compacta huecos de escritorios
+      -- vacios sin navegar. Para N>9, invocar el script a mano.
+      for i = 1, 9 do
+        hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
+      end
+
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       hl.bind("SUPER + N", hl.dsp.exec_cmd("wezterm start -- zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
@@ -720,6 +727,42 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
           hyprctl eval 'hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0 } })'
           notify-send -t 2000 -a hyprland -u low "Blur + transparencia OFF"
         fi
+      '';
+    };
+
+    # Mueve todas las ventanas del workspace activo a otro (N): compacta huecos
+    # de escritorios vacios. Reusa el mecanismo probado de guirun (hyprctl -j
+    # clients + python + hyprctl eval), porque con config Lua los strings legacy
+    # de "hyprctl dispatch ..." ya no se parsean (ver time-to-work.sh).
+    "hypr/scripts/workspace-move-all.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Arg: workspace destino N. Ventanas pinned NO se mueven (viven en todos
+        # los workspaces). follow=false: no cambia la vista.
+        [ -n "$1" ] || exit 1
+        cur=$(hyprctl -j activeworkspace 2>/dev/null | ${pkgs.python3}/bin/python3 -c '
+import json, sys
+try:
+    print(json.load(sys.stdin)["id"])
+except Exception:
+    pass')
+        [ -n "$cur" ] || exit 0
+        [ "$cur" = "$1" ] && exit 0
+        n=0
+        while read -r a; do
+          [ -n "$a" ] || continue
+          hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = $1, follow = false, window = \"address:$a\" }))" >/dev/null 2>&1 || true
+          n=$((n+1))
+        done < <(${pkgs.python3}/bin/python3 -c '
+import json, sys
+try:
+    for w in json.load(sys.stdin):
+        if w["workspace"]["id"] == int(sys.argv[1]) and not w.get("pinned"):
+            print(w["address"])
+except Exception:
+    pass' "$cur" < <(hyprctl -j clients 2>/dev/null))
+        [ "$n" -gt 0 ] && notify-send -t 2000 -a hyprland -u low "ws $cur -> $1 ($n ventanas)"
       '';
     };
 
