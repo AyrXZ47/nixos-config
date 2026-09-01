@@ -2,74 +2,6 @@
 
 let
   cfg = config.modules.desktop.hyprland;
-
-  # Lanzador de GUIs "no intrusivas": abre la app en un workspace NUEVO
-  # consecutivo (max en uso + 1) sin robar el foco ni tocar el workspace
-  # actual. Motivacion: las GUIs que lanza el agente opencode (gtkwave,
-  # matplotlib, logisim) nacian EN el workspace activo y su terminal se
-  # redimensionaba -> opencode se rompe (bug documentado). El workspace es
-  # dinamico (si hay 3 en uso abre el 4; si hay 10, el 11). Mecanica:
-  # snapshot de clientes hyprctl, lanza la app desasociada (setsid), espera
-  # la primera ventana nueva (hasta 10s: una JVM tarda) y la mueve con
-  # movetoworkspacesilent (no cambia la vista).
-  # ponytail: si la app abre MULTIPLES ventanas solo se mueve la primera; si
-  # eso pasa con gtkwave/matplotlib, cambiar a windowrule por class.
-  guirun = pkgs.writeShellScriptBin "guirun" ''
-    set -euo pipefail
-    # fuera de Hyprland (tty/ssh): lanzar normal
-    command -v hyprctl >/dev/null 2>&1 || exec "$@"
-
-    snap() {
-      hyprctl -j clients 2>/dev/null | ${pkgs.python3}/bin/python3 -c '
-import json, sys
-try:
-    print("\n".join(w["address"] for w in json.load(sys.stdin)))
-except Exception:
-    pass' | sort
-    }
-    nextws() {
-      hyprctl -j workspaces 2>/dev/null | ${pkgs.python3}/bin/python3 -c '
-import json, sys
-try:
-    ids = [w["id"] for w in json.load(sys.stdin) if w["id"] > 0]
-    print((max(ids) + 1) if ids else 1)
-except Exception:
-    print(1)'
-    }
-
-    pid=$(setsid "$@" >/dev/null 2>&1 & echo $!)
-    pgid=$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' ')
-    [ -z "$pgid" ] && pgid=$pid
-    ws=$(nextws)
-    # Vigilia de 12s: mueve al workspace nuevo TODAS las ventanas del proceso
-    # lanzado (por pgid), no solo la primera. Necesario para apps con splash
-    # (gtkwave abre splash + ventana principal, y la principal nace ~2s
-    # despues, ya en el workspace activo). follow=false = no cambia la vista.
-    # ponytail: apps que re-hacen setsid (se salen del pgid) escapan del
-    # rastreo; si alguna dia pasa, caer de vuelta al diff de direcciones.
-    declare -A moved
-    for _ in $(seq 1 60); do
-      pids=$(pgrep -g "$pgid" 2>/dev/null | paste -sd,)
-      if [ -n "$pids" ]; then
-        while read -r a; do
-          [ -z "$a" ] && continue
-          [ -n "''${moved[$a]:-}" ] && continue
-          moved[$a]=1
-          hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = \"$ws\", follow = false, window = \"address:$a\" }))" >/dev/null 2>&1 || true
-        done < <(hyprctl -j clients | ${pkgs.python3}/bin/python3 -c '
-import json, sys
-want = set(sys.argv[1].split(",")) if sys.argv[1] else set()
-try:
-    for w in json.load(sys.stdin):
-        if str(w.get("pid")) in want:
-            print(w["address"])
-except Exception:
-    pass' "$pids")
-      fi
-      sleep 0.2
-    done
-    exit 0
-  '';
 in
 {
   options.modules.desktop.hyprland = {
@@ -490,7 +422,6 @@ in
     };
 
     environment.systemPackages = with pkgs; [
-      guirun
       mpvpaper
       cliphist
       (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })

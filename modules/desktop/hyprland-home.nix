@@ -215,14 +215,17 @@ in
       --    pierden su fullscreen. Solucion: flotante a tamaño de monitor
       --    (size/move con expresiones monitor_w/h), sin foco, sin animacion.
       hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, float = true, size = { "(monitor_w)", "(monitor_h)" }, move = { 0, 0 }, no_initial_focus = true, no_blur = true, no_anim = true })
-      -- Red de seguridad para GUIs de simulacion/HDL lanzadas FUERA de los
-      -- scripts (rofi, python3 a pelo): van al workspace "guis" sin robar el
-      -- foco. El camino dinamico (workspace nuevo consecutivo) lo hacen los
-      -- scripts vhdlrun y guirun, que mueven la ventana a max+1 despues de
-      -- abrir (un windowrule no puede computar "workspace siguiente libre").
-      -- El "silent" del windowrule viejo dejo de existir en el motor nuevo:
-      -- el equivalente es no_initial_focus.
-      hl.window_rule({ name = "sims-guis", match = { class = "^(gtkwave|python3|python|Tk|matplotlib|logisim-evolution)$" }, workspace = "guis", no_initial_focus = true })
+      -- GUIs de simulacion/HDL lanzadas desde la terminal (gtkwave, matplotlib,
+      -- logisim): nacen FLOTANTES y a PANTALLA COMPLETA encima de las
+      -- terminales. Flotante = el layout en mosaico no se toca (las terminales
+      -- nunca se redimensionan, bug documentado de opencode) y al cerrar la
+      -- GUI queda todo como estaba. La regla aplica al mapear (atomica), a
+      -- diferencia de guirun (eliminado) que movia la ventana a otro workspace
+      -- despues de varios segundos de terminales ensanchandose. Sin
+      -- no_initial_focus: la GUI toma el foco (el fullscreen ademas no
+      -- funciona con esa regla, bug documentado en kdeconnect-presenter).
+      -- ponytail: el match es de cadena COMPLETA; app nueva = anadir su class.
+      hl.window_rule({ name = "sims-guis", match = { class = "^(gtkwave|python3|python|Tk|matplotlib|logisim-evolution)$" }, float = true, fullscreen = true })
 
       -----------------------
       ---- LAYER RULES ------
@@ -731,7 +734,7 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
     };
 
     # Mueve todas las ventanas del workspace activo a otro (N): compacta huecos
-    # de escritorios vacios. Reusa el mecanismo probado de guirun (hyprctl -j
+    # de escritorios vacios. Reusa el mecanismo probado (hyprctl -j
     # clients + python + hyprctl eval), porque con config Lua los strings legacy
     # de "hyprctl dispatch ..." ya no se parsean (ver time-to-work.sh).
     "hypr/scripts/workspace-move-all.sh" = {

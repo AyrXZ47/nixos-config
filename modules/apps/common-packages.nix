@@ -245,8 +245,7 @@ for raw in open(sys.argv[1]):
         lines.append(" {} {}.{}".format(kind, ".".join(scopes), p[4]))
 print("\n".join(lines))
 PYEOF
-    # a workspace NUEVO consecutivo sin robar foco (ver guirun)
-    guirun gtkwave "$tb.vcd" "$tb.gtkw" >/dev/null 2>&1 &
+    gtkwave "$tb.vcd" "$tb.gtkw" >/dev/null 2>&1 &
   '';
 in
 {
