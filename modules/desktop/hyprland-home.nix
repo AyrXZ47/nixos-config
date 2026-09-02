@@ -216,16 +216,19 @@ in
       --    (size/move con expresiones monitor_w/h), sin foco, sin animacion.
       hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, float = true, size = { "(monitor_w)", "(monitor_h)" }, move = { 0, 0 }, no_initial_focus = true, no_blur = true, no_anim = true })
       -- GUIs de simulacion/HDL lanzadas desde la terminal (gtkwave, matplotlib,
-      -- logisim): nacen FLOTANTES y a PANTALLA COMPLETA encima de las
-      -- terminales. Flotante = el layout en mosaico no se toca (las terminales
-      -- nunca se redimensionan, bug documentado de opencode) y al cerrar la
-      -- GUI queda todo como estaba. La regla aplica al mapear (atomica), a
-      -- diferencia de guirun (eliminado) que movia la ventana a otro workspace
-      -- despues de varios segundos de terminales ensanchandose. Sin
-      -- no_initial_focus: la GUI toma el foco (el fullscreen ademas no
-      -- funciona con esa regla, bug documentado en kdeconnect-presenter).
+      -- logisim): nacen FLOTANTES y MAXIMIZADAS (fullscreen modo 1, el estilo
+      -- LibreOffice: cubre todo el mosaico respetando los gaps y la zona
+      -- reservada de wayle, verificado en vivo: margen 4px uniforme, borde a
+      -- 4px de la barra) encima de las terminales. Flotante = el layout en
+      -- mosaico no se toca (las terminales nunca se redimensionan, bug
+      -- documentado de opencode) y al cerrar la GUI queda todo como estaba.
+      -- La regla aplica al mapear (atomica), a diferencia de guirun
+      -- (eliminado) que movia la ventana a otro workspace despues de varios
+      -- segundos de terminales ensanchandose. Sin no_initial_focus: la GUI
+      -- toma el foco (el fullscreen/maximize ademas no funciona con esa
+      -- regla, bug documentado en kdeconnect-presenter).
       -- ponytail: el match es de cadena COMPLETA; app nueva = anadir su class.
-      hl.window_rule({ name = "sims-guis", match = { class = "^(gtkwave|python3|python|Tk|matplotlib|logisim-evolution)$" }, float = true, fullscreen = true })
+      hl.window_rule({ name = "sims-guis", match = { class = "^(gtkwave|python3|python|Tk|matplotlib|logisim-evolution)$" }, float = true, maximize = true })
 
       -----------------------
       ---- LAYER RULES ------
