@@ -101,7 +101,10 @@
   # reintenta a la próxima.
   system.autoUpgrade = {
     enable = true;
-    flake = "/home/yovick/workspaces/nixos-config";
+    # Sin sufijo de host, nixos-upgrade usa el hostname ("nixos-pc") como attr
+    # del flake, pero los attrs son "pc"/"laptop"/"server"/"vm": fallaba en
+    # cada boot. Se deriva del hostname quitando el prefijo "nixos-".
+    flake = "/home/yovick/workspaces/nixos-config#${lib.removePrefix "nixos-" config.networking.hostName}";
   };
 
   # nixos-upgrade corre como root; libgit2 rechaza el repo del flake por no
