@@ -284,6 +284,7 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 | `SUPER J` | Toggle split |
 | `SUPER arrows` / `SUPER SHIFT arrows` | Focus / move window |
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
+| `SUPER ALT SHIFT 1-9` | Move ALL windows of active ws to N and follow (GNOME-style) |
 | `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox on ws 1-3 |
 | `SUPER N` | *netrunner*: btop + nvtop split |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |

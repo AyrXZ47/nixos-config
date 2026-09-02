@@ -265,8 +265,9 @@ in
       end
 
       -- SUPER+ALT+SHIFT+N: mover TODAS las ventanas del workspace ACTIVO al N
-      -- (follow=false, no cambia la vista). Compacta huecos de escritorios
-      -- vacios sin navegar. Para N>9, invocar el script a mano.
+      -- (follow=true, estilo GNOME: la vista acompana a las ventanas).
+      -- Compacta huecos de escritorios vacios navegando al destino.
+      -- Para N>9, invocar el script a mano.
       for i = 1, 9 do
         hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
       end
@@ -745,7 +746,7 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
       text = ''
         #!/usr/bin/env bash
         # Arg: workspace destino N. Ventanas pinned NO se mueven (viven en todos
-        # los workspaces). follow=false: no cambia la vista.
+        # los workspaces). follow=true: estilo GNOME, la vista acompana.
         [ -n "$1" ] || exit 1
         cur=$(hyprctl -j activeworkspace 2>/dev/null | ${pkgs.python3}/bin/python3 -c '
 import json, sys
@@ -758,7 +759,7 @@ except Exception:
         n=0
         while read -r a; do
           [ -n "$a" ] || continue
-          hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = $1, follow = false, window = \"address:$a\" }))" >/dev/null 2>&1 || true
+          hyprctl eval "hl.dispatch(hl.dsp.window.move({ workspace = $1, follow = true, window = \"address:$a\" }))" >/dev/null 2>&1 || true
           n=$((n+1))
         done < <(${pkgs.python3}/bin/python3 -c '
 import json, sys
