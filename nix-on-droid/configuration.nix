@@ -74,6 +74,10 @@
     openssl
     gnupg
     cmatrix
+    # pipes-rs: el binario NO lo instala shell.nix (solo su config.toml via
+    # xdg.configFile) y home/default.nix no se importa aqui. Verificado: el
+    # binario aarch64 de la cache corre bajo proot.
+    pipes-rs
   ];
 
   # Reutiliza los módulos home del repo (shell con powerlevel10k, nvim con
