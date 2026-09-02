@@ -111,9 +111,17 @@
     # home-manager, asi que se sobrescribe con la cadena del helper.
     programs.git.settings.credential.helper = lib.mkForce "!gh auth git-credential";
 
+    # PATH para el binario que extrae la activacion de abajo. No va en el
+    # sessionPath de shell.nix (compartido con los hosts de escritorio): alla
+    # el binario viene de pkgs.opencode y la entrada era una reliquia que
+    # dejaria a un self-update sombrear el paquete nix (e30559b la quito del
+    # PC con razon). Aqui no hay pkgs.opencode: sin esta entrada, zsh dice
+    # 'command not found' aunque el binario corra bien por ruta completa.
+    home.sessionPath = [ "$HOME/.opencode/bin" ];
+
     # opencode autocurable: el tarball viaja en el flake source (re-copiado
     # fresco en cada switch, imposible que falte) y esta activacion lo extrae
-    # a ~/.opencode/bin — primer entrada del sessionPath de shell.nix. No hay
+    # a ~/.opencode/bin — en el PATH via home.sessionPath (ver arriba). No hay
     # store path nix que corromper ni symlink muerto posible: cada switch lo
     # reinstala. OJO: sobreescribe el binario si opencode se auto-actualizo
     # (version pinneada declarativa — feature, no bug).
