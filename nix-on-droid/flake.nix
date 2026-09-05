@@ -89,7 +89,13 @@
         # extrae a ~/.opencode/bin (ya en sessionPath) como activation:
         # autocurable, sin store path que se corrompa. Al subir de version:
         # reemplazar este archivo y ajustar la version en configuration.nix.
-        extraSpecialArgs = { opencodeTarball = ./opencode-1.18.16.tar.gz; };
+        # rtk sigue el mismo patrón por la misma razón: release prebuilt
+        # aarch64 (ningún nixpkgs 25.11 tiene el paquete y unstable no corre
+        # bajo este proot), tarball verificado commiteado (4 MB).
+        extraSpecialArgs = {
+          opencodeTarball = ./opencode-1.18.16.tar.gz;
+          rtkTarball = ./rtk-0.48.0-aarch64.tar.gz;
+        };
         modules = [ ./configuration.nix ];
       };
     };

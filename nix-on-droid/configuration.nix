@@ -1,4 +1,4 @@
-{ pkgs, opencodeTarball, ... }:
+{ pkgs, opencodeTarball, rtkTarball, ... }:
 
 {
   # No tocar sin leer el changelog de nix-on-droid antes de subir de version.
@@ -7,7 +7,7 @@
   # El tarball llega aqui via extraSpecialArgs del flake (module system top);
   # home-manager.config se evalua como submódulo y NO hereda esos args — se
   # re-expone con la opcion home-manager.extraSpecialArgs (ver abajo).
-  home-manager.extraSpecialArgs = { inherit opencodeTarball; };
+  home-manager.extraSpecialArgs = { inherit opencodeTarball rtkTarball; };
 
   # OJO: el default de nix-on-droid es bash. Sin esto la terminal abre en bash:
   # sin p10k, sin aliases (tree/dev/ll), sin fastfetch al abrir, sin fzf. El
@@ -87,7 +87,7 @@
   # fastfetch tampoco: el config del pc usa logo PNG (protocolo kitty) y lineas
   # de 70+ chars que en la terminal angosta del celular envuelven y se pisan.
   # Aqui fastfetch corre con su config por defecto (logo ascii, ajusta ancho).
-  home-manager.config = { config, pkgs, lib, opencodeTarball, ... }: {
+  home-manager.config = { config, pkgs, lib, opencodeTarball, rtkTarball, ... }: {
     home.stateVersion = "24.05";
     imports = [
       ../modules/apps/shell.nix
@@ -121,6 +121,8 @@
     # dejaria a un self-update sombrear el paquete nix (e30559b la quito del
     # PC con razon). Aqui no hay pkgs.opencode: sin esta entrada, zsh dice
     # 'command not found' aunque el binario corra bien por ruta completa.
+    # (rtk va a ~/.local/bin, que shell.nix ya pone en sessionPath: no se
+    # duplica aqui.)
     home.sessionPath = [ "$HOME/.opencode/bin" ];
 
     # opencode autocurable: el tarball viaja en el flake source (re-copiado
@@ -141,6 +143,25 @@
       # al loader de glibc del store (el mismo que corre todo lo demas).
       ${pkgs.patchelf}/bin/patchelf --set-interpreter "${pkgs.glibc}/lib/ld-linux-aarch64.so.1" "$HOME/.opencode/bin/opencode"
       chmod +x "$HOME/.opencode/bin/opencode"
+    '';
+
+    # rtk (v0.48.0, declarativa): proxy CLI que comprime la salida de comandos
+    # para agentes tipo opencode (60-90% menos tokens). Mismo patrón que
+    # installOpencode: release prebuilt aarch64 upstream (no existe en nixpkgs
+    # 25.11 y unstable no corre bajo este proot), tarball verificado commiteado
+    # (sha256 5ed65486a960...) viaja en el flake source y se extrae a
+    # ~/.local/bin en cada switch. patchelf NO solo re-apunta el interpreter
+    # (mismo motivo que opencode): el binario enlaza libgcc_s.so.1 (no vive en
+    # glibc) -> rpath a libgcc + glibc del store. Max GLIBC symbol 2.39 <= 2.40
+    # del pin 25.11. Autocurable; al subir de version: reemplazar el tarball.
+    home.activation.installRtk = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      mkdir -p "$HOME/.local/bin"
+      ${pkgs.gzip}/bin/gzip -dc "${rtkTarball}" | ${pkgs.gnutar}/bin/tar -xf - -C "$HOME/.local/bin"
+      ${pkgs.patchelf}/bin/patchelf \
+        --set-interpreter "${pkgs.glibc}/lib/ld-linux-aarch64.so.1" \
+        --set-rpath "${pkgs.libgcc}/lib:${pkgs.glibc}/lib" \
+        "$HOME/.local/bin/rtk"
+      chmod +x "$HOME/.local/bin/rtk"
     '';
 
     # Máximo 3 generaciones SIEMPRE (por conteo, no por edad), igual que

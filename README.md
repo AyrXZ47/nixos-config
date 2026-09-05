@@ -370,6 +370,16 @@ al loader de glibc del store (el binario standalone pide `/lib/ld-linux-aarch64.
 inexistente en nix-on-droid). Autocurable: cada switch lo reinstala. Al subir de
 versión: reemplazar el tarball y ajustar la versión en `configuration.nix`.
 
+**rtk** sigue el mismo patrón de opencode (release prebuilt, tarball commiteado
+`nix-on-droid/rtk-0.48.0-aarch64.tar.gz`, 4 MB): el paquete no existe en nixpkgs
+25.11 y el de unstable no corre bajo este proot (glibc ≥2.42). La activación lo
+extrae a `~/.local/bin` (ya en sessionPath por `shell.nix`) con `patchelf` al
+interpreter de glibc del store + rpath a libgcc (enlaza `libgcc_s.so.1`; su
+símbolo glibc más alto es 2.39, cabe en el 2.40 del pin). Verificar el checksum
+contra `checksums.txt` del release al reemplazarlo. Una vez en el celular:
+`rtk init -g --opencode` instala el plugin de opencode (archivo TS en
+`~/.config/opencode/plugins/`, no declarativo).
+
 **Gotchas del entorno proot** (por qué algunas cosas del PC no van aquí):
 - `btop` no: proot falsifica `/proc/stat` con un stub mínimo que solo soporta `htop`.
 - `fastfetch` corre con su config por defecto (la del PC usa logo PNG y líneas anchas).
