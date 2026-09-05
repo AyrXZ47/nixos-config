@@ -399,6 +399,10 @@ in
     # octaveFull trae la GUI Qt; el octave base viene sin GUI (solo CLI).
     octaveFull
     ollama
+    # rtk: proxy CLI que comprime la salida de comandos (git, cargo, grep, etc.)
+    # para agentes tipo opencode (60-90% menos tokens). Los plugins de opencode
+    # lo esperan en el PATH, por eso va en systemPackages de todos los hosts.
+    rtk
     # whisper-cpp con GPU ya va DENTRO del wrapper de shotcut (mismo bin/).
     # Aquí NO se instala suelto para no duplicar el binario en el system path:
     # el wrapper de shotcut ya expone whisper-cli adyacente a shotcut, que es
