@@ -235,24 +235,32 @@
         ) &!
       }
 
+      # YouTube exige PO Token a los clientes web logueados (403 al descargar);
+      # tv_downgraded/tv/visionos siguen entregando URLs que funcionan con cookies.
+      yt_url() {
+        local u="$1"
+        [[ -z "$u" ]] && u="$(wl-paste | grep -oE 'https?://(music\.|www\.)?(youtube\.com|youtu\.be)[^[:space:]"]+' | head -1)"
+        print -r -- "$u" | tr -d '\\'
+      }
+
       ytsong() {
-        local url=$(wl-paste)
+        local url="$(yt_url "$1")"
         yt-dlp --no-warnings --no-playlist --extract-audio --audio-format opus --audio-quality 0 \
           -f "bestaudio/best" \
           --embed-metadata --embed-thumbnail --js-runtimes node \
           --cookies-from-browser firefox \
-          --extractor-args "youtube:player_client=default,-android_vr" \
+          --extractor-args "youtube:player_client=tv_downgraded,tv,visionos" \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"
       }
 
       ytlist() {
-        local url=$(wl-paste)
+        local url="$(yt_url "$1")"
         yt-dlp --no-warnings --ignore-errors --extract-audio --audio-format opus --audio-quality 0 \
           -f "bestaudio/best" \
           --embed-metadata --embed-thumbnail --js-runtimes node \
           --cookies-from-browser firefox --download-archive historial_descargas.txt \
           --sleep-requests 1 --sleep-interval 3 --max-sleep-interval 8 \
-          --extractor-args "youtube:player_client=default,-android_vr" \
+          --extractor-args "youtube:player_client=tv_downgraded,tv,visionos" \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"
       }
 
