@@ -11,6 +11,7 @@
     ../../modules/apps/common-packages.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/syncthing.nix
+    ../../modules/apps/docker.nix
   ];
 
   boot.loader.systemd-boot.enable = true;

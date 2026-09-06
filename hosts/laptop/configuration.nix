@@ -19,6 +19,7 @@
     ../../modules/apps/packettracer.nix
     ../../modules/apps/vivado.nix
     ../../modules/apps/syncthing.nix
+    ../../modules/apps/docker.nix
   ];
 
   # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.

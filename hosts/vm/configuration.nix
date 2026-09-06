@@ -16,6 +16,7 @@
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/packettracer.nix
     ../../modules/apps/syncthing.nix
+    ../../modules/apps/docker.nix
   ];
 
   # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.

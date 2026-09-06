@@ -20,6 +20,7 @@
     ../../modules/apps/packettracer.nix
     ../../modules/apps/vivado.nix
     ../../modules/apps/syncthing.nix
+    ../../modules/apps/docker.nix
   ];
 
   # Packet Tracer (universidad): con el .deb en el store el rebuild construye;
