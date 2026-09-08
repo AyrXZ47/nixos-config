@@ -92,7 +92,7 @@
   # ── Logs: journald acotado a 100M ─────────────────────────────────────────
   # Sustituye el journalctl --vacuum-size de Fedora: se limita una vez y nunca
   # más hay que vaciar a mano (equivalente al --vacuum-size=100M mensual).
-  services.journald.extraConfig = "SystemMaxUse=100M";
+  services.journald.settings.Journal.SystemMaxUse = "100M";
 
   # ── Actualización automática semanal ──────────────────────────────────────
   # Rebuild semanal del flake YA CONFIRMADO. No corre `nix flake update`: para
