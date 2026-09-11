@@ -470,7 +470,7 @@ in
         else
           # ponytail: primario por area*Hz, no por nombre fijo (DP-1 vs eDP-1
           # segun host); upgrade: elegir el primario manualmente en waybar/rofi.
-          primary=$(echo "$state" | jq -r 'max_by(.width * .height * .refreshRate) | .name')
+          primary=$(echo "$state" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
           for name in $(echo "$state" | jq -r '.[].name'); do
             [ "$name" = "$primary" ] || hyprctl keyword monitor "$name,preferred,auto,1,mirror,$primary" >/dev/null
           done

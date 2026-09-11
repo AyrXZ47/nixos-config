@@ -33,27 +33,23 @@
       fi
 
       ip=$(tailscale ip -4)
+      out_args=()
       if [ "$mode" = "extend" ]; then
         # ponytail: resolucion fija 1920x1200 (16:10, tipico de tab S);
         # si la tablet es 16:9 la letra se ve con letterbox: ajustable.
         hyprctl output create headless "$headless" >/dev/null
         hyprctl keyword monitor "$headless,1920x1200,auto,1" >/dev/null
-        wayvnc --detach --output "$headless" "$ip" 5900 || {
-          hyprctl output remove "$headless" >/dev/null
-          notify-send "Cast: wayvnc no arrancó" "ver /tmp/wayvnc-cast.log"
-          exit 1
-        }
-      else
-        wayvnc --detach "$ip" 5900 || {
-          notify-send "Cast: wayvnc no arrancó" "ver /tmp/wayvnc-cast.log"
-          exit 1
-        }
+        out_args=(--output "$headless")
       fi
+      # wayvnc 0.10 no tiene modo daemon: nohup + & y listo. Si falla al
+      # arrancar, limpiamos la salida headless y salimos con error.
+      nohup wayvnc "''${out_args[@]}" "$ip" 5900 >/tmp/wayvnc-cast.log 2>&1 &
       sleep 0.3
       if pgrep -x wayvnc >/dev/null 2>&1; then
         notify-send "Cast ($mode): $ip:5900 (tailscale)"
       else
-        notify-send "Cast: wayvnc murió justo tras arrancar" "ver /tmp/wayvnc-cast.log"
+        hyprctl output remove "$headless" >/dev/null 2>&1 || true
+        notify-send "Cast: wayvnc no arrancó" "ver /tmp/wayvnc-cast.log"
         exit 1
       fi
     '')
