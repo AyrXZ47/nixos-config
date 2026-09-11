@@ -437,6 +437,7 @@ in
       polkit_gnome
       brightnessctl
       ddcutil
+      jq # parsing de hyprctl -j en monitor-mirror.sh
     ];
 
     # hyprlock hace la autenticación por contraseña vía PAM (servicio "hyprlock");

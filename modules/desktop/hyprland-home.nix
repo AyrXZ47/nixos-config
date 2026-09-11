@@ -240,6 +240,8 @@ in
       -----------------------
       hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("wezterm"))
       hl.bind("SUPER + F2", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/touchpad-toggle.sh"))
+      -- Espejo/expander pantallas (presentaciones): toggle con deteccion de hosts
+      hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
       hl.bind("SUPER + A", hl.dsp.exec_cmd("rofi -show drun -show-icons"))
       hl.bind("SUPER + Delete", hl.dsp.window.close())
       hl.bind("SUPER + M", hl.dsp.exit())
@@ -441,6 +443,36 @@ in
         hyprctl dispatch 'hl.dsp.exec_cmd("mixxx", { workspace = 1 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("obsidian", { workspace = 2 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("firefox", { workspace = 3 })'
+      '';
+    };
+
+    # Alterna espejo/extender. Presentar = SUPER+SHIFT+D (lo deja en espejo);
+    # volver a extender = otro SUPER+SHIFT+D. Deliberamente temporal:
+    # hyprctl keyword no toca el config, al reconectar/reiniciar vuelve el modo
+    # del archivo (extender), sin daemon de hotplug.
+    "hypr/scripts/monitor-mirror.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        shopt -s nullglob
+        # check de jq en runtime por si sueltan el script fuera de NixOS
+        command -v jq >/dev/null || { echo "falta jq" >&2; exit 1; }
+        state=$(hyprctl monitors -j)
+        if echo "$state" | jq -e '[.[] | select(.mirrorOf != "none")] | length > 0' >/dev/null; then
+          for name in $(echo "$state" | jq -r '.[].name'); do
+            hyprctl keyword monitor "$name,preferred,auto,1" >/dev/null
+          done
+          wayle notify "Modo extender"
+        else
+          # ponytail: primario por area*Hz, no por nombre fijo (DP-1 vs eDP-1
+          # segun host); upgrade: elegir el primario manualmente en waybar/rofi.
+          primary=$(echo "$state" | jq -r 'max_by(.width * .height * .refreshRate) | .name')
+          for name in $(echo "$state" | jq -r '.[].name'); do
+            [ "$name" = "$primary" ] || hyprctl keyword monitor "$name,preferred,auto,1,mirror,$primary" >/dev/null
+          done
+          wayle notify "Modo espejo"
+        fi
       '';
     };
     "hypr/scripts/brightness.sh" = {
