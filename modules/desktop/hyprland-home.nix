@@ -242,6 +242,9 @@ in
       hl.bind("SUPER + F2", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/touchpad-toggle.sh"))
       -- Espejo/expander pantallas (presentaciones): toggle con deteccion de hosts
       hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
+      -- Cast a tablet via VNC+tailscale: SUPER+ALT+D espejo, SUPER+ALT+SHIFT+D extend
+      hl.bind("SUPER + ALT + D", hl.dsp.exec_cmd("cast-tablet"))
+      hl.bind("SUPER + ALT + SHIFT + D", hl.dsp.exec_cmd("cast-tablet extend"))
       hl.bind("SUPER + A", hl.dsp.exec_cmd("rofi -show drun -show-icons"))
       hl.bind("SUPER + Delete", hl.dsp.window.close())
       hl.bind("SUPER + M", hl.dsp.exit())
