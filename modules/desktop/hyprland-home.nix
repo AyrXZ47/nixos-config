@@ -62,6 +62,14 @@ in
         hl.exec_cmd("hyprctl setcursor Bibata-Material-Deep-Blue 30")
       end)
 
+      -- Hotplug: al conectar un monitor se aplica espejo automaticamente
+      -- (visto en el stub de eventos monitor.added; Hyprland 0.56 no emite
+      -- ya los eventos monitoradded>> por socket2). El toggle manual
+      -- SUPER+SHIFT+D queda para pasar a extend a mano.
+      hl.on("monitor.added", function()
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh mirror")
+      end)
+
       ------------------------
       ---- LOOK AND FEEL ----
       ------------------------
@@ -449,33 +457,38 @@ in
       '';
     };
 
-    # Alterna espejo/extender. Presentar = SUPER+SHIFT+D (lo deja en espejo);
-    # volver a extender = otro SUPER+SHIFT+D. Deliberamente temporal:
-    # hyprctl keyword no toca el config, al reconectar/reiniciar vuelve el modo
-    # del archivo (extender), sin daemon de hotplug.
+    # Toggle de disposicion de monitores: espejo <-> extend. Sin argumento
+    # alterna; con "mirror" fuerza espejo (lo usa el evento monitor.added).
+    # hyprctl keyword esta bloqueado en Hyprland 0.56 ("non-legacy parsers"):
+    # el runtime va via hyprctl eval de la API hl.monitor(..., mirror = X).
+    # notify-send (no "wayle notify": ese subcommand solo controla la lista,
+    # no envia texto).
     "hypr/scripts/monitor-mirror.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
         set -euo pipefail
-        # check de jq en runtime por si sueltan el script fuera de NixOS
         command -v jq >/dev/null || { echo "falta jq" >&2; exit 1; }
-        # Hyprland 0.56 (config lua): hyprctl keyword monitor rechaza el parser
-        # legacy ("keyword can't work with non-legacy parsers"); el runtime va
-        # por hyprctl eval de la API hl.monitor(..., mirror = X). Notify con
-        # notify-send: wayle notify solo controla la lista, no envia texto.
         mirror_on() { hyprctl eval "hl.monitor({ output = \"$1\", mode = \"preferred\", position = \"auto\", scale = \"1\", mirror = \"$2\" })" >/dev/null; }
         # Base SIEMPRE en 'monitors all': al espejar, la salida clonada sale de
         # la lista activa y el toggle de vuelta la perderia.
         all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false)]')
+        if [ "''${1:-}" = "mirror" ]; then
+          # ponytail: primario por area*Hz, no por nombre fijo (DP-1 vs eDP-1
+          # segun host); upgrade: elegir el primario manualmente en bar/rofi.
+          primary=$(echo "$all" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
+          for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
+            mirror_on "$name" "$primary"
+          done
+          notify-send "Modo espejo"
+          exit 0
+        fi
         if echo "$all" | jq -e '[.[] | select(.mirrorOf != "none")] | length > 0' >/dev/null; then
           for name in $(echo "$all" | jq -r '.[] | .name'); do
             mirror_on "$name" none
           done
           notify-send "Modo extender"
         else
-          # ponytail: primario por area*Hz, no por nombre fijo (DP-1 vs eDP-1
-          # segun host); upgrade: elegir el primario manualmente en bar/rofi.
           primary=$(echo "$all" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
           for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
             mirror_on "$name" "$primary"
@@ -484,6 +497,10 @@ in
         fi
       '';
     };
+
+    # El hotplug en si va dentro del config Lua (ver hl.on "monitor.added"
+    # en extraConfig); aqui no hay script que mantener: monitor-mirror.sh
+    # mirror hace el trabajo.
     "hypr/scripts/brightness.sh" = {
       executable = true;
       text = ''
