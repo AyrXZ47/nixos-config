@@ -458,23 +458,29 @@ in
       text = ''
         #!/usr/bin/env bash
         set -euo pipefail
-        shopt -s nullglob
         # check de jq en runtime por si sueltan el script fuera de NixOS
         command -v jq >/dev/null || { echo "falta jq" >&2; exit 1; }
-        state=$(hyprctl monitors -j)
-        if echo "$state" | jq -e '[.[] | select(.mirrorOf != "none")] | length > 0' >/dev/null; then
-          for name in $(echo "$state" | jq -r '.[].name'); do
-            hyprctl keyword monitor "$name,preferred,auto,1" >/dev/null
+        # Hyprland 0.56 (config lua): hyprctl keyword monitor rechaza el parser
+        # legacy ("keyword can't work with non-legacy parsers"); el runtime va
+        # por hyprctl eval de la API hl.monitor(..., mirror = X). Notify con
+        # notify-send: wayle notify solo controla la lista, no envia texto.
+        mirror_on() { hyprctl eval "hl.monitor({ output = \"$1\", mode = \"preferred\", position = \"auto\", scale = \"1\", mirror = \"$2\" })" >/dev/null; }
+        # Base SIEMPRE en 'monitors all': al espejar, la salida clonada sale de
+        # la lista activa y el toggle de vuelta la perderia.
+        all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false)]')
+        if echo "$all" | jq -e '[.[] | select(.mirrorOf != "none")] | length > 0' >/dev/null; then
+          for name in $(echo "$all" | jq -r '.[] | .name'); do
+            mirror_on "$name" none
           done
-          wayle notify "Modo extender"
+          notify-send "Modo extender"
         else
           # ponytail: primario por area*Hz, no por nombre fijo (DP-1 vs eDP-1
-          # segun host); upgrade: elegir el primario manualmente en waybar/rofi.
-          primary=$(echo "$state" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
-          for name in $(echo "$state" | jq -r '.[].name'); do
-            [ "$name" = "$primary" ] || hyprctl keyword monitor "$name,preferred,auto,1,mirror,$primary" >/dev/null
+          # segun host); upgrade: elegir el primario manualmente en bar/rofi.
+          primary=$(echo "$all" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
+          for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
+            mirror_on "$name" "$primary"
           done
-          wayle notify "Modo espejo"
+          notify-send "Modo espejo"
         fi
       '';
     };
