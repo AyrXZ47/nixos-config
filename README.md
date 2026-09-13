@@ -87,6 +87,18 @@ flake.nix              # Entry point — hosts & shared modules
   firewalls, protontricks) with **Proton GE**.
 - **GameMode**, **MangoHud**, **Gamescope**, **ProtonUp-Qt**, Wine (Wayland),
   Winetricks.
+- **Mandos PS4 (clones) por Bluetooth** (`modules/desktop/hyprland.nix` +
+  `modules/apps/gaming.nix`): los clones de DS4 emparejan SIN bonding
+  (`Bonded: no` en `bluetoothctl info`) y el plugin input de bluez >= 5.69
+  rechaza su conexión HID (`Rejected connection from !bonded device`) a menos
+  que `hardware.bluetooth.input.General.ClassicBondedOnly = false`. Trampa
+  triple: la opción vive en `input.conf` (NO en `main.conf`), sección
+  `[General]` (NO `[Input]` — bluez falla en silencio y queda el default
+  `true`), y `bluetoothd` NO recarga config en `switch` (reiniciar a mano:
+  `sudo systemctl restart bluetooth`). Emparejar por CLI con agente:
+  `bluetoothctl` → `agent on` → `scan on` → (SHARE+PS en el mando) →
+  `pair <MAC>` → confirmar → `trust <MAC>` → `connect <MAC>`. Tras el primer
+  pair+trust, reconectar es solo presionar PS.
 
 ### Toolchains (system-wide)
 - **Android**: `android-tools` (adb/fastboot).
