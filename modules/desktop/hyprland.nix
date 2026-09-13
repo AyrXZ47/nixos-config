@@ -408,10 +408,18 @@ in
     # bluez >= 5.69 rechaza HID de dispositivos !bonded ("Rejected connection
     # from !bonded device") a menos que se relaje esta opción. Es el workaround
     # documentado para mandos genéricos de PS4.
+    # OJO: el plugin input de bluetoothd lee esta opción de INPUT.CONF, no de
+    # main.conf (verificado en strings del binario 5.87); hardware.bluetooth.settings
+    # solo genera main.conf, así que esta opción va via environment.etc.
     # ponytail: ClassicBondedOnly=false permite conexiones HID sin cifrar por
     # bonding (superficie del CVE-2020-27263); si algún día los mandos bondan
     # de verdad, borrar este bloque.
-    hardware.bluetooth.settings.Input.ClassicBondedOnly = false;
+    environment.etc."bluetooth/input.conf" = lib.mkForce {
+      text = ''
+        [Input]
+        ClassicBondedOnly=false
+      '';
+    };
     services.upower.enable = true;
     # Brillo de monitores externos via DDC/CI (i2c) con ddcutil
     hardware.i2c.enable = true;
