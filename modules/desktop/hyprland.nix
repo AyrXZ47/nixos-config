@@ -404,6 +404,14 @@ in
     '';
     # Daemons runtime del dashboard de Wayle (red, bluetooth, batería)
     hardware.bluetooth.enable = true;
+    # Los clones de DS4 emparejan SIN bonding (Bonded: no) y el plugin input de
+    # bluez >= 5.69 rechaza HID de dispositivos !bonded ("Rejected connection
+    # from !bonded device") a menos que se relaje esta opción. Es el workaround
+    # documentado para mandos genéricos de PS4.
+    # ponytail: ClassicBondedOnly=false permite conexiones HID sin cifrar por
+    # bonding (superficie del CVE-2020-27263); si algún día los mandos bondan
+    # de verdad, borrar este bloque.
+    hardware.bluetooth.settings.Input.ClassicBondedOnly = false;
     services.upower.enable = true;
     # Brillo de monitores externos via DDC/CI (i2c) con ddcutil
     hardware.i2c.enable = true;
