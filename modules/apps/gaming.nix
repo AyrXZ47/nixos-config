@@ -12,6 +12,10 @@
 
   programs.steam.extraCompatPackages = with pkgs; [ proton-ge-bin ];
 
+  # reglas udev para mandos (DualShock/DualSense y genéricos)
+  hardware.steam-hardware.enable = true;
+  services.udev.packages = [ pkgs.game-devices-udev-rules ];
+
   programs.gamemode.enable = true;
 
   environment.systemPackages = with pkgs; [
