@@ -34,7 +34,7 @@
   modules.hardware.fingerprint.enable = true;
 
   # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
-  environment.systemPackages = [ pkgs.openrgb ];
+  environment.systemPackages = [ pkgs.openrgb pkgs.dnsmasq ];
 
   # fwupd: servicio para actualizar firmware (BIOS/SSD). Uso: `fwupdmgr refresh && fwupdmgr update`.
   services.fwupd.enable = true;
@@ -49,6 +49,19 @@
   # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
   # (sin esto el daemon corre pero no descubre/conecta dispositivos).
   programs.kdeconnect.enable = true;
+
+  # Miracast (gnome-network-displays -> Smart View de TVs Samsung). La fase 2
+  # de la conexion P2P hace que NM monte una red compartida con dnsmasq
+  # (servidor DHCP en la interfaz p2p-dev-wlp3s0) y luego corre RTSP de WFD
+  # en el puerto 7236. Sin dnsmasq en PATH ni estos puertos el link se arma
+  # pero la TV nunca recibe IP / nunca conecta la sesion de video, y GND
+  # aborta con "connection established .. connection lost".
+  # ponytail: GND 0.99 tiene SIGABRTs conocidos (gitlab #466, flathub #89);
+  # si vuelve a tirar, correr
+  #   flatpak run --env=G_MESSAGES_DEBUG=all org.gnome.NetworkDisplays > gnd.log 2>&1
+  # y comparar con los issues de upstream.
+  networking.firewall.allowedTCPPorts = [ 7236 ];
+  networking.firewall.allowedUDPPorts = [ 67 123 7236 ];
 
   time.timeZone = "America/Mexico_City";
 
