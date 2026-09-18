@@ -11,7 +11,7 @@ let
     {
       "$schema": "https://opencode.ai/config.json",
       "default_agent": "planner",
-      "model": "opencode-go/glm-5.3-flash",
+      "model": "opencode-go/deepseek-v4.1-flash",
       "mcp": {
         "serena": {
           "type": "local",
@@ -77,7 +77,7 @@ in
        ${pkgs.gnugrep}/bin/grep -q '"disable"' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q 'no-python-downloads' "$HOME/.config/opencode/opencode.json" || \
        ! ${pkgs.gnugrep}/bin/grep -q '"default_agent"' "$HOME/.config/opencode/opencode.json" || \
-       ! ${pkgs.gnugrep}/bin/grep -q '"model": "opencode-go/glm-5.3-flash"' "$HOME/.config/opencode/opencode.json"; then
+       ! ${pkgs.gnugrep}/bin/grep -q '"model": "opencode-go/deepseek-v4.1-flash"' "$HOME/.config/opencode/opencode.json"; then
       # Mismo motivo que arriba: cp dejaria 400 y romperia el re-seed.
       ${pkgs.coreutils}/bin/install -m 600 ${opencodeSeed} "$HOME/.config/opencode/opencode.json"
     fi
