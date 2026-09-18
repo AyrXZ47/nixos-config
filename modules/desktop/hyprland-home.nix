@@ -454,6 +454,7 @@ in
         hyprctl dispatch 'hl.dsp.exec_cmd("mixxx", { workspace = 1 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("obsidian", { workspace = 2 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("firefox", { workspace = 3 })'
+        hyprctl dispatch 'hl.dsp.exec_cmd("wezterm", { workspace = 4 })'
       '';
     };
 
