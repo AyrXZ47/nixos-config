@@ -342,7 +342,7 @@ in
 
   programs.rofi = {
     enable = true;
-    extraConfig = {
+    settings = {
       display-drun = "";
       display-run = "";
       display-filebrowser = "";
