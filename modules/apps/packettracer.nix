@@ -1,48 +1,88 @@
 # Cisco Packet Tracer 9.0.0 (Cisco Networking Academy, universidad) — simulador
-# de redes. Activo por defecto en los hosts gráficos (pc/laptop/vm): el .deb
-# del 9.0.0 se sirve PUBLICAMENTE en Archive.org (mirror del que NetAcad
-# reparte), así que el rebuild lo descarga SOLO (fetchurl) — una instalación
-# limpia (clone → bootstrap.sh) baja el .deb sin tocar nada, y 100 máquinas
-# con el mismo repo reconstruyen igual, sin intervención manual ninguna.
+# de redes. Activo en los hosts gráficos (pc/laptop/vm) con el flag
+# modules.apps.packetTracer.enable.
 #
-# El paquete es el de nixpkgs (cisco-packet-tracer_9): appimageTools maneja el
-# AppImage estándar del 9.0.0 sin hacks; aquí solo se reemplaza la fuente (el
-# .deb) por la URL pública (requireFile upstream obliga a bajarlo a mano).
-#
-# nixpkgs (26.11) reestructuró el paquete: el requireFile ya no es el src
-# directo del AppImage, vive en una derivación intermedia y el extraInstall-
-# Commands del wrapType2 arrastra una extracción del original — el viejo truco
-# de overrideAttrs sobre el src dejaba el requireFile en el grafo y el rebuild
-# moría. Fix: override del requireFile que el paquete recibe por callPackage —
-# para el .deb del 9.0.0 devuelve el fetchurl de Archive.org con EL MISMO hash
-# que pinea nixpkgs; cualquier otro requireFile queda intacto.
-# NO usar el 9.0.1 de NetAcad: su "AppImage" viene en formato roto (ELF stub +
-# squashfs sin footer AI + ABI viejas libjpeg.so.8/libtiff.so.5 que nixpkgs ya
-# no provee); documentado en el historial del repo.
+# POR QUÉ ESTÁ VENDORIZADO Y NO SALE DE pkgs.cisco-packet-tracer_9:
+# nixpkgs avanza el paquete al ritmo de Cisco (el bump de 2026-09-16 lo pasó de
+# 9.0.0 a 9.0.1) y el 9.0.1 de NetAcad viene en formato roto (ELF stub + squashfs
+# sin footer AI + ABI viejas libjpeg.so.8/libtiff.so.5 que nixpkgs ya no provee).
+# Además nixpkgs lo pinea con requireFile (bajarlo a mano), mientras que el 9.0.0
+# se sirve público en Archive.org con hash conocido. Este módulo es la definición
+# de nixpkgs 9.0.0 con la fuente cambiada a fetchurl: una instalación limpia
+# (clone -> bootstrap.sh) baja el .deb SOLO, y N máquinas reconstruyen igual.
 #
 # ponytail: si Archive.org moviera el item, el rebuild falla con el fetch —
-# actualizar la URL aquí (1 línea). Es el mismo trade-off de cualquier fuente
-# pineada (omnetpp usa GitHub releases).
+# actualizar la URL/hash aquí (1 línea). Mismo trade-off de cualquier fuente
+# pineada.
 { config, pkgs, lib, ... }:
 
 let
-  pt = (pkgs.cisco-packet-tracer_9.override {
-    requireFile = args:
-      if args.name == "CiscoPacketTracer_900_Ubuntu_64bit.deb"
-      then pkgs.fetchurl {
-        inherit (args) name hash;
-        url = "https://archive.org/download/packettracer900/${args.name}";
-      }
-      else pkgs.requireFile args;
-  }).overrideAttrs (old: {
-    # Entrada de escritorio del "PTSA" (agente de sesion de Cisco): inutil para
-    # el humano, solo ensucia el lanzador con un icono duplicado. Se borra en
-    # extraInstallCommands (no postInstall): upstream instala los .desktop ahi,
-    # y postInstall corria ANTES dejando el PTSA de vuelta en cada rebuild.
-    extraInstallCommands = (old.extraInstallCommands or "") + ''
-      rm -f $out/share/applications/cisco-packet-tracer-ptsa-9.desktop
-    '';
-  });
+  pt = pkgs.appimageTools.wrapType2 rec {
+    pname = "cisco-packet-tracer";
+    version = "9.0.0";
+
+    # appimageTools envuelve el AppImage estándar del 9.0.0 sin hacks. El .deb
+    # (formato Debian) se desempaqueta con dpkg para sacar opt/pt/packettracer.AppImage.
+    src = pkgs.stdenvNoCC.mkDerivation {
+      pname = "cisco-packet-tracer-appimage";
+      inherit version;
+
+      src = pkgs.fetchurl {
+        name = "CiscoPacketTracer_900_Ubuntu_64bit.deb";
+        url = "https://archive.org/download/packettracer900/CiscoPacketTracer_900_Ubuntu_64bit.deb";
+        hash = "sha256-3ZrA1Mf8N9y2j2J/18fm+m1CAMFEklJuVhi5vRcu2SA=";
+      };
+
+      nativeBuildInputs = [ pkgs.dpkg ];
+
+      installPhase = ''
+        runHook preInstall
+        cp opt/pt/packettracer.AppImage $out
+        runHook postInstall
+      '';
+    };
+
+    extraPkgs = _: [
+      pkgs.libpng
+      pkgs.libxkbfile
+    ];
+
+    extraBwrapArgs = [
+      # fixes launch on wayland when the user sets QT_QPA_PLATFORM=wayland:
+      # "Fatal: This application failed to start because no Qt platform plugin could be initialized."
+      "--setenv QT_QPA_PLATFORM xcb"
+    ];
+
+    extraInstallCommands =
+      let
+        contents = pkgs.appimageTools.extract { inherit pname version src; };
+      in
+      ''
+        mv $out/bin/${pname} $out/bin/packettracer9
+
+        install -Dm444 ${contents}/CiscoPacketTracer-9.0.0.desktop $out/share/applications/cisco-packet-tracer-9.desktop
+        # El .desktop del PTSA (agente de sesión de Cisco) es inútil para el
+        # humano y duplicaba el icono en el lanzador: no se instala.
+        substituteInPlace $out/share/applications/* \
+          --replace-fail "Exec=@EXEC_PATH@" "Exec=packettracer9" \
+          --replace-fail "Icon=app" "Icon=cisco-packet-tracer-9"
+
+        install -Dm444 ${contents}/usr/share/icons/hicolor/48x48/apps/app.png $out/share/icons/hicolor/48x48/apps/cisco-packet-tracer-9.png
+        cp -r ${contents}/usr/share/icons/gnome/48x48/mimetypes $out/share/icons/hicolor/48x48/
+
+        for desktop in $out/share/applications/*.desktop; do
+          sed -i '/^\[Desktop Entry\]/a StartupWMClass=PacketTracer' "$desktop"
+        done
+      '';
+
+    meta = {
+      description = "Network simulation tool from Cisco";
+      homepage = "https://www.netacad.com/courses/packet-tracer";
+      license = lib.licenses.unfree;
+      platforms = [ "x86_64-linux" ];
+      sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
+    };
+  };
 in
 {
   options.modules.apps.packetTracer.enable =

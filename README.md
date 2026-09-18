@@ -162,9 +162,10 @@ instala en los 4 hosts desde `modules/apps/common-packages.nix` (input
 
 ### Cisco Packet Tracer (redes — universidad)
 
-Simulador de redes de Cisco (Cisco Networking Academy). Paquete de nixpkgs
-(`cisco-packet-tracer_9`, **9.0.0**, AppImage estándar que `appimageTools`
-empaqueta sin hacks), **activo en los hosts gráficos** (pc/laptop/vm) con el
+Simulador de redes de Cisco (Cisco Networking Academy). Definición
+**vendorizada** en `modules/apps/packettracer.nix` (copia de la de nixpkgs
+**9.0.0**, AppImage estándar que `appimageTools` empaqueta sin hacks),
+**activo en los hosts gráficos** (pc/laptop/vm) con el
 flag `modules.apps.packetTracer.enable`. El `.deb` del 9.0.0 se sirve
 **públicamente** en Archive.org (sin login de NetAcad) y el módulo lo descarga
 **solo** en cada rebuild (`fetchurl`): una instalación limpia (clone →
@@ -172,12 +173,12 @@ flag `modules.apps.packetTracer.enable`. El `.deb` del 9.0.0 se sirve
 y N máquinas con el mismo repo reconstruyen idénticas. Es unfree
 (`allowUnfree` ya está en `modules/core/user.nix`).
 
-Por qué la fuente es `fetchurl` y no `requireFile`: nixpkgs pineó el `.deb` con
-`requireFile` (obligaba a bajarlo a mano, política de no-redistribución de
-Cisco), pero el archivo está publicado en Archive.org con hash conocido — el
-override del módulo solo cambia la fuente. Si Archive.org moviera el item, el
-rebuild falla con un fetch: actualizar la URL en
-`modules/apps/packettracer.nix` (1 línea).
+Por qué vendorizada y con `fetchurl` y no el paquete de nixpkgs: nixpkgs avanza
+al ritmo de Cisco (el bump de 2026-09-16 lo pasó a 9.0.1, que viene roto) y lo
+pinea con `requireFile` (bajarlo a mano, política de no-redistribución de
+Cisco). El módulo fija el 9.0.0 y cambia la fuente al `fetchurl` de Archive.org
+(hash conocido). Si Archive.org moviera el item, el rebuild falla con un fetch:
+actualizar la URL/hash en `modules/apps/packettracer.nix` (1 línea).
 
 NO usar el 9.0.1 de NetAcad: su "AppImage" viene en un formato roto (ELF stub +
 squashfs sin footer AI + ABI viejas `libjpeg.so.8`/`libtiff.so.5` que nixpkgs
