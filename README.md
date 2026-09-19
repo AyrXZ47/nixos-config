@@ -37,7 +37,7 @@ flake.nix              # Entry point — hosts & shared modules
 ├── modules/
 │   ├── apps/          # Applications (system + home)
 │   ├── core/          # User & Nix daemon tuning
-│   ├── desktop/       # Hyprland (system + home), rofi
+│   ├── desktop/       # Hyprland (system + home), Caelestia shell, rofi
 │   ├── hardware/      # AMD tuning (common, desktop, laptop)
 │   └── theming/       # Cursor/fonts, Plymouth, wallpapers
 ├── home/              # Home Manager entry point (user `yovick`)
@@ -55,11 +55,15 @@ flake.nix              # Entry point — hosts & shared modules
 - **Hyprland** — dwindle layout, 5px/10px gaps, 12px rounding, blur (12/3 passes),
   shadows, opacity 0.8/0.75, overshoot/bounce animations, animated gradient borders.
 - **SDDM** — Wayland, `sddm-astronaut` "cyberpunk" theme.
-- **wayle** — right-side cyberpunk bar: workspaces, clock, notifications, battery,
-  clipboard, wallpaper, dashboard (lock/logout/reboot/poweroff).
+- **Caelestia** — shell Quickshell (Qt6/QML): barra lateral izquierda con
+  workspaces, clock, notificaciones, batería, clipboard, emoji, launcher,
+  dashboard (media/perf), utilities y menú de sesión. Lock e idle propios.
+  Config declarativa en `modules/desktop/caelestia.nix` (`shell.json`).
 - **rofi** — drun/run launchers with a custom `cyberpunk.rasi` theme.
-- **hyprlock / hypridle**, polkit-gnome agent, `cliphist` clipboard manager,
-  `hyprshot` screenshots, animated wallpapers via **mpvpaper** (looped mp4).
+- polkit-gnome agent, `cliphist` clipboard manager, `hyprshot` screenshots,
+  animated wallpapers via **mpvpaper** (looped mp4) driven through Caelestia's
+  `wallpaper.postHook` (the shell computes the Material You scheme from the
+  video's first frame; mpvpaper keeps painting the real background).
 
 ### Shell & Terminal
 - **Zsh** + Oh My Zsh (`git`, `sudo`) + **powerlevel10k** (instant prompt) +
@@ -238,7 +242,9 @@ fprintd-verify               # probar sin PAM de por medio
 
 Dónde funciona la huella:
 - **sudo** (terminal) — PAM `pam_fprintd`.
-- **hyprlock** (bloqueo de pantalla) — fprintd nativo de hyprlock, sin PAM.
+- **Lock de Caelestia** (bloqueo de pantalla) — el shell trae su propia unidad
+  PAM (`assets/pam.d/fprint` → `pam_fprintd.so`, `lock.enableFprint = true` en
+  `shell.json`); no pasa por `/etc/pam.d`.
 - **NO** en SDDM: no tiene UI de huella y `pam_fprintd` bloqueaba el login
   esperando el dedo; el PAM de `login`/`sddm` está desactivado a propósito
   (`fprintAuth = false`).
@@ -301,8 +307,14 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 | `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox → WezTerm on ws 1-4 |
 | `SUPER N` | *netrunner*: btop + nvtop split |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
-| `SUPER L` | Lock session |
+| `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |
 | `SUPER P` variants | Screenshot region (`SUPER SHIFT P`) / window (`SUPER ALT P`) / screen (`SUPER P`) |
+| `SUPER CTRL SPACE` | Caelestia launcher |
+| `SUPER CTRL D` / `SUPER CTRL Q` | Caelestia dashboard / session menu |
+| `SUPER CTRL U` / `SUPER CTRL N` | Caelestia utilities panel / sidebar |
+| `SUPER CTRL K` | Caelestia show-all (launcher + dashboard + OSD) |
+| `SUPER SHIFT V` / `SUPER Period` | Clipboard history / emoji picker (Caelestia) |
+| `SUPER F6/F7/F8` | Media prev / play-pause / next (Caelestia MPRIS) |
 | Media keys | Volume (wpctl), mic mute, brightness (brightnessctl) |
 
 ## Custom Commands
