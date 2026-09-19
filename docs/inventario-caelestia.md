@@ -147,6 +147,55 @@ en una sesión real:
 - **Atajos**: `SUPER+CTRL+*` (launcher/dashboard/session/utilities/sidebar) y
   `SUPER+SHIFT+V`/`SUPER+Period` (clipboard/emoji) no chocan con los bindings
   existentes (SUPER+Space, SUPER+N, SUPER+V).
+- **Blur**: `ignore_alpha` de los drawers bajó a 0.8 (antes 0.85 = la opacidad
+  base, Hyprland ignora `<=`, así que la regla estática podía dejar sin blur).
+  Confirmar que drawers/launcher/dashboard salen esmerilados con
+  `transparency.enabled=true`.
+- **Tray**: `tray.hiddenIcons` va vacío; si el icono de qpwgraph molesta,
+  capturar su id REAL (el de `Nexus > Tray`, no asumir `qpwgraph`) antes de
+  añadirlo.
+- **Nexus editable**: tras el rebuild `~/.config/caelestia/shell.json` debe ser
+  archivo real (el servicio `caelestia-seed-config` borra el symlink viejo y
+  copia el default nuevo, ya sin clock/power).
+
+## Diagnóstico de batería (medido 2026-09-19)
+
+Pregunta: "qué se traga mi batería". Muestreo real de `/proc/<pid>/stat` durante
+20 s (CPU instantánea, no el promedio acumulado de `top`/`btop`):
+
+| proceso | CPU |
+|---|---|
+| Hyprland | 5.7% |
+| mpvpaper (video, sesión en AC) | 5.2% |
+| mixxx | 2.2% |
+| quickshell | 0.1% |
+| firefox | 0.1% |
+
+- **El visualiser NO corre siempre.** `Audio.cava` es un servicio con refcount
+  (`service.cpp`: `ref()` arranca, `unref()` para). El `ServiceRef` de
+  `Visualiser.qml` vive dentro de un `Loader` que solo se activa con
+  `shouldBeActive`, y `autoHide=true` lo desactiva cuando hay una ventana
+  tileada. Con wezterm tileado: quickshell 0.1%. Apagarlo no ahorra nada y
+  perdería el cava: se deja `enabled=true` + `autoHide=true`.
+- **mpvpaper se pausa en batería.** `amd-laptop.nix` corre `eppSwitch` por udev
+  (AC change) y aplica EPP + `pause=yes` por IPC. En batería no descodifica un
+  frame. En AC gasta ~5% CPU, inherente a un wallpaper animado.
+- **El idle no es agresivo; ahora sí ahorra.** Antes hypridle solo tenía
+  `lock_cmd` (sin timeouts: la pantalla nunca se apagaba sola). Los timeouts
+  nuevos (lock 5 min, dpms 10, suspend 30) duermen el equipo. Si no hay
+  hibernación (solo zram, sin swap en disco), `SessionManager.exec` cae a
+  `Suspend` tras `CanHibernate`.
+- Consumidores reales: las apps del propio usuario (opencode/serena, wezterm) y
+  el video en AC, no la migración.
+
+## Notificaciones
+
+`quickshell` es el único dueño de `org.freedesktop.Notifications` (verificado en
+la migración). Los `notify-send` de los scripts (touchpad, monitor-mirror,
+switch-layout, toggle-frost, workspace-move-all, cast-tablet) ya entran por ahí y
+se pintan como notificaciones de Caelestia. No se migran a toasts (`caelestia
+shell ipc call toaster`): notify-send es estándar, no depende del IPC del shell y
+sobrevive a reiniciarlo. Los toasts internos (volumen, dnd, etc.) son otra cosa.
 
 ## Reversión
 
