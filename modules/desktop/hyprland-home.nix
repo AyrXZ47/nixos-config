@@ -39,7 +39,9 @@ in
       ---- AUTOSTART ----
       ------------------
       hl.on("hyprland.start", function()
-        hl.exec_cmd("wayle shell")
+        -- Caelestia (Quickshell) reemplaza a Wayle como shell. El CLI vive en el
+        -- wrapper de caelestia-shell; `-d` lo desacopla de la terminal.
+        hl.exec_cmd("caelestia shell -d")
         -- qpwgraph demonio: minimizado en el tray y aplicando el patchbay
         -- guardado. Ambas cosas son ajustes nativos de qpwgraph: "Start minimized
         -- to system tray" (Options) y guardar el patchbay activado una sola vez
@@ -241,7 +243,9 @@ in
       -----------------------
       ---- LAYER RULES ------
       -----------------------
-      hl.layer_rule({ name = "wayle-blur", match = { namespace = "wayle" }, blur = true, ignore_alpha = 1 })
+      hl.layer_rule({ name = "caelestia-drawers-blur", match = { namespace = "caelestia-drawers" }, blur = true, ignore_alpha = 0.85 })
+      hl.layer_rule({ name = "caelestia-background", match = { namespace = "caelestia-background" }, ignore_alpha = 0.85 })
+      hl.layer_rule({ name = "caelestia-area-picker", match = { namespace = "caelestia-area-picker" }, blur = true })
 
       -----------------------
       ---- KEYBINDINGS ------
@@ -254,6 +258,22 @@ in
       hl.bind("SUPER + ALT + D", hl.dsp.exec_cmd("cast-tablet"))
       hl.bind("SUPER + ALT + SHIFT + D", hl.dsp.exec_cmd("cast-tablet extend"))
       hl.bind("SUPER + A", hl.dsp.exec_cmd("rofi -show drun -show-icons"))
+      -- Caelestia: launcher, dashboard, menu de sesion y utilities. Reemplazan
+      -- al dropdown dashboard de Wayle. SUPER+N (netrunner) sigue siendo
+      -- terminal, por eso el sidebar usa SUPER+CTRL+N.
+      hl.bind("SUPER + CTRL + N", hl.dsp.global("caelestia:sidebar"))
+      hl.bind("SUPER + CTRL + Space", hl.dsp.global("caelestia:launcher"))
+      hl.bind("SUPER + CTRL + D", hl.dsp.global("caelestia:dashboard"))
+      hl.bind("SUPER + CTRL + Q", hl.dsp.global("caelestia:session"))
+      hl.bind("SUPER + CTRL + U", hl.dsp.global("caelestia:utilities"))
+      hl.bind("SUPER + CTRL + K", hl.dsp.global("caelestia:showall"))
+      -- Clipboard/emoji pickers nativos de Caelestia (fuzzel). Sustituyen al
+      -- rofi+cliphist del modulo custom de Wayle; el historial sigue en
+      -- cliphist porque Caelestia lo usa por debajo en el CLI.
+      hl.bind("SUPER + SHIFT + V", hl.dsp.exec_cmd("pkill fuzzel || caelestia clipboard"))
+      hl.bind("SUPER + Period", hl.dsp.exec_cmd("pkill fuzzel || caelestia emoji -p"))
+      -- Screenshot nativo (area picker con freeze) ademas de los hyprshot del
+      -- repo; el picker de color ya existe arriba via hyprpicker.
       hl.bind("SUPER + Delete", hl.dsp.window.close())
       hl.bind("SUPER + M", hl.dsp.exit())
       hl.bind("SUPER + V", hl.dsp.window.float({ action = "toggle" }))
@@ -324,12 +344,14 @@ in
       hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
       hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
 
-      -- Control de reproducción: wayle media usa MPRIS, así que SUPER+F7 pausa
-      -- lo que sea que esté sonando (YouTube/Firefox, VLC, mpv...). El `|| mpc`
-      -- es el fallback para MPD cuando no hay reproductor MPRIS activo.
-      hl.bind("SUPER + F7", hl.dsp.exec_cmd("wayle media play-pause || mpc toggle"))
-      hl.bind("SUPER + F6", hl.dsp.exec_cmd("wayle media previous || mpc prev"))
-      hl.bind("SUPER + F8", hl.dsp.exec_cmd("wayle media next || mpc next"))
+      -- Control de reproducción: Caelestia expone shortcuts globales de Hyprland
+      -- (caelestia:media*) que van por MPRIS, así que SUPER+F7 pausa lo que sea
+      -- que esté sonando (YouTube/Firefox, VLC, mpv...). El `|| mpc` como
+      -- fallback para MPD ya no aplica: el global shortcut no devuelve estado,
+      -- y Caelestia cubre MPRIS que es el caso real.
+      hl.bind("SUPER + F7", hl.dsp.global("caelestia:mediaToggle"))
+      hl.bind("SUPER + F6", hl.dsp.global("caelestia:mediaPrev"))
+      hl.bind("SUPER + F8", hl.dsp.global("caelestia:mediaNext"))
 
       -----------------------
       ---- GESTOS -----------
@@ -590,6 +612,70 @@ in
           [ -z "$f" ] && f=$(find "$dir" -maxdepth 1 -type f \( -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) 2>/dev/null | shuf -n1)
         fi
         [ -z "$f" ] && exit 0
+
+        # Enlaza con Caelestia: para que su esquema Material You siga al
+        # wallpaper, se le pasa una imagen (solo acepta imagenes). Video -> se
+        # extrae el frame 0 a un PNG cacheado por hash; imagen -> tal cual. La
+        # llamada al CLI dispara el postHook (Caelestia lo ejecuta con
+        # WALLPAPER_PATH), que es quien realmente arranca mpvpaper, asi que la
+        # logica de reproduccion vive en UN solo lugar.
+        #
+        # La ruta ORIGINAL se guarda para el postHook: el fondo real es el
+        # video, no el frame PNG con el que se calcula el esquema.
+        state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia"
+        mkdir -p "$state"
+        printf '%s' "$f" > "$state/wallpaper-source.txt"
+        case "''${f##*.}" in
+          mp4|webm|mkv|mov)
+            hash=$(sha1sum "$f" | cut -d' ' -f1)
+            cache="''${XDG_CACHE_HOME:-$HOME/.cache}/caelestia/wallpaper-frame"
+            mkdir -p "$cache"
+            frame="$cache/$hash.png"
+            [ -f "$frame" ] || ${pkgs.ffmpeg}/bin/ffmpeg -y -v error -i "$f" -frames:v 1 "$frame"
+            [ -f "$frame" ] || exit 0
+            # --no-filter: el PNG no tiene que superar el tamaño de monitor.
+            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$frame" -N -n
+            ;;
+          *)
+            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$f"
+            ;;
+        esac
+      '';
+    };
+    "hypr/scripts/wallpaper-cycle.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        exec ~/.config/hypr/scripts/wallpaper-set.sh
+      '';
+    };
+    # postHook de Caelestia: el CLI (caelestia-cli) lo invoca en cada cambio de
+    # wallpaper tras calcular el esquema Material You. Recibe WALLPAPER_PATH
+    # (ruta de la imagen que se le pasó al CLI) y SCHEME_*. Como
+    # background.wallpaperEnabled=false en shell.json, Caelestia NO pinta
+    # fondo: el fondo REAL lo pinta mpvpaper aquí.
+    #
+    # OJO (recursión evitada): este hook NO vuelve a llamar a
+    # `caelestia wallpaper`, porque set_wallpaper() -> apply_colours() ->
+    # postHook() y sería un bucle. El frame de video ya lo extrajo
+    # wallpaper-set.sh y se lo pasó al CLI; aquí solo se reproduce.
+    #
+    # Para saber si el fondo es video, wallpaper-set.sh guarda la ruta original
+    # en $XDG_STATE_HOME/caelestia/wallpaper-source.txt.
+    "hypr/scripts/caelestia-wallpaper.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # ponytail: sin `set -e`: postHook best-effort, no debe abortar el
+        # cambio de esquema.
+        img="''${WALLPAPER_PATH:-}"
+        srcfile="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/wallpaper-source.txt"
+        src="$(cat "$srcfile" 2>/dev/null || true)"
+
+        # El fondo real es el ORIGEN (video o imagen), no el frame del esquema.
+        wall="''${src:-$img}"
+        [ -n "$wall" ] && [ -f "$wall" ] || exit 0
+
         pkill -x .mpvpaper-wrapp 2>/dev/null
         sleep 0.2
         # hwdec=vaapi: descodifica el video en la GPU (VCN/Radeon), no en la CPU.
@@ -605,7 +691,7 @@ in
 loop-file=inf
 hwdec=vaapi
 pause=yes
-input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
+input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         # Bateria = un supply de SISTEMA (scope=System, excluye ratones/teclados
         # inalambricos) descargandose. Un desktop sin bateria (o tras UPS) no la
         # tiene => el wallpaper vive siempre. Antes se miraba /supply/AC/online,
@@ -620,14 +706,7 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$f"
           done
           return 1
         }
-        on_battery || ~/.config/hypr/scripts/mpvpaper-pause.sh off
-      '';
-    };
-    "hypr/scripts/wallpaper-cycle.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        exec ~/.config/hypr/scripts/wallpaper-set.sh
+        on_battery || "$HOME/.config/hypr/scripts/mpvpaper-pause.sh" off
       '';
     };
     "hypr/scripts/wallpaper-menu.sh" = {
