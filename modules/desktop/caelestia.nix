@@ -507,6 +507,16 @@ in
 {
   options.modules.desktop.caelestia = {
     enable = lib.mkEnableOption "Caelestia shell (Quickshell)";
+
+    # JSON por defecto de shell.json, materializado en el store. Lo consume el
+    # activation de hyprland-home.nix para sembrarlo como archivo real (editable
+    # por Nexus). Se expone como opción de solo lectura para cruzar el límite
+    # NixOS -> Home Manager sin duplicar el objeto.
+    shellJsonPath = lib.mkOption {
+      type = lib.types.path;
+      readOnly = true;
+      description = "Ruta en el store con el shell.json por defecto de Caelestia.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -519,11 +529,16 @@ in
       pkgs.quickshell
     ] ++ fonts ++ cliRuntime;
 
+    modules.desktop.caelestia.shellJsonPath = pkgs.writeText "caelestia-shell.json" (builtins.toJSON shellConfig);
+
     fonts.packages = fonts;
 
     home-manager.users.yovick = {
-      xdg.configFile."caelestia/shell.json".text = builtins.toJSON shellConfig;
-
+      # shell.json NO va por xdg.configFile: seria un symlink read-only al store
+      # y Nexus/Caelestia lo escriben en runtime -> "Failed to save config" en
+      # cada cambio. Se siembra como archivo real con el servicio systemd de
+      # abajo (idempotente: solo copia si no existe, respeta ediciones).
+      #
       # config.json fue un error de la migración (el CLI solo lee cli.json): el
       # borrado vive en hyprland-home.nix, en scope de Home Manager (ahí sí hay
       # lib.hm.dag para ordenarlo tras writeBoundary).
@@ -566,5 +581,34 @@ in
     # security.pam.services.<name>.fprintAuth defaulta a true. Eso solo afecta
     # a los servicios de /etc/pam.d (login/sddm/sudo/hyprlock), no al lock del
     # shell, así que no se toca aquí.
+    #
+    # --- Siembra de shell.json -------------------------------------------------
+    # Se ejecuta ANTES del shell (graphical-session.target) y es idempotente:
+    #   - symlink previo al store (migración vieja) -> se reemplaza por copia.
+    #   - archivo real ya editado por Nexus -> se respeta, NO se toca.
+    #   - no existe -> se copia el default del repo.
+    # Para volver al default: borrar ~/.config/caelestia/shell.json y rebuild.
+    systemd.user.services.caelestia-seed-config = {
+      description = "Siembra ~/.config/caelestia/shell.json (editable) desde el default del repo";
+      before = [ "graphical-session.target" ];
+      partOf = [ "graphical-session.target" ];
+      wantedBy = [ "graphical-session.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "caelestia-seed-config" ''
+          set -eu
+          f="$HOME/.config/caelestia/shell.json"
+          mkdir -p "$(dirname "$f")"
+          # Symlink al store (read-only) de una generación anterior: fuera.
+          if [ -L "$f" ]; then rm -f "$f"; fi
+          # Archivo real: es del usuario (editado en Nexus), se respeta.
+          if [ ! -f "$f" ]; then
+            cp ${config.modules.desktop.caelestia.shellJsonPath} "$f"
+            chmod u+w "$f"
+          fi
+        '';
+      };
+    };
   };
 }
