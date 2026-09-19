@@ -306,6 +306,8 @@ in
       end
 
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
+      -- Selector de wallpaper (rofi con miniaturas de video).
+      hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-menu.sh"))
       hl.bind("SUPER + N", hl.dsp.exec_cmd("wezterm start -- zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/lock.sh"))
@@ -726,16 +728,53 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       executable = true;
       text = ''
         #!/usr/bin/env bash
+        # Selector de wallpaper con rofi. Muestra miniatura del PRIMER FRAME de
+        # cada video: el cache de frames lo comparte caelestia-wallpaper.sh
+        # (mismo hash sha1 -> mismo PNG), asi que aqui solo se busca.
+        # rofi recibe el icono por linea con el protocolo \0icon\x1f<ruta>.
+        #
+        # lastpipe: el `| read -r pick` final corre en el shell actual (job
+        # control off en scripts no interactivos); sin esto pick se perderia en
+        # el subshell y el menu no aplicaria nada.
+        shopt -s lastpipe
         dir="${wallpapersDir}"
         set="$HOME/.config/hypr/scripts/wallpaper-set.sh"
+        cache="''${XDG_CACHE_HOME:-$HOME/.cache}/caelestia/wallpaper-frame"
+        mkdir -p "$cache"
+
         action=$(printf "Next wallpaper\nSet wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1; spacing: 6px;} element {padding: 8px;} element-icon {size: 0px;}')
         [ -z "$action" ] && exit 0
+
         case "$action" in
           "Next wallpaper")
             "$set"
             ;;
           "Set wallpaper")
-            pick=$(find "$dir" -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) | sort | while read f; do basename "$f"; done | rofi -dmenu -p "wallpaper" -theme-str 'window {width: 700px;} listview {columns: 1; lines: 15; spacing: 6px;} element {padding: 8px;} element-icon {size: 0px;}')
+            # Lista con icono por linea: para video se usa el frame (se genera
+            # si falta); para imagen se usa la imagen misma. CRITICO: va por
+            # PIPE DIRECTO a rofi, sin variable intermedia — bash come los \0
+            # del protocolo \0icon\x1f en cualquier command substitution y los
+            # iconos desaparecen.
+            find "$dir" -maxdepth 1 -type f \
+              \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) \
+              | sort | while IFS= read -r f; do
+                  b=$(basename "$f")
+                  case "''${f##*.}" in
+                    mp4|webm|mkv)
+                      h=$(sha1sum "$f" 2>/dev/null | cut -d' ' -f1)
+                      icon="$cache/$h.png"
+                      # Video ilegible o frame no generable: icono generico en
+                      # vez de un PNG fantasma (rofi mostraria un hueco roto).
+                      if [ -z "$h" ] || { [ ! -f "$icon" ] && ! ${pkgs.ffmpeg}/bin/ffmpeg -y -v error -i "$f" -frames:v 1 "$icon" 2>/dev/null; }; then
+                        icon="video-x-generic"
+                      fi
+                      ;;
+                    *) icon="$f" ;;
+                  esac
+                  printf '%s\0icon\x1f%s\n' "$b" "$icon"
+                done \
+              | rofi -dmenu -p "wallpaper" -show-icons -theme-str 'window {width: 700px;} listview {columns: 1; lines: 10; spacing: 6px;} element {padding: 8px;} element-icon {size: 100px;}' \
+              | read -r pick
             [ -z "$pick" ] && exit 0
             "$set" "$dir/$pick"
             ;;
@@ -1182,6 +1221,21 @@ EOF
   # El archivo huérfano no lo gestiona Home Manager, así que se borra una vez.
   home.activation.rmObsoleteCaelestiaConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     rm -f "$HOME/.config/caelestia/config.json"
+  '';
+
+  # Publica los wallpapers del repo (assets/wallpapers, store read-only) en
+  # ~/Pictures/Wallpapers, que es el `paths.wallpaperDir` de Caelestia y lo que
+  # mira su launcher (>wallpaper). Symlinks, no copias: los mp4 pesan cientos
+  # de MB y el store ya los tiene. El launcher del shell solo lista imágenes
+  # (FileSystemModel.Images), así que los mp4 no aparecen ahí — se eligen con
+  # SUPER+SHIFT+W (wallpaper-menu.sh). Los symlinks igual sirven para dejar
+  # imágenes propias en esa carpeta.
+  home.activation.materializeWallpapers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dest="$HOME/Pictures/Wallpapers"
+    run mkdir -p "$dest"
+    for f in ${wallpapersDir}/*; do
+      run ln -sfn "$f" "$dest/$(basename "$f")"
+    done
   '';
 
 }
