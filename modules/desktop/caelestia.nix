@@ -57,7 +57,10 @@ let
     };
 
     general = {
-      logo = "";
+      # Logo de la barra: snowflake de NixOS (ruta absoluta; SysInfo la soporta
+      # via Paths.absolutePath). Con "" caía al logo de Caelestia porque
+      # Quickshell.iconPath("nix-snowflake") no lo encuentra fuera del tema.
+      logo = "/run/current-system/sw/share/icons/hicolor/256x256/apps/nix-snowflake.png";
       showOverFullscreen = false;
       mediaGifSpeedAdjustment = 300;
       sessionGifSpeed = 0.7;
@@ -166,11 +169,20 @@ let
         shown = 5;
         activeIndicator = true;
         occupiedBg = false;
+        # Iconos de app por workspace: Caelestia NO deduplica (pinta uno por
+        # ventana). El dedupe real (1 icono por clase) vive en el parche QML de
+        # flake.nix sobre caelestia-shell; aquí se deja el máximo de iconos
+        # visibles para que ese dedupe tenga margen.
         showWindows = true;
         showWindowsOnSpecialWorkspaces = true;
-        maxWindowIcons = 5;
+        maxWindowIcons = 8;
         activeTrail = false;
-        displayType = "shapes";
+        # Texto (número de workspace) en vez de las formas Material ("figuritas"
+        # del morphing). Labels vacíos -> cae al número del workspace.
+        displayType = "text";
+        label = "";
+        occupiedLabel = "";
+        activeLabel = "";
         capitalisation = "preserve";
         workspaceIcons = [ ];
         specialWorkspaceIcons = [
@@ -289,18 +301,13 @@ let
           id = "tray";
           enabled = true;
         }
-        {
-          id = "clock";
-          enabled = true;
-        }
+        # clock fuera: el reloj/calendario no aporta en esta barra.
         {
           id = "statusIcons";
           enabled = true;
         }
-        {
-          id = "power";
-          enabled = true;
-        }
+        # power fuera: el apagado/logout vive en el menu de sesion
+        # (SUPER+CTRL+Q). El logo (arriba) abre el launcher.
       ];
       excludedScreens = [ ];
     };

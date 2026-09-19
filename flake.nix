@@ -410,11 +410,40 @@ PYEOF
         '';
       };
 
+      # Caelestia: la barra pinta UN icono de app por VENTANA en cada workspace
+      # (Workspace.qml: `windows.slice(0, maxWindowIcons)`), asi que N wezterms
+      # en el mismo workspace muestran N veces el mismo icono. Wayle deduplicaba
+      # por clase; aqui se reimplementa: agrupar por icono de categoria (la
+      # misma funcion Icons.getAppCategoryIcon que usa el shell) y quedarse con
+      # una ventana por grupo antes del slice.
+      # ponytail: parche de una expresion sobre el tarball del release (rev
+      # 24aa15e == version 2.4.0 de nixpkgs). Si upstream lo hace nativo o sube
+      # la version, el substitute falla ruidosamente en el build -> borrar este
+      # overlay y el `enable` de caelestia.nix. Cambio de comportamiento 100%
+      # visual; no toca servicios ni datos.
+      caelestiaDedupeOverlay = final: prev: {
+        caelestia-shell = prev.caelestia-shell.overrideAttrs (old: {
+          postPatch = (old.postPatch or "") + ''
+            substituteInPlace modules/bar/components/workspaces/Workspace.qml \
+              --replace-fail \
+            'const windows = Hypr.toplevelsForWs(root.ws);' \
+            'const seen = new Set();
+                        const windows = Hypr.toplevelsForWs(root.ws).filter(w => {
+                            const key = Icons.getAppCategoryIcon(w.lastIpcObject.class, "terminal");
+                            if (seen.has(key))
+                                return false;
+                            seen.add(key);
+                            return true;
+                        });'
+          '';
+        });
+      };
+
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
