@@ -1,12 +1,6 @@
 { config, pkgs, lib, ... }:
 
 let
-  adi1090x-src = pkgs.fetchFromGitHub {
-    owner = "adi1090x";
-    repo = "rofi";
-    rev = "512a585fff6da5b2a90e5948059b062516ddb2e7";
-    hash = "sha256-iUX0Quae06tGd7gDgXZo1B3KYgPHU+ADPBrowHlv02A=";
-  };
   wallpapersDir = ../../assets/wallpapers;
 in
 {
@@ -257,7 +251,10 @@ in
       -- Cast a tablet via VNC+tailscale: SUPER+ALT+D espejo, SUPER+ALT+SHIFT+D extend
       hl.bind("SUPER + ALT + D", hl.dsp.exec_cmd("cast-tablet"))
       hl.bind("SUPER + ALT + SHIFT + D", hl.dsp.exec_cmd("cast-tablet extend"))
-      hl.bind("SUPER + A", hl.dsp.exec_cmd("rofi -show drun -show-icons"))
+      -- rofi retirado: TODO pasa por el launcher de Caelestia (SUPER+CTRL+Space
+      -- para apps, y `>ack` dentro del launcher para las acciones). SUPER+A
+      -- abre el mismo launcher para no perder la costumbre.
+      hl.bind("SUPER + A", hl.dsp.global("caelestia:launcher"))
       -- Caelestia: launcher, dashboard, menu de sesion y utilities. Reemplazan
       -- al dropdown dashboard de Wayle. SUPER+N (netrunner) sigue siendo
       -- terminal, por eso el sidebar usa SUPER+CTRL+N.
@@ -279,7 +276,8 @@ in
       hl.bind("SUPER + V", hl.dsp.window.float({ action = "toggle" }))
       -- Pin = always on top + visible en todos los workspaces (requiere ventana flotante).
       hl.bind("SUPER + T", hl.dsp.window.pin({ action = "toggle" }))
-      hl.bind("SUPER + R", hl.dsp.exec_cmd("rofi -show run"))
+      -- SUPER+R (rofi run) fuera: el launcher de Caelestia ya busca binarios
+      -- ademas de apps. Se deja como acceso al selector de wallpaper propio.
       hl.bind("SUPER + J", hl.dsp.layout("togglesplit"))
 
       hl.bind("SUPER + left", hl.dsp.focus({ direction = "left" }))
@@ -306,7 +304,8 @@ in
       end
 
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
-      -- Selector de wallpaper (rofi con miniaturas de video).
+      -- Selector de wallpaper (fuzzel con miniaturas de video). Tambien está
+      -- como accion `>Wallpaper` en el launcher de Caelestia.
       hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-menu.sh"))
       hl.bind("SUPER + N", hl.dsp.exec_cmd("wezterm start -- zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
@@ -364,17 +363,8 @@ in
     '';
   };
 
-  programs.rofi = {
-    enable = true;
-    settings = {
-      display-drun = "";
-      display-run = "";
-      display-filebrowser = "";
-      display-window = "";
-      drun-display-format = "{name}";
-      show-icons = true;
-    };
-    theme = lib.mkForce "~/.config/rofi/cyberpunk.rasi";
+  programs.rofi = lib.mkForce {
+    enable = false;
   };
 
   home.packages = with pkgs; [
@@ -728,57 +718,47 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Selector de wallpaper con rofi. Muestra miniatura del PRIMER FRAME de
-        # cada video: el cache de frames lo comparte caelestia-wallpaper.sh
-        # (mismo hash sha1 -> mismo PNG), asi que aqui solo se busca.
-        # rofi recibe el icono por linea con el protocolo \0icon\x1f<ruta>.
+        # Selector de wallpaper con fuzzel (la misma UI que usa Caelestia para
+        # clipboard/emoji). Muestra miniatura del PRIMER FRAME de cada video: el
+        # cache de frames lo comparte caelestia-wallpaper.sh (mismo hash sha1 ->
+        # mismo PNG), asi que aqui solo se busca.
         #
-        # lastpipe: el `| read -r pick` final corre en el shell actual (job
-        # control off en scripts no interactivos); sin esto pick se perderia en
-        # el subshell y el menu no aplicaria nada.
-        shopt -s lastpipe
+        # fuzzel recibe el icono por linea con el protocolo \0icon\x1f<ruta>
+        # (igual que rofi). CRITICO: la lista va por PIPE DIRECTO a fuzzel, sin
+        # variable intermedia — bash come los \0 en cualquier command
+        # substitution y los iconos desaparecen.
         dir="${wallpapersDir}"
         set="$HOME/.config/hypr/scripts/wallpaper-set.sh"
         cache="''${XDG_CACHE_HOME:-$HOME/.cache}/caelestia/wallpaper-frame"
         mkdir -p "$cache"
 
-        action=$(printf "Next wallpaper\nSet wallpaper" | rofi -dmenu -p "Wallpaper" -theme-str 'window {width: 300px;} listview {lines: 2; columns: 1; spacing: 6px;} element {padding: 8px;} element-icon {size: 0px;}')
-        [ -z "$action" ] && exit 0
+        list_f="$cache/.menu-list"
+        find "$dir" -maxdepth 1 -type f \
+          \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) \
+          | sort | while IFS= read -r f; do
+              b=$(basename "$f")
+              case "''${f##*.}" in
+                mp4|webm|mkv)
+                  h=$(sha1sum "$f" 2>/dev/null | cut -d' ' -f1)
+                  icon="$cache/$h.png"
+                  # Video ilegible o frame no generable: icono generico en vez
+                  # de un PNG fantasma (fuzzel mostraria un hueco roto).
+                  if [ -z "$h" ] || { [ ! -f "$icon" ] && ! ${pkgs.ffmpeg}/bin/ffmpeg -y -v error -i "$f" -frames:v 1 "$icon" 2>/dev/null; }; then
+                    icon="video-x-generic"
+                  fi
+                  ;;
+                *) icon="$f" ;;
+              esac
+              printf '%s\0icon\x1f%s\n' "$b" "$icon"
+            done > "$list_f"
+        [ -s "$list_f" ] || exit 0
 
-        case "$action" in
-          "Next wallpaper")
-            "$set"
-            ;;
-          "Set wallpaper")
-            # Lista con icono por linea: para video se usa el frame (se genera
-            # si falta); para imagen se usa la imagen misma. CRITICO: va por
-            # PIPE DIRECTO a rofi, sin variable intermedia — bash come los \0
-            # del protocolo \0icon\x1f en cualquier command substitution y los
-            # iconos desaparecen.
-            find "$dir" -maxdepth 1 -type f \
-              \( -name '*.mp4' -o -name '*.webm' -o -name '*.mkv' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.png' \) \
-              | sort | while IFS= read -r f; do
-                  b=$(basename "$f")
-                  case "''${f##*.}" in
-                    mp4|webm|mkv)
-                      h=$(sha1sum "$f" 2>/dev/null | cut -d' ' -f1)
-                      icon="$cache/$h.png"
-                      # Video ilegible o frame no generable: icono generico en
-                      # vez de un PNG fantasma (rofi mostraria un hueco roto).
-                      if [ -z "$h" ] || { [ ! -f "$icon" ] && ! ${pkgs.ffmpeg}/bin/ffmpeg -y -v error -i "$f" -frames:v 1 "$icon" 2>/dev/null; }; then
-                        icon="video-x-generic"
-                      fi
-                      ;;
-                    *) icon="$f" ;;
-                  esac
-                  printf '%s\0icon\x1f%s\n' "$b" "$icon"
-                done \
-              | rofi -dmenu -p "wallpaper" -show-icons -theme-str 'window {width: 700px;} listview {columns: 1; lines: 10; spacing: 6px;} element {padding: 8px;} element-icon {size: 100px;}' \
-              | read -r pick
-            [ -z "$pick" ] && exit 0
-            "$set" "$dir/$pick"
-            ;;
-        esac
+        # fuzzel en modo dmenu (NO --dmenu0: ese usa NUL como separador de
+        # linea y chocaria con el \0 del protocolo de iconos). El input se pasa
+        # tal cual por stdin.
+        pick=$(fuzzel --dmenu --prompt="Wallpaper  " < "$list_f") || exit 0
+        [ -z "$pick" ] && exit 0
+        "$set" "$dir/$pick"
       '';
     };
     # Bloqueo: lo pinta Caelestia (WlSessionLock), pero ademas hay dos
@@ -894,32 +874,8 @@ except Exception:
         [ "$n" -gt 0 ] && notify-send -t 2000 -a hyprland -u low "ws $cur -> $1 ($n ventanas)"
       '';
     };
-
-    "rofi/launcher.rasi" = {
-      source = ./themes/rofi/launcher.rasi;
-    };
-    "rofi/cyberpunk.rasi".text = ''
-      @theme "launchers/type-3/style-1"
-
-      * {
-          background:     #000B1E;
-          background-alt: #0A1528;
-          foreground:     #0ABDC6;
-          selected:       #0ABDC6;
-          active:         #00FF00;
-          urgent:         #FF0000;
-      }
-
-      window {
-          background-color: #000B1E;
-      }
-    '';
-    "rofi/launchers".source = "${adi1090x-src}/files/launchers";
-    "rofi/colors".source = "${adi1090x-src}/files/colors";
-    "rofi/applets".source = "${adi1090x-src}/files/applets";
-    "rofi/powermenu".source = "${adi1090x-src}/files/powermenu";
-    "rofi/scripts".source = "${adi1090x-src}/files/scripts";
-    "rofi/fonts".source = "${adi1090x-src}/fonts";
+    # rofi/*.rasi + tema cyberpunk retirados: el launcher es Caelestia y los
+    # pickers usan fuzzel (misma UI que clipboard/emoji).
   };
 
   xdg.mimeApps.enable = false;

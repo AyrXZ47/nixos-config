@@ -359,6 +359,113 @@ let
         variants = false;
         wallpapers = false;
       };
+      # Acciones del launcher (>). Sustituyen a rofi: el prefijo `>` las lista.
+      # Se reemplaza la lista entera (en este sistema de config un valor de
+      # usuario pisa el default), así que van incluidas las que traía el shell
+      # (Scheme/Variant/Light/Dark/Shutdown/Reboot/Logout/Lock/Sleep/Settings)
+      # más las funciones propias del repo que antes vivían en rofi o en atajos
+      # sueltos. Las de apagado quedan como `dangerous`.
+      actions = [
+        {
+          name = "Wallpaper";
+          icon = "image";
+          description = "Elegir wallpaper (video o imagen)";
+          command = [ "/home/yovick/.config/hypr/scripts/wallpaper-menu.sh" ];
+        }
+        {
+          name = "Random wallpaper";
+          icon = "casino";
+          description = "Wallpaper aleatorio";
+          command = [ "/home/yovick/.config/hypr/scripts/wallpaper-cycle.sh" ];
+        }
+        {
+          name = "Scheme";
+          icon = "palette";
+          description = "Cambiar el esquema de color";
+          command = [ "autocomplete" "scheme" ];
+        }
+        {
+          name = "Variant";
+          icon = "colors";
+          description = "Cambiar la variante del esquema";
+          command = [ "autocomplete" "variant" ];
+        }
+        {
+          name = "Light";
+          icon = "light_mode";
+          description = "Esquema en modo claro";
+          command = [ "setMode" "light" ];
+        }
+        {
+          name = "Dark";
+          icon = "dark_mode";
+          description = "Esquema en modo oscuro";
+          command = [ "setMode" "dark" ];
+        }
+        {
+          name = "Settings";
+          icon = "settings";
+          description = "Configurar el shell";
+          command = [ "caelestia" "shell" "nexus" "open" ];
+        }
+        {
+          name = "Clipboard";
+          icon = "content_paste";
+          description = "Historial del portapapeles";
+          command = [ "caelestia" "clipboard" ];
+        }
+        {
+          name = "Emoji";
+          icon = "emoji_emotions";
+          description = "Selector de emojis";
+          command = [ "caelestia" "emoji" "-p" ];
+        }
+        {
+          name = "Color picker";
+          icon = "colorize";
+          description = "Copiar el color de un pixel";
+          command = [ "hyprpicker" "-a" "-f" "hex" ];
+        }
+        {
+          name = "Screenshot";
+          icon = "screenshot_region";
+          description = "Captura de region";
+          command = [ "hyprshot" "-m" "region" "-o" "/home/yovick/Pictures/Screenshots" ];
+        }
+        {
+          name = "Next wallpaper";
+          icon = "skip_next";
+          description = "Siguiente wallpaper aleatorio";
+          command = [ "/home/yovick/.config/hypr/scripts/wallpaper-cycle.sh" ];
+        }
+        {
+          name = "Lock";
+          icon = "lock";
+          description = "Bloquear la sesion";
+          command = [ "/home/yovick/.config/hypr/scripts/lock.sh" ];
+        }
+        {
+          name = "Logout";
+          icon = "logout";
+          description = "Cerrar la sesion";
+          command = [ "logout" ];
+          dangerous = true;
+        }
+        {
+          name = "Shutdown";
+          icon = "power_settings_new";
+          description = "Apagar";
+          command = [ "poweroff" ];
+          dangerous = true;
+        }
+        {
+          name = "Reboot";
+          icon = "restart_alt";
+          description = "Reiniciar";
+          command = [ "reboot" ];
+          dangerous = true;
+        }
+      ];
     };
 
     # fprint del laptop (el sensor ya funciona vía fprintd, ver
