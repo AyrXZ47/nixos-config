@@ -1163,4 +1163,11 @@ EOF
     grep -q '^EnableRemoteFolderThumbnail=' "$f" 2>/dev/null || sed -i '/^\[PreviewSettings\]/a EnableRemoteFolderThumbnail=true' "$f"
   '';
 
+  # Caelestia: config.json fue un error de la migración (caelestia-cli lee
+  # ÚNICAMENTE ~/.config/caelestia/cli.json, ver modules/desktop/caelestia.nix).
+  # El archivo huérfano no lo gestiona Home Manager, así que se borra una vez.
+  home.activation.rmObsoleteCaelestiaConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    rm -f "$HOME/.config/caelestia/config.json"
+  '';
+
 }

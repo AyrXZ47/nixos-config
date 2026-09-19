@@ -524,24 +524,24 @@ in
     home-manager.users.yovick = {
       xdg.configFile."caelestia/shell.json".text = builtins.toJSON shellConfig;
 
-      # El CLI (caelestia-cli) lee ~/.config/caelestia/cli.json. enableHypr=false
-      # es CLAVE: por defecto el CLI escribe el esquema de color en
-      # ~/.config/hypr/scheme/current.lua en cada cambio de wallpaper, y con
-      # mpvpaper + Hyprland Lua eso pisaría la config del repo. Con el flag en
-      # false, el esquema lo consume el shell (vía SCHEME_COLOURS del postHook)
-      # y no toca Hyprland.
-      xdg.configFile."caelestia/cli.json".text = builtins.toJSON {
-        theme.enableHypr = false;
-      };
+      # config.json fue un error de la migración (el CLI solo lee cli.json): el
+      # borrado vive en hyprland-home.nix, en scope de Home Manager (ahí sí hay
+      # lib.hm.dag para ordenarlo tras writeBoundary).
 
-      # El resto del tema (GTK/Qt/btop/…) no aplica: el repo ya lleva su propia
-      # theming (theme-base.nix, kdeglobals, rofi cyberpunk). Caelestia solo
-      # aporta el esquema de su propia UI.
-      xdg.configFile."caelestia/config.json".text = builtins.toJSON {
-        # Ruta absoluta: este módulo corre en el scope de NixOS, donde
-        # config.xdg.configHome (opción de Home Manager) no existe.
-        wallpaper.postHook = "/home/yovick/.config/hypr/scripts/caelestia-wallpaper.sh";
+      # OJO: caelestia-cli lee UN SOLO archivo para todo, `cli.json`
+      # (`user_config_path = c_config_dir / "cli.json"` en utils/paths.py). Otra
+      # ruta (config.json) se ignora por completo — error que dejó a mpvpaper
+      # sin arrancar en el primer boot. Aqui va TODO lo del CLI:
+      #  - theme.enableHypr=false: el CLI escribe el esquema de color en
+      #    ~/.config/hypr/scheme/current.lua por defecto; con mpvpaper + Hyprland
+      #    Lua eso pisaría la config del repo. El esquema lo consume el shell.
+      #  - theme.enable*: el resto del theming ya lo lleva el repo
+      #    (theme-base.nix, kdeglobals, rofi cyberpunk); Caelestia solo aporta el
+      #    esquema de su propia UI.
+      #  - wallpaper.postHook: arranca mpvpaper con el fondo real.
+      xdg.configFile."caelestia/cli.json".text = builtins.toJSON {
         theme = {
+          enableHypr = false;
           enableGtk = false;
           enableQt = false;
           enableBtop = false;
@@ -554,6 +554,9 @@ in
           enableWarp = false;
           enableZed = false;
         };
+        # Ruta absoluta: este módulo corre en el scope de NixOS, donde
+        # config.xdg.configHome (opción de Home Manager) no existe.
+        wallpaper.postHook = "/home/yovick/.config/hypr/scripts/caelestia-wallpaper.sh";
       };
     };
 
