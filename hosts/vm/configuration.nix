@@ -7,6 +7,7 @@
     ../../modules/core/networking.nix
     ../../modules/core/tailscale.nix
     ../../modules/desktop/hyprland.nix
+    ../../modules/desktop/caelestia.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
     ../../modules/hardware/fingerprint.nix
@@ -23,6 +24,7 @@
   modules.apps.packetTracer.enable = true;
 
   modules.desktop.hyprland.enable = true;
+  modules.desktop.caelestia.enable = true;
 
   modules.hardware.fingerprint.enable = true;
 
