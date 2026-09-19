@@ -56,7 +56,7 @@ in
         -- daemon-autostart" (ver abajo), no por exec-once: el portal RemoteDesktop
         -- deriva el app id del llamador desde el nombre de su unidad systemd y sin
         -- unidad queda vacio (el backend de hypr-kdeconnect lo rechaza).
-        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/idle.sh")
+        -- (idle.sh/hypridle eliminado: el idle vive en Caelestia, ver shell.json)
         -- Forzar cursor Material Bibata Deep Blue tambien en la sesion
         -- Hyprland (ademas del XCURSOR_THEME global de home-manager):
         -- hyprcursor a veces no pilla el tema del sistema y deja el default;
@@ -79,10 +79,10 @@ in
         general = {
           gaps_in = 5,
           -- gaps_out por-lado en formato TABLA (la config lua NO acepta string
-          -- css para hl.config: exige entero o tabla). right negativo para
-          -- absorber el hueco que deja la reserva exclusive de wayle; en
-          -- 0.56 puede clampar a 0 segun discusion 12880, se valida en vivo.
-          gaps_out = { top = 10, right = -10, bottom = 10, left = 10 },
+          -- css para hl.config: exige entero o tabla). Con la barra de Caelestia
+          -- a la IZQUIERDA (exclusive) el hueco a absorber esta a la izquierda;
+          -- antes el -10 right compensaba la barra derecha de wayle. Simetrico.
+          gaps_out = { top = 10, right = 10, bottom = 10, left = 10 },
           border_size = 4,
           layout = "dwindle",
           col = {
@@ -228,8 +228,8 @@ in
       -- GUIs de simulacion/HDL lanzadas desde la terminal (gtkwave, matplotlib,
       -- logisim): nacen FLOTANTES y MAXIMIZADAS (fullscreen modo 1, el estilo
       -- LibreOffice: cubre todo el mosaico respetando los gaps y la zona
-      -- reservada de wayle, verificado en vivo: margen 4px uniforme, borde a
-      -- 4px de la barra) encima de las terminales. Flotante = el layout en
+      -- reservada de la barra de Caelestia (izquierda), verificado en vivo:
+      -- margen uniforme, borde a unos px de la barra) encima de las terminales. Flotante = el layout en
       -- mosaico no se toca (las terminales nunca se redimensionan, bug
       -- documentado de opencode) y al cerrar la GUI queda todo como estaba.
       -- La regla aplica al mapear (atomica), a diferencia de guirun
@@ -308,7 +308,7 @@ in
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       hl.bind("SUPER + N", hl.dsp.exec_cmd("wezterm start -- zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
-      hl.bind("SUPER + L", hl.dsp.exec_cmd("loginctl lock-session"))
+      hl.bind("SUPER + L", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/lock.sh"))
       -- Esmerilado on/off (blur + transparencia) con notificación.
       hl.bind("SUPER + B", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/toggle-frost.sh"))
 
@@ -376,8 +376,7 @@ in
   };
 
   home.packages = with pkgs; [
-    hyprlock
-    hypridle
+    # hyprlock/hypridle fuera: lock e idle los hace Caelestia (module caelestia.nix).
     brightnessctl
     pavucontrol
     libnotify
@@ -484,8 +483,8 @@ in
     # alterna; con "mirror" fuerza espejo (lo usa el evento monitor.added).
     # hyprctl keyword esta bloqueado en Hyprland 0.56 ("non-legacy parsers"):
     # el runtime va via hyprctl eval de la API hl.monitor(..., mirror = X).
-    # notify-send (no "wayle notify": ese subcommand solo controla la lista,
-    # no envia texto).
+    # notify-send (no "wayle notify", ya retirado: ese subcommand solo controlaba
+    # la lista, no enviaba texto).
     "hypr/scripts/monitor-mirror.sh" = {
       executable = true;
       text = ''
@@ -729,105 +728,37 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         esac
       '';
     };
-    # Bloqueo: hyprlock al instante y, en paralelo, el hook de OpenRGB aplica el
-    # perfil "apagado"; al desbloquear restaura el perfil normal. Los hooks solo
-    # corren si el módulo openrgb está activo (el `[ -x ... ]` lo decide).
+    # Bloqueo: lo pinta Caelestia (WlSessionLock), pero ademas hay dos
+    # side-effects del repo que el shell no conoce:
+    #   1) cliphist wipe: el historial captura TODO (incl. passwords de
+    #      KeepassXC) y quedaban en claro en ~/.cache/cliphist.
+    #   2) OpenRGB: al bloquear se apaga el perfil y al volver se restaura.
+    # El "after" ya no puede ser un `wait`: el IPC de Caelestia no bloquea.
+    # Se sondea `lock isLocked` en segundo plano (patron ya usado en hyprdev
+    # para no depender de sleeps ciegos).
     "hypr/scripts/lock.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Al bloquear se borra el historial de clipboard (cliphist wipe): captura
-        # TODO lo copiado, incluidos passwords de KeepassXC, y quedaban en claro en
-        # ~/.cache/cliphist. Solo quedan los max-items post-rebuild; esto los deja
-        # en cero cada vez que se bloquea la sesión.
         cliphist wipe
-        hyprlock &
-        _hyprlock_pid=$!
         [ -x "$HOME/.config/hypr/scripts/openrgb-lock-before" ] && "$HOME/.config/hypr/scripts/openrgb-lock-before"
-        wait "$_hyprlock_pid"
-        [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
+        caelestia shell ipc call lock lock >/dev/null 2>&1 || exit 0
+        # Restaura cuando el lock se libere (poll corto; sale si el shell muere).
+        (
+          for _ in $(seq 60); do
+            sleep 2
+            locked=$(caelestia shell ipc call lock isLocked 2>/dev/null || echo "")
+            [ "$locked" = "false" ] && break
+            [ -z "$locked" ] && exit 0
+          done
+          [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
+        ) >/dev/null 2>&1 &
       '';
     };
-    # hypridle (daemon de idle nativo de Hyprland) escucha las señales de logind:
-    # loginctl lock-session (SUPER+L y el dropdown de wayle) emite la señal D-Bus
-    # Lock y hypridle corre lock_cmd (lock.sh → hyprlock). No hay listeners de
-    # inactividad: solo se bloquea manual o antes de dormir.
-    "hypr/scripts/idle.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        exec hypridle
-      '';
-    };
-    "hypr/hypridle.conf".text = ''
-      general {
-          lock_cmd = pidof hyprlock || ${config.xdg.configHome}/hypr/scripts/lock.sh
-          before_sleep_cmd = loginctl lock-session
-      }
-    '';
 
-    # hyprlock: la config debe existir o hyprlock sale con error y la sesión NO se
-    # bloquea. Autenticación: PAM (contraseña, vía security.pam.services.hyprlock)
-    # y huella nativa por fprintd (auth fingerprint:enabled), en paralelo.
-    # background path=screenshot usa screencopy de Hyprland; el color es solo el
-    # fallback (algunos lockers daban pantalla blanca con screenshot; no aplica).
-    "hypr/hyprlock.conf".text = ''
-      general {
-          hide_cursor = true
-          immediate_render = true
-      }
-
-      background {
-          path = screenshot
-          color = rgb(10, 10, 18)
-          blur_passes = 3
-          blur_size = 8
-          contrast = 0.9
-          brightness = 0.8
-      }
-
-      auth {
-          pam:enabled = true
-          fingerprint:enabled = true
-      }
-
-      input-field {
-          size = 360, 60
-          position = 0, -100
-          outline_thickness = 3
-          dots_size = 0.2
-          dots_spacing = 0.2
-          dots_center = true
-          outer_color = rgb(255, 0, 102)
-          inner_color = rgb(10, 10, 18)
-          font_color = rgb(212, 212, 240)
-          fade_on_empty = false
-          placeholder_text = Password
-          fail_text = $FAIL
-          check_color = rgb(0, 255, 136)
-          fail_color = rgb(255, 0, 64)
-          rounding = 8
-      }
-
-      label {
-          text = cmd[update:1000] echo "$(date +'%H:%M')"
-          color = rgb(255, 0, 102)
-          font_size = 44
-          font_family = "JetBrains Mono"
-          position = 0, 120
-          halign = center
-          valign = center
-      }
-
-      label {
-          text = $FPRINTPROMPT
-          color = rgb(136, 136, 170)
-          font_size = 13
-          position = 0, -170
-          halign = center
-          valign = center
-      }
-    '';
+    # hyprlock/hypridle ELIMINADOS: Caelestia trae lock (WlSessionLock) e idle
+    # (IdleMonitors con los timeouts de shell.json) propios. Mantener los dos
+    # sistemas pelearía por la sesión y duplicaría bloqueos.
     "hypr/scripts/switch-layout.sh" = {
       executable = true;
       text = ''

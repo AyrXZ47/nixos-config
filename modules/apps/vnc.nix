@@ -14,9 +14,10 @@
   #     depender de Miracast/Second screen. Esta salida se elimina al soltar
   #     (hyprctl output remove); el config de monitores del archivo no se
   #     toca: hyprctl keyword/output solo afecta la sesion actual.
-  # Ceiling: si hypridle apaga/blanquea la pantalla la sesion cast se congela
+  # Ceiling: si el idle apaga/blanquea la pantalla la sesion cast se congela
   # hasta que vuelva el input; para presentaciones largas, mantener la
-  # pantalla despierta (wayle idle toggle) durante el cast.
+  # pantalla despierta. El idle ahora es de Caelestia (shell.json); el
+  # inhibidor se activa desde su panel utilities (quickToggle "keepAwake").
   home.packages = with pkgs; [
     wayvnc
     (pkgs.writeShellScriptBin "cast-tablet" ''

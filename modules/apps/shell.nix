@@ -86,8 +86,9 @@
       # (dwindle): el mismo feel de WM que cualquier ventana — se reparten la
       # pantalla sin solaparse y se redimensionan con SUPER+clic — sin el modo
       # DE de un mosaico flotante. Las 4 comparten la MISMA clase
-      # hyprdev-<runid>: wayle (app-icons-dedupe: 1 icono por clase única)
-      # colapsa las 4 ventanas en UN solo icono en la barra; el runid aísla
+      # hyprdev-<runid>: caelestia (bar.workspaces.windowIcons regex: un icono
+      # de terminal por las 4 ventanas, mismo efecto que el app-icons-dedupe de
+      # wayle) colapsa las 4 ventanas en UN solo icono en la barra; el runid aísla
       # sesiones concurrentes. El orden del spawn ES el layout: cada ventana
       # parte a la anterior (cascada dwindle) y cada spawn ESPERA a que el
       # conteo de ventanas llegue a N (poll por clase-runid, sin sleeps a
@@ -136,7 +137,7 @@
           # Cierre en cadena gobernado por la terminal free: su cierre (exit/
           # ctrl-d o SUPER+Q) mata a los clientes supervivientes (matar el
           # cliente mata su ventana). free ya NO se distingue por clase (las 4
-          # comparten hyprdev-<runid> para el icono único de wayle): se
+          # comparten hyprdev-<runid> para el icono único de caelestia): se
           # identifica por su pid, el 2º del pidfile (orden de spawn), que es
           # wezterm mientras su ventana viva. Los crashes o salidas de
           # opencode/pipes/nvim SOLO cierran su propia ventana: opencode tiene

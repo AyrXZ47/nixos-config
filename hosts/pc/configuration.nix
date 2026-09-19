@@ -82,15 +82,17 @@
   };
 
   # ddcci: expone el monitor externo (DDC/CI) como /sys/class/backlight/ddcci0.
-  # Asi wayle (modulo brightness nativo: dropdown + OSD) y brightnessctl pueden
-  # controlar el brillo, sin depender de ddcutil por cada cambio. Sin esto no hay
-  # /sys/class/backlight en este PC (monitor externo) y el brillo solo va por DDC.
+  # Asi Caelestia (OSD de brillo: osd.enableBrightness + scroll en la barra) y
+  # brightnessctl pueden controlar el brillo, sin depender de ddcutil por cada
+  # cambio. Sin esto no hay /sys/class/backlight en este PC (monitor externo) y
+  # el brillo solo va por DDC.
   boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   boot.kernelModules = [ "ddcci" "ddcci-backlight" ];
 
   # ddcci: desde kernel 6.8 el auto-probe de displays esta roto (el driver no
   # instancia el dispositivo por si solo), y sin el, /sys/class/backlight queda
-  # vacio -> wayle oculta el icono de brillo. Fix: instanciar manualmente el
+  # vacio -> Caelestia no puede leer el brillo (icono/OSD vacios). Fix:
+  # instanciar manualmente el
   # dispositivo 0x37 (DDC/CI) en el bus i2c del conector conectado.
   # Ojo: en DP el DDC/CI viaja por el bus i2c AUXILIAR (drm_dp_auxN, nombre
   # "AMDGPU DM aux hw bus"), NO por el symlink ddc (que apunta a un i2c del
