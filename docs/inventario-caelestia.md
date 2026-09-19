@@ -117,10 +117,39 @@ esquema dinámico de Caelestia para la UI.
 ## Plan por fases
 
 1. `modules/desktop/caelestia.nix`: enable option, paquetes, fonts, OSD,
-   session, quickToggles.
+   session, quickToggles. ✅
 2. `shell.json` declarativo: barra izquierda, workspaces, statusIcons,
-   dashboard/session, idle, lock.
-3. mpvpaper + scheme dinámico via `postHook`.
-4. `hyprland-home.nix`: autostart, global shortcuts, layer rules, quitar wayle.
-5. `hyprland.nix`: quitar config Wayle, restos, README.
-6. PAM lock (fprintd) y validación `nix flake check`.
+   dashboard/session, idle, lock. ✅
+3. mpvpaper + scheme dinámico via `postHook`. ✅
+4. `hyprland-home.nix`: autostart, global shortcuts, layer rules, quitar wayle. ✅
+5. `hyprland.nix`: quitar config Wayle, restos, README. ✅
+6. PAM lock (fprintd) y validación `nix flake check`. ✅
+
+## Pendiente de validar en vivo (tras el primer rebuild)
+
+`nix flake check` y el build del toplevel pasan, pero estas cosas solo se ven
+en una sesión real:
+
+- **Barra**: Caelestia la pone a la IZQUIERDA sí o sí. Ver si el `gaps_out`
+  simétrico (10/10/10/10) queda bien o hay que volver a compensar.
+- **Fprint del lock**: el lock de Caelestia lee `assets/pam.d/fprint` con
+  `pam_fprintd.so` (parcheado por nixpkgs a
+  `/run/current-system/sw/lib/security/pam_fprintd.so`). Confirmar que
+  desbloquea con el dedo y que no pelea con el `pam_fprintd` de sudo.
+- **Idle**: los timeouts de `shell.json` (lock 5 min, dpms 10, suspender 30)
+  reemplazan a hypridle. Confirmar que respeta `inhibitWhenAudio` durante
+  música/video.
+- **mpvpaper**: el postHook arranca mpvpaper con el video; el frame extraído
+  se usa para el esquema Material You. Probar `>wallpaper` en el launcher y el
+  botón de wallpaper de la barra (`wallpaper-menu.sh`).
+- **hyprdev**: el glob `hyprdev.*` de `windowIcons` debe colapsar las 4
+  ventanas en un icono de terminal.
+- **Atajos**: `SUPER+CTRL+*` (launcher/dashboard/session/utilities/sidebar) y
+  `SUPER+SHIFT+V`/`SUPER+Period` (clipboard/emoji) no chocan con los bindings
+  existentes (SUPER+Space, SUPER+N, SUPER+V).
+
+## Reversión
+
+Todo está en commits atómicos sobre `main`; para volver a Wayle basta con
+`git revert` de los commits de la migración (o `git checkout` del commit
+anterior a `fe8c70c`).
