@@ -604,6 +604,12 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
+        # Dos responsabilidades separadas a proposito:
+        #   1) FONDO (mpvpaper/imagen): no depende del shell. Se aplica ya.
+        #   2) ESQUEMA Material You: lo calcula caelestia-cli, que necesita el
+        #      shell arriba (IPC). En el boot esto era una carrera: el autostart
+        #      llama a este script justo tras `caelestia shell -d` y el CLI
+        #      podia llegar antes de que el shell tuviera IPC -> sin fondo.
         dir="${wallpapersDir}"
         f="$1"
         if [ -z "$f" ]; then
@@ -612,18 +618,22 @@ in
         fi
         [ -z "$f" ] && exit 0
 
-        # Enlaza con Caelestia: para que su esquema Material You siga al
-        # wallpaper, se le pasa una imagen (solo acepta imagenes). Video -> se
-        # extrae el frame 0 a un PNG cacheado por hash; imagen -> tal cual. La
-        # llamada al CLI dispara el postHook (Caelestia lo ejecuta con
-        # WALLPAPER_PATH), que es quien realmente arranca mpvpaper, asi que la
-        # logica de reproduccion vive en UN solo lugar.
-        #
         # La ruta ORIGINAL se guarda para el postHook: el fondo real es el
         # video, no el frame PNG con el que se calcula el esquema.
         state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia"
         mkdir -p "$state"
         printf '%s' "$f" > "$state/wallpaper-source.txt"
+
+        # (1) FONDO, ya y sin depender de nadie.
+        ~/.config/hypr/scripts/caelestia-wallpaper.sh "$f"
+
+        # (2) ESQUEMA: esperar el IPC del shell (hasta ~10s) y avisar al CLI.
+        # Si el shell no aparece, el fondo ya esta puesto: el esquema se
+        # aplicara en el siguiente cambio/rebuild sin bloquear nada.
+        for _ in $(seq 20); do
+          caelestia shell ipc call lock isLocked >/dev/null 2>&1 && break
+          sleep 0.5
+        done
         case "''${f##*.}" in
           mp4|webm|mkv|mov)
             hash=$(sha1sum "$f" | cut -d' ' -f1)
@@ -632,11 +642,12 @@ in
             frame="$cache/$hash.png"
             [ -f "$frame" ] || ${pkgs.ffmpeg}/bin/ffmpeg -y -v error -i "$f" -frames:v 1 "$frame"
             [ -f "$frame" ] || exit 0
-            # --no-filter: el PNG no tiene que superar el tamaño de monitor.
-            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$frame" -N -n
+            # -N (no-smart) + -n (no-filter): el PNG es un frame, no un
+            # wallpaper de tamaño completo.
+            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$frame" -N -n || true
             ;;
           *)
-            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$f"
+            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$f" || true
             ;;
         esac
       '';
@@ -665,9 +676,12 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
+        # Se invoca de dos formas: desde wallpaper-set.sh con la ruta como $1
+        # (fondo directo, sin depender del shell) y desde caelestia-cli como
+        # postHook con WALLPAPER_PATH en el entorno (cuando cambia el esquema).
         # ponytail: sin `set -e`: postHook best-effort, no debe abortar el
         # cambio de esquema.
-        img="''${WALLPAPER_PATH:-}"
+        img="''${1:-''${WALLPAPER_PATH:-}}"
         srcfile="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/wallpaper-source.txt"
         src="$(cat "$srcfile" 2>/dev/null || true)"
 
