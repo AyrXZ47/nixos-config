@@ -1177,6 +1177,12 @@ EOF
   # El archivo huérfano no lo gestiona Home Manager, así que se borra una vez.
   home.activation.rmObsoleteCaelestiaConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     rm -f "$HOME/.config/caelestia/config.json"
+    # Residuos de un intento viejo de gestionar el wallpaper por bateria
+    # (unidades "bad/ignored" que fallaban en cada boot). Hoy lo cubre
+    # mpvpaper-pause.sh + Caelestia; estos symlinks apuntan a un store muerto.
+    rm -f "$HOME/.config/systemd/user/wallpaper-power-state.service" \
+          "$HOME/.config/systemd/user/wallpaper-power-state.timer"
+    rm -f "$HOME/.config/systemd/user/timers.target.wants/wallpaper-power-state.timer"
   '';
 
   # Publica los wallpapers del repo (assets/wallpapers, store read-only) en
