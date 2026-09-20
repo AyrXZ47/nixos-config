@@ -447,8 +447,8 @@ PYEOF
         caelestia-cli = prev.caelestia-cli.overrideAttrs (old: {
           postInstall = (old.postInstall or "") + ''
             scheme_dir=$(echo $out/lib/python*/site-packages/caelestia/data/schemes)
-            mkdir -p $scheme_dir/cyberpunk
-            cat > $scheme_dir/cyberpunk/dark.txt <<'SCHEME'
+            mkdir -p $scheme_dir/cyberpunk/default
+            cat > $scheme_dir/cyberpunk/default/dark.txt <<'SCHEME'
             primary_paletteKeyColor ff0066
             secondary_paletteKeyColor 00aaff
             tertiary_paletteKeyColor 00ff88
