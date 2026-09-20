@@ -1,5 +1,12 @@
 # Brief: Wave 1 · Executor 3
 
+> **CORREGIDO 2026-09-20 (F1 de la auditoría)**: la ruta correcta del esquema
+> es `schemes/cyberpunk/default/dark.txt` (con subdirectorio de flavour), NO
+> `schemes/cyberpunk/dark.txt`, y el verify DEBE ejecutar el CLI
+> (`caelestia scheme list | jq -e '.cyberpunk.default'`), no un `ls`. Este brief
+> queda como histórico; el fix real vive en
+> `.workflow/briefs/wave2-executor-1.md`.
+
 > Copy this template per executor. The planner fills every section. The
 > executor never touches a file it doesn't own, even "obviously". Deviations
 > go back to the planner via the decision log in `.workflow/plan.md`.

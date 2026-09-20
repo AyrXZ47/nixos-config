@@ -114,82 +114,120 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
   fg-muted #8888aa · primary #ff0066 · red #ff0040 · yellow #ffcc00 ·
   green #00ff88 · blue #00aaff`. Caelestia solo acepta esquemas de su lista fija
   (o `dynamic`); `scheme_data_dir` es read-only dentro del paquete
-  `caelestia-cli` → se añade un esquema `cyberpunk` por overlay.
+  `caelestia-cli` → se añade un esquema `cyberpunk` por overlay. **F1**: la
+  ruta correcta es `schemes/cyberpunk/default/dark.txt` (con subdirectorio de
+  flavour); la original sin `default/` crashea el CLI.
+- **#5 animaciones**: las transiciones entre workspaces las da **Hyprland**
+  (`hl.animation({ leaf = "workspaces", ... })`), no Caelestia. Estilos válidos
+  en 0.56: `slide`, `slidevert`, `fade`, `slidefade`, `slidefadevert` (admiten
+  porcentaje, p.ej. `slidefade 20%`). Caelestia solo aporta la animación del
+  indicador de la barra (`activeTrail` + morph de las shapes). El "bounce
+  fuerte" viejo era `hl.curve("bounce", { {0.05, 1.8}, {0.2, 1.0} })` +
+  `slidevert`; hoy hay `standard`. Se restaura un bounce más suave + un script
+  para probar todos los estilos en vivo por `hyprctl eval`.
+- **Monitor actual**: `HDMI-A-2` 1920x1080 a **60 Hz**, con modo **100 Hz**
+  disponible. El repo tiene un rule muerto `DP-1 @170` y el catch-all en
+  `preferred` → se queda en 60. Fix: catch-all `mode = "highrr"` (máxima
+  frecuencia), reproducible en cualquier host. Nota: "el video" = modo de
+  pantalla; mpvpaper reproduce a los fps del archivo, no se puede forzar a 100.
+- **Restart de Caelestia**: `caelestia shell -k` mata el shell y
+  `caelestia shell -d` lo relanza (equivalente a `wayle panel restart`). El
+  shell ya recarga `shell.json`/`scheme.json` en caliente, así que normalmente
+  no hace falta reiniciar.
 
 ## Waves
 
 | Wave | Focus | Status |
 |------|-------|--------|
-| 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle/suspend, Celsius) + paleta cyberpunk | planned |
-| 2 | Parches QML del overlay: notificaciones nativas, iconos reales, animación workspace | pending |
-| 3 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
-| 4 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
+| 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle/suspend, Celsius) + paleta cyberpunk | **rejected (F1)** → fix en ola 2 |
+| 2 | Fix F1 (esquema) + monitor 100 Hz + animaciones de workspace + NeoCyberVim + layout nativo | planned |
+| 3 | Parches QML del overlay: notificaciones nativas, iconos reales, animación del indicador | pending |
+| 4 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
+| 5 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
 
 ---
 
-## Wave 1 (current)
+## Wave 1 — RECHAZADA por auditoría (F1), fix en ola 2
 
-Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`, ni
-`modules/apps/*`, ni los scripts que no le toquen.
+> Audit: `.workflow/audits/wave1.md`. Integración, build, seguridad y los puntos
+> #1 (figuritas), #4a (transparencia), #5 (Celsius), #8 (OSD de brillo), #11a
+> (trail) y #12 (SUPER+L) están bien y verificados en vivo. **Bloqueante F1**:
+> el esquema del overlay quedó en `schemes/<nombre>/dark.txt` en vez de
+> `schemes/<nombre>/<flavour>/dark.txt` → `caelestia scheme set -n cyberpunk`
+> crashea con `IndexError` y la paleta (#4) no se aplica. F2 (`|| true` en
+> `wallpaper-set.sh`) lo enmascaraba. El fix va en la ola 2.
+
+---
+
+## Wave 2 (current) — fix F1 + monitor 100 Hz + animaciones + NeoCyberVim
+
+Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
 ### File ownership map
 
 | File/glob | Owner |
 |-----------|-------|
-| `modules/desktop/caelestia.nix` | executor-1 |
+| `flake.nix` | executor-1 |
 | `modules/desktop/hyprland-home.nix` | executor-2 |
-| `flake.nix` | executor-3 |
+| `modules/apps/neovim.nix` | executor-3 |
+| `modules/desktop/caelestia.nix` | executor-4 |
 
 ### Tasks
 
-- [ ] T1: `shell.json` seed — figuritas (`displayType=shapes`), transparencia
-      0.34 + layers 0.5, `activeTrail=true`, idle sin auto-lock ni auto-hibernar,
-      Celsius forzado (`useFahrenheit=false`, `useFahrenheitPerformance=false`)
-      → brief: `.workflow/briefs/wave1-executor-1.md`
-- [ ] T2: fixes de `hyprland-home.nix` — IPC de lock (SUPER+L), binds de brillo
-      a global shortcuts (OSD) + retiro de `brightness.sh`, `ignore_alpha` del
-      blur a 0.3, watchdog lock→suspender a los 5 min, re-aplicar esquema
-      cyberpunk tras cambiar wallpaper → brief: `.workflow/briefs/wave1-executor-2.md`
-- [ ] T3: overlay `caelestia-cli` con el esquema `cyberpunk` (paleta Wayle
-      mapeada a claves M3) → brief: `.workflow/briefs/wave1-executor-3.md`
+- [ ] T1: fix F1 — esquema `cyberpunk` a `schemes/cyberpunk/default/dark.txt` +
+      verify fuerte que ejecuta `caelestia scheme list` y exige
+      `.cyberpunk.default` → brief: `.workflow/briefs/wave2-executor-1.md`
+- [ ] T2: monitor a `highrr` (100 Hz; el rule `DP-1 @170` está muerto), quitar
+      el `|| true` de F2, restaurar el bounce "natural" + script de prueba de
+      estilos de workspace, notificación nativa del cambio de layout
+      → brief: `.workflow/briefs/wave2-executor-2.md`
+- [ ] T3: neovim → tema `NeoCyberVim` (reemplaza `cyberneon`)
+      → brief: `.workflow/briefs/wave2-executor-3.md`
+- [ ] T4: reproducibilidad de la paleta (activation idempotente que aplica
+      `cyberpunk`) + apagar el toast nativo del layout
+      → brief: `.workflow/briefs/wave2-executor-4.md`
 
 ### Integration plan
 
-- Orden de merge: **executor-3 (flake.nix) primero** (habilita el esquema
-  `cyberpunk` que referencia executor-2), luego executor-1 y executor-2. Los
-  tres son disjuntos; el orden solo evita una ventana en la que
-  `caelestia scheme set -n cyberpunk` aún no exista.
+- Orden de merge: executor-1 (flake.nix, habilita el esquema) → executor-4
+  (caelestia.nix) → executor-2 (hyprland-home.nix) → executor-3 (neovim.nix).
+  Disjuntos; el orden evita que el activation o el `notify-send` referencien el
+  esquema/toast antes de existir.
 - Comandos en el árbol integrado:
   ```bash
   nix flake check
   nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
   ```
-- Pasos del humano tras el commit (regla AGENTS.md: rebuild lo corre él):
-  1. `rm ~/.config/caelestia/shell.json` (adoptar el seed nuevo; pierde ajustes
-     hechos en Nexus) y `sudo nixos-rebuild switch --flake .#pc`.
-  2. `caelestia scheme set -n cyberpunk` (una vez).
-  3. Validar en vivo: SUPER+L bloquea; SUPER+F11/F12 y XF86 muestran el OSD;
-     figuritas de vuelta; transparencia/blur; indicador con estela; paleta
-     magenta/cian; Celsius en todo. Las notificaciones nativas se pulen en ola 2.
+- Pasos del humano tras el commit + rebuild (`sudo nixos-rebuild switch --flake
+  .#pc`):
+  1. `rm ~/.config/caelestia/shell.json` (adoptar el seed; ya no hace falta
+     `caelestia scheme set` a mano: lo hace el activation).
+  2. Validar: paleta cyberpunk aplicada (`caelestia scheme get -n` →
+     `cyberpunk`); monitor a 100 Hz; SUPER+ALT+A lista las animaciones de
+     workspace y se pueden probar en vivo; SUPER+SPACE (layout) sale como
+     notificación arriba-derecha; `nvim` con NeoCyberVim.
 
 ### Audit gate
 
 - Auditor corre en el árbol integrado:
   - `nix flake check` pasa.
-  - `git diff main..HEAD --stat` = solo `modules/desktop/caelestia.nix`,
-    `modules/desktop/hyprland-home.nix`, `flake.nix` (+ `.workflow/`).
+  - `git diff main..HEAD --stat` = solo `flake.nix`,
+    `modules/desktop/hyprland-home.nix`, `modules/apps/neovim.nix`,
+    `modules/desktop/caelestia.nix` (+ `.workflow/`).
+  - **F1**: `caelestia scheme list | jq -e '.cyberpunk.default'` y
+    `caelestia scheme set -n cyberpunk` (con `XDG_STATE_HOME` temporal) sin
+    `IndexError`. Este check NO es negociable (fue el bloqueante).
   - El verify de cada brief pasa.
-  - Sin secretos; sin archivos fuera del mapa de propiedad.
-  - `skills/security-audit` NO aplica (no se distribuye).
+  - Sin secretos; sin archivos fuera del mapa.
 
 ---
 
-## Wave 2 (next) — parches QML del overlay
+## Wave 3 (next) — parches QML del overlay
 
-> Gate: ola 1 integrada y auditada. Un solo ejecutor (`flake.nix`), porque los
+> Gate: ola 2 integrada y auditada. Un solo ejecutor (`flake.nix`), porque los
 > tres parches viven en el mismo overlay.
 
 - **Notificaciones nativas (#2)**: el humano quiere que TODO se vea como
@@ -199,21 +237,17 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`, ni
     apilados bajo las notificaciones.
   - `ToastItem.qml`: re-estilizar para que coincida con la tarjeta de
     notificación nativa.
-  - Cambio de layout (kbLayout): desactivar el toast C++ en `shell.json`
-    (`utilities.toasts.kbLayoutChanged=false`) y re-agregar `notify-send` en
-    `switch-layout.sh` (hubo que quitarlo antes por duplicado; con el toast
-    apagado ya no duplica). Ese sí es una notificación DBus 100% nativa.
   - Caps lock / num lock: viven en C++ (no hay fuente de evento externa) → se
     quedan como toast, pero re-posicionado/re-estilizado en la zona nativa.
 - **Iconos reales de apps (#10)**: `Workspace.qml` usa `MaterialIcon` con
   `Icons.getAppCategoryIcon` (glifo monocromo). Parche para usar
   `Icons.getAppIcon` (icono real del `.desktop` vía `Quickshell.iconPath`) con
   `CachingIconImage`/`Image` de fallback al glifo.
-- **Animación de workspace fluida (#11b)**: portar el `workspace-bounce` de
-  Wayle (recuperado del `styles/index.scss` de HM) al indicador/iconos de
+- **Animación del indicador (#11b)**: portar el `workspace-bounce` de Wayle
+  (recuperado del `styles/index.scss` de HM) al indicador/iconos de
   `Workspace.qml`, o exponer una curva más expresiva. Validar con el humano.
 
-## Wave 3 — kitty (confirmado por el humano)
+## Wave 4 — kitty (confirmado por el humano)
 
 > Gate: ola 2 integrada. Un ejecutor (o dos: `modules/apps/kitty.nix` +
 > `modules/apps/shell.nix`/`hyprland-home.nix`; a decidir al planificar la ola).
@@ -240,7 +274,7 @@ El humano ya decidió migrar de wezterm a kitty (2026-09-20). Alcance acordado:
 - Limpieza final: retirar comentarios muertos de rofi, cerrar `#3/#5/#7/#8/#9/
   #12/#13` en el decision log.
 
-## Wave 4 — Mixxx MPRIS (DESCARTADO)
+## Wave 5 — Mixxx MPRIS (DESCARTADO)
 
 El humano descartó el soporte de Mixxx en el menú de media (2026-09-20) tras
 la evidencia del hallazgo #9: Mixxx 2.5.6 no expone MPRIS y no hay bridge
@@ -262,3 +296,10 @@ mantenido. No se planifica.
 | 2026-09-20 | #6 kitty: MIGRAR (confirmado). Requisitos: tema cyberpunk, `cursor_trail` (smear), hyprdev con geometría fija vía splits de kitty, SUPER+N autónomo; fallback = comportarse como wezterm | Recuperado el palette de Wayle y `workspace-bounce`; kitty soporta cursor trail nativo y splits con `--bias` |
 | 2026-09-20 | #2 notificaciones: TODO debe verse como notificación nativa de Caelestia. Toasts re-posicionados/re-estilizados arriba-derecha; kb layout pasa a `notify-send` real; caps/num lock se quedan como toast re-posicionado (viven en C++) | No hay fuente de evento externa para caps lock; el resto se puede hacer nativo |
 | 2026-09-20 | #5: el humano borra `~/.config/caelestia/shell.json` para adoptar el seed (solo tenía tema + Celsius). Se fuerzan `useFahrenheit=false` y `useFahrenheitPerformance=false` | Defaults por locale podían quedar en imperial |
+| 2026-09-20 | **F1 (auditoría ola 1)**: el esquema va en `schemes/cyberpunk/default/dark.txt`, no `cyberpunk/dark.txt`; verify fuerte (ejecutar `caelestia scheme list`), no `ls` | `get_scheme_flavours()` lista directorios; sin `default/` da `IndexError` |
+| 2026-09-20 | **F2**: quitar el `\|\| true` del `scheme set -n cyberpunk` en `wallpaper-set.sh` | Enmascaraba F1 en runtime |
+| 2026-09-20 | Monitor: catch-all a `mode = "highrr"` y borrar el rule muerto `DP-1 @170`; el monitor real es `HDMI-A-2` @100 | `hyprctl monitors`: 60 Hz actual, 100 Hz disponible |
+| 2026-09-20 | Animaciones de workspace: se restauran con bounce suave + script de prueba en vivo (Hyprland, no Caelestia) | El humano quiere probar los estilos y elegir; la barra solo da `activeTrail`/morph |
+| 2026-09-20 | #6 neovim: tema `NeoCyberVim` (DonJulve) reemplaza a `cyberneon` | Petición del humano |
+| 2026-09-20 | P3 (auditoría): audits/briefs del proyecto viejo renombrados a `ollama-*` | Evitar colisión de nombres con las olas 2/3 de este proyecto |
+| 2026-09-20 | Reproducibilidad: la config es igual en `pc`/`laptop`/`vm` (importan caelestia + hyprland); `server` no. El estado aplicado del esquema se automatiza con un activation idempotente | El seed de `shell.json` y los esquemas son estado de usuario |

@@ -6,83 +6,65 @@
 
 ## Task
 
-Crear el módulo `modules/apps/ollama-bin.nix` que instala **ollama 0.32.12**
-desde el binario oficial de la release de GitHub (tarball ROCm para la RX
-7600) y fijarlo como `services.ollama.package` en el host `pc`. El objetivo
-es poder hacer `ollama pull qwen3.8:27b-mtp-q4_K_M` (requiere ≥ 0.32.12;
-nixpkgs-unstable solo tiene 0.32.7).
+Arreglar **F1** de la auditoría de la ola 1 (bloqueante): el esquema
+`cyberpunk` del overlay quedó en la ruta equivocada.
 
-El módulo nuevo importa la derivación (fetchurl del tarball + copy de
-`bin/` y `lib/`), y `modules/hardware/amd-desktop.nix` se edita para
-importar ese módulo y **eliminar** su línea `services.ollama.package =
-pkgs.ollama-rocm;` (el paquete pasa a decidirlo ollama-bin.nix). Laptop
-NO cambia en esta ola: sigue con `pkgs.ollama-vulkan`.
+En `flake.nix`, dentro de `caelestiaCyberpunkSchemeOverlay`, la ruta debe ser
+`schemes/cyberpunk/default/dark.txt` (con **subdirectorio de flavour**
+`default`), NO `schemes/cyberpunk/dark.txt`. `caelestia-cli` exige
+`schemes/<nombre>/<flavour>/<modo>.txt`; sin el subdirectorio,
+`get_scheme_flavours("cyberpunk")` devuelve `[]` y `caelestia scheme set -n
+cyberpunk` crashea con `IndexError`.
 
-El tarball oficial extrae `bin/ollama` y `lib/ollama/` en la raíz; copiarlos
-a `$out/` preserva la ruta relativa `../lib/ollama` que el binario usa para
-encontrar los runners. Necesitas `pkgs.zstd` en `nativeBuildInputs` para que
-`tar --zstd` funcione en el sandbox.
+Cambios exactos:
+- `mkdir -p "$scheme_dir/cyberpunk"` → `mkdir -p "$scheme_dir/cyberpunk/default"`
+- `cat > "$scheme_dir/cyberpunk/dark.txt"` → `cat > "$scheme_dir/cyberpunk/default/dark.txt"`
 
-Ponytail: es un fetch + copy, no una compilación. Si la derivación intenta
-hacer build, está mal.
+El CONTENIDO de `dark.txt` no cambia (es el que ya está en `flake.nix`).
+
+No toques nada más de `flake.nix`.
 
 ## Definition of done
 
-- `modules/apps/ollama-bin.nix` existe con la derivación ollama 0.32.12
-  (tarball `ollama-linux-amd64-rocm.tar.zst`).
-- `modules/hardware/amd-desktop.nix` importa ollama-bin.nix y ya no define
-  `services.ollama.package`.
-- `modules/hardware/amd-laptop.nix` y `modules/apps/common-packages.nix`
-  intactos.
-- Hash del tarball VERIFICADO con `nix-prefetch-url <url>` antes de fijarlo
-  en el `sha256` (el valor del plan es orientativo, del API de GitHub).
-- La verificación de abajo pasa.
+- El overlay escribe `…/data/schemes/cyberpunk/default/dark.txt`.
+- `caelestia scheme list` lista `cyberpunk` con flavour `default` y
+  `primary == ff0066` (verify fuerte; NO basta un `ls`).
+- El verify command pasa. Solo `flake.nix` modificado.
 
 ## Files you own
 
-- `modules/apps/ollama-bin.nix` (nuevo)
-- `modules/hardware/amd-desktop.nix`
+- `flake.nix`
 
 ## Files forbidden
 
-- `modules/hardware/amd-laptop.nix` (sigue en ollama-vulkan — fuera de ola)
-- `modules/apps/common-packages.nix` (enable + env vars de ollama: no tocar)
-- `flake.lock`, `flake.nix`, `.workflow/**`
-- Cualquier otro archivo del repo
+- `flake.lock`, `modules/**`, `hosts/**`, `home/**`, `.workflow/**` (salvo leer).
 
 ## Read first
 
-- `modules/hardware/amd-desktop.nix` (la línea a eliminar y el patrón de
-  imports del host)
-- `modules/hardware/amd-laptop.nix` (referencia: patrón que NO debes tocar)
-- `modules/apps/common-packages.nix` líneas 48-61 (enable, context length,
-  GPU overhead — contexto de cómo se sirve ollama)
-- `.workflow/plan.md` (decisión log: por qué tarball oficial y no override
-  de la derivación nixpkgs)
+- `flake.nix` → `caelestiaCyberpunkSchemeOverlay` (busca `cyberpunk`).
+- `.workflow/audits/wave1.md` → F1 (reproducción y fix propuesto).
+- `.workflow/briefs/wave1-executor-3.md` → contenido del `dark.txt`.
 
 ## Verify command
 
 ```bash
-nix flake check && nix build .#nixosConfigurations.pc.config.services.ollama.package --no-link && nix eval --raw .#nixosConfigurations.pc.config.services.ollama.package.version
+nix flake check --no-build && P=$(nix build --no-link --print-out-paths '.#nixosConfigurations.pc.pkgs.caelestia-cli') && XDG_STATE_HOME=$(mktemp -d) XDG_CACHE_HOME=$(mktemp -d) "$P/bin/caelestia" scheme list | jq -e '.cyberpunk.default.primary == "ff0066"'
 ```
-
-Debe terminar sin errores y el último comando imprime `0.32.12`. Si el build
-falla por el hash del fetchurl, corregir con el hash real de
-`nix-prefetch-url` y reintentar.
 
 ## Commit
 
 - MANDATORY: conventional commits, short summary, imperative, one line
-  (`feat:`/`fix:`/`chore:`/`docs:`). Under ~72 chars. No AI attribution, no
-  trailers. En español, estilo del repo.
-- One logical change per commit. One commit per task.
-- Commit ONLY your owned files.
-- BRANCH ISOLATION (mandatory): worktree branch `wave2-executor-1`; commit
-  and push ONLY to it (`git push origin wave2-executor-1`). Never push to
-  `main` or another branch. No `git checkout`/`switch`/`branch`/`worktree`
-  ajenos.
+  (`fix:`, `feat:`, `chore:`, `docs:`, `refactor:`, `test:`, `perf:`,
+  `style:`, `build:`, `ci:`, `revert:`, optional `(scope)`). Under ~72 chars.
+  No AI attribution, no trailers. En español.
+- One commit.
+- Commit ONLY `flake.nix`.
+- BRANCH ISOLATION (mandatory): commit and push ONLY to your own worktree
+  branch — `git push origin wave2-executor-1` — after the commit. Never push
+  to `main` or another branch; never merge, rebase, or fast-forward anyone
+  else's branch.
 
 ## Report back
 
-- Archivos cambiados, salida del verify, hash real del tarball usado,
-  desviaciones (si el layout del tarball resultó distinto), dudas abiertas.
+- Diff exacto de las 2 líneas, salida del verify, y confirmar que el `primary`
+  del esquema es `ff0066`.
