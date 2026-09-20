@@ -413,9 +413,8 @@ PYEOF
       # Caelestia: la barra pinta UN icono de app por VENTANA en cada workspace
       # (Workspace.qml: `windows.slice(0, maxWindowIcons)`), asi que N wezterms
       # en el mismo workspace muestran N veces el mismo icono. Wayle deduplicaba
-      # por clase; aqui se reimplementa: agrupar por icono de categoria (la
-      # misma funcion Icons.getAppCategoryIcon que usa el shell) y quedarse con
-      # una ventana por grupo antes del slice.
+      # por clase; aqui se reimplementa: agrupar por `class` de la ventana y
+      # quedarse con una ventana por grupo antes del slice.
       # ponytail: parche de una expresion sobre el tarball del release (rev
       # 24aa15e == version 2.4.0 de nixpkgs). Si upstream lo hace nativo o sube
       # la version, el substitute falla ruidosamente en el build -> borrar este
@@ -429,12 +428,94 @@ PYEOF
             'const windows = Hypr.toplevelsForWs(root.ws);' \
             'const seen = new Set();
                         const windows = Hypr.toplevelsForWs(root.ws).filter(w => {
-                            const key = Icons.getAppCategoryIcon(w.lastIpcObject.class, "terminal");
+                            const key = w.lastIpcObject.class;
                             if (seen.has(key))
                                 return false;
                             seen.add(key);
                             return true;
                         });'
+
+            # Logo NixOS: el shell lo colorea con el color del esquema
+            # (m3tertiary); el azul original de NixOS es fijo.
+            substituteInPlace modules/bar/components/OsIcon.qml \
+              --replace-fail \
+            'colour: Colours.palette.m3tertiary' \
+            'colour: "#5277c3"'
+
+            # Notificaciones nativas (caps/num lock incluidos, son toasts): anclar
+            # los toasts arriba-derecha, bajo las notificaciones, y darles el mismo
+            # fondo que notifications/Notification.qml.
+            substituteInPlace modules/drawers/Panels.qml \
+              --replace-fail \
+            'anchors.bottom: sidebar.visible ? parent.bottom : utilities.top' \
+            'anchors.top: notifications.bottom' \
+              --replace-fail \
+            'anchors.right: sidebar.left' \
+            'anchors.right: parent.right'
+            substituteInPlace modules/utilities/toasts/ToastItem.qml \
+              --replace-fail \
+            'return Colours.palette.m3surface;' \
+            'return Colours.tPalette.m3surfaceContainer;'
+
+            # Iconos reales de apps: reemplazar el MaterialIcon de categoria por
+            # el Image del icono declarado en el .desktop de la ventana.
+            substituteInPlace modules/bar/components/workspaces/Workspace.qml \
+              --replace-fail \
+            'MaterialIcon {
+                                required property var modelData
+
+                                grade: 0
+                                text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
+                                color: Colours.palette.m3onSurfaceVariant
+                            }' \
+            'Image {
+                                required property var modelData
+
+                                source: Icons.getAppIcon(modelData.lastIpcObject.class, "")
+                                fillMode: Image.PreserveAspectFit
+                                implicitWidth: Math.round(Tokens.font.icon.small.pointSize * 1.33)
+                                implicitHeight: Math.round(Tokens.font.icon.small.pointSize * 1.33)
+                            }'
+
+            # Bounce del indicador de ventanas al enfocar el workspace (port del
+            # workspace-bounce de Wayle): escala con overshoot ~1.25 y vuelve.
+            substituteInPlace modules/bar/components/workspaces/Workspace.qml \
+              --replace-fail \
+            'Behavior on Layout.preferredHeight {
+                    Anim {}
+                }' \
+            'Connections {
+                    target: root
+
+                    function onFocusedChanged(): void {
+                        if (root.focused)
+                            bounce.restart();
+                    }
+                }
+
+                SequentialAnimation {
+                    id: bounce
+
+                    NumberAnimation {
+                        target: windows
+                        property: "scale"
+                        to: 1.25
+                        duration: 120
+                        easing: Easing.OutQuad
+                    }
+
+                    NumberAnimation {
+                        target: windows
+                        property: "scale"
+                        to: 1
+                        duration: 260
+                        easing: Easing.OutBack
+                    }
+                }
+
+                Behavior on Layout.preferredHeight {
+                    Anim {}
+                }'
           '';
         });
       };
