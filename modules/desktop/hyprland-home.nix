@@ -242,10 +242,10 @@ in
       ---- LAYER RULES ------
       -----------------------
       -- ignore_alpha descarta el blur en pixeles con opacidad <= al valor. Los
-      -- drawers pintan su superficie con alpha = transparency.base (0.85), asi
-      -- que 0.85 los dejaba SIN blur cuando esta regla estatica gana a la que
-      -- Caelestia aplica en runtime (base - 0.03 = 0.82). 0.8 deja margen.
-      hl.layer_rule({ name = "caelestia-drawers-blur", match = { namespace = "caelestia-drawers" }, blur = true, ignore_alpha = 0.8 })
+      -- drawers pintan su superficie con alpha = transparency.base (0.34 desde
+      -- que se subio la transparencia), asi que un umbral por encima los dejaba
+      -- SIN blur. 0.3 queda por debajo del base para que el blur se aplique.
+      hl.layer_rule({ name = "caelestia-drawers-blur", match = { namespace = "caelestia-drawers" }, blur = true, ignore_alpha = 0.3 })
       hl.layer_rule({ name = "caelestia-area-picker", match = { namespace = "caelestia-area-picker" }, blur = true })
 
       -----------------------
@@ -340,17 +340,19 @@ in
       hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
       hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-      -- Multimedia: volumen, micrófono y brillo (repeat + locked = bindel/bindl legacy)
+      -- Multimedia: volumen y micrófono (repeat + locked = bindel/bindl legacy)
       hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
       hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
       hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true, repeating = true })
       hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true, repeating = true })
-      hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"), { locked = true, repeating = true })
-      hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"), { locked = true, repeating = true })
-      hl.bind("SUPER + F12", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
-      hl.bind("SUPER + F11", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
-      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
-      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
+      -- Brillo por los global shortcuts de Caelestia (panel interno + DDC/CI):
+      -- su servicio Brightness es quien pinta el OSD; brightness.sh se retiró.
+      hl.bind("XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"), { locked = true, repeating = true })
+      hl.bind("XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"), { locked = true, repeating = true })
+      hl.bind("SUPER + F12", hl.dsp.global("caelestia:brightnessUp"))
+      hl.bind("SUPER + F11", hl.dsp.global("caelestia:brightnessDown"))
+      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.global("caelestia:brightnessUp"))
+      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.global("caelestia:brightnessDown"))
 
       -- Control de reproducción: Caelestia expone shortcuts globales de Hyprland
       -- (caelestia:media*) que van por MPRIS, así que SUPER+F7 pausa lo que sea
@@ -456,6 +458,21 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
+  # Watchdog del lock: sin swap en disco no hay hibernación real, el humano
+  # aceptó suspend puro. El nombre "hibernate" se conserva por el brief/plan.
+  systemd.user.services.caelestia-lock-hibernate = {
+    Unit = {
+      Description = "Suspende la sesión tras 5 min con la pantalla bloqueada";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${config.xdg.configHome}/hypr/scripts/lock-hibernate.sh";
+      Restart = "always";
+      RestartSec = 5;
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
+
   # cliphist: limite de historial en 6 items. Pequeño a propósito: al ser un
   # clipboard manager captura TODO lo copiado (incluido el "copiar" de
   # contraseñas desde KeepassXC/otras apps), y menos items = menos superficie
@@ -522,31 +539,6 @@ in
     # El hotplug en si va dentro del config Lua (ver hl.on "monitor.added"
     # en extraConfig); aqui no hay script que mantener: monitor-mirror.sh
     # mirror hace el trabajo.
-    "hypr/scripts/brightness.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        # ponytail: panel interno (portatil) via brightnessctl; monitor externo
-        # via DDC/CI (ddcutil sobre i2c). El detect en cada llamada re-escaneaba
-        # todos los buses i2c y decenas de procesos peleaban el flock -> journal
-        # lleno y delays de minutos; por eso ahora se decide por /sys/class/backlight
-        # (chequeo barato) y se serializa con flock. "down" usa "10 - 5" (con
-        # espacio): "10 -5" lo traga getopt como opcion y no hace nada.
-        # Ceiling: si el monitor externo no implementa DDC/CI, setvcp falla.
-        if ls /sys/class/backlight/*/brightness >/dev/null 2>&1; then
-          case "$1" in
-            up) brightnessctl s +10% ;;
-            down) brightnessctl s 10%- ;;
-          esac
-        else
-          lock=/tmp/ddcutil-brightness.lock
-          case "$1" in
-            up)   exec flock -w 1 "$lock" ddcutil setvcp 10 + 5 ;;
-            down) exec flock -w 1 "$lock" ddcutil setvcp 10 - 5 ;;
-          esac
-        fi
-      '';
-    };
     "hypr/scripts/mpvpaper-pause.sh" = {
       executable = true;
       text = ''
@@ -630,7 +622,7 @@ in
         # Si el shell no aparece, el fondo ya esta puesto: el esquema se
         # aplicara en el siguiente cambio/rebuild sin bloquear nada.
         for _ in $(seq 20); do
-          caelestia shell ipc call lock isLocked >/dev/null 2>&1 && break
+          caelestia shell lock isLocked >/dev/null 2>&1 && break
           sleep 0.5
         done
         case "''${f##*.}" in
@@ -649,6 +641,11 @@ in
             ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$f" || true
             ;;
         esac
+
+        # Re-aplica la paleta cyberpunk: cambiar de wallpaper recalcula Material
+        # You y la pisaría. El `|| true` lo hace inofensivo si el esquema aún no
+        # existe (lo crea executor-3).
+        ${pkgs.caelestia-cli}/bin/caelestia scheme set -n cyberpunk || true
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
@@ -782,17 +779,43 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         #!/usr/bin/env bash
         cliphist wipe
         [ -x "$HOME/.config/hypr/scripts/openrgb-lock-before" ] && "$HOME/.config/hypr/scripts/openrgb-lock-before"
-        caelestia shell ipc call lock lock >/dev/null 2>&1 || exit 0
+        caelestia shell lock lock >/dev/null 2>&1 || exit 0
         # Restaura cuando el lock se libere (poll corto; sale si el shell muere).
         (
           for _ in $(seq 60); do
             sleep 2
-            locked=$(caelestia shell ipc call lock isLocked 2>/dev/null || echo "")
+            locked=$(caelestia shell lock isLocked 2>/dev/null || echo "")
             [ "$locked" = "false" ] && break
             [ -z "$locked" ] && exit 0
           done
           [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
         ) >/dev/null 2>&1 &
+      '';
+    };
+
+    # Watchdog del lock: a los 5 min bloqueado suspende la máquina (el humano
+    # decidió suspend puro; sin swap en disco no hay hibernación real). Usa el
+    # binario directo `caelestia-shell` (no el CLI) para no depender del wrapper.
+    "hypr/scripts/lock-hibernate.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # ponytail: sondeo cada 15 s; "idle" se aproxima con "bloqueado" (no
+        # distingue idle real). Techo: hasta 15 s de retardo por granularidad;
+        # upgrade: escuchar eventos de lock en vez de sondear.
+        count=0
+        while sleep 15; do
+          state=$(${pkgs.caelestia-shell}/bin/caelestia-shell ipc call lock isLocked 2>/dev/null || echo "")
+          if [ "$state" = "true" ]; then
+            count=$((count + 15))
+            if [ "$count" -ge 300 ]; then
+              systemctl suspend
+              count=0
+            fi
+          else
+            count=0
+          fi
+        done
       '';
     };
 
