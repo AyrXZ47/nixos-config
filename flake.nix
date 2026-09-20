@@ -413,9 +413,8 @@ PYEOF
       # Caelestia: la barra pinta UN icono de app por VENTANA en cada workspace
       # (Workspace.qml: `windows.slice(0, maxWindowIcons)`), asi que N wezterms
       # en el mismo workspace muestran N veces el mismo icono. Wayle deduplicaba
-      # por clase; aqui se reimplementa: agrupar por icono de categoria (la
-      # misma funcion Icons.getAppCategoryIcon que usa el shell) y quedarse con
-      # una ventana por grupo antes del slice.
+      # por clase; aqui se reimplementa: agrupar por `class` de la ventana y
+      # quedarse con una ventana por grupo antes del slice.
       # ponytail: parche de una expresion sobre el tarball del release (rev
       # 24aa15e == version 2.4.0 de nixpkgs). Si upstream lo hace nativo o sube
       # la version, el substitute falla ruidosamente en el build -> borrar este
@@ -429,7 +428,7 @@ PYEOF
             'const windows = Hypr.toplevelsForWs(root.ws);' \
             'const seen = new Set();
                         const windows = Hypr.toplevelsForWs(root.ws).filter(w => {
-                            const key = Icons.getAppCategoryIcon(w.lastIpcObject.class, "terminal");
+                            const key = w.lastIpcObject.class;
                             if (seen.has(key))
                                 return false;
                             seen.add(key);
@@ -457,6 +456,26 @@ PYEOF
               --replace-fail \
             'return Colours.palette.m3surface;' \
             'return Colours.tPalette.m3surfaceContainer;'
+
+            # Iconos reales de apps: reemplazar el MaterialIcon de categoria por
+            # el Image del icono declarado en el .desktop de la ventana.
+            substituteInPlace modules/bar/components/workspaces/Workspace.qml \
+              --replace-fail \
+            'MaterialIcon {
+                                required property var modelData
+
+                                grade: 0
+                                text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
+                                color: Colours.palette.m3onSurfaceVariant
+                            }' \
+            'Image {
+                                required property var modelData
+
+                                source: Icons.getAppIcon(modelData.lastIpcObject.class, "")
+                                fillMode: Image.PreserveAspectFit
+                                implicitWidth: Math.round(Tokens.font.icon.small.pointSize * 1.33)
+                                implicitHeight: Math.round(Tokens.font.icon.small.pointSize * 1.33)
+                            }'
           '';
         });
       };
