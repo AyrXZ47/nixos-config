@@ -687,31 +687,23 @@ in
         # config.xdg.configHome (opción de Home Manager) no existe.
         wallpaper.postHook = "/home/yovick/.config/hypr/scripts/caelestia-wallpaper.sh";
       };
-    };
 
-    # El lock de Caelestia (WlSessionLock) usa sus propias unidades PAM en
-    # assets/pam.d/{passwd,fprint,howdy}, NO /etc/pam.d. Pero el fprint tiene
-    # una trampa conocida del repo (README): con services.fprintd.enable,
-    # security.pam.services.<name>.fprintAuth defaulta a true. Eso solo afecta
-    # a los servicios de /etc/pam.d (login/sddm/sudo/hyprlock), no al lock del
-    # shell, así que no se toca aquí.
-    #
-    # --- Siembra de shell.json -------------------------------------------------
-    # Se ejecuta ANTES del shell (graphical-session.target) y es idempotente:
-    #   - symlink previo al store (migración vieja) -> se reemplaza por copia.
-    #   - archivo real ya editado por Nexus -> se respeta, NO se toca.
-    #   - no existe -> se copia el default del repo.
-    # Para volver al default: borrar ~/.config/caelestia/shell.json y rebuild.
-    systemd.user.services.caelestia-seed-config = {
-      description = "Siembra ~/.config/caelestia/shell.json (editable) desde el default del repo";
-      before = [ "graphical-session.target" ];
-      partOf = [ "graphical-session.target" ];
-      wantedBy = [ "graphical-session.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "caelestia-seed-config" ''
-          set -eu
+      # --- Siembra de shell.json -----------------------------------------------
+      # Corre en CADA `home-manager switch` (activation), no al login. El
+      # servicio systemd anterior no arrancaba al cambiar de generación (el
+      # target ya estaba activo) y shell.json quedaba sin crear -> Caelestia
+      # usaba los defaults y "ningún cambio se aplicaba" (visto 2026-09-19: el
+      # symlink viejo lo borró Home Manager al dejar de gestionarlo). Idempotente:
+      #   - symlink previo al store (migración vieja) -> se reemplaza por copia.
+      #   - archivo real ya editado por Nexus -> se respeta, NO se toca.
+      #   - no existe -> se copia el default del repo.
+      # El shell vigila shell.json (SettingsFile/QFileSystemWatcher) y lo
+      # recarga en caliente, así que tras el switch no hace falta reiniciar.
+      # Para volver al default: borrar ~/.config/caelestia/shell.json y rebuild.
+      home.activation.caelestiaSeedConfig = {
+        after = [ "writeBoundary" ];
+        before = [ ];
+        data = ''
           f="$HOME/.config/caelestia/shell.json"
           mkdir -p "$(dirname "$f")"
           # Symlink al store (read-only) de una generación anterior: fuera.
@@ -724,5 +716,12 @@ in
         '';
       };
     };
+
+    # El lock de Caelestia (WlSessionLock) usa sus propias unidades PAM en
+    # assets/pam.d/{passwd,fprint,howdy}, NO /etc/pam.d. Pero el fprint tiene
+    # una trampa conocida del repo (README): con services.fprintd.enable,
+    # security.pam.services.<name>.fprintAuth defaulta a true. Eso solo afecta
+    # a los servicios de /etc/pam.d (login/sddm/sudo/hyprlock), no al lock del
+    # shell, así que no se toca aquí.
   };
 }
