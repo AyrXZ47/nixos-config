@@ -517,12 +517,16 @@ in
         command -v jq >/dev/null || { echo "falta jq" >&2; exit 1; }
         mirror_on() { hyprctl eval "hl.monitor({ output = \"$1\", mode = \"preferred\", position = \"auto\", scale = \"1\", mirror = \"$2\" })" >/dev/null; }
         # Base SIEMPRE en 'monitors all': al espejar, la salida clonada sale de
-        # la lista activa y el toggle de vuelta la perderia.
-        all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false)]')
+        # la lista activa y el toggle de vuelta la perderia. Se excluyen las
+        # salidas HEADLESS (cast/tablet): tienen area grande y ganarian la
+        # eleccion de primario.
+        all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false) | select(.name | startswith("HEADLESS") | not)]')
         if [ "''${1:-}" = "mirror" ]; then
-          # ponytail: primario por area*Hz, no por nombre fijo (DP-1 vs eDP-1
-          # segun host); upgrade: elegir el primario manualmente en bar/rofi.
-          primary=$(echo "$all" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
+          # ponytail: primario por monitor enfocado (el que usa el humano), con
+          # fallback al primero; antes era area*Hz y la salida HEADLESS 1920x1200
+          # le ganaba al fisico -> el fisico espejaba la tablet. No por nombre
+          # fijo (DP-1 vs eDP-1 segun host).
+          primary=$(echo "$all" | jq -r '[.[] | select(.mirrorOf == "none")] | (map(select(.focused == true))[0] // .[0]) | .name')
           for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
             mirror_on "$name" "$primary"
           done
@@ -535,7 +539,7 @@ in
           done
           notify-send "Modo extender"
         else
-          primary=$(echo "$all" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
+          primary=$(echo "$all" | jq -r '[.[] | select(.mirrorOf == "none")] | (map(select(.focused == true))[0] // .[0]) | .name')
           for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
             mirror_on "$name" "$primary"
           done
