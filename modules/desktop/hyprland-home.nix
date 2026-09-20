@@ -643,9 +643,9 @@ in
         esac
 
         # Re-aplica la paleta cyberpunk: cambiar de wallpaper recalcula Material
-        # You y la pisaría. El `|| true` lo hace inofensivo si el esquema aún no
-        # existe (lo crea executor-3).
-        ${pkgs.caelestia-cli}/bin/caelestia scheme set -n cyberpunk || true
+        # You y la pisaría. El esquema ya existe (fix de la ola 2), así que un
+        # fallo aquí debe ser ruidoso en vez de quedar enmascarado.
+        ${pkgs.caelestia-cli}/bin/caelestia scheme set -n cyberpunk
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
