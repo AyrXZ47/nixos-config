@@ -340,17 +340,19 @@ in
       hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
       hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-      -- Multimedia: volumen, micrófono y brillo (repeat + locked = bindel/bindl legacy)
+      -- Multimedia: volumen y micrófono (repeat + locked = bindel/bindl legacy)
       hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
       hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
       hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true, repeating = true })
       hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true, repeating = true })
-      hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"), { locked = true, repeating = true })
-      hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"), { locked = true, repeating = true })
-      hl.bind("SUPER + F12", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
-      hl.bind("SUPER + F11", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
-      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh up"))
-      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness.sh down"))
+      -- Brillo por los global shortcuts de Caelestia (panel interno + DDC/CI):
+      -- su servicio Brightness es quien pinta el OSD; brightness.sh se retiró.
+      hl.bind("XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"), { locked = true, repeating = true })
+      hl.bind("XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"), { locked = true, repeating = true })
+      hl.bind("SUPER + F12", hl.dsp.global("caelestia:brightnessUp"))
+      hl.bind("SUPER + F11", hl.dsp.global("caelestia:brightnessDown"))
+      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.global("caelestia:brightnessUp"))
+      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.global("caelestia:brightnessDown"))
 
       -- Control de reproducción: Caelestia expone shortcuts globales de Hyprland
       -- (caelestia:media*) que van por MPRIS, así que SUPER+F7 pausa lo que sea
@@ -522,31 +524,6 @@ in
     # El hotplug en si va dentro del config Lua (ver hl.on "monitor.added"
     # en extraConfig); aqui no hay script que mantener: monitor-mirror.sh
     # mirror hace el trabajo.
-    "hypr/scripts/brightness.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        # ponytail: panel interno (portatil) via brightnessctl; monitor externo
-        # via DDC/CI (ddcutil sobre i2c). El detect en cada llamada re-escaneaba
-        # todos los buses i2c y decenas de procesos peleaban el flock -> journal
-        # lleno y delays de minutos; por eso ahora se decide por /sys/class/backlight
-        # (chequeo barato) y se serializa con flock. "down" usa "10 - 5" (con
-        # espacio): "10 -5" lo traga getopt como opcion y no hace nada.
-        # Ceiling: si el monitor externo no implementa DDC/CI, setvcp falla.
-        if ls /sys/class/backlight/*/brightness >/dev/null 2>&1; then
-          case "$1" in
-            up) brightnessctl s +10% ;;
-            down) brightnessctl s 10%- ;;
-          esac
-        else
-          lock=/tmp/ddcutil-brightness.lock
-          case "$1" in
-            up)   exec flock -w 1 "$lock" ddcutil setvcp 10 + 5 ;;
-            down) exec flock -w 1 "$lock" ddcutil setvcp 10 - 5 ;;
-          esac
-        fi
-      '';
-    };
     "hypr/scripts/mpvpaper-pause.sh" = {
       executable = true;
       text = ''
