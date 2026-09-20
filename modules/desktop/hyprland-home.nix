@@ -25,9 +25,9 @@ in
       ---- MONITORES ----
       ------------------
       hl.monitor({ output = "Virtual-1", mode = "1920x1080@60", position = "0x0", scale = "1" })
-      -- PC: DP-1 a máx res / máx refresco (170 Hz); el catch-all "preferred" elige 60.
-      hl.monitor({ output = "DP-1", mode = "1920x1080@170", position = "auto", scale = "1" })
-      hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "1" })
+      -- Catch-all: máxima frecuencia soportada (highrr). Reproductible en
+      -- cualquier host sin hardcodear nombres (pc 100 Hz, laptop, vm).
+      hl.monitor({ output = "", mode = "highrr", position = "auto", scale = "1" })
 
       ------------------
       ---- AUTOSTART ----
