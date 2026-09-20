@@ -799,22 +799,10 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        if command -v hyprctl >/dev/null 2>&1; then
-          dev=$(hyprctl devices | awk '/^\t\t[a-zA-Z0-9._-]+$/{d=$1} /main: yes/{print d}' | tail -1)
-          [ -n "$dev" ] && hyprctl switchxkblayout "$dev" next
-          sleep 0.1
-          layout=$(hyprctl devices | awk '/active keymap: /{km=$0} /main: yes/{print km}' | tail -1 | sed 's/.*active keymap: //')
-        else
-          current=$(setxkbmap -query 2>/dev/null | grep '^layout' | awk '{print $2}')
-          if [ "$current" = "latam" ]; then
-            setxkbmap us
-            layout="us"
-          else
-            setxkbmap latam
-            layout="latam"
-          fi
-        fi
-        [ -n "$layout" ] && notify-send -t 2000 -a layout -u low " $layout"
+        # Solo cambia el layout. La notificacion la da Caelestia de fabrica
+        # (HyprKeyboard::layoutChanged): un notify-send propio aqui salia
+        # DUPLICADO. "all" cambia todos los teclados, sin parsear dispositivos.
+        hyprctl switchxkblayout all next
       '';
     };
 
