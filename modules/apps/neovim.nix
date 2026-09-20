@@ -1,16 +1,17 @@
 { config, pkgs, lib, ... }:
 
 let
-  theme = "cyberneon";
+  theme = "NeoCyberVim";
 
   pluginsDir = {
     ".config/nvim/lua/plugins/theme.lua" = {
       text = ''
         return {
-          "followLemmi/cyberneon.nvim",
-          name = "cyberneon",
+          "DonJulve/NeoCyberVim",
+          name = "NeoCyberVim",
           lazy = false,
           priority = 20000,
+          opts = {},
         }
       '';
     };
