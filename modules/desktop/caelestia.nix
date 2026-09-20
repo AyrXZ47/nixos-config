@@ -379,6 +379,12 @@ let
           command = [ "autocomplete" "scheme" ];
         }
         {
+          name = "Cyberpunk";
+          icon = "palette";
+          description = "Volver al esquema cyberpunk";
+          command = [ "caelestia" "scheme" "set" "-n" "cyberpunk" ];
+        }
+        {
           name = "Variant";
           icon = "colors";
           description = "Cambiar la variante del esquema";
