@@ -189,10 +189,10 @@ in
       hl.animation({ leaf = "windowsOut", enabled = true, speed = 5, bezier = "default", style = "popin 80%" })
       hl.animation({ leaf = "border", enabled = true, speed = 10, bezier = "default" })
       hl.animation({ leaf = "fade", enabled = true, speed = 7, bezier = "default" })
-      -- Workspaces: bounce suave + vertical (la barra también lo es). El bounce
-      -- fuerte del viejo Wayle vuelve como curva "bounce" (probable en vivo con
-      -- SUPER+ALT+A); el default es la variante natural.
-      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "bounce-natural", style = "slidevert" })
+      -- Workspaces: slidefadevert + overshot, elegida por el humano con el
+      -- selector SUPER+ALT+A (ola 3). Las curvas "bounce"/"bounce-natural"
+      -- siguen definidas arriba para probar variantes en vivo.
+      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "overshot", style = "slidefadevert" })
 
       -----------------------
       ---- WINDOW RULES -----
