@@ -278,10 +278,6 @@ let
       ];
       entries = [
         {
-          id = "logo";
-          enabled = true;
-        }
-        {
           id = "workspaces";
           enabled = true;
         }
@@ -307,7 +303,12 @@ let
           enabled = true;
         }
         # power fuera: el apagado/logout vive en el menu de sesion
-        # (SUPER+CTRL+Q). El logo (arriba) abre el launcher.
+        # (SUPER+CTRL+Q). El logo NixOS (abre el launcher) va al fondo, en el
+        # hueco que dejaba el apagado.
+        {
+          id = "logo";
+          enabled = true;
+        }
       ];
       excludedScreens = [ ];
     };
