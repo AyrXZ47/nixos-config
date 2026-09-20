@@ -179,15 +179,20 @@ in
       -- Curva "standard" por defecto de Caelestia (animations.lua) para workspaces.
       hl.curve("standard", { type = "bezier", points = { {0.2, 0}, {0, 1} } })
       hl.curve("overshot", { type = "bezier", points = { {0.05, 0.9}, {0.1, 1.05} } })
+      -- Curvas de rebote: "bounce" es el bounce fuerte del viejo Wayle
+      -- (workspace-bounce), "bounce-natural" lo suaviza. Se dejan definidas
+      -- ambas para probarlas en vivo con workspace-anim.sh (SUPER+ALT+A).
+      hl.curve("bounce", { type = "bezier", points = { {0.05, 1.8}, {0.2, 1.0} } })
+      hl.curve("bounce-natural", { type = "bezier", points = { {0.1, 1.4}, {0.3, 1.0} } })
 
       hl.animation({ leaf = "windows", enabled = true, speed = 6, bezier = "overshot", style = "slideright" })
       hl.animation({ leaf = "windowsOut", enabled = true, speed = 5, bezier = "default", style = "popin 80%" })
       hl.animation({ leaf = "border", enabled = true, speed = 10, bezier = "default" })
       hl.animation({ leaf = "fade", enabled = true, speed = 7, bezier = "default" })
-      -- Workspaces con la curva y velocidad por defecto de Caelestia, pero en
-      -- vertical (slidevert) porque la barra también lo es. El "bounce" propio
-      -- se retira: el user pidió la animación original de Caelestia.
-      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "standard", style = "slidevert" })
+      -- Workspaces: bounce suave + vertical (la barra también lo es). El bounce
+      -- fuerte del viejo Wayle vuelve como curva "bounce" (probable en vivo con
+      -- SUPER+ALT+A); el default es la variante natural.
+      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "bounce-natural", style = "slidevert" })
 
       -----------------------
       ---- WINDOW RULES -----
@@ -334,6 +339,10 @@ in
       -- Deslizarse entre escritorios como GNOME (la animación slidevert está arriba).
       hl.bind("SUPER + ALT + up", hl.dsp.focus({ workspace = "-1" }))
       hl.bind("SUPER + ALT + down", hl.dsp.focus({ workspace = "+1" }))
+
+      -- Selector de animación de workspaces (fuzzel): aplica en vivo con
+      -- hyprctl eval. Temporal, vive hasta el próximo reload/rebuild.
+      hl.bind("SUPER + ALT + A", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-anim.sh"))
 
       -- Ratón: LMB arrastra (mover), RMB redimensiona (sin estos binds el config
       -- sobreescribe los defaults de Hyprland).
@@ -890,6 +899,38 @@ try:
 except Exception:
     pass' "$cur" < <(hyprctl -j clients 2>/dev/null))
         [ "$n" -gt 0 ] && notify-send -t 2000 -a hyprland -u low "ws $cur -> $1 ($n ventanas)"
+      '';
+    };
+
+    # Prueba EN VIVO las animaciones de workspace (Hyprland las da, no
+    # Caelestia). No toca la config: aplica con hyprctl eval y se pierde en el
+    # próximo reload/rebuild. Con argumentos `style curve` aplica directo.
+    "hypr/scripts/workspace-anim.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        styles=(slide slidevert fade slidefade slidefadevert)
+        curves=(standard overshot bounce bounce-natural)
+
+        apply() {
+          hyprctl eval "hl.animation({ leaf = 'workspaces', enabled = true, speed = 5, bezier = '$2', style = '$1' })"
+          msg="workspace-anim: style=$1 curve=$2 (temporal: se pierde en el próximo reload/rebuild)"
+          echo "$msg"
+          notify-send -t 2000 -a hyprland -u low "Workspace anim" "$1 / $2 (temporal)" 2>/dev/null || true
+        }
+
+        if [ -n "$2" ]; then
+          apply "$1" "$2"
+        else
+          pick=$(for s in "''${styles[@]}"; do
+            for c in "''${curves[@]}"; do
+              printf '%s %s\n' "$s" "$c"
+            done
+          done | fuzzel --dmenu --prompt="Workspace anim  ") || exit 0
+          [ -z "$pick" ] && exit 0
+          read -r style curve <<< "$pick"
+          apply "$style" "$curve"
+        fi
       '';
     };
     # rofi/*.rasi + tema cyberpunk retirados: el launcher es Caelestia y los
