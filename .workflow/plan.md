@@ -175,8 +175,8 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 |------|-------|--------|
 | 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle/suspend, Celsius) + paleta cyberpunk | rejected (F1) → fixeada en ola 2 |
 | 2 | Fix F1 (esquema) + monitor `highrr` + animaciones de workspace + NeoCyberVim + layout nativo | audited · APPROVED |
-| 3 | Animación final (`slidefadevert`+`overshot`), fuera cast VNC, espejo arreglado, nvim transparente | planned |
-| 4 | Parches QML del overlay: notificaciones nativas, iconos reales, animación del indicador | integrated · pending audit |
+| 3 | Animación final (`slidefadevert`+`overshot`), fuera cast VNC, espejo arreglado, nvim transparente | integrated (sin auditar — excepción humana) |
+| 4 | Logo azul, notificaciones nativas, iconos reales, mpvpaper dedupe, espejo con 2+ monitores | integrated · audit APPROVED WITH EXCEPTIONS · **HOTFIX F3 (shell no carga)** |
 | 5 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
 | 6 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
 
@@ -226,6 +226,34 @@ Desviación **aceptada**. `_template.md` documenta ahora la diferencia.
 > borrado, `NeoCyberVim` transparente. **Riesgo aceptado**: sin verify/audit no
 > hay evidencia de `nix flake check` tras el merge. Si algo se rompe, la ola 4
 > lo va a exponer.
+
+---
+
+## HOTFIX F3 (bloqueante de arranque) — `Image.implicitHeight` es read-only
+
+> Detectado en runtime 2026-09-20: al reiniciar la shell, quickshell falla con
+> `Type Workspace unavailable: Invalid property assignment: "implicitHeight" is a
+> read-only property` (cadena `Drawers → ContentWindow → Bar → Workspaces →
+> Workspace`). La shell NO carga. La auditoría de la ola 4 fue
+> `APPROVED WITH EXCEPTIONS` pero solo grepeó el QML construido, **nunca lo
+> cargó**: `nix flake check`/build no detectan errores de binding en QML.
+
+Causa: el parche de iconos reales en `flake.nix` genera
+`Image { … implicitWidth: …; implicitHeight: … }`. En Qt, `Image.implicitWidth/Height`
+son **read-only** (dependen de `sourceSize`).
+
+Fix (2 líneas en `flake.nix`, bloque del `substituteInPlace` de iconos reales):
+sustituir las dos líneas `implicitWidth`/`implicitHeight` por
+```qml
+                                sourceSize: Qt.size(Math.round(Tokens.font.icon.small.pointSize * 1.33), Math.round(Tokens.font.icon.small.pointSize * 1.33))
+```
+Tras el fix y rebuild: `~/.config/hypr/scripts/caelestia-restart.sh` y verificar
+que la shell carga (sin `Failed to load configuration`).
+
+**Lección (obligatoria para toda ola con parches QML)**: el gate de auditoría
+debe incluir un **smoke test de carga del shell**:
+`pkill -f 'quickshell.*caelestia-shell'; caelestia shell -d 2>&1 | grep -qi 'Failed to load configuration' && FAIL`.
+Actualizado en `.workflow/audit-checklist.md`.
 
 ---
 
@@ -353,3 +381,5 @@ mantenido. No se planifica.
 | 2026-09-20 | Quitar el auto-espejo de `monitor.added`; `monitor-mirror.sh` no-op con <2 salidas físicas | Al arrancar espejaba todo y volvía locas las pantallas |
 | 2026-09-20 | Acción de launcher `Cyberpunk` para restaurar el esquema tras un cambio accidental | El humano cambió a `dynamic` desde `>scheme` |
 | 2026-09-20 | Ola 4 integrada: merges `3a2341a`, `2b2b77b`, `0d4a44c` en `main`; `nix flake check` + build del toplevel de `pc` pasan | Integración limpia (archivos disjuntos); pendiente auditoría |
+| 2026-09-20 | Ola 4 auditada: APPROVED WITH EXCEPTIONS (`.workflow/audits/wave4.md`), excepción = validación visual del humano | Build/integridad/disciplina OK |
+| 2026-09-20 | **F3**: el parche de iconos reales usó `Image.implicitWidth/Height` (read-only) → la shell NO carga. Hotfix: `sourceSize: Qt.size(N,N)` | La auditoría solo grepeó el QML construido; nunca lo cargó. Se añade smoke test de carga al checklist |

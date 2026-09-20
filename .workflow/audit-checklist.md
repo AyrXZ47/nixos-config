@@ -20,6 +20,16 @@ check. After the audit, copy this file to `.workflow/audits/wave<N>.md`
 - [ ] Test command passes: `<command>` → record output.
 - [ ] Each brief's verify command passes on the INTEGRATED tree, not just on
       its worktree.
+- [ ] **Smoke test de carga del shell (obligatorio si la ola toca QML del
+      overlay):** reiniciar la shell y exigir que cargue sin errores. `nix flake
+      check`/build NO detectan bindings QML inválidos (p.ej. asignar
+      `implicitHeight` a un `Image`).
+      ```bash
+      pkill -f 'quickshell.*caelestia-shell'; sleep 1
+      caelestia shell -d 2>&1 | tee /tmp/qs-start.log
+      ! grep -qi 'Failed to load configuration' /tmp/qs-start.log
+      ```
+      Si la shell no carga, la ola se REJECTED aunque los greps pasen.
 
 ## 3. Scope discipline (ponytail)
 
