@@ -915,10 +915,20 @@ except Exception:
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        styles=(slide slidevert fade slidefade slidefadevert)
-        curves=(standard overshot bounce bounce-natural)
+        allowed_styles=(slide slidevert fade slidefade slidefadevert)
+        allowed_curves=(standard overshot bounce bounce-natural)
+
+        allowed() {
+          local needle="$1"; shift
+          for item in "$@"; do [ "$item" = "$needle" ] && return 0; done
+          return 1
+        }
 
         apply() {
+          # Allowlist antes de interpolar en hyprctl eval (H2 auditoria ola 2):
+          # solo estilos/curvas de los arrays; el menu ya sale de ahi.
+          allowed "$1" "''${allowed_styles[@]}" || { echo "style no permitido: $1" >&2; exit 1; }
+          allowed "$2" "''${allowed_curves[@]}" || { echo "curve no permitido: $2" >&2; exit 1; }
           hyprctl eval "hl.animation({ leaf = 'workspaces', enabled = true, speed = 5, bezier = '$2', style = '$1' })"
           msg="workspace-anim: style=$1 curve=$2 (temporal: se pierde en el próximo reload/rebuild)"
           echo "$msg"
@@ -928,8 +938,8 @@ except Exception:
         if [ -n "$2" ]; then
           apply "$1" "$2"
         else
-          pick=$(for s in "''${styles[@]}"; do
-            for c in "''${curves[@]}"; do
+          pick=$(for s in "''${allowed_styles[@]}"; do
+            for c in "''${allowed_curves[@]}"; do
               printf '%s %s\n' "$s" "$c"
             done
           done | fuzzel --dmenu --prompt="Workspace anim  ") || exit 0
