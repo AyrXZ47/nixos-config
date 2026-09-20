@@ -58,14 +58,6 @@ in
         hl.exec_cmd("hyprctl setcursor Bibata-Material-Deep-Blue 30")
       end)
 
-      -- Hotplug: al conectar un monitor se aplica espejo automaticamente
-      -- (visto en el stub de eventos monitor.added; Hyprland 0.56 no emite
-      -- ya los eventos monitoradded>> por socket2). El toggle manual
-      -- SUPER+SHIFT+D queda para pasar a extend a mano.
-      hl.on("monitor.added", function()
-        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh mirror")
-      end)
-
       ------------------------
       ---- LOOK AND FEEL ----
       ------------------------
@@ -504,7 +496,9 @@ in
     };
 
     # Toggle de disposicion de monitores: espejo <-> extend. Sin argumento
-    # alterna; con "mirror" fuerza espejo (lo usa el evento monitor.added).
+    # alterna; con "mirror" fuerza espejo. El modo manual es SUPER+D (ya no hay
+    # auto-espejo al conectar un monitor: causaba las "pantallas locas" al
+    # arrancar). Con menos de 2 salidas fisicas el script no hace nada.
     # hyprctl keyword esta bloqueado en Hyprland 0.56 ("non-legacy parsers"):
     # el runtime va via hyprctl eval de la API hl.monitor(..., mirror = X).
     # notify-send (no "wayle notify", ya retirado: ese subcommand solo controlaba
@@ -521,6 +515,10 @@ in
         # salidas HEADLESS (cast/tablet): tienen area grande y ganarian la
         # eleccion de primario.
         all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false) | select(.name | startswith("HEADLESS") | not)]')
+        if [ "$(echo "$all" | jq 'length')" -lt 2 ]; then
+          notify-send "Solo hay un monitor"
+          exit 0
+        fi
         if [ "''${1:-}" = "mirror" ]; then
           # ponytail: primario por monitor enfocado (el que usa el humano), con
           # fallback al primero; antes era area*Hz y la salida HEADLESS 1920x1200
@@ -548,9 +546,8 @@ in
       '';
     };
 
-    # El hotplug en si va dentro del config Lua (ver hl.on "monitor.added"
-    # en extraConfig); aqui no hay script que mantener: monitor-mirror.sh
-    # mirror hace el trabajo.
+    # El espejo ya no se aplica en hotplug: solo manual con SUPER+D
+    # (monitor-mirror.sh). Con <2 salidas fisicas el script no hace nada.
     "hypr/scripts/mpvpaper-pause.sh" = {
       executable = true;
       text = ''
@@ -607,12 +604,13 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Dos responsabilidades separadas a proposito:
-        #   1) FONDO (mpvpaper/imagen): no depende del shell. Se aplica ya.
-        #   2) ESQUEMA Material You: lo calcula caelestia-cli, que necesita el
-        #      shell arriba (IPC). En el boot esto era una carrera: el autostart
-        #      llama a este script justo tras `caelestia shell -d` y el CLI
-        #      podia llegar antes de que el shell tuviera IPC -> sin fondo.
+        # Solo dos responsabilidades:
+        #   1) guardar la ruta FUENTE en wallpaper-source.txt (la usa
+        #      caelestia-wallpaper.sh para saber si el fondo es video o imagen).
+        #   2) lanzar el fondo ya, sin depender del shell.
+        # El esquema Material You es FIJO (cyberpunk) y lo garantiza el activation
+        # de caelestia.nix: ya no se recalcula en cada cambio de wallpaper (el CLI
+        # disparaba el postHook hasta 3 veces -> mpvpaper duplicados).
         dir="${wallpapersDir}"
         f="$1"
         if [ -z "$f" ]; then
@@ -621,43 +619,11 @@ in
         fi
         [ -z "$f" ] && exit 0
 
-        # La ruta ORIGINAL se guarda para el postHook: el fondo real es el
-        # video, no el frame PNG con el que se calcula el esquema.
         state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia"
         mkdir -p "$state"
         printf '%s' "$f" > "$state/wallpaper-source.txt"
 
-        # (1) FONDO, ya y sin depender de nadie.
         ~/.config/hypr/scripts/caelestia-wallpaper.sh "$f"
-
-        # (2) ESQUEMA: esperar el IPC del shell (hasta ~10s) y avisar al CLI.
-        # Si el shell no aparece, el fondo ya esta puesto: el esquema se
-        # aplicara en el siguiente cambio/rebuild sin bloquear nada.
-        for _ in $(seq 20); do
-          caelestia shell lock isLocked >/dev/null 2>&1 && break
-          sleep 0.5
-        done
-        case "''${f##*.}" in
-          mp4|webm|mkv|mov)
-            hash=$(sha1sum "$f" | cut -d' ' -f1)
-            cache="''${XDG_CACHE_HOME:-$HOME/.cache}/caelestia/wallpaper-frame"
-            mkdir -p "$cache"
-            frame="$cache/$hash.png"
-            [ -f "$frame" ] || ${pkgs.ffmpeg}/bin/ffmpeg -y -v error -i "$f" -frames:v 1 "$frame"
-            [ -f "$frame" ] || exit 0
-            # -N (no-smart) + -n (no-filter): el PNG es un frame, no un
-            # wallpaper de tamaño completo.
-            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$frame" -N -n || true
-            ;;
-          *)
-            ${pkgs.caelestia-cli}/bin/caelestia wallpaper -f "$f" || true
-            ;;
-        esac
-
-        # Re-aplica la paleta cyberpunk: cambiar de wallpaper recalcula Material
-        # You y la pisaría. El esquema ya existe (fix de la ola 2), así que un
-        # fallo aquí debe ser ruidoso en vez de quedar enmascarado.
-        ${pkgs.caelestia-cli}/bin/caelestia scheme set -n cyberpunk
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
@@ -667,19 +633,30 @@ in
         exec ~/.config/hypr/scripts/wallpaper-set.sh
       '';
     };
-    # postHook de Caelestia: el CLI (caelestia-cli) lo invoca en cada cambio de
-    # wallpaper tras calcular el esquema Material You. Recibe WALLPAPER_PATH
-    # (ruta de la imagen que se le pasó al CLI) y SCHEME_*. Como
-    # background.wallpaperEnabled=false en shell.json, Caelestia NO pinta
-    # fondo: el fondo REAL lo pinta mpvpaper aquí.
+    "hypr/scripts/caelestia-restart.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Reinicia el shell de Caelestia tras un rebuild (la instancia viva apunta al
+        # store anterior y el IPC `caelestia shell ...` falla con exit 255).
+        pkill -f 'quickshell.*caelestia-shell' 2>/dev/null
+        sleep 0.5
+        caelestia shell -d
+      '';
+    };
+    # postHook de Caelestia: el CLI (caelestia-cli) lo invoca al cambiar de
+    # wallpaper/esquema. Recibe WALLPAPER_PATH (ruta de la imagen que se le pasó
+    # al CLI) y SCHEME_*. Como background.wallpaperEnabled=false en shell.json,
+    # Caelestia NO pinta fondo: el fondo REAL lo pinta mpvpaper aquí (idempotente:
+    # si ya corre con el mismo wallpaper, no relanza).
     #
     # OJO (recursión evitada): este hook NO vuelve a llamar a
     # `caelestia wallpaper`, porque set_wallpaper() -> apply_colours() ->
-    # postHook() y sería un bucle. El frame de video ya lo extrajo
-    # wallpaper-set.sh y se lo pasó al CLI; aquí solo se reproduce.
+    # postHook() y sería un bucle.
     #
-    # Para saber si el fondo es video, wallpaper-set.sh guarda la ruta original
-    # en $XDG_STATE_HOME/caelestia/wallpaper-source.txt.
+    # wallpaper-set.sh guarda la ruta original en
+    # $XDG_STATE_HOME/caelestia/wallpaper-source.txt para saber si el fondo es
+    # video o imagen.
     "hypr/scripts/caelestia-wallpaper.sh" = {
       executable = true;
       text = ''
@@ -696,6 +673,14 @@ in
         # El fondo real es el ORIGEN (video o imagen), no el frame del esquema.
         wall="''${src:-$img}"
         [ -n "$wall" ] && [ -f "$wall" ] || exit 0
+
+        # Idempotencia: si ya corre mpvpaper con ESTE mismo wallpaper, no hacer
+        # nada. El CLI dispara el postHook varias veces por cambio; sin esta
+        # guarda se relanzaba y quedaban procesos duplicados (pkill perdia la
+        # carrera).
+        if pgrep -af 'mpvpaper' | grep -qF -- "$wall"; then
+          exit 0
+        fi
 
         pkill -x .mpvpaper-wrapp 2>/dev/null
         sleep 0.2
