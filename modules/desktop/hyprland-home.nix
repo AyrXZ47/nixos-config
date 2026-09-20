@@ -258,11 +258,10 @@ in
       -----------------------
       hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("wezterm"))
       hl.bind("SUPER + F2", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/touchpad-toggle.sh"))
-      -- Espejo/expander pantallas (presentaciones): toggle con deteccion de hosts
+      -- Espejo/expander pantallas (presentaciones): SUPER+D alterna (toggle con
+      -- deteccion de hosts); SUPER+SHIFT+D se mantiene como alias.
+      hl.bind("SUPER + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
       hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
-      -- Cast a tablet via VNC+tailscale: SUPER+ALT+D espejo, SUPER+ALT+SHIFT+D extend
-      hl.bind("SUPER + ALT + D", hl.dsp.exec_cmd("cast-tablet"))
-      hl.bind("SUPER + ALT + SHIFT + D", hl.dsp.exec_cmd("cast-tablet extend"))
       -- rofi retirado: TODO pasa por el launcher de Caelestia (SUPER+CTRL+Space
       -- para apps, y `>ack` dentro del launcher para las acciones). SUPER+A
       -- abre el mismo launcher para no perder la costumbre.
