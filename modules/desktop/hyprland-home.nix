@@ -835,10 +835,13 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Solo cambia el layout. La notificacion la da Caelestia de fabrica
-        # (HyprKeyboard::layoutChanged): un notify-send propio aqui salia
-        # DUPLICADO. "all" cambia todos los teclados, sin parsear dispositivos.
+        # Solo cambia el layout. La notificacion nativa de Caelestia
+        # (HyprKeyboard::layoutChanged) se apaga en shell.json (executor-4),
+        # asi que el aviso se re-emite aqui como notificacion DBus, que
+        # Caelestia pinta arriba-derecha. "all" cambia todos los teclados.
         hyprctl switchxkblayout all next
+        layout=$(hyprctl devices -j 2>/dev/null | jq -r '.keyboards[0].active_keymap // "cambiada"')
+        notify-send -t 2000 -a caelestia -u low "Distribución de teclado" "$layout"
       '';
     };
 
