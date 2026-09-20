@@ -476,6 +476,46 @@ PYEOF
                                 implicitWidth: Math.round(Tokens.font.icon.small.pointSize * 1.33)
                                 implicitHeight: Math.round(Tokens.font.icon.small.pointSize * 1.33)
                             }'
+
+            # Bounce del indicador de ventanas al enfocar el workspace (port del
+            # workspace-bounce de Wayle): escala con overshoot ~1.25 y vuelve.
+            substituteInPlace modules/bar/components/workspaces/Workspace.qml \
+              --replace-fail \
+            'Behavior on Layout.preferredHeight {
+                    Anim {}
+                }' \
+            'Connections {
+                    target: root
+
+                    function onFocusedChanged(): void {
+                        if (root.focused)
+                            bounce.restart();
+                    }
+                }
+
+                SequentialAnimation {
+                    id: bounce
+
+                    NumberAnimation {
+                        target: windows
+                        property: "scale"
+                        to: 1.25
+                        duration: 120
+                        easing: Easing.OutQuad
+                    }
+
+                    NumberAnimation {
+                        target: windows
+                        property: "scale"
+                        to: 1
+                        duration: 260
+                        easing: Easing.OutBack
+                    }
+                }
+
+                Behavior on Layout.preferredHeight {
+                    Anim {}
+                }'
           '';
         });
       };
