@@ -442,6 +442,21 @@ PYEOF
               --replace-fail \
             'colour: Colours.palette.m3tertiary' \
             'colour: "#5277c3"'
+
+            # Notificaciones nativas (caps/num lock incluidos, son toasts): anclar
+            # los toasts arriba-derecha, bajo las notificaciones, y darles el mismo
+            # fondo que notifications/Notification.qml.
+            substituteInPlace modules/drawers/Panels.qml \
+              --replace-fail \
+            'anchors.bottom: sidebar.visible ? parent.bottom : utilities.top' \
+            'anchors.top: notifications.bottom' \
+              --replace-fail \
+            'anchors.right: sidebar.left' \
+            'anchors.right: parent.right'
+            substituteInPlace modules/utilities/toasts/ToastItem.qml \
+              --replace-fail \
+            'return Colours.palette.m3surface;' \
+            'return Colours.tPalette.m3surfaceContainer;'
           '';
         });
       };
