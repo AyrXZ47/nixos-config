@@ -176,14 +176,18 @@ in
       ------------------------
       ---- ANIMACIONES -------
       ------------------------
-      hl.curve("bounce", { type = "bezier", points = { {0.05, 1.8}, {0.2, 1.0} } })
+      -- Curva "standard" por defecto de Caelestia (animations.lua) para workspaces.
+      hl.curve("standard", { type = "bezier", points = { {0.2, 0}, {0, 1} } })
       hl.curve("overshot", { type = "bezier", points = { {0.05, 0.9}, {0.1, 1.05} } })
 
       hl.animation({ leaf = "windows", enabled = true, speed = 6, bezier = "overshot", style = "slideright" })
       hl.animation({ leaf = "windowsOut", enabled = true, speed = 5, bezier = "default", style = "popin 80%" })
       hl.animation({ leaf = "border", enabled = true, speed = 10, bezier = "default" })
       hl.animation({ leaf = "fade", enabled = true, speed = 7, bezier = "default" })
-      hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "bounce", style = "slidevert" })
+      -- Workspaces con la curva y velocidad por defecto de Caelestia, pero en
+      -- vertical (slidevert) porque la barra también lo es. El "bounce" propio
+      -- se retira: el user pidió la animación original de Caelestia.
+      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "standard", style = "slidevert" })
 
       -----------------------
       ---- WINDOW RULES -----
