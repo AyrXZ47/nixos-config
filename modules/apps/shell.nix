@@ -52,34 +52,48 @@
       # Solo si está instalado: el celular (nix-on-droid) no trae fastfetch.
       command -v fastfetch >/dev/null && fastfetch
 
-      # Parte la terminal en dos: btop (55%, izquierda) y nvtop (45%,
-      # derecha). La versión con hyprctl dispatch layoutmsg/exec dejó de
-      # funcionar con la config Lua (el dispatch legacy no se parsea) y solo
-      # abría btop.
+      # Parte el kitty ACTUAL en dos: btop (izquierda) y nvtop (45%, derecha).
+      # Usa el control remoto de kitty (`kitty @ launch`, exige
+      # `allow_remote_control`, lo trae modules/apps/kitty.nix). El panel nuevo
+      # va en el layout `splits`: vsplit + bias=45 lo deja a la derecha con el
+      # 45% del ancho; btop se queda en la ventana de origen con `exec btop`.
       netrunner() {
-        if [[ -z "$WEZTERM_PANE" ]]; then
-          echo "Error: Se requiere WezTerm activo."
+        if [[ -z "$KITTY_WINDOW_ID" ]]; then
+          echo "Error: Se requiere kitty activo."
           return 1
         fi
-        wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 45 -- zsh -ic nvtop
+        kitty @ goto-layout --match "window_id:$KITTY_WINDOW_ID" splits 2>/dev/null
+        kitty @ launch --location=vsplit --bias=45 --next-to "id:$KITTY_WINDOW_ID" zsh -ic nvtop
         exec btop
       }
 
+      # Uso: dev [directorio-repo] — si se pasa, entra al repo antes de partir.
+      # Layout (migrado de los panes del dev viejo a los splits de kitty):
+      # fila superior nvim (15%, izquierda) + opencode (85%, derecha); fila
+      # inferior pipes-rs (15%, izquierda) + terminal libre (85%, derecha).
+      # `hsplit --bias=20` crea la fila inferior debajo y `vsplit --bias=85`
+      # deja el panel nuevo a la derecha (el bias es el % del panel nuevo).
       dev() {
-        if [[ -z "$WEZTERM_PANE" ]]; then
-          echo "Error: Se requiere WezTerm activo."
+        if [[ -z "$KITTY_WINDOW_ID" ]]; then
+          echo "Error: Se requiere kitty activo."
           return 1
         fi
-        # Uso: dev [directorio-repo] — si se pasa, entra al repo antes de partir paneles.
-        # Layout: arriba 80% (nvim 15% a la izquierda + opencode 85% a la
-        # derecha) y abajo 20% partido en vertical con pipes-rs (15% del ancho)
-        # y terminal git libre (85%).
         local repo="''${1:-}"
         [[ -n "$repo" ]] && { cd "$repo" || return 1; }
-        local PANE_BOTTOM_BLOCK=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --bottom --percent 20)
-        local PANE_OPENCODE=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 85 -- zsh -ic "opencode")
-        local PANE_PIPES=$(wezterm cli split-pane --pane-id "$PANE_BOTTOM_BLOCK" --left --percent 15 -- zsh -ic "pipes-rs")
-        echo "nvim\r" | wezterm cli send-text --pane-id "$WEZTERM_PANE"
+        local base="$KITTY_WINDOW_ID" bottom
+        kitty @ goto-layout --match "window_id:$base" splits 2>/dev/null
+        # Fila inferior completa (20% del alto): pipes-rs queda a la izquierda
+        # al partirle la terminal libre a la derecha.
+        bottom=$(kitty @ launch --location=hsplit --bias=20 --next-to "id:$base" \
+          --cwd "$PWD" zsh -ic pipes-rs)
+        # Fila superior: opencode a la derecha (85%); nvim se queda a la izquierda.
+        kitty @ launch --location=vsplit --bias=85 --next-to "id:$base" \
+          --cwd "$PWD" zsh -ic opencode >/dev/null 2>&1
+        [[ -n "$bottom" ]] && kitty @ launch --location=vsplit --bias=85 --next-to "id:$bottom" \
+          --cwd "$PWD" zsh >/dev/null 2>&1
+        # nvim en la ventana de origen (antes el send-text del dev viejo).
+        kitty @ send-text --match "id:$base" 'nvim\r'
+        kitty @ focus-window --match "id:$base" 2>/dev/null
       }
 
       # `dev` pero con VENTANAS wezterm independientes que Hyprland TILEA
