@@ -191,11 +191,22 @@ Pregunta: "qué se traga mi batería". Muestreo real de `/proc/<pid>/stat` duran
 ## Notificaciones
 
 `quickshell` es el único dueño de `org.freedesktop.Notifications` (verificado en
-la migración). Los `notify-send` de los scripts (touchpad, monitor-mirror,
-switch-layout, toggle-frost, workspace-move-all, cast-tablet) ya entran por ahí y
-se pintan como notificaciones de Caelestia. No se migran a toasts (`caelestia
-shell ipc call toaster`): notify-send es estándar, no depende del IPC del shell y
-sobrevive a reiniciarlo. Los toasts internos (volumen, dnd, etc.) son otra cosa.
+la migración) y además emite avisos propios desde C++. **Cuidado con duplicar lo
+que Caelestia ya avisa solo**: `HyprKeyboard::layoutChanged` (en
+`libcaelestia-services.so`, gated por `utilities.toasts.kbLayoutChanged`) muestra
+"Keyboard layout changed" al cambiar de layout, así que el `notify-send` que
+tenía `switch-layout.sh` salía DOS veces (capturado 2026-09-19 con `grim` +
+`dbus-monitor`). Se retiró ese `notify-send`; el aviso lo da Caelestia stock.
+
+El resto de `notify-send` de los scripts (touchpad, monitor-mirror, toggle-frost,
+workspace-move-all, cast-tablet) no tiene equivalente nativo y se queda: entran
+por el bus y Caelestia los pinta. No se migran a `caelestia shell ipc call
+toaster`: notify-send es estándar, no depende del IPC del shell y sobrevive a
+reiniciarlo.
+
+Regla para lo que venga: antes de añadir un aviso propio, comprobar si Caelestia
+ya lo emite (`strings libcaelestia-services.so | grep -i <tema>`, o los toasts de
+`utilities.toasts` en `shell.json`). Si existe nativo, no duplicar.
 
 ## Reversión
 
