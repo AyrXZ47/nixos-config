@@ -476,6 +476,16 @@ PYEOF
                                 sourceSize: Qt.size(Math.round(Tokens.font.icon.small.pointSize * 1.33), Math.round(Tokens.font.icon.small.pointSize * 1.33))
                             }'
 
+            # Icono del workspace activo: el Colouriser recoloreaba todo el
+            # contenido del mask a m3onPrimary y aplanaba los iconos reales a un
+            # solo color. Se desactiva el recoloreo conservando el redibujado.
+            substituteInPlace modules/bar/components/workspaces/ActiveIndicator.qml \
+              --replace-fail \
+            '        colorizationColor: Colours.palette.m3onPrimary' \
+            '        colorizationColor: Colours.palette.m3onPrimary
+                    colorization: 0
+                    brightness: 0'
+
             # Bounce del indicador de ventanas al enfocar el workspace (port del
             # workspace-bounce de Wayle): escala con overshoot ~1.25 y vuelve.
             substituteInPlace modules/bar/components/workspaces/Workspace.qml \
