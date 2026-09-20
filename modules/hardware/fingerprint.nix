@@ -35,5 +35,24 @@ in
     services.udev.extraRules = ''
       SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{idProduct}=="00bd", ATTR{power/control}="on"
     '';
+
+    # Al volver de S3 (el idle de Caelestia ahora suspende) el controlador xHCI
+    # Renesas resetea el bus y el sensor reenumera reportando firmware 0.00:
+    # libfprint lo ignora ("unsupported firmware version") y fprintd deja la
+    # reserva colgada -> sudo deja de pedir la huella (visto 2026-09-19). Un
+    # rebind del USB fuerza una reenumeracion limpia y reiniciar fprintd limpia
+    # la reserva. En hosts sin este sensor el loop no encuentra nada.
+    powerManagement.resumeCommands = ''
+      for d in /sys/bus/usb/devices/*/; do
+        [ -f "$d/idVendor" ] || continue
+        [ "$(cat "$d/idVendor")" = "06cb" ] || continue
+        [ "$(cat "$d/idProduct")" = "00bd" ] || continue
+        dev="$(basename "$d")"
+        echo "$dev" > /sys/bus/usb/drivers/usb/unbind 2>/dev/null || true
+        sleep 1
+        echo "$dev" > /sys/bus/usb/drivers/usb/bind 2>/dev/null || true
+      done
+      systemctl restart fprintd.service 2>/dev/null || true
+    '';
   };
 }
