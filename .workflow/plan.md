@@ -78,9 +78,11 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 - **#9 mixxx en media**: NO es viable con configuración. Mixxx 2.5.6 no expone
   MPRIS: no hay bus `org.mpris.MediaPlayer2.mixxx` con Mixxx corriendo
   (`busctl --user list`), no hay strings `org.mpris`/`MediaPlayer2` en el
-  binario, y no existe bridge mantenido. Opciones reales: (a) feature request
-  upstream, (b) parche C++ a Mixxx (grande), (c) dejarlo. **Recomendación
-  ponytail: no construirlo.** Decisión del humano pendiente.
+  binario, y no existe bridge mantenido. El humano lo **descartó** (2026-09-20).
+- **#5 Celsius**: existe `services.useFahrenheit` y
+  `services.useFahrenheitPerformance`, ambos con default por locale
+  (`QLocale().measurementSystem()`); en su locale pueden quedar en imperial. Se
+  fuerzan `false` en el seed. La temperatura de CPU/GPU siempre es °C.
 - **#13 hibernación**: `pc` (y `laptop`) NO tienen swap en disco
   (`swapDevices = []`; solo `zramSwap`). La hibernación real (suspend-to-disk)
   no es posible sin un swapfile/partición con `resume=`. El watchdog
@@ -99,8 +101,13 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
   (C++: caps lock, cambio de layout, carga, etc.), que se pintan ABAJO-derecha
   (`Panels.qml`: `Toasts` anclado a `bottom: utilities.top`). Las notificaciones
   DBus (p. ej. "Modo espejo") se pintan ARRIBA-derecha
-  (`notifications/Wrapper` anclado `top`+`right`). El humano quiere los toasts
-  integrados arriba-derecha.
+  (`notifications/Wrapper` anclado `top`+`right`). Decisión del humano
+  (2026-09-20): **absolutamente todo** debe verse como notificación nativa de
+  Caelestia (zona superior derecha y estilo de `notifications/Content.qml`).
+  Los eventos del cambio de layout se pueden emitir con `notify-send` real
+  (desactivando el toast nativo y re-agregando el aviso en `switch-layout.sh`);
+  caps lock no tiene fuente de evento externa (vive en C++), así que su toast
+  se re-posiciona/re-estiliza en la zona de notificaciones.
 - **#4 paleta Wayle** (recuperada de la config HM generada,
   `/nix/store/xk9lwgp2zwa18zad8yzimqs044kvnzy7-hm_wayleconfig.toml`):
   `bg #0a0a12 · surface #141428 · elevated #1e1e3a · fg #d4d4f0 ·
@@ -113,10 +120,10 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 
 | Wave | Focus | Status |
 |------|-------|--------|
-| 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle) + paleta cyberpunk | planned |
-| 2 | Parches QML del overlay: iconos reales, toasts arriba-derecha, animación workspace | pending |
-| 3 | Kitty (gated por decisión del humano) + limpieza + validación en vivo | pending |
-| 4 | (opcional) Mixxx MPRIS — NO recomendado (ver hallazgo #9) | pending |
+| 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle/suspend, Celsius) + paleta cyberpunk | planned |
+| 2 | Parches QML del overlay: notificaciones nativas, iconos reales, animación workspace | pending |
+| 3 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
+| 4 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -139,12 +146,13 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`, ni
 ### Tasks
 
 - [ ] T1: `shell.json` seed — figuritas (`displayType=shapes`), transparencia
-      0.34 + layers 0.5, `activeTrail=true`, idle sin auto-lock ni auto-hibernar
+      0.34 + layers 0.5, `activeTrail=true`, idle sin auto-lock ni auto-hibernar,
+      Celsius forzado (`useFahrenheit=false`, `useFahrenheitPerformance=false`)
       → brief: `.workflow/briefs/wave1-executor-1.md`
 - [ ] T2: fixes de `hyprland-home.nix` — IPC de lock (SUPER+L), binds de brillo
       a global shortcuts (OSD) + retiro de `brightness.sh`, `ignore_alpha` del
-      blur a 0.3, watchdog lock→hibernar 5 min, re-aplicar esquema cyberpunk
-      tras cambiar wallpaper → brief: `.workflow/briefs/wave1-executor-2.md`
+      blur a 0.3, watchdog lock→suspender a los 5 min, re-aplicar esquema
+      cyberpunk tras cambiar wallpaper → brief: `.workflow/briefs/wave1-executor-2.md`
 - [ ] T3: overlay `caelestia-cli` con el esquema `cyberpunk` (paleta Wayle
       mapeada a claves M3) → brief: `.workflow/briefs/wave1-executor-3.md`
 
@@ -165,7 +173,7 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`, ni
   2. `caelestia scheme set -n cyberpunk` (una vez).
   3. Validar en vivo: SUPER+L bloquea; SUPER+F11/F12 y XF86 muestran el OSD;
      figuritas de vuelta; transparencia/blur; indicador con estela; paleta
-     magenta/cian; toasts (esto último se pule en ola 2).
+     magenta/cian; Celsius en todo. Las notificaciones nativas se pulen en ola 2.
 
 ### Audit gate
 
@@ -184,34 +192,59 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`, ni
 > Gate: ola 1 integrada y auditada. Un solo ejecutor (`flake.nix`), porque los
 > tres parches viven en el mismo overlay.
 
+- **Notificaciones nativas (#2)**: el humano quiere que TODO se vea como
+  notificación de Caelestia (arriba-derecha, estilo de
+  `notifications/Content.qml`).
+  - `Panels.qml`: re-anclar `Toasts.Toasts` a la zona superior derecha,
+    apilados bajo las notificaciones.
+  - `ToastItem.qml`: re-estilizar para que coincida con la tarjeta de
+    notificación nativa.
+  - Cambio de layout (kbLayout): desactivar el toast C++ en `shell.json`
+    (`utilities.toasts.kbLayoutChanged=false`) y re-agregar `notify-send` en
+    `switch-layout.sh` (hubo que quitarlo antes por duplicado; con el toast
+    apagado ya no duplica). Ese sí es una notificación DBus 100% nativa.
+  - Caps lock / num lock: viven en C++ (no hay fuente de evento externa) → se
+    quedan como toast, pero re-posicionado/re-estilizado en la zona nativa.
 - **Iconos reales de apps (#10)**: `Workspace.qml` usa `MaterialIcon` con
   `Icons.getAppCategoryIcon` (glifo monocromo). Parche para usar
   `Icons.getAppIcon` (icono real del `.desktop` vía `Quickshell.iconPath`) con
   `CachingIconImage`/`Image` de fallback al glifo.
-- **Toasts arriba-derecha (#2)**: `Panels.qml` ancla `Toasts.Toasts` a
-  `bottom: utilities.top`. Reposicionar a la zona superior derecha, apilados
-  bajo las notificaciones, para que se vean integrados como los nativos.
 - **Animación de workspace fluida (#11b)**: portar el `workspace-bounce` de
-  Wayle (o una variante) al indicador/iconos de `Workspace.qml`, o exponer una
-  curva más expresiva. Validar con el humano cuál le gusta.
+  Wayle (recuperado del `styles/index.scss` de HM) al indicador/iconos de
+  `Workspace.qml`, o exponer una curva más expresiva. Validar con el humano.
 
-## Wave 3 (next-next) — kitty + cierre
+## Wave 3 — kitty (confirmado por el humano)
 
-> Gate: decisión del humano sobre migrar a kitty (#6). Hasta entonces, no se
-> escribe el brief.
+> Gate: ola 2 integrada. Un ejecutor (o dos: `modules/apps/kitty.nix` +
+> `modules/apps/shell.nix`/`hyprland-home.nix`; a decidir al planificar la ola).
 
-- `kitty` como terminal (nuevo `modules/apps/kitty.nix` o sección en
-  `home/default.nix`), mismo look del vidrio (0.66), fuente y colores
-  cyberpunk; actualizar `general.apps.terminal`, binds (`SUPER+Backspace`,
-  `SUPER+N`) y los scripts que abren `wezterm`. Alternativa ponytail: quedarse
-  en wezterm (ya está afinado) y no migrar.
-- Limpieza final: retirar comentarios muertos de rofi, cerrar `#3/#5/#7` en el
-  decision log.
+El humano ya decidió migrar de wezterm a kitty (2026-09-20). Alcance acordado:
 
-## Wave 4 (opcional) — Mixxx MPRIS
+- **Tema cyberpunk**: kitty acepta colores propios; generar una paleta a partir
+  de `#0a0a12/#141428/#1e1e3a/#d4d4f0/#ff0066/#00aaff` (misma de Wayle),
+  paridad con `color_scheme = "Cyberdyne"` de wezterm, fuente JetBrains Mono
+  Nerd Font, fondo translúcido (~0.4 como wezterm o 0.66 como el resto) y
+  `cursor_trail`/`cursor_trail_decay` para el **smear cursor** entre terminales
+  (kitty lo trae nativo).
+- **hyprdev con geometría fija**: hoy son 4 ventanas wezterm tileadas por
+  dwindle. Con kitty se puede hacer UN panel con splits exactos vía
+  `kitty @ launch --location=... --bias=N`: opencode arriba-derecha (~75%
+  ancho × 65% alto), nvim arriba-izquierda, pipes-rs abajo-izquierda, terminal
+  libre abajo-derecha. Fallback aceptado por el humano: comportarse como el
+  wezterm actual (4 ventanas tileadas).
+- **SUPER+N (netrunner)**: que lance sus terminales flotantes de forma
+  autónoma, igual que hyprdev (hoy exige un `WEZTERM_PANE` activo).
+- Actualizar `general.apps.terminal`, binds (`SUPER+Backspace`, `SUPER+N`) y los
+  scripts que abren `wezterm`. Mover `programs.wezterm`/`hyprdev`/`netrunner` a
+  kitty; decidir si se retira wezterm o se deja instalado.
+- Limpieza final: retirar comentarios muertos de rofi, cerrar `#3/#5/#7/#8/#9/
+  #12/#13` en el decision log.
 
-No recomendado (hallazgo #9). Solo si el humano insiste: parche C++ a Mixxx o
-feature request upstream. No se planifica hasta que lo pida.
+## Wave 4 — Mixxx MPRIS (DESCARTADO)
+
+El humano descartó el soporte de Mixxx en el menú de media (2026-09-20) tras
+la evidencia del hallazgo #9: Mixxx 2.5.6 no expone MPRIS y no hay bridge
+mantenido. No se planifica.
 
 ---
 
@@ -223,5 +256,9 @@ feature request upstream. No se planifica hasta que lo pida.
 | 2026-09-20 | #9 Mixxx: NO construir bridge MPRIS; recomendar descartar | Verificado: Mixxx 2.5.6 no expone MPRIS (sin bus name, sin strings) y no hay bridge mantenido |
 | 2026-09-20 | #8 y #12 se arreglan con la sintaxis correcta de IPC (`caelestia shell <target> <func>`, no `ipc call`) | El subcomando `ipc call` del CLI duplica el prefijo y da "Target not found" |
 | 2026-09-20 | #4 paleta: esquema `cyberpunk` por overlay a `caelestia-cli` (no se puede escribir un esquema de usuario) | `scheme_data_dir` vive read-only dentro del paquete |
-| 2026-09-20 | #13: sin auto-lock; watchdog que hiberna si la sesión lleva 5 min bloqueada | Caelestia no soporta timeouts condicionados al lock |
-| 2026-09-20 | #13: `pc`/`laptop` no pueden hibernar de verdad (sin swap en disco, solo zram) → el watchdog usa `suspend-then-hibernate` con fallback a `suspend`; hibernación real = tarea de infra pendiente de decisión | Verificado: `swapDevices = []` + `zramSwap` en `amd-common.nix` |
+| 2026-09-20 | #13: sin auto-lock; watchdog que suspende si la sesión lleva 5 min bloqueada | Caelestia no soporta timeouts condicionados al lock |
+| 2026-09-20 | #13: `pc`/`laptop` no tienen swap en disco (solo zram); el humano ACEPTA `suspend` puro y NO quiere swap | Verificado: `swapDevices = []` + `zramSwap` en `amd-common.nix`. El watchdog usa `systemctl suspend` |
+| 2026-09-20 | #9 Mixxx: DESCARTADO definitivamente por el humano | No hay MPRIS ni bridge; no se construye |
+| 2026-09-20 | #6 kitty: MIGRAR (confirmado). Requisitos: tema cyberpunk, `cursor_trail` (smear), hyprdev con geometría fija vía splits de kitty, SUPER+N autónomo; fallback = comportarse como wezterm | Recuperado el palette de Wayle y `workspace-bounce`; kitty soporta cursor trail nativo y splits con `--bias` |
+| 2026-09-20 | #2 notificaciones: TODO debe verse como notificación nativa de Caelestia. Toasts re-posicionados/re-estilizados arriba-derecha; kb layout pasa a `notify-send` real; caps/num lock se quedan como toast re-posicionado (viven en C++) | No hay fuente de evento externa para caps lock; el resto se puede hacer nativo |
+| 2026-09-20 | #5: el humano borra `~/.config/caelestia/shell.json` para adoptar el seed (solo tenía tema + Celsius). Se fuerzan `useFahrenheit=false` y `useFahrenheitPerformance=false` | Defaults por locale podían quedar en imperial |

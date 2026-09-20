@@ -32,19 +32,17 @@ sin tocar nada más:
    `caelestia-drawers-blur` de `0.8` a `0.3` (el nuevo
    `transparency.base` es 0.34; `ignore_alpha` debe quedar por debajo para que
    Hyprland no descarte el blur). Actualizar el comentario de la regla.
-4. **Watchdog lock→hibernar (#13)**: agregar
+4. **Watchdog lock→dormir (#13)**: agregar
    `"hypr/scripts/lock-hibernate.sh"` (executable) y un
    `systemd.user.services.caelestia-lock-hibernate` (`WantedBy =
    [ "graphical-session.target" ]`, `Restart = "always"`, `RestartSec = 5`)
    que lo corra. El script sondea cada 15 s con
    `caelestia-shell ipc call lock isLocked` (usa el binario directo, NO el CLI,
    para no depender del wrapper); si lleva ≥ 300 s bloqueado ejecuta
-   `systemctl suspend-then-hibernate 2>/dev/null || systemctl suspend` y
-   resetea el contador al desbloquear. `ponytail:` comentario con el techo
-   (granularidad 15 s; "idle" ≈ "bloqueado").
-   OJO: en `pc` y `laptop` no hay swap en disco (solo zram) → la hibernación
-   real no es posible; `suspend-then-hibernate` cae a suspender. Dejarlo así y
-   reportarlo.
+   `systemctl suspend` y resetea el contador al desbloquear. `ponytail:`
+   comentario con el techo (granularidad 15 s; "idle" ≈ "bloqueado").
+   El humano decidió **suspend puro** (sin swap en disco, no quiere
+   hibernación): NO usar `hibernate` ni `suspend-then-hibernate`.
 5. **Paleta cyberpunk persistente**: en `"hypr/scripts/wallpaper-set.sh"`, al
    final del paso (2), agregar
    `${pkgs.caelestia-cli}/bin/caelestia scheme set -n cyberpunk || true` para
@@ -86,7 +84,7 @@ nix flake check --no-build \
   && nix eval --raw '.#nixosConfigurations.pc.config.home-manager.users.yovick.xdg.configFile."hypr/scripts/lock.sh".text' | grep -q 'caelestia shell lock lock' \
   && nix eval --raw '.#nixosConfigurations.pc.config.home-manager.users.yovick.wayland.windowManager.hyprland.extraConfig' | grep -q 'caelestia:brightnessUp' \
   && nix eval --raw '.#nixosConfigurations.pc.config.home-manager.users.yovick.wayland.windowManager.hyprland.extraConfig' | grep -q 'ignore_alpha = 0.3' \
-  && nix eval --raw '.#nixosConfigurations.pc.config.home-manager.users.yovick.xdg.configFile."hypr/scripts/lock-hibernate.sh".text' | grep -q 'suspend-then-hibernate'
+  && nix eval --raw '.#nixosConfigurations.pc.config.home-manager.users.yovick.xdg.configFile."hypr/scripts/lock-hibernate.sh".text' | grep -q 'systemctl suspend'
 ```
 
 ## Commit
@@ -105,6 +103,6 @@ nix flake check --no-build \
 
 ## Report back
 
-- Diff resumido (`git diff --stat`), salida del verify, y una nota sobre la
-  limitación de hibernación (sin swap en disco → suspende). Reporta si algún
-  bind de brillo no podía pasar a global shortcut.
+- Diff resumido (`git diff --stat`), salida del verify, y una nota sobre el
+  watchdog (suspende tras 5 min bloqueado, por decisión del humano). Reporta si
+  algún bind de brillo no podía pasar a global shortcut.

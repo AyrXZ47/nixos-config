@@ -20,14 +20,19 @@ Ajustar el seed de `shell.json` en `modules/desktop/caelestia.nix`
    `lock` (timeout 300) y la de `suspendThenHibernate` (timeout 1800). Dejar
    SOLO la de `dpms off`/`dpms on` a 600. `lockBeforeSleep` y los flags de
    `inhibitWhenAudio` se quedan como están.
+5. **Celsius siempre (#5)**: en `services`, agregar explícitos
+   `useFahrenheit = false` y `useFahrenheitPerformance = false` (hoy se
+   adivinan por locale). No toques `weatherLocation` ni `showWeather`.
 
 No toques `cli.json`, ni la lista de acciones del launcher, ni los `paths`, ni
-`utilities`. La reposición de toasts y los iconos reales van en la ola 2.
+`utilities`. Las notificaciones nativas, los iconos reales y la animación de
+workspace van en la ola 2.
 
 ## Definition of done
 
 - `displayType == "shapes"`, `transparency.base == 0.34`,
   `transparency.layers == 0.5`, `activeTrail == true`.
+- `services.useFahrenheit == false` y `services.useFahrenheitPerformance == false`.
 - Ningún timeout de idle con `idleAction == "lock"` ni con
   `"suspendThenHibernate"`; queda el de `dpms off`.
 - El verify command pasa.
@@ -55,7 +60,7 @@ No toques `cli.json`, ni la lista de acciones del launcher, ni los `paths`, ni
 ## Verify command
 
 ```bash
-nix flake check --no-build && nix build --no-link --print-out-paths '.#nixosConfigurations.pc.config.modules.desktop.caelestia.shellJsonPath' | xargs jq -e '.bar.workspaces.displayType=="shapes" and .appearance.transparency.base==0.34 and .appearance.transparency.layers==0.5 and .bar.workspaces.activeTrail==true and ([.general.idle.timeouts[].idleAction] | index("lock") | not) and ([.general.idle.timeouts[].idleAction] | index("suspendThenHibernate") | not)'
+nix flake check --no-build && nix build --no-link --print-out-paths '.#nixosConfigurations.pc.config.modules.desktop.caelestia.shellJsonPath' | xargs jq -e '.bar.workspaces.displayType=="shapes" and .appearance.transparency.base==0.34 and .appearance.transparency.layers==0.5 and .bar.workspaces.activeTrail==true and .services.useFahrenheit==false and .services.useFahrenheitPerformance==false and ([.general.idle.timeouts[].idleAction] | index("lock") | not) and ([.general.idle.timeouts[].idleAction] | index("suspendThenHibernate") | not)'
 ```
 
 ## Commit
