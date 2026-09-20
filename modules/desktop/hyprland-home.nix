@@ -25,9 +25,9 @@ in
       ---- MONITORES ----
       ------------------
       hl.monitor({ output = "Virtual-1", mode = "1920x1080@60", position = "0x0", scale = "1" })
-      -- PC: DP-1 a máx res / máx refresco (170 Hz); el catch-all "preferred" elige 60.
-      hl.monitor({ output = "DP-1", mode = "1920x1080@170", position = "auto", scale = "1" })
-      hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "1" })
+      -- Catch-all: máxima frecuencia soportada (highrr). Reproductible en
+      -- cualquier host sin hardcodear nombres (pc 100 Hz, laptop, vm).
+      hl.monitor({ output = "", mode = "highrr", position = "auto", scale = "1" })
 
       ------------------
       ---- AUTOSTART ----
@@ -179,15 +179,20 @@ in
       -- Curva "standard" por defecto de Caelestia (animations.lua) para workspaces.
       hl.curve("standard", { type = "bezier", points = { {0.2, 0}, {0, 1} } })
       hl.curve("overshot", { type = "bezier", points = { {0.05, 0.9}, {0.1, 1.05} } })
+      -- Curvas de rebote: "bounce" es el bounce fuerte del viejo Wayle
+      -- (workspace-bounce), "bounce-natural" lo suaviza. Se dejan definidas
+      -- ambas para probarlas en vivo con workspace-anim.sh (SUPER+ALT+A).
+      hl.curve("bounce", { type = "bezier", points = { {0.05, 1.8}, {0.2, 1.0} } })
+      hl.curve("bounce-natural", { type = "bezier", points = { {0.1, 1.4}, {0.3, 1.0} } })
 
       hl.animation({ leaf = "windows", enabled = true, speed = 6, bezier = "overshot", style = "slideright" })
       hl.animation({ leaf = "windowsOut", enabled = true, speed = 5, bezier = "default", style = "popin 80%" })
       hl.animation({ leaf = "border", enabled = true, speed = 10, bezier = "default" })
       hl.animation({ leaf = "fade", enabled = true, speed = 7, bezier = "default" })
-      -- Workspaces con la curva y velocidad por defecto de Caelestia, pero en
-      -- vertical (slidevert) porque la barra también lo es. El "bounce" propio
-      -- se retira: el user pidió la animación original de Caelestia.
-      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "standard", style = "slidevert" })
+      -- Workspaces: bounce suave + vertical (la barra también lo es). El bounce
+      -- fuerte del viejo Wayle vuelve como curva "bounce" (probable en vivo con
+      -- SUPER+ALT+A); el default es la variante natural.
+      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "bounce-natural", style = "slidevert" })
 
       -----------------------
       ---- WINDOW RULES -----
@@ -334,6 +339,10 @@ in
       -- Deslizarse entre escritorios como GNOME (la animación slidevert está arriba).
       hl.bind("SUPER + ALT + up", hl.dsp.focus({ workspace = "-1" }))
       hl.bind("SUPER + ALT + down", hl.dsp.focus({ workspace = "+1" }))
+
+      -- Selector de animación de workspaces (fuzzel): aplica en vivo con
+      -- hyprctl eval. Temporal, vive hasta el próximo reload/rebuild.
+      hl.bind("SUPER + ALT + A", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-anim.sh"))
 
       -- Ratón: LMB arrastra (mover), RMB redimensiona (sin estos binds el config
       -- sobreescribe los defaults de Hyprland).
@@ -643,9 +652,9 @@ in
         esac
 
         # Re-aplica la paleta cyberpunk: cambiar de wallpaper recalcula Material
-        # You y la pisaría. El `|| true` lo hace inofensivo si el esquema aún no
-        # existe (lo crea executor-3).
-        ${pkgs.caelestia-cli}/bin/caelestia scheme set -n cyberpunk || true
+        # You y la pisaría. El esquema ya existe (fix de la ola 2), así que un
+        # fallo aquí debe ser ruidoso en vez de quedar enmascarado.
+        ${pkgs.caelestia-cli}/bin/caelestia scheme set -n cyberpunk
       '';
     };
     "hypr/scripts/wallpaper-cycle.sh" = {
@@ -826,10 +835,13 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Solo cambia el layout. La notificacion la da Caelestia de fabrica
-        # (HyprKeyboard::layoutChanged): un notify-send propio aqui salia
-        # DUPLICADO. "all" cambia todos los teclados, sin parsear dispositivos.
+        # Solo cambia el layout. La notificacion nativa de Caelestia
+        # (HyprKeyboard::layoutChanged) se apaga en shell.json (executor-4),
+        # asi que el aviso se re-emite aqui como notificacion DBus, que
+        # Caelestia pinta arriba-derecha. "all" cambia todos los teclados.
         hyprctl switchxkblayout all next
+        layout=$(hyprctl devices -j 2>/dev/null | jq -r '.keyboards[0].active_keymap // "cambiada"')
+        notify-send -t 2000 -a caelestia -u low "Distribución de teclado" "$layout"
       '';
     };
 
@@ -890,6 +902,38 @@ try:
 except Exception:
     pass' "$cur" < <(hyprctl -j clients 2>/dev/null))
         [ "$n" -gt 0 ] && notify-send -t 2000 -a hyprland -u low "ws $cur -> $1 ($n ventanas)"
+      '';
+    };
+
+    # Prueba EN VIVO las animaciones de workspace (Hyprland las da, no
+    # Caelestia). No toca la config: aplica con hyprctl eval y se pierde en el
+    # próximo reload/rebuild. Con argumentos `style curve` aplica directo.
+    "hypr/scripts/workspace-anim.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        styles=(slide slidevert fade slidefade slidefadevert)
+        curves=(standard overshot bounce bounce-natural)
+
+        apply() {
+          hyprctl eval "hl.animation({ leaf = 'workspaces', enabled = true, speed = 5, bezier = '$2', style = '$1' })"
+          msg="workspace-anim: style=$1 curve=$2 (temporal: se pierde en el próximo reload/rebuild)"
+          echo "$msg"
+          notify-send -t 2000 -a hyprland -u low "Workspace anim" "$1 / $2 (temporal)" 2>/dev/null || true
+        }
+
+        if [ -n "$2" ]; then
+          apply "$1" "$2"
+        else
+          pick=$(for s in "''${styles[@]}"; do
+            for c in "''${curves[@]}"; do
+              printf '%s %s\n' "$s" "$c"
+            done
+          done | fuzzel --dmenu --prompt="Workspace anim  ") || exit 0
+          [ -z "$pick" ] && exit 0
+          read -r style curve <<< "$pick"
+          apply "$style" "$curve"
+        fi
       '';
     };
     # rofi/*.rasi + tema cyberpunk retirados: el launcher es Caelestia y los
