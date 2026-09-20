@@ -435,6 +435,13 @@ PYEOF
                             seen.add(key);
                             return true;
                         });'
+
+            # Logo NixOS: el shell lo colorea con el color del esquema
+            # (m3tertiary); el azul original de NixOS es fijo.
+            substituteInPlace modules/bar/components/OsIcon.qml \
+              --replace-fail \
+            'colour: Colours.palette.m3tertiary' \
+            'colour: "#5277c3"'
           '';
         });
       };
