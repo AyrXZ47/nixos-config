@@ -176,7 +176,7 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle/suspend, Celsius) + paleta cyberpunk | rejected (F1) → fixeada en ola 2 |
 | 2 | Fix F1 (esquema) + monitor `highrr` + animaciones de workspace + NeoCyberVim + layout nativo | audited · APPROVED |
 | 3 | Animación final (`slidefadevert`+`overshot`), fuera cast VNC, espejo arreglado, nvim transparente | planned |
-| 4 | Parches QML del overlay: notificaciones nativas, iconos reales, animación del indicador | pending |
+| 4 | Parches QML del overlay: notificaciones nativas, iconos reales, animación del indicador | integrated · pending audit |
 | 5 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
 | 6 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
 
@@ -352,3 +352,4 @@ mantenido. No se planifica.
 | 2026-09-20 | mpvpaper duplicado: simplificar `wallpaper-set.sh` (solo fondo) + idempotencia en `caelestia-wallpaper.sh` | 3 postHooks por cambio de wallpaper + `pkill` que perdía la carrera |
 | 2026-09-20 | Quitar el auto-espejo de `monitor.added`; `monitor-mirror.sh` no-op con <2 salidas físicas | Al arrancar espejaba todo y volvía locas las pantallas |
 | 2026-09-20 | Acción de launcher `Cyberpunk` para restaurar el esquema tras un cambio accidental | El humano cambió a `dynamic` desde `>scheme` |
+| 2026-09-20 | Ola 4 integrada: merges `3a2341a`, `2b2b77b`, `0d4a44c` en `main`; `nix flake check` + build del toplevel de `pc` pasan | Integración limpia (archivos disjuntos); pendiente auditoría |
