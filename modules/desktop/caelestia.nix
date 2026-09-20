@@ -48,11 +48,11 @@ let
         workspaces = "Rubik";
       };
       anim.durations.scale = 1;
-      # Transparencia/glass como el vidrio biselado del repo (0.85 base).
+      # Transparencia/glass ~66% (antes 0.85, casi opaco).
       transparency = {
         enabled = true;
-        base = 0.85;
-        layers = 0.4;
+        base = 0.34;
+        layers = 0.5;
       };
     };
 
@@ -70,29 +70,18 @@ let
         playback = [ "mpv" ];
         explorer = [ "dolphin" ];
       };
-      # Antes solo existía hypridle con lock_cmd (sin timeouts); ahora el idle
-      # es del shell y SÍ duerme la pantalla. El lock a los 5 min, dpms a los
-      # 10, suspender+hibernar a los 30.
+      # Idle del shell: SOLO apaga la pantalla (dpms) a los 10 min. Sin autolock
+      # ni suspensión (sin swap en disco, no habría hibernación real); el lock
+      # es siempre manual.
       idle = {
         lockBeforeSleep = true;
         inhibitWhenAudio = true;
         inhibitWhenCharging = false;
         timeouts = [
           {
-            timeout = 300;
-            idleAction = "lock";
-            inhibitWhenAudio = true;
-            inhibitWhenCharging = false;
-            respectInhibitors = true;
-          }
-          {
             timeout = 600;
             idleAction = "dpms off";
             returnAction = "dpms on";
-          }
-          {
-            timeout = 1800;
-            idleAction = [ "suspendThenHibernate" ];
           }
         ];
       };
@@ -176,10 +165,11 @@ let
         showWindows = true;
         showWindowsOnSpecialWorkspaces = true;
         maxWindowIcons = 8;
-        activeTrail = false;
-        # Texto (número de workspace) en vez de las formas Material ("figuritas"
-        # del morphing). Labels vacíos -> cae al número del workspace.
-        displayType = "text";
+        # Estela fluida del indicador al cambiar de workspace.
+        activeTrail = true;
+        # Formas Material ("figuritas" del morphing) en vez de texto. Labels
+        # vacíos -> cae al número del workspace.
+        displayType = "shapes";
         label = "";
         occupiedLabel = "";
         activeLabel = "";
@@ -512,6 +502,10 @@ let
 
     services = {
       weatherLocation = "";
+      # Celsius explícito: el default se adivina por locale y puede caer en
+      # imperial.
+      useFahrenheit = false;
+      useFahrenheitPerformance = false;
       gpuType = "Auto";
       # 44 barras + espejo: el visualiser de fondo hereda el look del módulo
       # cava de la barra de Wayle (que en Caelestia no existe como módulo).
