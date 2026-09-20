@@ -255,6 +255,14 @@ Dónde funciona la huella:
 > `services.fprintd.enable` está activo, así que todos los servicios PAM la
 > heredan salvo que se apague explícitamente.
 
+Al **volver de suspender** (el idle de Caelestia ahora suspende) el xHCI Renesas
+resetea el bus y el sensor reenumera con firmware `0.00`; libfprint lo ignora
+(`unsupported firmware version`) y fprintd deja la reserva colgada, así que sudo
+deja de pedir la huella. `fingerprint.nix` lo recupera solo con
+`powerManagement.resumeCommands` (rebind del USB + `systemctl restart fprintd`).
+Si pasa en vivo sin querer esperar al reboot: `sudo systemctl restart fprintd` y,
+si sigue, rebind del USB o reboot.
+
 ### Autoscroll con botón central (`modules/hardware/wheeltani.nix`)
 Replica el trackpoint del laptop en el PC (solo activo en `pc`): mantener el
 **botón central** y mover el mouse scrolla en esa dirección (la velocidad
