@@ -34,37 +34,6 @@ let
         }
       '';
     };
-    ".config/nvim/lua/plugins/replace.lua" = {
-      text = ''
-        return {
-          {
-            "keymaps",
-            keys = {
-              {
-                "<leader>rr",
-                function()
-                  local search = vim.fn.input("Buscar: ")
-                  if search == "" then
-                    return
-                  end
-                  local repl = vim.fn.input("Reemplazar por: ")
-                  vim.cmd(("%%s/%s/%s/gc"):format(vim.fn.escape(search, "/"), vim.fn.escape(repl, "/&")))
-                end,
-                desc = "Buscar y reemplazar en el buffer",
-              },
-              {
-                "<leader>rw",
-                function()
-                  local repl = vim.fn.input("Reemplazar última búsqueda por: ")
-                  vim.cmd(("%%s//%s/gc"):format(vim.fn.escape(repl, "/&")))
-                end,
-                desc = "Reemplazar última búsqueda en el buffer",
-              },
-            },
-          },
-        }
-      '';
-    };
     ".config/nvim/lua/plugins/obsidian.lua" = {
       text = ''
         return {
@@ -315,6 +284,20 @@ let
       vim.schedule(function()
         vim.cmd.colorscheme("${theme}")
       end)
+
+      vim.keymap.set("n", "<leader>rr", function()
+        local search = vim.fn.input("Buscar: ")
+        if search == "" then
+          return
+        end
+        local repl = vim.fn.input("Reemplazar por: ")
+        vim.cmd(("%%s/%s/%s/gc"):format(vim.fn.escape(search, "/"), vim.fn.escape(repl, "/&")))
+      end, { desc = "Buscar y reemplazar en el buffer" })
+
+      vim.keymap.set("n", "<leader>rw", function()
+        local repl = vim.fn.input("Reemplazar última búsqueda por: ")
+        vim.cmd(("%%s//%s/gc"):format(vim.fn.escape(repl, "/&")))
+      end, { desc = "Reemplazar última búsqueda en el buffer" })
     '';
 in
 {
