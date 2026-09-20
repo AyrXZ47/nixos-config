@@ -561,7 +561,7 @@ let
         audioInputChanged = true;
         capsLockChanged = true;
         numLockChanged = true;
-        kbLayoutChanged = true;
+        kbLayoutChanged = false;
         kbLimit = true;
         vpnChanged = true;
         nowPlaying = false;
@@ -710,6 +710,25 @@ in
           if [ ! -f "$f" ]; then
             cp ${config.modules.desktop.caelestia.shellJsonPath} "$f"
             chmod u+w "$f"
+          fi
+        '';
+      };
+
+      # Reproducibilidad de la paleta: el esquema cyberpunk vive en el overlay
+      # de caelestia-cli (read-only) y `scheme set` lo persiste en estado de
+      # usuario, que NO se comparte entre hosts ni sobrevive a un borrado de
+      # ~/.local/state. Re-aplicarlo aquí garantiza la misma paleta en todos.
+      # ponytail: fija cyberpunk a propósito; si se quisieran esquemas
+      # dinámicos, basta quitar este activation.
+      home.activation.caelestiaCyberpunkScheme = {
+        after = [ "writeBoundary" ];
+        before = [ ];
+        data = ''
+          if command -v caelestia >/dev/null 2>&1; then
+            cur=$(caelestia scheme get -n 2>/dev/null || true)
+            if [ "$cur" != "cyberpunk" ]; then
+              caelestia scheme set -n cyberpunk >/dev/null 2>&1 || true
+            fi
           fi
         '';
       };
