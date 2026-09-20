@@ -140,9 +140,30 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
   queda. `SUPER+D` pasa a ser el toggle espejo/extender de pantallas físicas/TV.
 - **OSD "monita" (#nuevo)**: el gif que anima en el panel de media del dashboard
   es `modules/dashboard/dash/Media.qml` → `AnimatedImage` con
-  `source: Config.paths.mediaGif` (hoy `assets/bongocat.gif`). Se puede cambiar
-  por cualquier otro GIF/asset con `paths.mediaGif`; no hay opción de apagarlo
-  sin parche. Pendiente: el humano elige el reemplazo.
+  `source: Config.paths.mediaGif` (hoy `assets/bongocat.gif`). El humano
+  confirmó 2026-09-20: **el bongocat se queda**, no hay tarea.
+- **Logo NixOS del barbecho (#nuevo)**: `modules/bar/components/OsIcon.qml`
+  renderiza `ColouredIcon { source: SysInfo.osLogo; colour: Colours.palette.m3tertiary }`
+  → lo **recolorea** al color del esquema (hoy verde `00ff88`). El humano lo
+  quiere azul NixOS (`#5277c3`). Parche QML: `colour: "#5277c3"` (o quitar el
+  recoloreo). Va en la ola 4.
+- **mpvpaper duplicado/parpadeo (#nuevo)**: el 2026-09-20 había **dos**
+  procesos `mpvpaper` (`.mpvpaper-wrapp`) con wallpapers distintos. Causa:
+  `wallpaper-set.sh` lanza el fondo, luego `caelestia wallpaper -f` y luego
+  `caelestia scheme set` disparan el `postHook` → `caelestia-wallpaper.sh` hasta
+  3 veces; el `pkill -x .mpvpaper-wrapp` no gana la carrera. Fix ola 4:
+  `wallpaper-set.sh` solo lanza el fondo; `caelestia-wallpaper.sh` idempotente
+  (si ya corre el mismo wallpaper, salir).
+- **Shell vieja en runtime (#nuevo)**: tras un `rebuild`, Hyprland sigue con la
+  instancia de quickshell del store **anterior** (PID viejo, config `5m8m…`)
+  mientras `caelestia-shell` en PATH ya es la nueva (`vbcm3v0…`). Por eso el IPC
+  (`caelestia shell lock …`) devuelve **exit 255** y SUPER+L no bloquea: no hay
+  que "arreglar" nada, hay que **reiniciar la shell**. Ola 4 agrega el helper
+  `caelestia-restart.sh`.
+- **Auto-espejo al arrancar (#nuevo)**: `hl.on("monitor.added", … monitor-mirror.sh mirror)`
+  espeja al detectar monitores → "pantallas locas" al boot. Ola 4 lo quita y
+  hace `monitor-mirror.sh` no-op con <2 salidas físicas; el toggle `SUPER+D`
+  queda manual.
 - **Restart de Caelestia**: `caelestia shell -k` mata el shell y
   `caelestia shell -d` lo relanza (equivalente a `wayle panel restart`). El
   shell ya recarga `shell.json`/`scheme.json` en caliente, así que normalmente
@@ -196,7 +217,19 @@ Desviación **aceptada**. `_template.md` documenta ahora la diferencia.
 
 ---
 
-## Wave 3 (current) — animación final, fuera VNC/cast, espejo arreglado, nvim transparente
+## Wave 3 — INTEGRADA (sin auditar, excepción autorizada por el humano)
+
+> El humano cerró la ola 3 y pidió avanzar más rápido, saltándose la auditoría.
+> **Excepción explícita registrada** (regla: la siguiente ola empieza solo tras
+> auditoría o excepción registrada). Verificado en el árbol por el planner:
+> animación `slidefadevert` + `overshot`, `SUPER+D` bindeado, `modules/apps/vnc.nix`
+> borrado, `NeoCyberVim` transparente. **Riesgo aceptado**: sin verify/audit no
+> hay evidencia de `nix flake check` tras el merge. Si algo se rompe, la ola 4
+> lo va a exponer.
+
+---
+
+## Wave 4 (current) — logo azul, notificaciones nativas, mpvpaper dedupe, espejo con 2+ monitores
 
 Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
@@ -204,69 +237,51 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
 | File/glob | Owner |
 |-----------|-------|
-| `modules/desktop/hyprland-home.nix` | executor-1 |
-| `modules/apps/vnc.nix` (borrar) + `home/default.nix` | executor-2 |
-| `modules/apps/neovim.nix` | executor-3 |
+| `flake.nix` | executor-1 |
+| `modules/desktop/hyprland-home.nix` | executor-2 |
+| `modules/desktop/caelestia.nix` | executor-3 |
 
 ### Tasks
 
-- [ ] T1: animación FINAL `slidefadevert` + `overshot`; quitar los binds de
-      cast (`SUPER+ALT+D` / `SUPER+ALT+SHIFT+D`); bind `SUPER+D` (dejando
-      `SUPER+SHIFT+D`) al toggle espejo/extender; arreglar el primario de
-      `monitor-mirror.sh` (bug real: elegía por área×Hz y espejaba el monitor
-      físico contra la salida headless del cast); allowlist de `style`/`curve`
-      en `workspace-anim.sh` (H2) → brief: `.workflow/briefs/wave3-executor-1.md`
-- [ ] T2: borrar `modules/apps/vnc.nix` y su import en `home/default.nix` (se
-      retira TODO el cast por VNC; Miracast/gnome-network-displays se queda)
-      → brief: `.workflow/briefs/wave3-executor-2.md`
-- [ ] T3: neovim transparente — `opts = { transparent = true }` en NeoCyberVim
-      → brief: `.workflow/briefs/wave3-executor-3.md`
+- [ ] T1 (flake.nix, parches QML del overlay): **logo NixOS azul real**
+      (`OsIcon.qml` recolorea con `m3tertiary`; usar `#5277c3`); **notificaciones
+      nativas** (re-anclar/re-estilizar `Toasts` arriba-derecha y estilo de
+      `notifications/Notification.qml`, que arrastra caps lock/num lock);
+      **iconos reales** de apps en `Workspace.qml`; **animación del indicador**
+      (`workspace-bounce` de Wayle) → brief: `.workflow/briefs/wave4-executor-1.md`
+- [ ] T2 (hyprland-home.nix): quitar el auto-espejo de
+      `hl.on("monitor.added", … mirror)` (causa las "pantallas locas" al
+      arrancar); `monitor-mirror.sh` no-op con <2 salidas físicas;
+      dedupe/simplificar mpvpaper (`wallpaper-set.sh` solo lanza el fondo;
+      `caelestia-wallpaper.sh` idempotente); helper `caelestia-restart.sh`
+      → brief: `.workflow/briefs/wave4-executor-2.md`
+- [ ] T3 (caelestia.nix): acción de launcher `Cyberpunk` que re-aplica
+      `caelestia scheme set -n cyberpunk` (el humano cambió el esquema por
+      accidente y quiere un regreso de un clic) → brief:
+      `.workflow/briefs/wave4-executor-3.md`
 
 ### Integration plan
 
-- Orden de merge: executor-1 (quita los binds a `cast-tablet`) → executor-2
-  (borra el módulo) → executor-3. Disjuntos.
+- Orden de merge: executor-2 (scripts) → executor-1 (QML) → executor-3
+  (launcher). Disjuntos.
 - Comandos en el árbol integrado:
   ```bash
   nix flake check
   nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
   ```
-- Pasos del humano: `sudo nixos-rebuild switch --flake .#pc`, luego
-  **`hyprctl reload`** (el `highrr`/100 Hz solo aplica al recargar la config de
-  Hyprland o al re-loguear) y cerrar la sesión de `wayvnc` si sigue viva
-  (`pkill -x wayvnc`). Validar: `hyprctl monitors` → 100 Hz; `SUPER+D` alterna
-  espejo/extender; `nvim` sin cuadro de fondo.
+- Pasos del humano: `sudo nixos-rebuild switch --flake .#pc`, luego:
+  1. `caelestia-restart.sh` (o `pkill -f 'quickshell.*caelestia-shell'; caelestia shell -d`) — **la shell en runtime es una instancia vieja del store anterior; hasta reiniciarla, el IPC (SUPER+L, lock, etc.) falla con exit 255**.
+  2. `hyprctl output remove HEADLESS-TABLET` (resto del cast) y `hyprctl reload`.
+  3. `caelestia scheme set -n cyberpunk` (quedó en `dynamic` por el cambio manual).
 
 ### Audit gate
 
-- Auditor: `nix flake check`; diff = solo los 3 archivos del mapa
-  (`home/default.nix` incluido); `cast-tablet`/`wayvnc` ausentes del árbol y de
-  los binds; `monitor-mirror.sh` sin `max_by(... refreshRate)`; verify de cada
+- Auditor: `nix flake check`; diff = solo los 3 archivos del mapa; `OsIcon.qml`
+  sin `m3tertiary`; `monitor.added` sin auto-`mirror`; un solo `mpvpaper` tras
+  cambiar wallpaper; `HEADLESS` excluido de `monitor-mirror.sh`; verify de cada
   brief.
 
 ---
-
-## Wave 4 (next) — parches QML del overlay
-
-> Gate: ola 2 integrada y auditada. Un solo ejecutor (`flake.nix`), porque los
-> tres parches viven en el mismo overlay.
-
-- **Notificaciones nativas (#2)**: el humano quiere que TODO se vea como
-  notificación de Caelestia (arriba-derecha, estilo de
-  `notifications/Content.qml`).
-  - `Panels.qml`: re-anclar `Toasts.Toasts` a la zona superior derecha,
-    apilados bajo las notificaciones.
-  - `ToastItem.qml`: re-estilizar para que coincida con la tarjeta de
-    notificación nativa.
-  - Caps lock / num lock: viven en C++ (no hay fuente de evento externa) → se
-    quedan como toast, pero re-posicionado/re-estilizado en la zona nativa.
-- **Iconos reales de apps (#10)**: `Workspace.qml` usa `MaterialIcon` con
-  `Icons.getAppCategoryIcon` (glifo monocromo). Parche para usar
-  `Icons.getAppIcon` (icono real del `.desktop` vía `Quickshell.iconPath`) con
-  `CachingIconImage`/`Image` de fallback al glifo.
-- **Animación del indicador (#11b)**: portar el `workspace-bounce` de Wayle
-  (recuperado del `styles/index.scss` de HM) al indicador/iconos de
-  `Workspace.qml`, o exponer una curva más expresiva. Validar con el humano.
 
 ## Wave 5 — kitty (confirmado por el humano)
 
@@ -331,3 +346,9 @@ mantenido. No se planifica.
 | 2026-09-20 | `monitor-mirror.sh`: elegir el primario por monitor **enfocado**, no por área×Hz, y saltar salidas `HEADLESS-*` | La salida headless 1920x1200 ganaba en área y el físico terminaba espejándola |
 | 2026-09-20 | Neovim: `opts = { transparent = true }` en NeoCyberVim | El fondo del tema opacaba el texto sobre la terminal translúcida |
 | 2026-09-20 | OSD "monita" = `paths.mediaGif` (bongocat) en el dashboard media; reemplazable por otro GIF. Pendiente: el humano elige el asset | `modules/dashboard/dash/Media.qml` usa `Config.paths.mediaGif` |
+| 2026-09-20 | Ola 3: integrada **sin auditar**, excepción explícita autorizada por el humano ("avanzar más rápido") | Verificado en árbol por el planner; riesgo de no tener evidencia de `nix flake check` aceptado |
+| 2026-09-20 | Logo del bar: `OsIcon.qml` recolorea el PNG NixOS a `m3tertiary`; se parchea a `#5277c3` (azul NixOS) | El humano lo quiere con su color original |
+| 2026-09-20 | SUPER+L roto = shell vieja en runtime (config `5m8m…` vs binario nuevo `vbcm3v0…`); fix = reiniciar la shell, no el código | `caelestia shell lock …` → exit 255 "No running instances" |
+| 2026-09-20 | mpvpaper duplicado: simplificar `wallpaper-set.sh` (solo fondo) + idempotencia en `caelestia-wallpaper.sh` | 3 postHooks por cambio de wallpaper + `pkill` que perdía la carrera |
+| 2026-09-20 | Quitar el auto-espejo de `monitor.added`; `monitor-mirror.sh` no-op con <2 salidas físicas | Al arrancar espejaba todo y volvía locas las pantallas |
+| 2026-09-20 | Acción de launcher `Cyberpunk` para restaurar el esquema tras un cambio accidental | El humano cambió a `dynamic` desde `>scheme` |
