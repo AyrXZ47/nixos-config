@@ -65,7 +65,7 @@ let
       mediaGifSpeedAdjustment = 300;
       sessionGifSpeed = 0.7;
       apps = {
-        terminal = [ "wezterm" ];
+        terminal = [ "kitty" ];
         audio = [ "pavucontrol" ];
         playback = [ "mpv" ];
         explorer = [ "dolphin" ];
