@@ -473,8 +473,7 @@ PYEOF
 
                                 source: Icons.getAppIcon(modelData.lastIpcObject.class, "")
                                 fillMode: Image.PreserveAspectFit
-                                implicitWidth: Math.round(Tokens.font.icon.small.pointSize * 1.33)
-                                implicitHeight: Math.round(Tokens.font.icon.small.pointSize * 1.33)
+                                sourceSize: Qt.size(Math.round(Tokens.font.icon.small.pointSize * 1.33), Math.round(Tokens.font.icon.small.pointSize * 1.33))
                             }'
 
             # Bounce del indicador de ventanas al enfocar el workspace (port del
