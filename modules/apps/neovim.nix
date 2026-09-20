@@ -11,7 +11,7 @@ let
           name = "NeoCyberVim",
           lazy = false,
           priority = 20000,
-          opts = {},
+          opts = { transparent = true },
         }
       '';
     };
