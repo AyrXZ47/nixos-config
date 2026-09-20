@@ -29,6 +29,10 @@ let
         return {
           "mg979/vim-visual-multi",
           init = function()
+            -- El leader por defecto de VM es `\`, que which-key ya ocupa como
+            -- trigger de `maplocalleader`; sin cambiarlo, VM arranca "with
+            -- warnings" y sus atajos (select-all, regex) no se registran.
+            vim.g.VM_leader = ","
             vim.g.VM_mouse_mappings = 1
           end,
         }
