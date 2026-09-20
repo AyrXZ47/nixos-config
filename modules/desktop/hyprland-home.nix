@@ -189,10 +189,10 @@ in
       hl.animation({ leaf = "windowsOut", enabled = true, speed = 5, bezier = "default", style = "popin 80%" })
       hl.animation({ leaf = "border", enabled = true, speed = 10, bezier = "default" })
       hl.animation({ leaf = "fade", enabled = true, speed = 7, bezier = "default" })
-      -- Workspaces: bounce suave + vertical (la barra también lo es). El bounce
-      -- fuerte del viejo Wayle vuelve como curva "bounce" (probable en vivo con
-      -- SUPER+ALT+A); el default es la variante natural.
-      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "bounce-natural", style = "slidevert" })
+      -- Workspaces: slidefadevert + overshot, elegida por el humano con el
+      -- selector SUPER+ALT+A (ola 3). Las curvas "bounce"/"bounce-natural"
+      -- siguen definidas arriba para probar variantes en vivo.
+      hl.animation({ leaf = "workspaces", enabled = true, speed = 5, bezier = "overshot", style = "slidefadevert" })
 
       -----------------------
       ---- WINDOW RULES -----
@@ -258,11 +258,10 @@ in
       -----------------------
       hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("wezterm"))
       hl.bind("SUPER + F2", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/touchpad-toggle.sh"))
-      -- Espejo/expander pantallas (presentaciones): toggle con deteccion de hosts
+      -- Espejo/expander pantallas (presentaciones): SUPER+D alterna (toggle con
+      -- deteccion de hosts); SUPER+SHIFT+D se mantiene como alias.
+      hl.bind("SUPER + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
       hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
-      -- Cast a tablet via VNC+tailscale: SUPER+ALT+D espejo, SUPER+ALT+SHIFT+D extend
-      hl.bind("SUPER + ALT + D", hl.dsp.exec_cmd("cast-tablet"))
-      hl.bind("SUPER + ALT + SHIFT + D", hl.dsp.exec_cmd("cast-tablet extend"))
       -- rofi retirado: TODO pasa por el launcher de Caelestia (SUPER+CTRL+Space
       -- para apps, y `>ack` dentro del launcher para las acciones). SUPER+A
       -- abre el mismo launcher para no perder la costumbre.
@@ -518,12 +517,16 @@ in
         command -v jq >/dev/null || { echo "falta jq" >&2; exit 1; }
         mirror_on() { hyprctl eval "hl.monitor({ output = \"$1\", mode = \"preferred\", position = \"auto\", scale = \"1\", mirror = \"$2\" })" >/dev/null; }
         # Base SIEMPRE en 'monitors all': al espejar, la salida clonada sale de
-        # la lista activa y el toggle de vuelta la perderia.
-        all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false)]')
+        # la lista activa y el toggle de vuelta la perderia. Se excluyen las
+        # salidas HEADLESS (cast/tablet): tienen area grande y ganarian la
+        # eleccion de primario.
+        all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false) | select(.name | startswith("HEADLESS") | not)]')
         if [ "''${1:-}" = "mirror" ]; then
-          # ponytail: primario por area*Hz, no por nombre fijo (DP-1 vs eDP-1
-          # segun host); upgrade: elegir el primario manualmente en bar/rofi.
-          primary=$(echo "$all" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
+          # ponytail: primario por monitor enfocado (el que usa el humano), con
+          # fallback al primero; antes era area*Hz y la salida HEADLESS 1920x1200
+          # le ganaba al fisico -> el fisico espejaba la tablet. No por nombre
+          # fijo (DP-1 vs eDP-1 segun host).
+          primary=$(echo "$all" | jq -r '[.[] | select(.mirrorOf == "none")] | (map(select(.focused == true))[0] // .[0]) | .name')
           for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
             mirror_on "$name" "$primary"
           done
@@ -536,7 +539,7 @@ in
           done
           notify-send "Modo extender"
         else
-          primary=$(echo "$all" | jq -r 'map(select(.mirrorOf == "none")) | max_by(.width * .height * .refreshRate) | .name')
+          primary=$(echo "$all" | jq -r '[.[] | select(.mirrorOf == "none")] | (map(select(.focused == true))[0] // .[0]) | .name')
           for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
             mirror_on "$name" "$primary"
           done
@@ -912,10 +915,20 @@ except Exception:
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        styles=(slide slidevert fade slidefade slidefadevert)
-        curves=(standard overshot bounce bounce-natural)
+        allowed_styles=(slide slidevert fade slidefade slidefadevert)
+        allowed_curves=(standard overshot bounce bounce-natural)
+
+        allowed() {
+          local needle="$1"; shift
+          for item in "$@"; do [ "$item" = "$needle" ] && return 0; done
+          return 1
+        }
 
         apply() {
+          # Allowlist antes de interpolar en hyprctl eval (H2 auditoria ola 2):
+          # solo estilos/curvas de los arrays; el menu ya sale de ahi.
+          allowed "$1" "''${allowed_styles[@]}" || { echo "style no permitido: $1" >&2; exit 1; }
+          allowed "$2" "''${allowed_curves[@]}" || { echo "curve no permitido: $2" >&2; exit 1; }
           hyprctl eval "hl.animation({ leaf = 'workspaces', enabled = true, speed = 5, bezier = '$2', style = '$1' })"
           msg="workspace-anim: style=$1 curve=$2 (temporal: se pierde en el próximo reload/rebuild)"
           echo "$msg"
@@ -925,8 +938,8 @@ except Exception:
         if [ -n "$2" ]; then
           apply "$1" "$2"
         else
-          pick=$(for s in "''${styles[@]}"; do
-            for c in "''${curves[@]}"; do
+          pick=$(for s in "''${allowed_styles[@]}"; do
+            for c in "''${allowed_curves[@]}"; do
               printf '%s %s\n' "$s" "$c"
             done
           done | fuzzel --dmenu --prompt="Workspace anim  ") || exit 0
