@@ -201,6 +201,13 @@ in
       -- apilaría sobre su fondo 0.4. El match de clase es de cadena COMPLETA
       -- (regex_match), por eso el .* antes del $.
       hl.window_rule({ name = "wezterm-glass", match = { class = "^(org.wezfurlong.wezterm|hyprdev-.*)$" }, opacity = "1 override" })
+      -- kitty: mismo vidrio que wezterm. opacity "1 override" evita que Hyprland
+      -- multiplique la translucidez propia de kitty (background_opacity) y deja
+      -- ver el blur del compositor detrás.
+      hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, opacity = "1 override" })
+      -- netrunner (SUPER+N): kitty flotante autónoma (clase propia para no
+      -- heredar la regla de kitty normal ni el mosaico del layout).
+      hl.window_rule({ name = "netrunner-float", match = { class = "netrunner" }, float = true })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
@@ -248,7 +255,7 @@ in
       -----------------------
       ---- KEYBINDINGS ------
       -----------------------
-      hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("wezterm"))
+      hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("kitty"))
       hl.bind("SUPER + F2", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/touchpad-toggle.sh"))
       -- Espejo/expander pantallas (presentaciones): SUPER+D alterna (toggle con
       -- deteccion de hosts); SUPER+SHIFT+D se mantiene como alias.
@@ -310,7 +317,7 @@ in
       -- Selector de wallpaper (fuzzel con miniaturas de video). Tambien está
       -- como accion `>Wallpaper` en el launcher de Caelestia.
       hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-menu.sh"))
-      hl.bind("SUPER + N", hl.dsp.exec_cmd("wezterm start -- zsh -ic netrunner"))
+      hl.bind("SUPER + N", hl.dsp.exec_cmd("kitty --class netrunner sh -c 'zsh -ic netrunner'"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/lock.sh"))
       -- Esmerilado on/off (blur + transparencia) con notificación.
@@ -491,7 +498,7 @@ in
         hyprctl dispatch 'hl.dsp.exec_cmd("mixxx", { workspace = 1 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("obsidian", { workspace = 2 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("firefox", { workspace = 3 })'
-        hyprctl dispatch 'hl.dsp.exec_cmd("wezterm", { workspace = 4 })'
+        hyprctl dispatch 'hl.dsp.exec_cmd("kitty", { workspace = 4 })'
       '';
     };
 
