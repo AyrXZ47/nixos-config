@@ -23,6 +23,15 @@ if this can be one line, it is one line.>
 - <exact paths or globs — never touch, even if you think they need fixing;
   report it to the planner instead>
 
+## Notas de scope (Nix)
+
+- Módulos **system-side** (p. ej. `modules/desktop/caelestia.nix`, importados
+  por `hosts/*/configuration.nix`) reciben el `lib` plano de nixpkgs: **NO**
+  existe `lib.hm.dag`. Para ordenar un activation usa la forma
+  `home.activation.<n> = { after = [ "writeBoundary" ]; before = [ ]; data = …; };`.
+- Solo los módulos **home-side** (importados por `home/default.nix`) reciben el
+  `lib` de Home Manager con `lib.hm.dag`.
+
 ## Read first
 
 - <key files to understand before editing — pointers that save re-exploration>

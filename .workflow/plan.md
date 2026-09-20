@@ -123,13 +123,26 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
   porcentaje, p.ej. `slidefade 20%`). Caelestia solo aporta la animación del
   indicador de la barra (`activeTrail` + morph de las shapes). El "bounce
   fuerte" viejo era `hl.curve("bounce", { {0.05, 1.8}, {0.2, 1.0} })` +
-  `slidevert`; hoy hay `standard`. Se restaura un bounce más suave + un script
-  para probar todos los estilos en vivo por `hyprctl eval`.
-- **Monitor actual**: `HDMI-A-2` 1920x1080 a **60 Hz**, con modo **100 Hz**
-  disponible. El repo tiene un rule muerto `DP-1 @170` y el catch-all en
-  `preferred` → se queda en 60. Fix: catch-all `mode = "highrr"` (máxima
-  frecuencia), reproducible en cualquier host. Nota: "el video" = modo de
-  pantalla; mpvpaper reproduce a los fps del archivo, no se puede forzar a 100.
+  `slidevert`; hoy hay `standard`. El humano probó con el selector y eligió la
+  definitiva: **`slidefadevert` + `overshot`** (se fija en la ola 3).
+- **Monitor actual**: `HDMI-A-2` 1920x1080 con modo **100 Hz** disponible. El
+  `highrr` ya está en el repo (ola 2), pero en runtime el monitor todavía marca
+  60 Hz porque (a) Hyprland no recarga la config tras el rebuild — hace falta
+  `hyprctl reload` o re-loguear, y (b) estaba **espejando** la salida
+  `HEADLESS-TABLET` del cast VNC (`mirrorOf = 1`). Cerrando wayvnc + reload
+  debería quedar en 100 Hz. Bug raíz del espejo: `monitor-mirror.sh` elegía el
+  primario por `max_by(área × Hz)` y la salida headless (1920x1200) le ganaba al
+  monitor físico → espejaba el físico contra la tablet.
+- **Cast VNC (#nuevo)**: el humano lo quiere fuera. `modules/apps/vnc.nix`
+  (paquete `wayvnc` + comando `cast-tablet`), sus binds
+  (`SUPER+ALT+D`, `SUPER+ALT+SHIFT+D`) y su import en `home/default.nix` se
+  borran. Miracast (`gnome-network-displays`, `modules/apps/miracast.nix`) se
+  queda. `SUPER+D` pasa a ser el toggle espejo/extender de pantallas físicas/TV.
+- **OSD "monita" (#nuevo)**: el gif que anima en el panel de media del dashboard
+  es `modules/dashboard/dash/Media.qml` → `AnimatedImage` con
+  `source: Config.paths.mediaGif` (hoy `assets/bongocat.gif`). Se puede cambiar
+  por cualquier otro GIF/asset con `paths.mediaGif`; no hay opción de apagarlo
+  sin parche. Pendiente: el humano elige el reemplazo.
 - **Restart de Caelestia**: `caelestia shell -k` mata el shell y
   `caelestia shell -d` lo relanza (equivalente a `wayle panel restart`). El
   shell ya recarga `shell.json`/`scheme.json` en caliente, así que normalmente
@@ -139,11 +152,12 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 
 | Wave | Focus | Status |
 |------|-------|--------|
-| 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle/suspend, Celsius) + paleta cyberpunk | **rejected (F1)** → fix en ola 2 |
-| 2 | Fix F1 (esquema) + monitor 100 Hz + animaciones de workspace + NeoCyberVim + layout nativo | planned |
-| 3 | Parches QML del overlay: notificaciones nativas, iconos reales, animación del indicador | pending |
-| 4 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
-| 5 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
+| 1 | Config Caelestia + bugs (SUPER+L, OSD brillo, idle/suspend, Celsius) + paleta cyberpunk | rejected (F1) → fixeada en ola 2 |
+| 2 | Fix F1 (esquema) + monitor `highrr` + animaciones de workspace + NeoCyberVim + layout nativo | audited · APPROVED |
+| 3 | Animación final (`slidefadevert`+`overshot`), fuera cast VNC, espejo arreglado, nvim transparente | planned |
+| 4 | Parches QML del overlay: notificaciones nativas, iconos reales, animación del indicador | pending |
+| 5 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
+| 6 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -162,70 +176,77 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 
 ---
 
-## Wave 2 (current) — fix F1 + monitor 100 Hz + animaciones + NeoCyberVim
+## Wave 2 — AUDITADA / APROBADA (F1 cerrado)
 
-Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
+> Audit: `.workflow/audits/wave2.md` (APPROVED). Merges `b618fda`, `792bff3`,
+> `1b47fee`, `7fb5cfa` en `main`; `nix flake check` completo pasa; los 4 verify
+> pasan; F1 cerrado con la verificación fuerte. H1–H4 informativos (validación
+> visual del humano, allowlist opcional en `workspace-anim.sh`, worktrees sin
+> retirar, plan desactualizado). Runtime confirmado 2026-09-20: `caelestia
+> scheme get -n` → `cyberpunk`.
+
+### Nota de proceso (desviación aceptada de executor-4)
+
+El brief pedía `lib.hm.dag.entryAfter` para el activation en
+`modules/desktop/caelestia.nix`, pero ese módulo es **system-side** (importado
+por `hosts/*/configuration.nix`): recibe el `lib` plano de nixpkgs, sin `.hm`.
+El executor usó la forma correcta y consistente con `caelestiaSeedConfig`:
+`home.activation.<nombre> = { after = [ "writeBoundary" ]; before = [ ]; data = …; };`.
+Desviación **aceptada**. `_template.md` documenta ahora la diferencia.
+
+---
+
+## Wave 3 (current) — animación final, fuera VNC/cast, espejo arreglado, nvim transparente
+
+Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
 ### File ownership map
 
 | File/glob | Owner |
 |-----------|-------|
-| `flake.nix` | executor-1 |
-| `modules/desktop/hyprland-home.nix` | executor-2 |
+| `modules/desktop/hyprland-home.nix` | executor-1 |
+| `modules/apps/vnc.nix` (borrar) + `home/default.nix` | executor-2 |
 | `modules/apps/neovim.nix` | executor-3 |
-| `modules/desktop/caelestia.nix` | executor-4 |
 
 ### Tasks
 
-- [ ] T1: fix F1 — esquema `cyberpunk` a `schemes/cyberpunk/default/dark.txt` +
-      verify fuerte que ejecuta `caelestia scheme list` y exige
-      `.cyberpunk.default` → brief: `.workflow/briefs/wave2-executor-1.md`
-- [ ] T2: monitor a `highrr` (100 Hz; el rule `DP-1 @170` está muerto), quitar
-      el `|| true` de F2, restaurar el bounce "natural" + script de prueba de
-      estilos de workspace, notificación nativa del cambio de layout
-      → brief: `.workflow/briefs/wave2-executor-2.md`
-- [ ] T3: neovim → tema `NeoCyberVim` (reemplaza `cyberneon`)
-      → brief: `.workflow/briefs/wave2-executor-3.md`
-- [ ] T4: reproducibilidad de la paleta (activation idempotente que aplica
-      `cyberpunk`) + apagar el toast nativo del layout
-      → brief: `.workflow/briefs/wave2-executor-4.md`
+- [ ] T1: animación FINAL `slidefadevert` + `overshot`; quitar los binds de
+      cast (`SUPER+ALT+D` / `SUPER+ALT+SHIFT+D`); bind `SUPER+D` (dejando
+      `SUPER+SHIFT+D`) al toggle espejo/extender; arreglar el primario de
+      `monitor-mirror.sh` (bug real: elegía por área×Hz y espejaba el monitor
+      físico contra la salida headless del cast); allowlist de `style`/`curve`
+      en `workspace-anim.sh` (H2) → brief: `.workflow/briefs/wave3-executor-1.md`
+- [ ] T2: borrar `modules/apps/vnc.nix` y su import en `home/default.nix` (se
+      retira TODO el cast por VNC; Miracast/gnome-network-displays se queda)
+      → brief: `.workflow/briefs/wave3-executor-2.md`
+- [ ] T3: neovim transparente — `opts = { transparent = true }` en NeoCyberVim
+      → brief: `.workflow/briefs/wave3-executor-3.md`
 
 ### Integration plan
 
-- Orden de merge: executor-1 (flake.nix, habilita el esquema) → executor-4
-  (caelestia.nix) → executor-2 (hyprland-home.nix) → executor-3 (neovim.nix).
-  Disjuntos; el orden evita que el activation o el `notify-send` referencien el
-  esquema/toast antes de existir.
+- Orden de merge: executor-1 (quita los binds a `cast-tablet`) → executor-2
+  (borra el módulo) → executor-3. Disjuntos.
 - Comandos en el árbol integrado:
   ```bash
   nix flake check
   nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
   ```
-- Pasos del humano tras el commit + rebuild (`sudo nixos-rebuild switch --flake
-  .#pc`):
-  1. `rm ~/.config/caelestia/shell.json` (adoptar el seed; ya no hace falta
-     `caelestia scheme set` a mano: lo hace el activation).
-  2. Validar: paleta cyberpunk aplicada (`caelestia scheme get -n` →
-     `cyberpunk`); monitor a 100 Hz; SUPER+ALT+A lista las animaciones de
-     workspace y se pueden probar en vivo; SUPER+SPACE (layout) sale como
-     notificación arriba-derecha; `nvim` con NeoCyberVim.
+- Pasos del humano: `sudo nixos-rebuild switch --flake .#pc`, luego
+  **`hyprctl reload`** (el `highrr`/100 Hz solo aplica al recargar la config de
+  Hyprland o al re-loguear) y cerrar la sesión de `wayvnc` si sigue viva
+  (`pkill -x wayvnc`). Validar: `hyprctl monitors` → 100 Hz; `SUPER+D` alterna
+  espejo/extender; `nvim` sin cuadro de fondo.
 
 ### Audit gate
 
-- Auditor corre en el árbol integrado:
-  - `nix flake check` pasa.
-  - `git diff main..HEAD --stat` = solo `flake.nix`,
-    `modules/desktop/hyprland-home.nix`, `modules/apps/neovim.nix`,
-    `modules/desktop/caelestia.nix` (+ `.workflow/`).
-  - **F1**: `caelestia scheme list | jq -e '.cyberpunk.default'` y
-    `caelestia scheme set -n cyberpunk` (con `XDG_STATE_HOME` temporal) sin
-    `IndexError`. Este check NO es negociable (fue el bloqueante).
-  - El verify de cada brief pasa.
-  - Sin secretos; sin archivos fuera del mapa.
+- Auditor: `nix flake check`; diff = solo los 3 archivos del mapa
+  (`home/default.nix` incluido); `cast-tablet`/`wayvnc` ausentes del árbol y de
+  los binds; `monitor-mirror.sh` sin `max_by(... refreshRate)`; verify de cada
+  brief.
 
 ---
 
-## Wave 3 (next) — parches QML del overlay
+## Wave 4 (next) — parches QML del overlay
 
 > Gate: ola 2 integrada y auditada. Un solo ejecutor (`flake.nix`), porque los
 > tres parches viven en el mismo overlay.
@@ -247,7 +268,7 @@ Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
   (recuperado del `styles/index.scss` de HM) al indicador/iconos de
   `Workspace.qml`, o exponer una curva más expresiva. Validar con el humano.
 
-## Wave 4 — kitty (confirmado por el humano)
+## Wave 5 — kitty (confirmado por el humano)
 
 > Gate: ola 2 integrada. Un ejecutor (o dos: `modules/apps/kitty.nix` +
 > `modules/apps/shell.nix`/`hyprland-home.nix`; a decidir al planificar la ola).
@@ -274,7 +295,7 @@ El humano ya decidió migrar de wezterm a kitty (2026-09-20). Alcance acordado:
 - Limpieza final: retirar comentarios muertos de rofi, cerrar `#3/#5/#7/#8/#9/
   #12/#13` en el decision log.
 
-## Wave 5 — Mixxx MPRIS (DESCARTADO)
+## Wave 6 — Mixxx MPRIS (DESCARTADO)
 
 El humano descartó el soporte de Mixxx en el menú de media (2026-09-20) tras
 la evidencia del hallazgo #9: Mixxx 2.5.6 no expone MPRIS y no hay bridge
@@ -303,3 +324,10 @@ mantenido. No se planifica.
 | 2026-09-20 | #6 neovim: tema `NeoCyberVim` (DonJulve) reemplaza a `cyberneon` | Petición del humano |
 | 2026-09-20 | P3 (auditoría): audits/briefs del proyecto viejo renombrados a `ollama-*` | Evitar colisión de nombres con las olas 2/3 de este proyecto |
 | 2026-09-20 | Reproducibilidad: la config es igual en `pc`/`laptop`/`vm` (importan caelestia + hyprland); `server` no. El estado aplicado del esquema se automatiza con un activation idempotente | El seed de `shell.json` y los esquemas son estado de usuario |
+| 2026-09-20 | Ola 2: `audited · APPROVED` (`.workflow/audits/wave2.md`); F1 cerrado. H1–H4 informativos | `nix flake check` completo + los 4 verify + reproducción en vivo |
+| 2026-09-20 | Desviación de executor-4 ACEPTADA: en módulos **system-side** no existe `lib.hm`; el activation usa `{ after; before; data; }` (forma de `caelestiaSeedConfig`) | `modules/desktop/caelestia.nix` recibe el `lib` plano de nixpkgs |
+| 2026-09-20 | Animación de workspace DEFINITIVA: `style = "slidefadevert"`, `bezier = "overshot"` | El humano la eligió probando con `SUPER+ALT+A` |
+| 2026-09-20 | Quitar TODO el cast por VNC (`wayvnc`, `cast-tablet`, sus binds y el import); se queda Miracast/gnome-network-displays. `SUPER+D` = toggle espejo/extender | El humano no usa el cast VNC; causaba el bug de espejo (el físico espejaba la salida headless) |
+| 2026-09-20 | `monitor-mirror.sh`: elegir el primario por monitor **enfocado**, no por área×Hz, y saltar salidas `HEADLESS-*` | La salida headless 1920x1200 ganaba en área y el físico terminaba espejándola |
+| 2026-09-20 | Neovim: `opts = { transparent = true }` en NeoCyberVim | El fondo del tema opacaba el texto sobre la terminal translúcida |
+| 2026-09-20 | OSD "monita" = `paths.mediaGif` (bongocat) en el dashboard media; reemplazable por otro GIF. Pendiente: el humano elige el asset | `modules/dashboard/dash/Media.qml` usa `Config.paths.mediaGif` |
