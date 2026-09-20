@@ -630,7 +630,7 @@ in
         # Si el shell no aparece, el fondo ya esta puesto: el esquema se
         # aplicara en el siguiente cambio/rebuild sin bloquear nada.
         for _ in $(seq 20); do
-          caelestia shell ipc call lock isLocked >/dev/null 2>&1 && break
+          caelestia shell lock isLocked >/dev/null 2>&1 && break
           sleep 0.5
         done
         case "''${f##*.}" in
@@ -782,12 +782,12 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         #!/usr/bin/env bash
         cliphist wipe
         [ -x "$HOME/.config/hypr/scripts/openrgb-lock-before" ] && "$HOME/.config/hypr/scripts/openrgb-lock-before"
-        caelestia shell ipc call lock lock >/dev/null 2>&1 || exit 0
+        caelestia shell lock lock >/dev/null 2>&1 || exit 0
         # Restaura cuando el lock se libere (poll corto; sale si el shell muere).
         (
           for _ in $(seq 60); do
             sleep 2
-            locked=$(caelestia shell ipc call lock isLocked 2>/dev/null || echo "")
+            locked=$(caelestia shell lock isLocked 2>/dev/null || echo "")
             [ "$locked" = "false" ] && break
             [ -z "$locked" ] && exit 0
           done
