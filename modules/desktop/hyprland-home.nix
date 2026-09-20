@@ -242,10 +242,10 @@ in
       ---- LAYER RULES ------
       -----------------------
       -- ignore_alpha descarta el blur en pixeles con opacidad <= al valor. Los
-      -- drawers pintan su superficie con alpha = transparency.base (0.85), asi
-      -- que 0.85 los dejaba SIN blur cuando esta regla estatica gana a la que
-      -- Caelestia aplica en runtime (base - 0.03 = 0.82). 0.8 deja margen.
-      hl.layer_rule({ name = "caelestia-drawers-blur", match = { namespace = "caelestia-drawers" }, blur = true, ignore_alpha = 0.8 })
+      -- drawers pintan su superficie con alpha = transparency.base (0.34 desde
+      -- que se subio la transparencia), asi que un umbral por encima los dejaba
+      -- SIN blur. 0.3 queda por debajo del base para que el blur se aplique.
+      hl.layer_rule({ name = "caelestia-drawers-blur", match = { namespace = "caelestia-drawers" }, blur = true, ignore_alpha = 0.3 })
       hl.layer_rule({ name = "caelestia-area-picker", match = { namespace = "caelestia-area-picker" }, blur = true })
 
       -----------------------
