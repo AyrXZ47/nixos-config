@@ -52,130 +52,103 @@
       # Solo si está instalado: el celular (nix-on-droid) no trae fastfetch.
       command -v fastfetch >/dev/null && fastfetch
 
-      # Parte la terminal en dos: btop (55%, izquierda) y nvtop (45%,
-      # derecha). La versión con hyprctl dispatch layoutmsg/exec dejó de
-      # funcionar con la config Lua (el dispatch legacy no se parsea) y solo
-      # abría btop.
+      # Parte el kitty ACTUAL en dos: btop (izquierda) y nvtop (45%, derecha).
+      # Usa el control remoto de kitty (`kitty @ launch`, exige
+      # `allow_remote_control`, lo trae modules/apps/kitty.nix). El panel nuevo
+      # va en el layout `splits`: vsplit + bias=45 lo deja a la derecha con el
+      # 45% del ancho; btop se queda en la ventana de origen con `exec btop`.
       netrunner() {
-        if [[ -z "$WEZTERM_PANE" ]]; then
-          echo "Error: Se requiere WezTerm activo."
+        if [[ -z "$KITTY_WINDOW_ID" ]]; then
+          echo "Error: Se requiere kitty activo."
           return 1
         fi
-        wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 45 -- zsh -ic nvtop
+        kitty @ goto-layout --match "window_id:$KITTY_WINDOW_ID" splits 2>/dev/null
+        kitty @ launch --location=vsplit --bias=45 --next-to "id:$KITTY_WINDOW_ID" zsh -ic nvtop
         exec btop
       }
 
+      # Uso: dev [directorio-repo] — si se pasa, entra al repo antes de partir.
+      # Layout (migrado de los panes del dev viejo a los splits de kitty):
+      # fila superior nvim (15%, izquierda) + opencode (85%, derecha); fila
+      # inferior pipes-rs (15%, izquierda) + terminal libre (85%, derecha).
+      # `hsplit --bias=20` crea la fila inferior debajo y `vsplit --bias=85`
+      # deja el panel nuevo a la derecha (el bias es el % del panel nuevo).
       dev() {
-        if [[ -z "$WEZTERM_PANE" ]]; then
-          echo "Error: Se requiere WezTerm activo."
+        if [[ -z "$KITTY_WINDOW_ID" ]]; then
+          echo "Error: Se requiere kitty activo."
           return 1
         fi
-        # Uso: dev [directorio-repo] — si se pasa, entra al repo antes de partir paneles.
-        # Layout: arriba 80% (nvim 15% a la izquierda + opencode 85% a la
-        # derecha) y abajo 20% partido en vertical con pipes-rs (15% del ancho)
-        # y terminal git libre (85%).
         local repo="''${1:-}"
         [[ -n "$repo" ]] && { cd "$repo" || return 1; }
-        local PANE_BOTTOM_BLOCK=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --bottom --percent 20)
-        local PANE_OPENCODE=$(wezterm cli split-pane --pane-id "$WEZTERM_PANE" --right --percent 85 -- zsh -ic "opencode")
-        local PANE_PIPES=$(wezterm cli split-pane --pane-id "$PANE_BOTTOM_BLOCK" --left --percent 15 -- zsh -ic "pipes-rs")
-        echo "nvim\r" | wezterm cli send-text --pane-id "$WEZTERM_PANE"
+        local base="$KITTY_WINDOW_ID" bottom
+        kitty @ goto-layout --match "window_id:$base" splits 2>/dev/null
+        # Fila inferior completa (20% del alto): pipes-rs queda a la izquierda
+        # al partirle la terminal libre a la derecha.
+        bottom=$(kitty @ launch --location=hsplit --bias=20 --next-to "id:$base" \
+          --cwd "$PWD" zsh -ic pipes-rs)
+        # Fila superior: opencode a la derecha (85%); nvim se queda a la izquierda.
+        kitty @ launch --location=vsplit --bias=85 --next-to "id:$base" \
+          --cwd "$PWD" zsh -ic opencode >/dev/null 2>&1
+        [[ -n "$bottom" ]] && kitty @ launch --location=vsplit --bias=85 --next-to "id:$bottom" \
+          --cwd "$PWD" zsh >/dev/null 2>&1
+        # nvim en la ventana de origen (antes el send-text del dev viejo).
+        kitty @ send-text --match "id:$base" 'nvim\r'
+        kitty @ focus-window --match "id:$base" 2>/dev/null
       }
 
-      # `dev` pero con VENTANAS wezterm independientes que Hyprland TILEA
-      # (dwindle): el mismo feel de WM que cualquier ventana — se reparten la
-      # pantalla sin solaparse y se redimensionan con SUPER+clic — sin el modo
-      # DE de un mosaico flotante. Las 4 comparten la MISMA clase
-      # hyprdev-<runid>: caelestia (bar.workspaces.windowIcons regex: un icono
-      # de terminal por las 4 ventanas, mismo efecto que el app-icons-dedupe de
-      # wayle) colapsa las 4 ventanas en UN solo icono en la barra; el runid aísla
-      # sesiones concurrentes. El orden del spawn ES el layout: cada ventana
-      # parte a la anterior (cascada dwindle) y cada spawn ESPERA a que el
-      # conteo de ventanas llegue a N (poll por clase-runid, sin sleeps a
-      # ciegas: esa era la fragilidad del hyprdev viejo).
-      # opencode→free→pipes→nvim: opencode hereda la mitad grande y nvim
-      # cierra la cascada con el foco (como dev, donde acabas en nvim). El
-      # directorio se hereda con --cwd.
-      # Uso: hyprdev [directorio-repo] (sin argumento: el directorio actual).
+      # `hyprdev [directorio-repo]` — la geometría de trabajo en UN panel kitty
+      # con 4 splits: nvim arriba-izquierda, opencode arriba-derecha (~75% del
+      # ancho × 65% del alto), pipes-rs abajo-izquierda y terminal libre
+      # abajo-derecha. Usa el layout `splits` de kitty vía `kitty @ launch
+      # --location=vsplit|hsplit --bias=N` (el bias es el % que se lleva el
+      # panel nuevo). Si los splits no están disponibles, cae a 4 ventanas
+      # kitty independientes con clase hyprdev-<runid>: Hyprland las tilea y
+      # caelestia las colapsa en un icono (windowIcons regex `hyprdev.*`),
+      # equivalente a las ventanas múltiples del hyprdev anterior. La sesión
+      # vive en UNA ventana: cerrarla (SUPER+Q / exit) cierra los 4 paneles,
+      # así que se elimina el watcher de cierre en cadena.
       hyprdev() {
-        if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
-          echo "Error: Se requiere sesión Hyprland activa."
+        if [[ -z "$KITTY_WINDOW_ID" ]]; then
+          echo "Error: Se requiere kitty activo."
           return 1
         fi
         local repo="''${1:-$PWD}"
         local runid="$(date +%s)$RANDOM"
-        local pidfile="/tmp/hyprdev-pids-$runid"
-        (
-          # spawn: el wrapper apunta su pid ANTES del exec (sin carreras de
-          # captura) y setsid le da sesión propia: los clientes de wezterm
-          # start son niñeros de su ventana (bloquean hasta que cierra y
-          # mueren con el panel que los lanzó, arrastrándola); en sesión
-          # propia sobreviven al kill del panel de origen. >/dev/null: el tty
-          # del panel muere antes que los clientes y un write a pty cerrado
-          # mataría por SIGPIPE.
-          spawn() {
-            setsid zsh -c "echo \$\$ >> '$pidfile'; exec wezterm start --cwd '$repo' --class hyprdev-$runid -- $2" >/dev/null 2>&1 &
-          }
-          waitn() {
-            local n=0
-            while (( n < 100 )); do
-              local c
-              c=$(hyprctl -j clients 2>/dev/null | grep -c "\"class\": \"hyprdev-$runid\"")
-              (( c >= $1 )) && return 0
-              sleep 0.1
-              (( n++ ))
-            done
-          }
-          spawn opencode 'zsh -ic "opencode"'; waitn 1
-          spawn free 'zsh';                   waitn 2
-          # Estilo elegido a mano: mezcla heavy/dots/sus, paleta darker sin
-          # ciclo de hue, más lento (-d 50) y SIN auto-reset (-r 0; el 0 lo
-          # desactiva: en paneles chicos el umbral reiniciaba cada ~30s).
-          # `r` o redimensionar reinician a mano; q/Ctrl+C salen.
-          spawn pipes 'zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0"'; waitn 3
-          spawn nvim 'zsh -ic "nvim; exec zsh"'; waitn 4
-          # Cierre en cadena gobernado por la terminal free: su cierre (exit/
-          # ctrl-d o SUPER+Q) mata a los clientes supervivientes (matar el
-          # cliente mata su ventana). free ya NO se distingue por clase (las 4
-          # comparten hyprdev-<runid> para el icono único de caelestia): se
-          # identifica por su pid, el 2º del pidfile (orden de spawn), que es
-          # wezterm mientras su ventana viva. Los crashes o salidas de
-          # opencode/pipes/nvim SOLO cierran su propia ventana: opencode tiene
-          # un bug upstream de segfault en resize (Bun/OpenTUI, issue #38199)
-          # y no debe tumbar la sesión. Se arma cuando las 4 están mapeadas y
-          # expira si nunca se armaron (spawn fallido).
-          setsid zsh -f -c '
-            run=$1 pids=$2 armed=0 n=0
-            free_pid=$(sed -n 2p "$pids")
-            free_viva() {
-              # cat, no $(<file): zsh abre <file antes de aplicar 2>/dev/null
-              # y escupe el error al stderr del watcher en cada tick.
-              [[ -n "$free_pid" && "$(cat /proc/$free_pid/comm 2>/dev/null)" == wezterm ]]
-            }
-            while :; do
-              sleep 1
-              out=$(hyprctl -j clients 2>/dev/null)
-              alive=$(grep -c "\"class\": \"hyprdev-$run\"" <<<"$out")
-              if (( alive == 4 )); then armed=1
-              elif (( armed == 1 )); then
-                if ! free_viva && (( alive > 0 )); then
-                  kill $(cat "$pids") 2>/dev/null
-                  exit 0
-                fi
-                (( alive == 0 )) && exit 0
-              elif (( ++n > 30 )); then
-                exit 0
-              fi
-            done
-          ' hyprdev-watch "$runid" "$pidfile" >/dev/null 2>&1 &
-        )
-        # El panel que invocó el comando quedaría estorbando detrás de las
-        # ventanas: se elimina (solo si hyprdev corrió dentro de wezterm).
-        # Los waitn ya garantizan que las 4 ventanas están en el GUI, así
-        # que matarlo no puede dejar el GUI en 0 ventanas.
-        if [[ -n "$WEZTERM_PANE" ]]; then
-          wezterm cli kill-pane --pane-id "$WEZTERM_PANE"
+        local base oc pipes
+
+        # --- Intento 1: una sola ventana OS con el layout `splits` ---
+        # nvim es la base; --var marca la sesión para limpiarla si hay que caer
+        # al fallback. `kitty @ launch` imprime el id de la ventana nueva.
+        base=$(kitty @ launch --type=os-window --cwd "$repo" \
+          --var "hyprdev=$runid" zsh -ic "nvim; exec zsh" 2>/dev/null)
+        if [[ -n "$base" ]] && kitty @ goto-layout --match "window_id:$base" splits 2>/dev/null; then
+          # opencode a la derecha con el 75% del ancho de la ventana base.
+          oc=$(kitty @ launch --location=vsplit --bias=75 --next-to "id:$base" --cwd "$repo" \
+            --var "hyprdev=$runid" zsh -ic opencode 2>/dev/null)
+          # pipes-rs debajo de nvim, 35% del alto de la columna izquierda.
+          pipes=$(kitty @ launch --location=hsplit --bias=35 --next-to "id:$base" --cwd "$repo" \
+            --var "hyprdev=$runid" \
+            zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0" 2>/dev/null)
+          if [[ -n "$oc" && -n "$pipes" ]]; then
+            # terminal libre debajo de opencode, 35% del alto de la columna derecha.
+            kitty @ launch --location=hsplit --bias=35 --next-to "id:$oc" --cwd "$repo" zsh >/dev/null 2>&1
+            # Como `dev`, el foco acaba en nvim.
+            kitty @ focus-window --match "id:$base" 2>/dev/null
+            kitty @ close-window --match "id:$KITTY_WINDOW_ID" >/dev/null 2>&1
+            return 0
+          fi
         fi
+
+        # --- Fallback: 4 ventanas kitty independientes que Hyprland tilea ---
+        # opencode→free→pipes→nvim, misma clase hyprdev-<runid> para el icono
+        # único de caelestia y la regla de vidrio (`hyprdev-.*`).
+        kitty @ close-window --match "var:hyprdev=$runid" 2>/dev/null
+        kitty @ launch --type=os-window --cwd "$repo" --os-window-class "hyprdev-$runid" zsh -ic opencode >/dev/null 2>&1
+        kitty @ launch --type=os-window --cwd "$repo" --os-window-class "hyprdev-$runid" zsh >/dev/null 2>&1
+        kitty @ launch --type=os-window --cwd "$repo" --os-window-class "hyprdev-$runid" \
+          zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0" >/dev/null 2>&1
+        kitty @ launch --type=os-window --cwd "$repo" --os-window-class "hyprdev-$runid" zsh -ic "nvim; exec zsh" >/dev/null 2>&1
+        kitty @ close-window --match "id:$KITTY_WINDOW_ID" >/dev/null 2>&1
       }
 
       SecDesk() {
