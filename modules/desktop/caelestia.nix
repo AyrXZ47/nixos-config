@@ -239,7 +239,10 @@ let
         recolour = false;
         compact = false;
         iconSubs = [ ];
-        hiddenIcons = [ ];
+        # qpwgraph arranca minimizado al tray (patchbay de PipeWire): su icono
+        # solo sirve para reabrir la UI, asi que se oculta. El id del
+        # StatusNotifierItem es el applicationName de Qt ("qpwgraph").
+        hiddenIcons = [ "qpwgraph" ];
       };
       clock = {
         background = false;
