@@ -458,6 +458,21 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
+  # Watchdog del lock: sin swap en disco no hay hibernación real, el humano
+  # aceptó suspend puro. El nombre "hibernate" se conserva por el brief/plan.
+  systemd.user.services.caelestia-lock-hibernate = {
+    Unit = {
+      Description = "Suspende la sesión tras 5 min con la pantalla bloqueada";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${config.xdg.configHome}/hypr/scripts/lock-hibernate.sh";
+      Restart = "always";
+      RestartSec = 5;
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
+
   # cliphist: limite de historial en 6 items. Pequeño a propósito: al ser un
   # clipboard manager captura TODO lo copiado (incluido el "copiar" de
   # contraseñas desde KeepassXC/otras apps), y menos items = menos superficie
@@ -770,6 +785,32 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
           done
           [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
         ) >/dev/null 2>&1 &
+      '';
+    };
+
+    # Watchdog del lock: a los 5 min bloqueado suspende la máquina (el humano
+    # decidió suspend puro; sin swap en disco no hay hibernación real). Usa el
+    # binario directo `caelestia-shell` (no el CLI) para no depender del wrapper.
+    "hypr/scripts/lock-hibernate.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # ponytail: sondeo cada 15 s; "idle" se aproxima con "bloqueado" (no
+        # distingue idle real). Techo: hasta 15 s de retardo por granularidad;
+        # upgrade: escuchar eventos de lock en vez de sondear.
+        count=0
+        while sleep 15; do
+          state=$(${pkgs.caelestia-shell}/bin/caelestia-shell ipc call lock isLocked 2>/dev/null || echo "")
+          if [ "$state" = "true" ]; then
+            count=$((count + 15))
+            if [ "$count" -ge 300 ]; then
+              systemctl suspend
+              count=0
+            fi
+          else
+            count=0
+          fi
+        done
       '';
     };
 
