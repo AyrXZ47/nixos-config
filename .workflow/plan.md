@@ -142,7 +142,15 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
   es `modules/dashboard/dash/Media.qml` → `AnimatedImage` con
   `source: Config.paths.mediaGif` (hoy `assets/bongocat.gif`). El humano
   confirmó 2026-09-20: **el bongocat se queda**, no hay tarea.
-- **Logo NixOS del barbecho (#nuevo)**: `modules/bar/components/OsIcon.qml`
+- **Icono del workspace activo en gris (#nuevo)**: `ActiveIndicator.qml` dibuja
+  la píldora del workspace activo y encima un `Colouriser` (un `MultiEffect` con
+  `colorization: 1`, `colorizationColor: m3onPrimary`) que **recolorea todo el
+  contenido del mask** para dar contraste. Con los glifos Material era invisible;
+  con los iconos reales, el icono del workspace activo se aplana a un solo color
+  (se ve gris). Fix ola 5: `colorization: 0` y `brightness: 0` en ese
+  `Colouriser` (sigue redibujando el contenido sobre la píldora, pero sin
+  recolorear).
+- **Logo NixOS del bar (#nuevo)**: `modules/bar/components/OsIcon.qml`
   renderiza `ColouredIcon { source: SysInfo.osLogo; colour: Colours.palette.m3tertiary }`
   → lo **recolorea** al color del esquema (hoy verde `00ff88`). El humano lo
   quiere azul NixOS (`#5277c3`). Parche QML: `colour: "#5277c3"` (o quitar el
@@ -311,32 +319,61 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
 ---
 
-## Wave 5 — kitty (confirmado por el humano)
+## Wave 5 (current) — color del icono activo + migración a kitty
 
-> Gate: ola 2 integrada. Un ejecutor (o dos: `modules/apps/kitty.nix` +
-> `modules/apps/shell.nix`/`hyprland-home.nix`; a decidir al planificar la ola).
+Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
-El humano ya decidió migrar de wezterm a kitty (2026-09-20). Alcance acordado:
+### File ownership map
 
-- **Tema cyberpunk**: kitty acepta colores propios; generar una paleta a partir
-  de `#0a0a12/#141428/#1e1e3a/#d4d4f0/#ff0066/#00aaff` (misma de Wayle),
-  paridad con `color_scheme = "Cyberdyne"` de wezterm, fuente JetBrains Mono
-  Nerd Font, fondo translúcido (~0.4 como wezterm o 0.66 como el resto) y
-  `cursor_trail`/`cursor_trail_decay` para el **smear cursor** entre terminales
-  (kitty lo trae nativo).
-- **hyprdev con geometría fija**: hoy son 4 ventanas wezterm tileadas por
-  dwindle. Con kitty se puede hacer UN panel con splits exactos vía
-  `kitty @ launch --location=... --bias=N`: opencode arriba-derecha (~75%
-  ancho × 65% alto), nvim arriba-izquierda, pipes-rs abajo-izquierda, terminal
-  libre abajo-derecha. Fallback aceptado por el humano: comportarse como el
-  wezterm actual (4 ventanas tileadas).
-- **SUPER+N (netrunner)**: que lance sus terminales flotantes de forma
-  autónoma, igual que hyprdev (hoy exige un `WEZTERM_PANE` activo).
-- Actualizar `general.apps.terminal`, binds (`SUPER+Backspace`, `SUPER+N`) y los
-  scripts que abren `wezterm`. Mover `programs.wezterm`/`hyprdev`/`netrunner` a
-  kitty; decidir si se retira wezterm o se deja instalado.
-- Limpieza final: retirar comentarios muertos de rofi, cerrar `#3/#5/#7/#8/#9/
-  #12/#13` en el decision log.
+| File/glob | Owner |
+|-----------|-------|
+| `flake.nix` | executor-1 |
+| `modules/apps/kitty.nix` (nuevo) + `home/default.nix` | executor-2 |
+| `modules/apps/shell.nix` | executor-3 |
+| `modules/desktop/hyprland-home.nix` + `modules/desktop/caelestia.nix` | executor-4 |
+
+### Tasks
+
+- [ ] T1: (flake.nix) **fix del color del icono en el workspace activo**: el
+      `Colouriser` de `ActiveIndicator.qml` aplana todo el contenido del mask a
+      `m3onPrimary`, así que el icono real pierde su color. Parchear el
+      `Colouriser` con `colorization: 0` y `brightness: 0` (sigue redibujando el
+      mask sobre la píldora, pero sin recolorear). → brief:
+      `.workflow/briefs/wave5-executor-1.md`
+- [ ] T2: (kitty) nuevo `modules/apps/kitty.nix` + import en `home/default.nix`:
+      paleta cyberpunk, fondo translúcido (~0.66), JetBrains Mono Nerd Font,
+      `cursor_trail`/`cursor_trail_decay` para el smear. wezterm se queda
+      instalado como fallback. → brief: `.workflow/briefs/wave5-executor-2.md`
+- [ ] T3: (shell.nix) migrar `dev()`, `hyprdev()` y `netrunner()` de wezterm a
+      kitty (`kitty @ launch`): hyprdev con la geometría pedida (opencode
+      arriba-derecha ~75%×65%, nvim arriba-izquierda, pipes-rs abajo-izquierda,
+      libre abajo-derecha) con fallback a 4 ventanas tileadas; netrunner
+      autónomo (btop+nvtop, flotante). → brief:
+      `.workflow/briefs/wave5-executor-3.md`
+- [ ] T4: (binds + terminal) `SUPER+Backspace`/`SUPER+N`/`time-to-work.sh` →
+      kitty; window rule de vidrio para `class = "kitty"`; `general.apps.terminal
+      = [ "kitty" ]`. → brief: `.workflow/briefs/wave5-executor-4.md`
+
+### Integration plan
+
+- Orden de merge: executor-2 (config kitty) → executor-3 (funciones) →
+  executor-4 (binds/terminal) → executor-1 (icon fix, independiente).
+- Comandos en el árbol integrado:
+  ```bash
+  nix flake check
+  nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
+  ```
+- Pasos del humano: `sudo nixos-rebuild switch --flake .#pc`,
+  `~/.config/hypr/scripts/caelestia-restart.sh`, y borrar
+  `~/.config/caelestia/shell.json` (para adoptar `terminal = kitty`). Probar
+  `hyprdev`, `SUPER+N`, `SUPER+Backspace`, el smear y el color del icono activo.
+
+### Audit gate
+
+- `nix flake check`; diff = los archivos del mapa; **smoke test de carga de la
+  shell (obligatorio: la ola toca QML, ver `audit-checklist.md`)**; kitty
+  presente en `general.apps.terminal`; sin `wezterm` en binds/scripts (salvo
+  `modules/apps/wezterm.nix`); verify de cada brief.
 
 ## Wave 6 — Mixxx MPRIS (DESCARTADO)
 
@@ -383,3 +420,4 @@ mantenido. No se planifica.
 | 2026-09-20 | Ola 4 integrada: merges `3a2341a`, `2b2b77b`, `0d4a44c` en `main`; `nix flake check` + build del toplevel de `pc` pasan | Integración limpia (archivos disjuntos); pendiente auditoría |
 | 2026-09-20 | Ola 4 auditada: APPROVED WITH EXCEPTIONS (`.workflow/audits/wave4.md`), excepción = validación visual del humano | Build/integridad/disciplina OK |
 | 2026-09-20 | **F3**: el parche de iconos reales usó `Image.implicitWidth/Height` (read-only) → la shell NO carga. Hotfix: `sourceSize: Qt.size(N,N)` | La auditoría solo grepeó el QML construido; nunca lo cargó. Se añade smoke test de carga al checklist |
+| 2026-09-20 | Fix F3 aplicado (`694b588`), shell verificada arriba. Ola 5 arranca: color del icono activo + kitty | El `Colouriser` de `ActiveIndicator.qml` aplana los iconos reales; se apaga la colorización |
