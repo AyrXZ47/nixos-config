@@ -24,6 +24,47 @@ let
         }
       '';
     };
+    ".config/nvim/lua/plugins/visual-multi.lua" = {
+      text = ''
+        return {
+          "mg979/vim-visual-multi",
+          init = function()
+            vim.g.VM_mouse_mappings = 1
+          end,
+        }
+      '';
+    };
+    ".config/nvim/lua/plugins/replace.lua" = {
+      text = ''
+        return {
+          {
+            "keymaps",
+            keys = {
+              {
+                "<leader>rr",
+                function()
+                  local search = vim.fn.input("Buscar: ")
+                  if search == "" then
+                    return
+                  end
+                  local repl = vim.fn.input("Reemplazar por: ")
+                  vim.cmd(("%%s/%s/%s/gc"):format(vim.fn.escape(search, "/"), vim.fn.escape(repl, "/&")))
+                end,
+                desc = "Buscar y reemplazar en el buffer",
+              },
+              {
+                "<leader>rw",
+                function()
+                  local repl = vim.fn.input("Reemplazar última búsqueda por: ")
+                  vim.cmd(("%%s//%s/gc"):format(vim.fn.escape(repl, "/&")))
+                end,
+                desc = "Reemplazar última búsqueda en el buffer",
+              },
+            },
+          },
+        }
+      '';
+    };
     ".config/nvim/lua/plugins/obsidian.lua" = {
       text = ''
         return {
