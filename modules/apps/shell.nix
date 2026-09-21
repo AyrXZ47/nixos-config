@@ -70,37 +70,65 @@
         exec btop
       }
 
-      # `hyprdev [directorio-repo]` — la geometría de trabajo en 4 ventanas
-      # kitty INDEPENDIENTES (nvim, opencode, terminal libre, pipes-rs) que
-      # Hyprland tilea: los gaps dejan ver el wallpaper, como las ventanas
-      # múltiples de wezterm. Todas usan la clase por defecto `kitty` para que
-      # el dedupe de Caelestia las colapse a UN icono y
-      # `Icons.getAppIcon("kitty")` dé el icono real. Cada ventana es su propio
-      # proceso: cerrarla no afecta a las demás (sin cadena de cierre).
+      # `hyprdev [directorio-repo]` — geometría de trabajo en 4 ventanas kitty
+      # INDEPENDIENTES que Hyprland tilea (los gaps dejan ver el wallpaper):
+      # esta terminal se REUTILIZA como nvim (`exec`) y solo se abren 3 nuevas
+      # (opencode, shell libre, pipes-rs). Clase por defecto `kitty` para que
+      # el dedupe de Caelestia las colapse a UN icono. Cierre en cadena tipo
+      # IDE: las 4 se rastrean por título `hyprdev-<runid>-<rol>` (-T) más la
+      # address de ESTA ventana capturada antes del exec nvim; armadas las 4,
+      # si cae cualquiera se cierran las demás.
       hyprdev() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
           echo "Error: Se requiere sesión Hyprland activa."
           return 1
         fi
         local repo="''${1:-$PWD}"
-        # La clase es compartida, así que el poll espera base+4 kitty: contar
-        # por cwd/título sería frágil (puede haber otras kitty abiertas).
-        local base=$(hyprctl -j clients 2>/dev/null | grep -c '"class": "kitty"')
-        local want=$((base + 4))
-        # setsid: las ventanas sobreviven a la shell que invocó el comando.
-        setsid kitty -d "$repo" zsh -ic "nvim; exec zsh" >/dev/null 2>&1 &
-        setsid kitty -d "$repo" zsh -ic opencode >/dev/null 2>&1 &
-        setsid kitty -d "$repo" zsh >/dev/null 2>&1 &
-        setsid kitty -d "$repo" \
-          zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0" >/dev/null 2>&1 &
-        # Espera (máx ~10s) a que las 4 estén mapeadas; si Hyprland tarda y no
-        # llegan, se sale igual: ya quedaron lanzadas secuencialmente.
-        local n=0
-        while (( n < 100 )); do
-          (( $(hyprctl -j clients 2>/dev/null | grep -c '"class": "kitty"') >= want )) && return 0
-          sleep 0.1
-          (( n++ ))
-        done
+        local runid="$(date +%s)$RANDOM"
+        local pidfile="/tmp/hyprdev-pids-$runid"
+        : > "$pidfile"
+        # Address y pid de ESTA ventana ANTES del exec nvim: tras el exec nvim
+        # su título ya no es rastreable, pero address/pid no cambian.
+        local inv_info inv_addr inv_pid
+        inv_info="$(hyprctl -j activewindow 2>/dev/null)"
+        inv_addr="$(grep -oE '0x[0-9a-f]+' <<<"$inv_info" | head -1)"
+        inv_pid="$(grep -oE '"pid": [0-9]+' <<<"$inv_info" | head -1 | grep -oE '[0-9]+')"
+        [[ -n "$KITTY_PID" ]] && inv_pid="$KITTY_PID"
+        # El wrapper apunta su pid ANTES del exec kitty (sin carreras de
+        # captura) y setsid le da sesión propia: sobrevive a esta shell.
+        spawn() {
+          local role="$1"; shift
+          setsid zsh -c 'pidf=$1; dir=$2; title=$3; shift 3; print -r -- $$ >> "$pidf"; exec kitty -d "$dir" -T "$title" "$@"' \
+            hyprdev-spawn "$pidfile" "$repo" "hyprdev-$runid-$role" "$@" >/dev/null 2>&1 &
+        }
+        spawn opencode zsh -ic opencode
+        spawn free zsh
+        spawn pipes zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0"
+        # Watcher en sesión propia ANTES del exec: sobrevive a esta shell. Se
+        # arma con las 4 arriba y, al bajar de 4, cierra las que sigan.
+        # `hyprctl dispatch closewindow address:<a>` (legacy) ya no se parsea
+        # con la config Lua, y `hl.dsp.window.close` con selector cae a la
+        # ventana ACTIVA cuando no matchea (footgun). Por eso se matan los PID
+        # kitty propios: exactos y sin tocar ninguna ventana ajena.
+        setsid zsh -f -c '
+          run=$1; inv=$2; invpid=$3; pidfile=$4; armed=0; n=0
+          while :; do
+            sleep 1
+            out=$(hyprctl -j clients 2>/dev/null)
+            a=$(grep -c "\"title\": \"hyprdev-$run-" <<<"$out")
+            if grep -q "\"address\": \"$inv\"" <<<"$out"; then a=$((a+1)); fi
+            if (( a == 4 )); then
+              armed=1
+            elif (( armed == 1 )); then
+              kill $(cat "$pidfile" 2>/dev/null) $invpid 2>/dev/null
+              exit 0
+            elif (( ++n > 30 )); then
+              exit 0
+            fi
+          done
+        ' hyprdev-watch "$runid" "$inv_addr" "$inv_pid" "$pidfile" >/dev/null 2>&1 &
+        cd "$repo" || return 1
+        exec nvim
       }
 
       SecDesk() {
