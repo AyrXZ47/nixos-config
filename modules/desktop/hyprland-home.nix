@@ -316,7 +316,7 @@ in
       hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-menu.sh"))
       -- netrunner abre sus propias ventanas kitty independientes (clase
       -- `kitty` por defecto): el dedupe de Caelestia las colapsa a un icono.
-      hl.bind("SUPER + N", hl.dsp.exec_cmd("zsh -ic netrunner"))
+      hl.bind("SUPER + N", hl.dsp.exec_cmd("kitty zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/lock.sh"))
       -- Esmerilado on/off (blur + transparencia) con notificación.
