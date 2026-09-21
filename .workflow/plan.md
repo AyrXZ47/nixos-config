@@ -172,6 +172,19 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
   espeja al detectar monitores → "pantallas locas" al boot. Ola 4 lo quita y
   hace `monitor-mirror.sh` no-op con <2 salidas físicas; el toggle `SUPER+D`
   queda manual.
+- **`shell.json` ausente → defaults (#nuevo, 2026-09-20)**: el humano borró
+  `~/.config/caelestia/shell.json` para adoptar `terminal=kitty` y reinició la
+  shell SIN rebuild. La siembra del seed solo corre en `home-manager switch`, así
+  que la shell arrancó con **defaults** (solo el esquema/tema sigue, porque vive
+  en `scheme.json`). Fix sin rebuild:
+  `cp "$(nix build --no-link --print-out-paths .#nixosConfigurations.pc.config.modules.desktop.caelestia.shellJsonPath)" ~/.config/caelestia/shell.json`.
+  Lección: borrar `shell.json` **exige** un rebuild (o el `cp` de arriba).
+- **Splits de kitty rechazados (#nuevo)**: la ola 5 dejó `hyprdev`/`netrunner`
+  usando `kitty @ launch --location=vsplit/hsplit`. El humano los rechaza: quiere
+  **ventanas kitty independientes tileadas** (para ver el wallpaper por los gaps),
+  con dedupe a **un icono** en la barra de Caelestia. La ola 6 revierte a
+  ventanas independientes (clase por defecto `kitty` → el dedupe de
+  `Workspace.qml` las colapsa y `getAppIcon("kitty")` da el icono real).
 - **Restart de Caelestia**: `caelestia shell -k` mata el shell y
   `caelestia shell -d` lo relanza (equivalente a `wayle panel restart`). El
   shell ya recarga `shell.json`/`scheme.json` en caliente, así que normalmente
@@ -185,8 +198,9 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 2 | Fix F1 (esquema) + monitor `highrr` + animaciones de workspace + NeoCyberVim + layout nativo | audited · APPROVED |
 | 3 | Animación final (`slidefadevert`+`overshot`), fuera cast VNC, espejo arreglado, nvim transparente | integrated (sin auditar — excepción humana) |
 | 4 | Logo azul, notificaciones nativas, iconos reales, mpvpaper dedupe, espejo con 2+ monitores | integrated · audit APPROVED WITH EXCEPTIONS · **HOTFIX F3 (shell no carga)** |
-| 5 | Kitty (confirmado por el humano) + hyprdev/netrunner + limpieza | pending |
-| 6 | Mixxx MPRIS — DESCARTADO por el humano (evidencia en hallazgo #9) | done |
+| 5 | Color del icono activo + migración a kitty (config + hyprdev/netrunner + binds) | audited · APPROVED WITH EXCEPTIONS |
+| 6 | hyprdev/netrunner a ventanas kitty independientes, bolita del logo Nix, MPRIS falso de Mixxx | planned |
+| 7 | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -375,11 +389,69 @@ Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
   presente en `general.apps.terminal`; sin `wezterm` en binds/scripts (salvo
   `modules/apps/wezterm.nix`); verify de cada brief.
 
-## Wave 6 — Mixxx MPRIS (DESCARTADO)
+## Wave 6 (current) — kitty independiente, bolita del logo, MPRIS falso de Mixxx
 
-El humano descartó el soporte de Mixxx en el menú de media (2026-09-20) tras
-la evidencia del hallazgo #9: Mixxx 2.5.6 no expone MPRIS y no hay bridge
-mantenido. No se planifica.
+Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
+
+### File ownership map
+
+| File/glob | Owner |
+|-----------|-------|
+| `modules/apps/shell.nix` | executor-1 |
+| `modules/desktop/hyprland-home.nix` + `modules/desktop/caelestia.nix` | executor-2 |
+| `flake.nix` | executor-3 |
+| `modules/apps/mixxx-mpris.nix` (nuevo) + `home/default.nix` | executor-4 |
+
+### Tasks
+
+- [ ] T1 (shell.nix): **revertir los splits de kitty**. `hyprdev` debe lanzar
+      **4 ventanas kitty independientes** (nvim, opencode, free, pipes-rs),
+      tileadas por Hyprland (así se ve el wallpaper por los gaps); `netrunner`
+      **2 ventanas independientes** (btop, nvtop), flotantes. Sin `kitty @
+      launch --location`. Clase por defecto (`kitty`) para que el dedupe de
+      Caelestia las colapse a UN icono. → brief: `.workflow/briefs/wave6-executor-1.md`
+- [ ] T2 (hyprland-home.nix + caelestia.nix): quitar la window rule
+      `netrunner-float` si ya no aplica (o ajustarla a 2 ventanas flotantes);
+      revisar `windowIcons`/binds de kitty. → brief:
+      `.workflow/briefs/wave6-executor-2.md`
+- [ ] T3 (flake.nix): **bolita de relleno tras el logo Nix** del bar (el
+      snowflake "casi no se ve"): en `OsIcon.qml`, círculo de fondo
+      (`StyledRect`/`Rectangle`, `radius = width/2`, color
+      `m3surfaceContainerHigh` o similar) detrás del icono. → brief:
+      `.workflow/briefs/wave6-executor-3.md`
+- [ ] T4 (nuevo `mixxx-mpris`): **MPRIS falso de Mixxx** (el "engaño"). Servicio
+      de usuario que publica `org.mpris.MediaPlayer2.mixxx` para que Caelestia
+      muestre el logo de Mixxx + bongocat cuando suene audio de Mixxx. Detecta si
+      hay un stream de Mixxx sonando (PipeWire/pactl) y ajusta `PlaybackStatus`;
+      `Metadata` con `mpris:artUrl` = icono de Mixxx. → brief:
+      `.workflow/briefs/wave6-executor-4.md`
+
+### Integration plan
+
+- Orden: executor-1 (funciones) → executor-2 (reglas) → executor-3 (QML) →
+  executor-4 (servicio MPRIS). Disjuntos.
+- Comandos en el árbol integrado:
+  ```bash
+  nix flake check
+  nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
+  ```
+- Pasos del humano: `sudo nixos-rebuild switch --flake .#pc`,
+  `~/.config/hypr/scripts/caelestia-restart.sh`, re-sembrar `shell.json` si hace
+  falta (`cp "$(nix build --no-link --print-out-paths …shellJsonPath)" …`).
+  Probar `hyprdev` (4 ventanas independientes + 1 icono), `SUPER+N`, el logo con
+  la bolita, y con Mixxx sonando el logo + bongocat en el dashboard.
+
+### Audit gate
+
+- `nix flake check`; diff = archivos del mapa; sin `--location=` en `shell.nix`
+  (no splits); **smoke test de carga de shell** (toca QML); el servicio MPRIS
+  registra el bus (`busctl --user list | grep mixxx`) sin Mixxx abierto no debe
+  romper; verify de cada brief.
+
+## Wave 7 — Mixxx MPRIS real (DESCARTADO)
+
+El humano descartó el soporte MPRIS nativo real (evidencia del hallazgo #9).
+La ola 6 implementa el "engaño" que él mismo pidió.
 
 ---
 
