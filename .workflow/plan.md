@@ -203,6 +203,7 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren) + bolita (color/padding) | audited · absorbida por ola 8 (`audits/wave8.md` §6) |
 | 8 | hyprdev/netrunner como el wezterm original (invocadora reutilizada + cierre en cadena) + emoji en kitty + logo simétrico con las pills | integrated · audit APPROVED WITH EXCEPTIONS (E1 verify débil, H1–H4) |
 | 9 | UPS/nobreak como batería en Caelestia (+ watts en el panel performance), netrunner cierre en cadena, emoji de kitty, limpieza H1 | audited · done (re-seed manual de `shell.json` por host) |
+| 10 | Reproducibilidad del seed de `shell.json`: el activation re-siembra cuando el seed del repo cambia (hash) | planned |
 | — (Mixxx) | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
@@ -246,6 +247,8 @@ Hacer el re-seed **automático y reproducible**: hashear el seed y copiarlo solo
 cuando el hash cambie (propaga cambios del repo a todos los hosts sin perder
 ediciones de Nexus entre cambios). ~5 líneas en `modules/desktop/caelestia.nix`
 (activation `caelestiaSeedConfig`). No se hace sin OK de V.
+
+> **APROBADA por V (2026-09-20):** se implementa en la **ola 10** (abajo).
 
 ### Pendientes NO bloqueantes (documentados, sin construir)
 
@@ -745,13 +748,50 @@ y `defaultPlayer` quedar en `Mixxx`.
   a color. Si el candado no sale, es la próxima ola (es un tema de render de
   kitty/p10k, no de config del repo).
 
-### Próxima ola — candidatos (NO detallada; depende de la validación en vivo)
+### Próxima ola (wave 10) — reproducibilidad del seed
 
-1. Candadito de p10k en kitty si la prueba falla.
-2. Watts del UPS: solo se verán si el nobreak reporta `EnergyRate` al descargar.
-3. Modo ahorro por UPS en `pc` (decisión de V).
-4. Endurecer el verify de E1 de la ola 8 (`shell.nix`) si se re-audita: el de
-   `netrunner` (ola 9) ya es código-only.
+Detallada abajo. Los demás candidatos siguen como pendientes no bloqueantes
+(candadito si falla la prueba, watts del UPS, modo ahorro por UPS, endurecer el
+verify de E1 de la ola 8).
+
+## Wave 10 (mini-ola) — reproducibilidad del seed de `shell.json`
+
+Un ejecutor. Meta: que cualquier host adopte el seed nuevo de Caelestia con solo
+hacer `switch`, sin pasos manuales, y sin perder ediciones de Nexus cuando el
+seed no cambió. Nada de QML → smoke test de shell no obligatorio.
+
+### File ownership map
+
+| File/glob | Owner |
+|-----------|-------|
+| `modules/desktop/caelestia.nix` | executor-1 |
+
+### Tasks
+
+- [ ] T1 (caelestia.nix): `caelestiaSeedConfig` compara un hash del seed
+      (`builtins.hashString "sha256"`, calculado en eval) con el sidecar
+      `~/.config/caelestia/.shell-seed.sha256`: si el archivo falta **o** el hash
+      cambió, re-siembra; si el hash es igual, respeta lo editado en Nexus.
+      → brief: `.workflow/briefs/wave10-executor-1.md`
+
+### Integration plan
+
+- Rama única `wave10-executor-1`; `git merge --no-ff` a `main`.
+- Comandos en el árbol integrado:
+  ```bash
+  nix flake check
+  nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
+  ```
+- Pasos del humano: `sudo nixos-rebuild switch --flake .#pc` y
+  `.#laptop`. El switch debe re-sembrar solo el `shell.json` stale (desaparece el
+  WARN de `workspaceIcons` y vuelven transparencia/acciones). Verificar
+  `caelestia scheme get -n` → `cyberpunk`.
+
+### Audit gate
+
+- `nix flake check`; diff = solo `modules/desktop/caelestia.nix`; `flake.lock`
+  intacto; el verify funcional del brief pasa (re-seed con seed cambiado y
+  preservación con seed igual).
 
 ## Mixxx MPRIS real — DESCARTADO (no es una ola)
 
@@ -821,3 +861,4 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | H1: el `shell.json` vivo (stale, con `workspaceIcons` y `defaultPlayer: mpv`) se cierra borrándolo y re-sembrando con `caelestia-restart.sh`; el activation no pisa un archivo real | El WARN sobrevive a rebuild/restart hasta borrar el archivo del usuario |
 | 2026-09-20 | "Candadito" del prompt = `POWERLEVEL9K_LOCK_ICON` de p10k (`U+F023`, dir no escribible), NO un aviso de sudo; `U+F023` sí existe en JetBrainsMono Nerd Font. `p10k configure` no es el fix. `U+2B50` (estrella) sí era el hueco del `symbol_map` y quedó cerrado en la ola 9 | Diagnóstico con fontTools + `internal/icons.zsh` (modo `nerdfont-v3`) |
 | 2026-09-20 | **Proyecto CERRADO**. Bug de `laptop` (barra sin transparencia/blur y sin acción "Cyberpunk" del launcher) = `~/.config/caelestia/shell.json` **stale**; el activation solo siembra si el archivo no existe. Fix por host: `rm shell.json` + `caelestia-restart.sh`. Ambos hosts importan el mismo módulo, no es desincronización de Nix | Reproducibilidad absoluta requiere cerrar el gap de estado de usuario (mejora opcional de hash del seed, decisión de V) |
+| 2026-09-20 | **Ola 10 aprobada por V**: el seed de `shell.json` se versiona con hash (`builtins.hashString`) y el activation re-siembra solo cuando cambia; se respeta lo editado en Nexus cuando no cambia | Único punto que rompía la reproducibilidad absoluta entre hosts |
