@@ -452,10 +452,10 @@ PYEOF
                 }' \
             '    Rectangle {
                     anchors.centerIn: parent
-                    implicitWidth: root.height
-                    implicitHeight: root.height
+                    implicitWidth: Math.round(root.height * 1.6)
+                    implicitHeight: Math.round(root.height * 1.6)
                     radius: width / 2
-                    color: Colours.palette.m3surfaceContainerHigh
+                    color: Colours.tPalette.m3surfaceContainer
                 }
 
                 Loader {
