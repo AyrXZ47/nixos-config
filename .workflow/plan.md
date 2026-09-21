@@ -468,36 +468,65 @@ Cinco ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
   registra el bus (`busctl --user list | grep mixxx`) sin Mixxx abierto no debe
   romper; verify de cada brief.
 
-## Wave 7 (current) — hotfix kitty `--cwd` + ajuste de la bolita del logo
+## Wave 7 (current) — hyprdev/netrunner como el wezterm original (kitty) + logo + emoji
 
-Dos ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
+Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
 ### File ownership map
 
 | File/glob | Owner |
 |-----------|-------|
-| `modules/apps/shell.nix` + `modules/apps/kitty.nix` | executor-1 |
-| `flake.nix` | executor-2 |
+| `modules/apps/shell.nix` | executor-1 |
+| `modules/apps/kitty.nix` + `modules/desktop/hyprland-home.nix` | executor-2 |
+| `flake.nix` | executor-3 |
 
 ### Tasks
 
-- [ ] T1 (hotfix, bloqueante de UX): `hyprdev`/`netrunner` no abren porque usan
-      `kitty --cwd`, **flag inexistente en kitty 0.48** (`Unknown flag: --cwd` →
-      kitty sale al instante y el `>/dev/null` lo oculta). Cambiar a
-      `kitty -d` / `--working-directory`. Quitar el comentario obsoleto de
-      `kitty.nix` que dice que `hyprdev` usa `kitty @` (H2 de la auditoría).
+- [ ] T1 (shell.nix): **reimplementar `hyprdev` y `netrunner` replicando las
+      funciones wezterm originales** (`git show b041d24^:modules/apps/shell.nix`),
+      con los requisitos exactos del humano:
+      - `hyprdev`: la terminal que invoca el comando se **reutiliza** como una de
+        las 4 (nvim o libre) y lanza SOLO 3 ventanas kitty más; **si una se
+        cierra, se cierran las 4** (candado tipo IDE). Nada de `--cwd`: usar
+        `kitty -d`. Un `runid` por sesión + títulos `hyprdev-<runid>-<rol>` para
+        poder rastrearlas con `hyprctl -j clients`.
+      - `netrunner`: la terminal que invoca **se convierte en btop** (`exec btop`)
+        y **nvtop sale en otra ventana kitty independiente, al lado** (nunca
+        debajo). Si no hay terminal que invoque (bind global), el bind la lanza.
       → brief: `.workflow/briefs/wave7-executor-1.md`
-- [ ] T2 (flake.nix): la bolita del logo no le gustó al humano: (a) debe usar el
-      MISMO color de la pill de status icons (`Colours.tPalette.m3surfaceContainer`,
-      no `m3surfaceContainerHigh`), y (b) con más padding/altura para que el
-      snowflake respire. → brief: `.workflow/briefs/wave7-executor-2.md`
+- [ ] T2 (kitty.nix + hyprland-home.nix): **emoji en kitty** (fontconfig resuelve
+      🔒 a *Noto Sans Symbols 2* monocromo antes que *Noto Color Emoji*):
+      `symbol_map` para los rangos emoji → `Noto Color Emoji`. Corregir el
+      comentario obsoleto de `kitty.nix` (H2: `hyprdev` ya no usa `kitty @`). Y el
+      bind `SUPER + N` → `kitty -d "$HOME" zsh -ic netrunner` (netrunner necesita
+      una terminal que lo invoque para reutilizarla como btop).
+      → brief: `.workflow/briefs/wave7-executor-2.md`
+- [ ] T3 (flake.nix): la bolita del logo: usa `Colours.tPalette.m3surfaceContainer`
+      (no `m3surfaceContainerHigh`) y el **diámetro = grosor de las pills**
+      (`Tokens.sizes.bar.innerWidth`, igual que las pills de workspaces/status),
+      para que quede simétrica con ellas. → brief:
+      `.workflow/briefs/wave7-executor-3.md`
 
 ### Integration plan
 
-- Orden: executor-1 → executor-2. Disjuntos.
+- Orden: executor-1 → executor-2 → executor-3. Disjuntos.
 - `nix flake check` + toplevel.
-- Humano: rebuild + `caelestia-restart.sh`; probar `hyprdev` (4 ventanas
-  independientes con gaps) y `netrunner`.
+- Humano: rebuild + `caelestia-restart.sh`; probar `hyprdev` (4 ventanas, cierre
+  en cadena), `netrunner` (btop + nvtop al lado), emoji del candado, y la bolita
+  simétrica.
+
+### Audit gate
+
+- `nix flake check`; diff = los archivos del mapa; `shell.nix` sin `--cwd`; bind
+  `SUPER+N` con `kitty`; **smoke test de shell (toca QML)**; verify de cada brief.
+
+### Notas de investigación (para los briefs)
+
+- kitty usa GPU (libEGL/libgallium/libGL) y Caelestia también (libEGL + Qt6Quick):
+  no hay que configurar nada para GPU; ya es por GPU.
+- kitty no tiene `--cwd`; el flag es `-d`/`--working-directory`/`--directory`.
+- "Frame extrapolation" es `lsfg-vk` (capa Vulkan por juego), no una opción del
+  escritorio → descartado como regla del repo (ver decision log).
 
 ### Audit gate
 
@@ -558,3 +587,6 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | **HOTFIX ola 7**: `hyprdev`/`netrunner` usaban `kitty --cwd`, flag inexistente en kitty 0.48 → kitty salía al instante (oculto por `>/dev/null`). Fix: `kitty -d`/`--working-directory` | Reproducido: `kitty --cwd /tmp` → `Unknown flag: --cwd` |
 | 2026-09-20 | La bolita del logo va con `Colours.tPalette.m3surfaceContainer` (mismo token que la pill de status icons), no `m3surfaceContainerHigh` ni un hex | El humano quería el color de los grupos de la barra |
 | 2026-09-20 | "Frame extrapolation" = **lsfg-vk** (Lossless Scaling Frame Generation, capa Vulkan por juego), NO una opción de Hyprland/escritorio → no puede ser regla global del repo | Investigado; es por-juego y requiere el DLL de Lossless Scaling |
+| 2026-09-20 | GPU confirmada en runtime: kitty (`libEGL/libgallium/libGL`) y Caelestia (`libEGL/libgallium/libQt6Quick`) ya renderizan por GPU; no hay que configurar nada | `/proc/<pid>/maps`; regla del repo «lo que pueda ir por GPU, va por GPU» |
+| 2026-09-20 | Ola 7 ampliada: `hyprdev`/`netrunner` replican las funciones wezterm (`b041d24^`), pero **reutilizando la terminal invocadora** (4ª ventana / btop) y con **cierre en cadena**; netrunner con nvtop **al lado** | Requisitos explícitos del humano; evita la 5ª/3ª terminal "inútil" |
+| 2026-09-20 | Emoji de kitty: `symbol_map` a `Noto Color Emoji` (fontconfig prefería *Noto Sans Symbols 2* monocromo) | El candadito de sudo no salía |
