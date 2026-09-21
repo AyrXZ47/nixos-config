@@ -58,15 +58,52 @@
       # layout dwindle que fuerza que la próxima ventana tileada se abra a la
       # derecha. nvtop se lanza ANTES del exec. El flag de directorio de la
       # versión anterior no existe en kitty 0.48 (kitty salía al instante):
-      # ahora `-d`.
+      # ahora `-d`. Cierre en cadena: las 2 ventanas se rastrean por la address
+      # de ESTA ventana (capturada antes del exec btop) y el título
+      # `netrunner-nvtop`; armadas las 2, si cae cualquiera se cierra la otra.
       netrunner() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
           echo "Error: Se requiere sesión Hyprland activa."
           return 1
         fi
         local repo="''${1:-$PWD}"
+        local runid="$(date +%s)$RANDOM"
+        local pidfile="/tmp/netrunner-pids-$runid"
+        : > "$pidfile"
+        # Address y pid de ESTA ventana ANTES del exec btop: tras el exec su
+        # título ya no es rastreable, pero address/pid no cambian.
+        local inv_info inv_addr inv_pid
+        inv_info="$(hyprctl -j activewindow 2>/dev/null)"
+        inv_addr="$(grep -oE '0x[0-9a-f]+' <<<"$inv_info" | head -1)"
+        inv_pid="$(grep -oE '"pid": [0-9]+' <<<"$inv_info" | head -1 | grep -oE '[0-9]+')"
+        [[ -n "$KITTY_PID" ]] && inv_pid="$KITTY_PID"
         hyprctl dispatch 'hl.dsp.layout("preselect r")' >/dev/null 2>&1
-        setsid kitty -d "$repo" -T netrunner-nvtop zsh -ic nvtop >/dev/null 2>&1 &
+        # El wrapper apunta su pid ANTES del exec kitty (sin carreras de
+        # captura) y setsid le da sesión propia: sobrevive a esta shell.
+        setsid zsh -c 'pidf=$1; dir=$2; print -r -- $$ >> "$pidf"; exec kitty -d "$dir" -T netrunner-nvtop zsh -ic nvtop' \
+          netrunner-spawn "$pidfile" "$repo" >/dev/null 2>&1 &
+        # Watcher en sesión propia ANTES del exec: sobrevive a esta shell. Se
+        # arma con las 2 arriba y, al bajar de 2, cierra la que siga por PID
+        # (nunca `closewindow` por selector: cae a la ventana activa si no
+        # matchea). Timeout de arranque ~30 s por si nvtop nunca aparece.
+        setsid zsh -f -c '
+          inv=$1; invpid=$2; pidfile=$3; armed=0; n=0
+          while :; do
+            sleep 1
+            out=$(hyprctl -j clients 2>/dev/null)
+            a=0
+            if grep -q "\"address\": \"$inv\"" <<<"$out"; then a=$((a+1)); fi
+            if grep -q "\"title\": \"netrunner-nvtop\"" <<<"$out"; then a=$((a+1)); fi
+            if (( a == 2 )); then
+              armed=1
+            elif (( armed == 1 )); then
+              kill $(cat "$pidfile" 2>/dev/null) $invpid 2>/dev/null
+              exit 0
+            elif (( ++n > 30 )); then
+              exit 0
+            fi
+          done
+        ' netrunner-watch "$inv_addr" "$inv_pid" "$pidfile" >/dev/null 2>&1 &
         exec btop
       }
 
