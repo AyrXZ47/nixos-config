@@ -199,8 +199,9 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 3 | Animación final (`slidefadevert`+`overshot`), fuera cast VNC, espejo arreglado, nvim transparente | integrated (sin auditar — excepción humana) |
 | 4 | Logo azul, notificaciones nativas, iconos reales, mpvpaper dedupe, espejo con 2+ monitores | integrated · audit APPROVED WITH EXCEPTIONS · **HOTFIX F3 (shell no carga)** |
 | 5 | Color del icono activo + migración a kitty (config + hyprdev/netrunner + binds) | audited · APPROVED WITH EXCEPTIONS |
-| 6 | hyprdev/netrunner a ventanas kitty independientes, bolita del logo Nix, MPRIS falso de Mixxx | planned |
-| 7 | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
+| 6 | hyprdev/netrunner a ventanas kitty independientes, bolita del logo Nix, MPRIS falso de Mixxx, kitty keys/tema, vendor de temas | audited · APPROVED WITH EXCEPTIONS (`E1` verify del brief-4 inválido) |
+| 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren), ajuste de la bolita del logo, limpieza | planned |
+| 8 | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -467,7 +468,43 @@ Cinco ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
   registra el bus (`busctl --user list | grep mixxx`) sin Mixxx abierto no debe
   romper; verify de cada brief.
 
-## Wave 7 — Mixxx MPRIS real (DESCARTADO)
+## Wave 7 (current) — hotfix kitty `--cwd` + ajuste de la bolita del logo
+
+Dos ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
+
+### File ownership map
+
+| File/glob | Owner |
+|-----------|-------|
+| `modules/apps/shell.nix` + `modules/apps/kitty.nix` | executor-1 |
+| `flake.nix` | executor-2 |
+
+### Tasks
+
+- [ ] T1 (hotfix, bloqueante de UX): `hyprdev`/`netrunner` no abren porque usan
+      `kitty --cwd`, **flag inexistente en kitty 0.48** (`Unknown flag: --cwd` →
+      kitty sale al instante y el `>/dev/null` lo oculta). Cambiar a
+      `kitty -d` / `--working-directory`. Quitar el comentario obsoleto de
+      `kitty.nix` que dice que `hyprdev` usa `kitty @` (H2 de la auditoría).
+      → brief: `.workflow/briefs/wave7-executor-1.md`
+- [ ] T2 (flake.nix): la bolita del logo no le gustó al humano: (a) debe usar el
+      MISMO color de la pill de status icons (`Colours.tPalette.m3surfaceContainer`,
+      no `m3surfaceContainerHigh`), y (b) con más padding/altura para que el
+      snowflake respire. → brief: `.workflow/briefs/wave7-executor-2.md`
+
+### Integration plan
+
+- Orden: executor-1 → executor-2. Disjuntos.
+- `nix flake check` + toplevel.
+- Humano: rebuild + `caelestia-restart.sh`; probar `hyprdev` (4 ventanas
+  independientes con gaps) y `netrunner`.
+
+### Audit gate
+
+- `nix flake check`; diff = los archivos del mapa; `shell.nix` sin `--cwd`;
+  **smoke test de shell (toca QML)**; verify de cada brief.
+
+## Wave 8 — Mixxx MPRIS real (DESCARTADO)
 
 El humano descartó el soporte MPRIS nativo real (evidencia del hallazgo #9).
 La ola 6 implementa el "engaño" que él mismo pidió.
@@ -517,3 +554,7 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | Temas vendorizados en el repo: `assets/kitty-cyberpunk.conf` y `assets/nvim/NeoCyberVim/` | El humano teme que upstream borre los repos; el repo debe ser reproducible sin depender de GitHub |
 | 2026-09-20 | Kitty: tema `johndrews/kitty-cyberpunk` + keybinds wezterm-like (`ctrl+page_up/down`, splits `ctrl+shift+alt+percent/quotedbl`) | Reproducible sin fetch en runtime; el tema es MIT |
 | 2026-09-20 | MPRIS falso de Mixxx es SOLO lectura (`pw-dump`) para lo visual; NO se enruta audio ni se parchea Mixxx | El humano quiere solo el logo + bongocat, sin control |
+| 2026-09-20 | Ola 6 `audited · APPROVED WITH EXCEPTIONS`. `E1`: el verify del brief-4 era inválido (`services.<n>.enable` no existe; `ExecStart` es lista) → corregido a `nix eval --json ... ExecStart \| jq -e '.[0] \| test("mixxx-mpris")'` | Reportado por el ejecutor y confirmado por el auditor; el feature sí funciona |
+| 2026-09-20 | **HOTFIX ola 7**: `hyprdev`/`netrunner` usaban `kitty --cwd`, flag inexistente en kitty 0.48 → kitty salía al instante (oculto por `>/dev/null`). Fix: `kitty -d`/`--working-directory` | Reproducido: `kitty --cwd /tmp` → `Unknown flag: --cwd` |
+| 2026-09-20 | La bolita del logo va con `Colours.tPalette.m3surfaceContainer` (mismo token que la pill de status icons), no `m3surfaceContainerHigh` ni un hex | El humano quería el color de los grupos de la barra |
+| 2026-09-20 | "Frame extrapolation" = **lsfg-vk** (Lossless Scaling Frame Generation, capa Vulkan por juego), NO una opción de Hyprland/escritorio → no puede ser regla global del repo | Investigado; es por-juego y requiere el DLL de Lossless Scaling |

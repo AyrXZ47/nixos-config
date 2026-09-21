@@ -68,8 +68,12 @@ con `GLib.MainLoop` y repórtalo.
 
 ## Verify command
 
+> **CORREGIDO 2026-09-20 (E1 de la auditoría ola 6)**: el verify original usaba
+> `systemd.user.services.mixxx-mpris.enable`, que no existe en este Home Manager
+> (los servicios solo exponen `Install`/`Service`/`Unit`), y `Service.ExecStart`
+> es una lista. El correcto es:
 ```bash
-nix flake check --no-build && nix eval '.#nixosConfigurations.pc.config.home-manager.users.yovick.systemd.user.services.mixxx-mpris.enable' | grep -q true 2>/dev/null || nix eval --raw '.#nixosConfigurations.pc.config.home-manager.users.yovick.systemd.user.services.mixxx-mpris.Service.ExecStart' | grep -q mixxx-mpris
+nix flake check --no-build && nix eval --json '.#nixosConfigurations.pc.config.home-manager.users.yovick.systemd.user.services.mixxx-mpris.Service.ExecStart' | jq -e '.[0] | test("mixxx-mpris")'
 ```
 
 ## Commit
