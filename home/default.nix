@@ -16,6 +16,7 @@
     ../modules/apps/dolphin.nix
     ../modules/apps/gtkwave.nix
     ../modules/apps/miracast.nix
+    ../modules/apps/mixxx-mpris.nix
   ];
 
   home.username = "yovick";
