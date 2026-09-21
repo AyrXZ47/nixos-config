@@ -52,13 +52,22 @@
       # Solo si está instalado: el celular (nix-on-droid) no trae fastfetch.
       command -v fastfetch >/dev/null && fastfetch
 
-      # netrunner: btop y nvtop en 2 ventanas kitty INDEPENDIENTES que Hyprland
-      # tilea (sin splits). Clase por defecto `kitty` como hyprdev, para que el
-      # dedupe de Caelestia (Workspace.qml) las colapse a un icono real.
+      # netrunner: btop y nvtop en 2 ventanas kitty INDEPENDIENTES, btop en
+      # ESTA terminal (se reutiliza con `exec`) y nvtop en una nueva, SIEMPRE
+      # al lado (nunca debajo): `preselect r` es un override de un solo uso del
+      # layout dwindle que fuerza que la próxima ventana tileada se abra a la
+      # derecha. nvtop se lanza ANTES del exec. El flag de directorio de la
+      # versión anterior no existe en kitty 0.48 (kitty salía al instante):
+      # ahora `-d`.
       netrunner() {
+        if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
+          echo "Error: Se requiere sesión Hyprland activa."
+          return 1
+        fi
         local repo="''${1:-$PWD}"
-        setsid kitty -d "$repo" zsh -ic btop >/dev/null 2>&1 &
-        setsid kitty -d "$repo" zsh -ic nvtop >/dev/null 2>&1 &
+        hyprctl dispatch 'hl.dsp.layout("preselect r")' >/dev/null 2>&1
+        setsid kitty -d "$repo" -T netrunner-nvtop zsh -ic nvtop >/dev/null 2>&1 &
+        exec btop
       }
 
       # `hyprdev [directorio-repo]` — la geometría de trabajo en 4 ventanas
