@@ -202,7 +202,7 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 6 | hyprdev/netrunner a ventanas kitty independientes, bolita del logo Nix, MPRIS falso de Mixxx, kitty keys/tema, vendor de temas | audited · APPROVED WITH EXCEPTIONS (`E1` verify del brief-4 inválido) |
 | 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren) + bolita (color/padding) | audited · absorbida por ola 8 (`audits/wave8.md` §6) |
 | 8 | hyprdev/netrunner como el wezterm original (invocadora reutilizada + cierre en cadena) + emoji en kitty + logo simétrico con las pills | integrated · audit APPROVED WITH EXCEPTIONS (E1 verify débil, H1–H4) |
-| 9 | UPS/nobreak como batería en Caelestia (+ watts en el panel performance), netrunner cierre en cadena, emoji de kitty, limpieza H1 | planned → in-flight |
+| 9 | UPS/nobreak como batería en Caelestia (+ watts en el panel performance), netrunner cierre en cadena, emoji de kitty, limpieza H1 | integrated · audit APPROVED WITH EXCEPTIONS (H1 residuo en `shell.json` vivo, validación en vivo) |
 | — (Mixxx) | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
@@ -657,6 +657,57 @@ Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
   **smoke test de carga de shell (obliga: se toca QML)**; verify de cada brief
   sobre el árbol integrado.
 
+## Wave 9 — AUDITADA / APROBADA CON EXCEPCIONES
+
+> Audit: `.workflow/audits/wave9.md` (APPROVED WITH EXCEPTIONS). Merges
+> `8aea7bf`, `e25a401`, `98d32e4`, `06fef1f` en `main`; `nix flake check` +
+> toplevel de `pc` + los 4 verify pasan; smoke test de shell OK (el store
+> `wmzxws66…` carga sin errores de binding; log confirma `UPowerDeviceType::Ups`).
+> Único residuo: **H1 a medias** — el seed ya no tiene `workspaceIcons` pero el
+> `~/.config/caelestia/shell.json` **vivo** sí, y el activation respeta un archivo
+> real; el WARN sigue en cada arranque.
+
+### Cierre de H1 (residuo de estado del usuario)
+
+El `shell.json` vivo (nació en la migración, ~2026-09-19) quedó **stale**: trae
+`workspaceIcons: []` y las entradas muertas de `windowIcons` (`hyprdev.*`,
+wezterm), y además `defaultPlayer: "mpv"` (el seed del repo ya dice `"Mixxx"`).
+El activation `caelestiaSeedConfig` **no** sobreescribe un archivo real, así que
+un rebuild/restart NO lo limpia. Comando de cierre (pierde ediciones manuales de
+Nexus; el seed del repo es la fuente de verdad):
+
+```bash
+rm ~/.config/caelestia/shell.json
+~/.config/hypr/scripts/caelestia-restart.sh   # re-siembra desde shell.default.json
+```
+
+Tras esto debe desaparecer `WARN Unknown option "bar.workspaces.workspaceIcons"`
+y `defaultPlayer` quedar en `Mixxx`.
+
+### Cursor smear / candadito del prompt (diagnóstico, sin código)
+
+- El "candadito" que V veía en wezterm es **`POWERLEVEL9K_LOCK_ICON`** de p10k
+  (`nerdfont-v3` → `U+F023`), que el segmento `dir` pinta cuando el directorio
+  **no es escribible** (p. ej. `/etc/nixos` al hacer `sudo nixos-rebuild`), no un
+  aviso de sudo. `p10k configure` NO lo controla más allá de regenerar el
+  `.p10k.zsh`; no hay que re-correrlo por la migración wezterm→kitty.
+- El glifo `U+F023` **sí** existe en la fuente de kitty (JetBrainsMono Nerd Font
+  3.5.0; comprobado con fontTools). La estrella `U+2B50` no está en esa fuente y
+  por eso caía a monocromo — eso es lo que arregló la ola 9 (`symbol_map`), no el
+  candadito.
+- `.p10k.zsh` es del usuario (no está en el repo). Prueba mínima en kitty nuevo:
+  `printf '\uF023  \u2B50\n'` — el candado debe salir del Nerd Font y la estrella
+  a color. Si el candado no sale, es la próxima ola (es un tema de render de
+  kitty/p10k, no de config del repo).
+
+### Próxima ola — candidatos (NO detallada; depende de la validación en vivo)
+
+1. Candadito de p10k en kitty si la prueba falla.
+2. Watts del UPS: solo se verán si el nobreak reporta `EnergyRate` al descargar.
+3. Modo ahorro por UPS en `pc` (decisión de V).
+4. Endurecer el verify de E1 de la ola 8 (`shell.nix`) si se re-audita: el de
+   `netrunner` (ola 9) ya es código-only.
+
 ## Mixxx MPRIS real — DESCARTADO (no es una ola)
 
 El humano descartó el soporte MPRIS nativo real (evidencia del hallazgo #9).
@@ -721,3 +772,6 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | Cursor smear real del mouse: **NO se construye**. El smear de kitty sigue siendo del caret (texto) y por-ventana; entre splits no hay estela | Hyprland no tiene trail de puntero y no hay plugin mantenido; hacerlo exige escribir un plugin de compositor |
 | 2026-09-20 | Caelestia **no** reemplaza a SDDM: es una shell de Quickshell dentro de Hyprland, no un greeter | Ya documentado en `docs/inventario-caelestia.md` (§Riesgos 7); `sddm-astronaut` se queda |
 | 2026-09-20 | Modo energía: sigue vigente y ya mejorado en `amd-laptop.nix` (`eppSwitch` EPP + pausa de mpvpaper, por eventos, 22W→12.6W); en `pc` el "hyperturbo" es permanente. Modo ahorro por UPS en `pc` = **decisión pendiente de V** (trabajo nuevo, riesgo de rendimiento), fuera de la ola 9 | El repo no tiene listener UPower y el `pc` no está en sysfs |
+| 2026-09-20 | Ola 9 auditada `APPROVED WITH EXCEPTIONS` (`audits/wave9.md`); el código pasa y el smoke test de shell carga. Excepciones: H1 residual en el `shell.json` vivo + validación en vivo de V | Integración limpia (4 archivos), `flake.lock` intacto |
+| 2026-09-20 | H1: el `shell.json` vivo (stale, con `workspaceIcons` y `defaultPlayer: mpv`) se cierra borrándolo y re-sembrando con `caelestia-restart.sh`; el activation no pisa un archivo real | El WARN sobrevive a rebuild/restart hasta borrar el archivo del usuario |
+| 2026-09-20 | "Candadito" del prompt = `POWERLEVEL9K_LOCK_ICON` de p10k (`U+F023`, dir no escribible), NO un aviso de sudo; `U+F023` sí existe en JetBrainsMono Nerd Font. `p10k configure` no es el fix. `U+2B50` (estrella) sí era el hueco del `symbol_map` y quedó cerrado en la ola 9 | Diagnóstico con fontTools + `internal/icons.zsh` (modo `nerdfont-v3`) |
