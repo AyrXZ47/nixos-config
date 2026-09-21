@@ -174,7 +174,6 @@ let
         occupiedLabel = "";
         activeLabel = "";
         capitalisation = "preserve";
-        workspaceIcons = [ ];
         specialWorkspaceIcons = [
           {
             name = "special";
