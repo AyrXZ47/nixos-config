@@ -479,11 +479,10 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # cliphist: limite de historial en 6 items. Pequeño a propósito: al ser un
-  # clipboard manager captura TODO lo copiado (incluido el "copiar" de
-  # contraseñas desde KeepassXC/otras apps), y menos items = menos superficie
-  # de leaks + menos ruido al elegir.
-  xdg.configFile."cliphist/config".text = "max-items 6\n";
+  # cliphist: limite de historial en 20 items. Era 6, pero el humano perdía
+  # contexto al elegir; 20 mantiene el historial corto sin crecer sin control
+  # (captura TODO lo copiado, incl. contraseñas de KeepassXC).
+  xdg.configFile."cliphist/config".text = "max-items 20\n";
 
   xdg.configFile = {
     "hypr/scripts/time-to-work.sh" = {
