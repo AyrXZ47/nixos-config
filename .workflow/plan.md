@@ -391,7 +391,7 @@ Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
 ## Wave 6 (current) — kitty independiente, bolita del logo, MPRIS falso de Mixxx
 
-Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
+Cinco ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
 ### File ownership map
 
@@ -401,6 +401,8 @@ Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 | `modules/desktop/hyprland-home.nix` + `modules/desktop/caelestia.nix` | executor-2 |
 | `flake.nix` | executor-3 |
 | `modules/apps/mixxx-mpris.nix` (nuevo) + `home/default.nix` | executor-4 |
+| `modules/apps/kitty.nix` + `assets/kitty-cyberpunk.conf` (nuevo) | executor-5 |
+| `modules/apps/neovim.nix` + `assets/nvim/NeoCyberVim/**` (nuevo) | executor-6 |
 
 ### Tasks
 
@@ -410,36 +412,53 @@ Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
       **2 ventanas independientes** (btop, nvtop), flotantes. Sin `kitty @
       launch --location`. Clase por defecto (`kitty`) para que el dedupe de
       Caelestia las colapse a UN icono. → brief: `.workflow/briefs/wave6-executor-1.md`
-- [ ] T2 (hyprland-home.nix + caelestia.nix): quitar la window rule
-      `netrunner-float` si ya no aplica (o ajustarla a 2 ventanas flotantes);
-      revisar `windowIcons`/binds de kitty. → brief:
-      `.workflow/briefs/wave6-executor-2.md`
+- [ ] T2 (hyprland-home.nix + caelestia.nix): bind `SUPER+N` → `zsh -ic
+      netrunner`; quitar la window rule `netrunner-float`; `defaultPlayer =
+      "Mixxx"`; **cliphist a 20 items**; **`caelestia-restart.sh` self-heal**
+      (si falta `shell.json`, copiarlo de `~/.config/caelestia/shell.default.json`)
+      y exponer ese default con `xdg.configFile."caelestia/shell.default.json".source
+      = shellJsonPath`. → brief: `.workflow/briefs/wave6-executor-2.md`
 - [ ] T3 (flake.nix): **bolita de relleno tras el logo Nix** del bar (el
       snowflake "casi no se ve"): en `OsIcon.qml`, círculo de fondo
-      (`StyledRect`/`Rectangle`, `radius = width/2`, color
-      `m3surfaceContainerHigh` o similar) detrás del icono. → brief:
-      `.workflow/briefs/wave6-executor-3.md`
+      (`Rectangle`, `radius = width/2`, color `m3surfaceContainerHigh`) detrás
+      del icono. → brief: `.workflow/briefs/wave6-executor-3.md`
 - [ ] T4 (nuevo `mixxx-mpris`): **MPRIS falso de Mixxx** (el "engaño"). Servicio
       de usuario que publica `org.mpris.MediaPlayer2.mixxx` para que Caelestia
       muestre el logo de Mixxx + bongocat cuando suene audio de Mixxx. Detecta si
-      hay un stream de Mixxx sonando (PipeWire/pactl) y ajusta `PlaybackStatus`;
-      `Metadata` con `mpris:artUrl` = icono de Mixxx. → brief:
+      hay un stream de Mixxx sonando (`pw-dump`, solo lectura) y ajusta
+      `PlaybackStatus`; `Metadata` con `mpris:artUrl` = icono de Mixxx. → brief:
       `.workflow/briefs/wave6-executor-4.md`
+- [ ] T5 (kitty.nix + asset): **tema `kitty-cyberpunk`** de
+      johndrews (vendorizado como `assets/kitty-cyberpunk.conf`, MIT, con
+      atribución) incluido con `include` en `extraConfig`; **keybindings de
+      kitty** para usarlo como su wezterm: `ctrl+page_up/down` →
+      `previous_window`/`next_window`, `ctrl+shift+alt+percent` →
+      `launch --location=vsplit --cwd=current`, `ctrl+shift+alt+quotedbl` →
+      `launch --location=hsplit --cwd=current`, `enabled_layouts = "splits"`.
+      → brief: `.workflow/briefs/wave6-executor-5.md`
+- [ ] T6 (neovim.nix + asset): **vendorizar NeoCyberVim** para que el tema no
+      dependa de GitHub. Clonar `DonJulve/NeoCyberVim` dentro de
+      `assets/nvim/NeoCyberVim/` (sin `.git`), y en `modules/apps/neovim.nix`
+      cargar el plugin desde esa ruta (`dir = "${../../assets/nvim/NeoCyberVim}"`
+      en el spec de Lazy) en vez del repo de GitHub, conservando
+      `theme = "NeoCyberVim"` y `opts = { transparent = true }`. Deja un
+      comentario con el upstream y la licencia. → brief:
+      `.workflow/briefs/wave6-executor-6.md`
 
 ### Integration plan
 
-- Orden: executor-1 (funciones) → executor-2 (reglas) → executor-3 (QML) →
-  executor-4 (servicio MPRIS). Disjuntos.
+- Orden: executor-1 (funciones) → executor-2 (reglas/restart) → executor-3 (QML)
+  → executor-4 (servicio MPRIS) → executor-5 (kitty keys/tema) → executor-6
+  (vendor NeoCyberVim). Disjuntos.
 - Comandos en el árbol integrado:
   ```bash
   nix flake check
   nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
   ```
 - Pasos del humano: `sudo nixos-rebuild switch --flake .#pc`,
-  `~/.config/hypr/scripts/caelestia-restart.sh`, re-sembrar `shell.json` si hace
-  falta (`cp "$(nix build --no-link --print-out-paths …shellJsonPath)" …`).
-  Probar `hyprdev` (4 ventanas independientes + 1 icono), `SUPER+N`, el logo con
-  la bolita, y con Mixxx sonando el logo + bongocat en el dashboard.
+  `~/.config/hypr/scripts/caelestia-restart.sh` (ya self-healing). Probar
+  `hyprdev` (4 ventanas independientes + 1 icono), `SUPER+N`, el logo con la
+  bolita, las keybinds de kitty, y con Mixxx sonando el logo + bongocat.
 
 ### Audit gate
 
@@ -493,3 +512,8 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | Ola 4 auditada: APPROVED WITH EXCEPTIONS (`.workflow/audits/wave4.md`), excepción = validación visual del humano | Build/integridad/disciplina OK |
 | 2026-09-20 | **F3**: el parche de iconos reales usó `Image.implicitWidth/Height` (read-only) → la shell NO carga. Hotfix: `sourceSize: Qt.size(N,N)` | La auditoría solo grepeó el QML construido; nunca lo cargó. Se añade smoke test de carga al checklist |
 | 2026-09-20 | Fix F3 aplicado (`694b588`), shell verificada arriba. Ola 5 arranca: color del icono activo + kitty | El `Colouriser` de `ActiveIndicator.qml` aplana los iconos reales; se apaga la colorización |
+| 2026-09-20 | `caelestia-restart.sh` re-siembra `shell.json` desde `shell.default.json` si falta; se expone el seed como `xdg.configFile` | Borrar `shell.json` + restart sin rebuild dejaba la shell en defaults (sin blur/cava/launcher) |
+| 2026-09-20 | cliphist `max-items` 6 → 20 | El humano perdió contexto con solo 6 |
+| 2026-09-20 | Temas vendorizados en el repo: `assets/kitty-cyberpunk.conf` y `assets/nvim/NeoCyberVim/` | El humano teme que upstream borre los repos; el repo debe ser reproducible sin depender de GitHub |
+| 2026-09-20 | Kitty: tema `johndrews/kitty-cyberpunk` + keybinds wezterm-like (`ctrl+page_up/down`, splits `ctrl+shift+alt+percent/quotedbl`) | Reproducible sin fetch en runtime; el tema es MIT |
+| 2026-09-20 | MPRIS falso de Mixxx es SOLO lectura (`pw-dump`) para lo visual; NO se enruta audio ni se parchea Mixxx | El humano quiere solo el logo + bongocat, sin control |
