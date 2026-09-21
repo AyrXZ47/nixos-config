@@ -547,6 +547,54 @@ PYEOF
                 Behavior on Layout.preferredHeight {
                     Anim {}
                 }'
+
+            # UPS/nobreak: Quickshell define isLaptopBattery=false para
+            # Type=Ups (C++ compilado), asi que el tank/icono de bateria nunca
+            # sale con el CPS LX1100G3. Tratar `Ups` como bateria en el QML.
+            substituteInPlace modules/dashboard/Performance.qml \
+              --replace-fail \
+            '!(UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery)' \
+            '!((UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) && Config.dashboard.performance.showBattery)' \
+              --replace-fail \
+            'active: UPower.displayDevice.isLaptopBattery && Config.dashboard.performance.showBattery' \
+            'active: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) && Config.dashboard.performance.showBattery'
+            substituteInPlace modules/bar/components/status/BatteryStatus.qml \
+              --replace-fail \
+            'if (!UPower.displayDevice.isLaptopBattery) {' \
+            'if (!(UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups)) {'
+            substituteInPlace modules/bar/popouts/Battery.qml \
+              --replace-fail \
+            'text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining:' \
+            'text: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) ? qsTr("Remaining:' \
+              --replace-fail \
+            'text: UPower.displayDevice.isLaptopBattery ? qsTr("Time' \
+            'text: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) ? qsTr("Time'
+            substituteInPlace modules/lock/Fetch.qml \
+              --replace-fail \
+            'const hasBatt = UPower.displayDevice.isLaptopBattery;' \
+            'const hasBatt = UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups;'
+
+            # Watts reales de la bateria/UPS (changeRate = EnergyRate; positivo
+            # cargando, negativo descargando). Solo visible si el dato existe.
+            substituteInPlace modules/dashboard/performance/BatteryTank.qml \
+              --replace-fail \
+            '            StyledText {
+                            text: `''${Math.round(UPower.displayDevice.percentage * 100)}%`
+                            color: contents.accentColour
+                            font: Tokens.font.headline.medium
+                        }' \
+            '            StyledText {
+                            visible: Math.abs(UPower.displayDevice.changeRate) > 0.05
+                            text: `''${Math.abs(UPower.displayDevice.changeRate).toFixed(1)} W`
+                            color: contents.subTextColour
+                            font: Tokens.font.body.small
+                        }
+
+                        StyledText {
+                            text: `''${Math.round(UPower.displayDevice.percentage * 100)}%`
+                            color: contents.accentColour
+                            font: Tokens.font.headline.medium
+                        }'
           '';
         });
       };
