@@ -1,0 +1,305 @@
+local colors = require("NeoCyberVim.colors")
+local config = require("NeoCyberVim.config")
+local utils = require("NeoCyberVim.utils")
+
+local M = {}
+
+---@param options Options
+function M.setup(options)
+	setmetatable(config, { __index = vim.tbl_extend("force", config.defaults, options) })
+
+	M.highlights = { bufferline = {}, navic = {} }
+	M.highlights.bufferline = require("NeoCyberVim.integrations.bufferline").highlights(config)
+	M.highlights.navic = require("NeoCyberVim.integrations.navic").highlights(config)
+end
+
+function M.colorscheme()
+	vim.api.nvim_command("hi clear")
+	if vim.fn.exists("syntax_on") then
+		vim.api.nvim_command("syntax reset")
+	end
+
+	vim.g.VM_theme_set_by_colorscheme = true
+	vim.o.termguicolors = true
+	vim.g.colors_name = "NeoCyberVim"
+
+	M.set_terminal_colors()
+	M.set_groups()
+end
+
+function M.set_terminal_colors()
+	vim.g.terminal_color_0 = colors.editorBackground
+	vim.g.terminal_color_1 = colors.errorText
+	vim.g.terminal_color_2 = colors.successText
+	vim.g.terminal_color_3 = colors.warningText
+	vim.g.terminal_color_4 = colors.syntaxConstant
+	vim.g.terminal_color_5 = colors.syntaxFunction
+	vim.g.terminal_color_6 = colors.stringText
+	vim.g.terminal_color_7 = colors.mainText
+	vim.g.terminal_color_8 = colors.editorBackground
+	vim.g.terminal_color_9 = colors.errorText
+	vim.g.terminal_color_10 = colors.successText
+	vim.g.terminal_color_11 = colors.warningText
+	vim.g.terminal_color_12 = colors.syntaxConstant
+	vim.g.terminal_color_13 = colors.syntaxFunction
+	vim.g.terminal_color_14 = colors.stringText
+	vim.g.terminal_color_15 = colors.mainText
+	vim.g.terminal_color_background = colors.editorBackground
+	vim.g.terminal_color_foreground = colors.mainText
+end
+
+function M.set_groups()
+	local bg = config.transparent and "NONE" or colors.editorBackground
+	
+	-- COLORES GIT MÁS INTENSOS (sin shade)
+	local diff_add = colors.gitAdd or colors.successText
+	local diff_delete = colors.gitDelete or colors.syntaxKeyword  
+	local diff_change = colors.gitChange or colors.syntaxFunction
+	local diff_text = colors.syntaxProperty
+
+	local groups = {
+		-- base
+		Normal = { fg = colors.mainText, bg = bg },
+		LineNrAbove = { fg = colors.lineNumberText },
+		LineNr = { fg = colors.lineNumberTextActive },
+		LineNrBelow = { fg = colors.lineNumberText },
+		ColorColumn = {
+			bg = utils.shade(colors.stringText, 0.5, colors.editorBackground),
+		},
+		Conceal = {},
+		Cursor = { fg = colors.editorBackground, bg = colors.mainText },
+		lCursor = { link = "Cursor" },
+		CursorIM = { link = "Cursor" },
+		CursorLine = { bg = colors.popupBackground },
+		CursorColumn = { link = "CursorLine" },
+		Directory = { fg = colors.mainText },
+		DiffAdd = { bg = bg, fg = diff_add },
+		DiffChange = { bg = bg, fg = diff_change },
+		DiffDelete = { bg = bg, fg = diff_delete },
+		DiffText = { bg = bg, fg = diff_text },
+		EndOfBuffer = { fg = bg },
+		TermCursor = { link = "Cursor" },
+		TermCursorNC = { link = "Cursor" },
+		ErrorMsg = { fg = colors.syntaxKeyword },
+		VertSplit = { fg = colors.border, bg = "NONE" },
+		Winseparator = { link = "VertSplit" },
+		SignColumn = { link = "Normal" },
+		Folded = { fg = colors.mainText, bg = colors.popupBackground },
+		FoldColumn = { link = "SignColumn" },
+		IncSearch = {
+			bg = utils.mix(colors.syntaxConstant, colors.editorBackground, math.abs(0.30)),
+			fg = colors.editorBackground,
+		},
+		Substitute = { link = "IncSearch" },
+		CursorLineNr = { fg = colors.commentText },
+		MatchParen = { fg = colors.syntaxKeyword },
+		ModeMsg = { link = "Normal" },
+		MsgArea = { link = "Normal" },
+		-- MsgSeparator = {},
+		MoreMsg = { fg = colors.syntaxConstant },
+		NonText = { fg = bg }, 
+		NormalFloat = { bg = bg },
+		FloatBorder = { fg = colors.border },
+		NormalNC = { link = "Normal" },
+		Pmenu = { link = "NormalFloat" },
+		PmenuSel = { bg = colors.menuOptionBackground },
+		PmenuSbar = {
+			bg = utils.shade(colors.editorBackground, 0.5, colors.editorBackground),
+		},
+		PmenuThumb = { bg = utils.shade(colors.editorBackground, 0.20) },
+		Question = { fg = colors.syntaxFunction },
+		QuickFixLine = { fg = colors.syntaxFunction },
+		SpecialKey = { fg = colors.syntaxProperty },
+		StatusLine = { fg = colors.mainText, bg = bg },
+		StatusLineNC = {
+			fg = colors.inactiveText,
+			bg = colors.editorBackground,
+		},
+		TabLine = {
+			bg = colors.editorBackground,
+			fg = colors.inactiveText,
+		},
+		TabLineFill = { link = "TabLine" },
+		TabLineSel = {
+			bg = colors.editorBackground,
+			fg = colors.mainText,
+		},
+		Search = { bg = utils.shade(colors.stringText, 0.70, colors.bg) },
+		SpellBad = { undercurl = true, sp = colors.syntaxKeyword },
+		SpellCap = { undercurl = true, sp = colors.syntaxFunction },
+		SpellLocal = { undercurl = true, sp = colors.syntaxConstant },
+		SpellRare = { undercurl = true, sp = colors.warningText },
+		Title = { fg = colors.syntaxConstant, bold = true },
+		Visual = {
+			bg = utils.shade(colors.syntaxConstant, 0.40, colors.editorBackground),
+		},
+		VisualNOS = { link = "Visual" },
+		WarningMsg = { fg = colors.warningText },
+		Whitespace = { fg = colors.editorBackground },
+		WildMenu = { bg = colors.menuOptionBackground },
+		Comment = {
+			fg = colors.commentText,
+			italic = config.italics.comments or false,
+		},
+
+		-- GIT SIGNS
+		GitSignsAdd = { fg = diff_add },
+		GitSignsChange = { fg = diff_change },
+		GitSignsDelete = { fg = diff_delete },
+
+		-- SYNTAX TRADICIONAL
+		Constant = { fg = colors.syntaxConstant },
+		String = {
+			fg = colors.stringText,
+			italic = config.italics.strings or false,
+		},
+		Character = { fg = colors.stringText },
+		Number = { fg = colors.syntaxNumber },
+		Boolean = { fg = colors.syntaxNumber },
+		Float = { link = "Number" },
+
+		Identifier = { fg = colors.syntaxConstant },
+		Function = { fg = colors.syntaxFunction },
+		Method = { fg = colors.syntaxFunction },
+		Property = { fg = colors.syntaxProperty },
+		Field = { link = "Property" },
+		Parameter = { fg = colors.syntaxConstant },
+		Statement = { fg = colors.syntaxKeyword },
+		Conditional = { fg = colors.syntaxKeyword },
+		Label = { fg = colors.syntaxFunction },
+		Operator = { fg = colors.syntaxOperator },
+		Keyword = { fg = colors.syntaxKeyword, italic = config.italics.keywords or false },
+		Exception = { fg = colors.syntaxKeyword },
+
+		PreProc = { link = "Keyword" },
+		Define = { fg = colors.syntaxConstant },
+		Macro = { link = "Define" },
+		PreCondit = { fg = colors.syntaxKeyword },
+
+		Type = { fg = colors.syntaxType },
+		Struct = { link = "Type" },
+		Class = { link = "Type" },
+
+		Attribute = { link = "Character" },
+		Punctuation = { fg = colors.syntaxBracket },
+		Special = { fg = colors.syntaxProperty },
+
+		SpecialChar = { fg = colors.syntaxKeyword },
+		Tag = { fg = colors.stringText },
+		Delimiter = { fg = colors.syntaxBracket },
+		Debug = { fg = colors.mainText },
+
+		Underlined = { underline = true },
+		Bold = { bold = true },
+		Italic = { italic = true },
+		Ignore = { fg = colors.editorBackground },
+		Error = { link = "ErrorMsg" },
+		Todo = { fg = colors.warningText, bold = true },
+
+		-- DIAGNOSTICS
+		DiagnosticError = { link = "Error" },
+		DiagnosticWarn = { link = "WarningMsg" },
+		DiagnosticInfo = { fg = colors.syntaxFunction },
+		DiagnosticHint = { fg = colors.syntaxConstant },
+		DiagnosticVirtualTextError = { link = "DiagnosticError" },
+		DiagnosticVirtualTextWarn = { link = "DiagnosticWarn" },
+		DiagnosticVirtualTextInfo = { link = "DiagnosticInfo" },
+		DiagnosticVirtualTextHint = { link = "DiagnosticHint" },
+		DiagnosticUnderlineError = { undercurl = true, link = "DiagnosticError" },
+		DiagnosticUnderlineWarn = { undercurl = true, link = "DiagnosticWarn" },
+		DiagnosticUnderlineInfo = { undercurl = true, link = "DiagnosticInfo" },
+		DiagnosticUnderlineHint = { undercurl = true, link = "DiagnosticHint" },
+
+		-- TREE-SITTER
+		["@text"] = { fg = colors.mainText },
+		["@comment"] = { link = "Comment" },
+		["@punctuation.bracket"] = { fg = colors.syntaxBracket },
+		["@punctuation.delimiter"] = { fg = colors.syntaxBracket },
+		["@punctuation.special"] = { fg = colors.syntaxBracket },
+
+		["@constant"] = { fg = colors.syntaxConstant },
+		["@constant.builtin"] = { fg = colors.syntaxConstant },
+		["@string"] = { link = "String" },
+		["@string.escape"] = { fg = utils.shade(colors.stringText, 0.45) },
+		["@number"] = { link = "Number" },
+		["@boolean"] = { link = "Boolean" },
+
+		["@function"] = { fg = colors.syntaxFunction },
+		["@function.call"] = { fg = colors.syntaxFunction },
+		["@function.builtin"] = { fg = colors.syntaxFunction },
+		["@parameter"] = { fg = colors.syntaxConstant },
+		["@method"] = { fg = colors.syntaxFunction },
+		
+		-- FIELD ACCESS
+		["@field"] = { fg = colors.syntaxProperty },  -- ROJO para .syntaxKeyword
+		["@property"] = { fg = colors.syntaxProperty },  -- ROJO para propiedades
+		["@constructor"] = { fg = colors.syntaxFunction },
+
+		["@keyword"] = { fg = colors.syntaxKeyword },
+		["@keyword.function"] = { fg = colors.syntaxKeyword },
+		["@operator"] = { fg = colors.syntaxOperator },
+
+		["@type"] = { link = "Type" },
+		["@type.builtin"] = { fg = colors.syntaxConstant },
+		
+		-- VARIABLES - MODIFICADO
+		["@variable"] = { fg = colors.syntaxConstant },  -- BLANCO para colors
+		["@variable.builtin"] = { fg = colors.syntaxConstant },  -- BLANCO
+		["@variable.member"] = { fg = colors.syntaxProperty },  -- ROJO para member access
+
+		["@tag"] = { link = "Tag" },
+		["@tag.delimiter"] = { fg = colors.syntaxProperty },
+		["@tag.attribute"] = { fg = colors.syntaxFunction },
+
+		-- LSP SEMANTIC TOKENS
+		["@lsp.type.variable"] = { fg = colors.syntaxConstant },
+		["@lsp.type.variable.lua"] = { fg = colors.syntaxConstant },
+		["@lsp.type.parameter"] = { fg = colors.syntaxConstant },
+		["@lsp.type.property"] = { fg = colors.syntaxProperty },  -- ROJO para propiedades
+		["@lsp.type.function"] = { fg = colors.syntaxFunction },
+		["@lsp.type.method"] = { fg = colors.syntaxFunction },
+		["@lsp.type.keyword"] = { fg = colors.syntaxKeyword },
+		["@lsp.type.operator"] = { fg = colors.syntaxOperator },
+		["@lsp.typemod.variable.defaultLibrary"] = { fg = colors.syntaxConstant },
+		["@lsp.typemod.variable.declaration"] = { fg = colors.syntaxConstant },
+		["@lsp.typemod.variable.readonly"] = { fg = colors.syntaxConstant },
+
+		-- SEMANTIC HIGHLIGHTING OVERRIDES
+		["@lsp.type.namespace"] = { link = "@namespace" },
+		["@lsp.type.type"] = { link = "@function" },
+		["@lsp.type.class"] = { link = "@type" },
+		["@lsp.type.enum"] = { link = "@type" },
+		["@lsp.type.enumMember"] = { fg = colors.syntaxFunction },
+		["@lsp.type.interface"] = { link = "@function" },
+		["@lsp.type.struct"] = { link = "@type" },
+		["@lsp.type.macro"] = { link = "@label" },
+		["@lsp.type.decorator"] = { link = "@label" },
+
+		-- Specific languages
+		["@label.json"] = { fg = colors.syntaxProperty },
+		["@label.help"] = { link = "@texcolorscheme.uri" },
+		["@texcolorscheme.uri.html"] = { underline = true },
+		["@markup.heading"] = { fg = colors.mainText, bold = true },		
+		["@markup.raw"] = { bg = bg },
+		["@markup.raw.markdown_inline"] = { bg = bg },
+		["@markup.raw.block"] = { bg = bg },
+		RenderMarkdownCode = { bg = bg },
+		RenderMarkdownCodeInline = { bg = bg },
+	}
+
+	-- integrations
+	groups = vim.tbl_extend("force", groups, require("NeoCyberVim.integrations.cmp").highlights())
+
+	-- overrides
+	groups = vim.tbl_extend(
+		"force",
+		groups,
+		type(config.overrides) == "function" and config.overrides(config) or config.overrides
+	)
+
+	for group, parameters in pairs(groups) do
+		vim.api.nvim_set_hl(0, group, parameters)
+	end
+end
+
+return M

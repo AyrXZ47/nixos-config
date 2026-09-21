@@ -6,12 +6,16 @@ let
   pluginsDir = {
     ".config/nvim/lua/plugins/theme.lua" = {
       text = ''
+        -- Tema de DonJulve/NeoCyberVim (MIT), vendorizado en assets/nvim/NeoCyberVim
+        -- para que no se pierda si upstream borra el repo.
         return {
-          "DonJulve/NeoCyberVim",
-          name = "NeoCyberVim",
-          lazy = false,
-          priority = 20000,
-          opts = { transparent = true },
+          {
+            dir = "${../../assets/nvim/NeoCyberVim}",
+            name = "NeoCyberVim",
+            lazy = false,
+            priority = 1000,
+            opts = { transparent = true },
+          },
         }
       '';
     };
