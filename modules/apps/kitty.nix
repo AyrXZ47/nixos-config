@@ -23,7 +23,8 @@
       window_padding_width = "10";
       confirm_os_window_close = "0";
       enable_audio_bell = "no";
-      # Control remoto para que `kitty @ launch` funcione (lo usa hyprdev)
+      # Control remoto disponible para uso manual (lanzar ventanas/splits con
+      # el CLI de kitty). hyprdev ya no lo usa.
       allow_remote_control = "yes";
       shell_integration = "enabled";
       # Wezterm-like: splits nativos de kitty
