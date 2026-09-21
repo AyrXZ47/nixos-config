@@ -200,9 +200,10 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 4 | Logo azul, notificaciones nativas, iconos reales, mpvpaper dedupe, espejo con 2+ monitores | integrated · audit APPROVED WITH EXCEPTIONS · **HOTFIX F3 (shell no carga)** |
 | 5 | Color del icono activo + migración a kitty (config + hyprdev/netrunner + binds) | audited · APPROVED WITH EXCEPTIONS |
 | 6 | hyprdev/netrunner a ventanas kitty independientes, bolita del logo Nix, MPRIS falso de Mixxx, kitty keys/tema, vendor de temas | audited · APPROVED WITH EXCEPTIONS (`E1` verify del brief-4 inválido) |
-| 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren) + bolita (color/padding) | integrated (auditoría pendiente) |
-| 8 | hyprdev/netrunner como el wezterm original (invocadora reutilizada + cierre en cadena) + emoji en kitty + logo simétrico con las pills | planned |
-| 9 | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
+| 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren) + bolita (color/padding) | audited · absorbida por ola 8 (`audits/wave8.md` §6) |
+| 8 | hyprdev/netrunner como el wezterm original (invocadora reutilizada + cierre en cadena) + emoji en kitty + logo simétrico con las pills | integrated · audit APPROVED WITH EXCEPTIONS (E1 verify débil, H1–H4) |
+| 9 | UPS/nobreak como batería en Caelestia (+ watts en el panel performance), netrunner cierre en cadena, emoji de kitty, limpieza H1 | planned → in-flight |
+| — (Mixxx) | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -469,15 +470,26 @@ Cinco ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
   registra el bus (`busctl --user list | grep mixxx`) sin Mixxx abierto no debe
   romper; verify de cada brief.
 
-## Wave 7 — INTEGRADA (auditoría pendiente)
+## Wave 7 — AUDITADA (absorbida por la ola 8)
 
 > Ejecutada por el humano 2026-09-20: `3139acc` (hyprdev/netrunner a `kitty -d`,
 > antes `--cwd` inexistente) y `525195a` (color y padding de la bolita del logo).
-> Merges `2d253d1`/`3422bb9` en `main`. Sin commit de auditoría todavía; la
-> validación de hyprdev/netrunner se re-hace en la ola 8 con los requisitos
-> definitivos.
+> Merges `2d253d1`/`3422bb9` en `main`. **Cerrada**: sus commits quedaron
+> subsumidos por la ola 8 y sus verifies pasan sobre el árbol integrado, salvo el
+> grep `'kitty @'` que quedó *stale* por el comentario nuevo de la ola 8 (H2 de
+> `.workflow/audits/wave8.md`). No se crea `.workflow/audits/wave7.md`.
 
-## Wave 8 (current) — hyprdev/netrunner como el wezterm original (kitty) + logo + emoji
+## Wave 8 — AUDITADA / APROBADA CON EXCEPCIONES
+
+> Audit: `.workflow/audits/wave8.md` (APPROVED WITH EXCEPTIONS). Merges
+> `eac1bb5`, `c25ad23`, `8cb26ea` en `main`; `nix flake check` + toplevel de `pc`
+> pasan; smoke test de carga de shell OK. Excepciones no bloqueantes: `E1` verify
+> débil (matchea un comentario, no el watcher de `kill`), `E2` validación en vivo
+> del humano, `E3` = `H1` (`workspaceIcons` inválido en el seed) y `H2` (verify
+> stale de la ola 7). `H3` (pkill auto-mata) y `H4` (worktrees sin retirar) son
+> operativos. `E1`/`H1`/`H3` se cierran en la ola 9.
+
+## Wave 8 (detalle original) — hyprdev/netrunner como el wezterm original (kitty) + logo + emoji
 
 Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
@@ -537,12 +549,115 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 - "Frame extrapolation" es `lsfg-vk` (capa Vulkan por juego), no una opción del
   escritorio → descartado como regla del repo (ver decision log).
 
+## Wave 9 (current) — UPS/nobreak como batería en Caelestia, netrunner, emoji
+
+Cuatro ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
+
+### Hallazgos de la investigación (2026-09-20, evidencia real en `pc`)
+
+- **El nobreak SÍ lo ve UPower, pero como `Ups`, no como `Battery`**:
+  `upower -e` → `/org/freedesktop/UPower/devices/ups_hiddev2` (CPS LX1100G3,
+  HID: `.../usbmisc/hiddev2`). El DisplayDevice reporta `Type=3 (Ups)`,
+  `Percentage=100`, `TimeToEmpty`, y `EnergyRate=0` (cargado). En `pc` **no hay
+  `/sys/class/power_supply/*`** (el nobreak no está en sysfs), así que el
+  predicado `on_battery()` del repo (sysfs) es no-op en `pc`.
+- **Causa raíz de que Caelestia no muestre la batería del nobreak**: Quickshell
+  define `isLaptopBattery == (type == Battery && powerSupply)` (`device.cpp`,
+  compilado). El UPS tiene `type == Ups` → `false`. Caelestia usa ese flag en
+  `Performance.qml` (gate del `BatteryTank`), `BatteryStatus.qml`, el popout
+  `Battery.qml` y `lock/Fetch.qml`. Se parchea el QML (overlay) para tratar
+  `UPowerDeviceType.Ups` como batería.
+- **Watts**: Quickshell expone `UPowerDevice.changeRate` = `EnergyRate` (W;
+  positivo cargando, negativo descargando). El `BatteryTank.qml` **no** lo
+  muestra hoy (solo % y tiempo). En la laptop es dato real; en este UPS
+  `EnergyRate` da 0 (cargado) → **validar en vivo si reporta watts al
+  descargar**; si no, se muestra solo cuando el dato exista.
+- **Emoji de kitty**: `kitty --debug-font-fallback` confirma que `symbol_map`
+  carga `NotoColorEmoji`; el hueco son los rangos NO mapeados. `p10k` usa
+  `U+2B50` (estrella, bloque `U+2B00–U+2BFF`) que no está en el `symbol_map`
+  actual (`U+1F300-U+1FAFF,U+2600-U+27BF,U+2190-U+21FF`) → cae a la fuente
+  monocroma. Fix: ampliar el rango.
+- **Cursor smear real (mouse)**: Hyprland NO tiene trail/smear de puntero
+  nativo y no hay plugin mantenido que lo haga (`hyprtrails` es de ventanas;
+  `hypr-cursors`/`hypr-dynamic-cursors` deforman el puntero por velocidad, no
+  dejan estela). El smear de kitty es del caret de texto y es por-ventana; al
+  cambiar de split se pierde. **Decisión: no se construye** (habría que escribir
+  un plugin de compositor). Ver decision log.
+- **Caelestia no puede reemplazar a SDDM**: es una shell de Quickshell dentro de
+  una sesión Hyprland; el greeter es un display manager aparte. Ya está en
+  `docs/inventario-caelestia.md` (§Riesgos 7). `sddm-astronaut` se queda.
+- **Modo energía**: sigue vigente y ya es la versión mejorada en `amd-laptop.nix`
+  (`eppSwitch`: EPP `power` en batería / `performance` en AC + pausa del
+  wallpaper, por eventos udev, medido 22W→12.6W). En `pc` "hyperturbo" es
+  permanente (`amd-desktop.nix`: governor `performance`, `max_cstate=1`,
+  `amdgpu-perf` high, power cap máximo). Un modo ahorro por UPS en `pc` es
+  posible pero es trabajo nuevo y con riesgo de sabotear el rendimiento:
+  **decisión pendiente de V** (ver decision log). No entra en la ola 9.
+
+### File ownership map
+
+| File/glob | Owner |
+|-----------|-------|
+| `flake.nix` | executor-1 |
+| `modules/desktop/caelestia.nix` | executor-2 |
+| `modules/apps/shell.nix` | executor-3 |
+| `modules/apps/kitty.nix` | executor-4 |
+
+### Tasks
+
+- [ ] T1 (flake.nix): en `caelestiaDedupeOverlay`, tratar el UPS como batería de
+      laptop y mostrar watts. Sustituciones sobre el QML upstream:
+      - `Performance.qml`: las 2 condiciones de `UPower.displayDevice.isLaptopBattery`
+        → `(UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups)`.
+      - `BatteryStatus.qml` y `Battery.qml` (popout): mismo criterio (popout con
+        `--replace-all`, hay 2 usos).
+      - `lock/Fetch.qml`: `hasBatt` incluye UPS.
+      - `BatteryTank.qml`: añadir un `StyledText` con
+        `${Math.abs(UPower.displayDevice.changeRate).toFixed(1)} W` visible solo
+        si `|changeRate| > 0.05`, junto al `%`.
+      → brief: `.workflow/briefs/wave9-executor-1.md`
+- [ ] T2 (caelestia.nix): **H1** quitar `workspaceIcons = [ ]` (opción inválida;
+      emite `WARN Unknown option "bar.workspaces.workspaceIcons"` en cada
+      arranque). Opcional: limpiar las entradas muertas de `windowIcons`
+      (`hyprdev.*` y wezterm) porque la clase ya es `kitty` y el icono real lo
+      resuelve el parche QML; conservar `steam`.
+      → brief: `.workflow/briefs/wave9-executor-2.md`
+- [ ] T3 (shell.nix): **netrunner con cierre en cadena** como hyprdev. La ventana
+      invocadora se convierte en btop (`exec`), nvtop sale al lado; un watcher
+      (por address de la invocadora + título `netrunner-nvtop`, armado con 2)
+      cierra la que quede cuando una se cae. Usar pidfile para los PID de kitty
+      (no `closewindow` por selector).
+      → brief: `.workflow/briefs/wave9-executor-3.md`
+- [ ] T4 (kitty.nix): ampliar `symbol_map` con `U+2B00-U+2BFF` (la estrella de
+      `p10k` y demás símbolos de ese bloque) para que resuelvan a
+      `Noto Color Emoji` en vez de la fuente monocroma.
+      → brief: `.workflow/briefs/wave9-executor-4.md`
+
+### Integration plan
+
+- Orden: executor-1 (overlay) → executor-2 (seed) → executor-3 (zsh) →
+  executor-4 (kitty). Disjuntos.
+- Comandos en el árbol integrado:
+  ```bash
+  nix flake check
+  nix build --no-link .#nixosConfigurations.pc.config.system.build.toplevel
+  ```
+- Pasos del humano:
+  1. `sudo nixos-rebuild switch --flake .#pc` y
+     `~/.config/hypr/scripts/caelestia-restart.sh`.
+  2. Abrir el dashboard: el UPS debe aparecer como batería con `%` (y watts si
+     el UPS los reporta). Probar `netrunner` (2 ventanas, cerrar una cierra la
+     otra) y un emoji del prompt (p. ej. la estrella de `p10k`).
+  3. En `laptop`: `sudo nixos-rebuild switch --flake .#laptop` y confirmar que el
+     `BatteryTank` muestra los watts reales de la batería.
+
 ### Audit gate
 
-- `nix flake check`; diff = los archivos del mapa; `shell.nix` sin `--cwd`;
-  **smoke test de shell (toca QML)**; verify de cada brief.
+- `nix flake check`; diff = los 4 archivos del mapa; `flake.lock` intacto;
+  **smoke test de carga de shell (obliga: se toca QML)**; verify de cada brief
+  sobre el árbol integrado.
 
-## Wave 9 — Mixxx MPRIS real (DESCARTADO)
+## Mixxx MPRIS real — DESCARTADO (no es una ola)
 
 El humano descartó el soporte MPRIS nativo real (evidencia del hallazgo #9).
 La ola 6 implementa el "engaño" que él mismo pidió.
@@ -599,3 +714,10 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | GPU confirmada en runtime: kitty (`libEGL/libgallium/libGL`) y Caelestia (`libEGL/libgallium/libQt6Quick`) ya renderizan por GPU; no hay que configurar nada | `/proc/<pid>/maps`; regla del repo «lo que pueda ir por GPU, va por GPU» |
 | 2026-09-20 | Ola 7 ampliada: `hyprdev`/`netrunner` replican las funciones wezterm (`b041d24^`), pero **reutilizando la terminal invocadora** (4ª ventana / btop) y con **cierre en cadena**; netrunner con nvtop **al lado** | Requisitos explícitos del humano; evita la 5ª/3ª terminal "inútil" |
 | 2026-09-20 | Emoji de kitty: `symbol_map` a `Noto Color Emoji` (fontconfig prefería *Noto Sans Symbols 2* monocromo) | El candadito de sudo no salía |
+| 2026-09-20 | Ola 8 auditada `APPROVED WITH EXCEPTIONS` (`audits/wave8.md`); ola 7 cerrada como absorbida por la ola 8 (sin audit propio) | Build/integración/smoke OK; excepciones = verify E1 débil + validación en vivo del humano |
+| 2026-09-20 | El nobreak (CPS LX1100G3) lo expone UPower como `Type=Ups` (HID), no como `Battery`; no aparece en `/sys/class/power_supply`. Caelestia se parchea por overlay para tratar `UPowerDeviceType.Ups` como batería | Quickshell define `isLaptopBattery == type==Battery && powerSupply`; con `Ups` el `BatteryTank` nunca se activa |
+| 2026-09-20 | Watts de batería en el panel performance vía `UPowerDevice.changeRate` (`EnergyRate`); visible solo cuando el dato existe | En el UPS cargado `EnergyRate=0`; en la laptop es real. Se valida en vivo al descargar |
+| 2026-09-20 | Emoji de kitty: el hueco real es el rango `U+2B00–U+2BFF` (estrella de p10k), fuera del `symbol_map`; se amplía el rango | `kitty --debug-font-fallback` confirma que `symbol_map` ya carga `NotoColorEmoji` |
+| 2026-09-20 | Cursor smear real del mouse: **NO se construye**. El smear de kitty sigue siendo del caret (texto) y por-ventana; entre splits no hay estela | Hyprland no tiene trail de puntero y no hay plugin mantenido; hacerlo exige escribir un plugin de compositor |
+| 2026-09-20 | Caelestia **no** reemplaza a SDDM: es una shell de Quickshell dentro de Hyprland, no un greeter | Ya documentado en `docs/inventario-caelestia.md` (§Riesgos 7); `sddm-astronaut` se queda |
+| 2026-09-20 | Modo energía: sigue vigente y ya mejorado en `amd-laptop.nix` (`eppSwitch` EPP + pausa de mpvpaper, por eventos, 22W→12.6W); en `pc` el "hyperturbo" es permanente. Modo ahorro por UPS en `pc` = **decisión pendiente de V** (trabajo nuevo, riesgo de rendimiento), fuera de la ola 9 | El repo no tiene listener UPower y el `pc` no está en sysfs |

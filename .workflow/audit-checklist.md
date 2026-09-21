@@ -25,10 +25,13 @@ check. After the audit, copy this file to `.workflow/audits/wave<N>.md`
       check`/build NO detectan bindings QML inválidos (p.ej. asignar
       `implicitHeight` a un `Image`).
       ```bash
-      pkill -f 'quickshell.*caelestia-shell'; sleep 1
+      pkill -f 'caelestia[-]shell'; sleep 1
       caelestia shell -d 2>&1 | tee /tmp/qs-start.log
       ! grep -qi 'Failed to load configuration' /tmp/qs-start.log
       ```
+      Usar `caelestia[-]shell` (no `quickshell.*caelestia-shell`): el bracket evita
+      que el `pkill` se auto-mate si el patrón aparece en su propia línea de
+      comandos. Si no, matar por PID.
       Si la shell no carga, la ola se REJECTED aunque los greps pasen.
 
 ## 3. Scope discipline (ponytail)
