@@ -24,7 +24,7 @@
       confirm_os_window_close = "0";
       enable_audio_bell = "no";
       # Control remoto disponible para uso manual (lanzar ventanas/splits con
-      # el CLI de kitty). hyprdev ya no lo usa.
+      # el CLI de kitty). hyprdev ya no usa `kitty @`.
       allow_remote_control = "yes";
       shell_integration = "enabled";
       # Emoji a color: fontconfig resuelve símbolos como 🔒 (U+1F512) a
