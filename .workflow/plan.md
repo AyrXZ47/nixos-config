@@ -202,11 +202,56 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 6 | hyprdev/netrunner a ventanas kitty independientes, bolita del logo Nix, MPRIS falso de Mixxx, kitty keys/tema, vendor de temas | audited · APPROVED WITH EXCEPTIONS (`E1` verify del brief-4 inválido) |
 | 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren) + bolita (color/padding) | audited · absorbida por ola 8 (`audits/wave8.md` §6) |
 | 8 | hyprdev/netrunner como el wezterm original (invocadora reutilizada + cierre en cadena) + emoji en kitty + logo simétrico con las pills | integrated · audit APPROVED WITH EXCEPTIONS (E1 verify débil, H1–H4) |
-| 9 | UPS/nobreak como batería en Caelestia (+ watts en el panel performance), netrunner cierre en cadena, emoji de kitty, limpieza H1 | integrated · audit APPROVED WITH EXCEPTIONS (H1 residuo en `shell.json` vivo, validación en vivo) |
+| 9 | UPS/nobreak como batería en Caelestia (+ watts en el panel performance), netrunner cierre en cadena, emoji de kitty, limpieza H1 | audited · done (re-seed manual de `shell.json` por host) |
 | — (Mixxx) | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
+
+## Estado: PROYECTO CERRADO (2026-09-20)
+
+Olas 1–9 integradas y auditadas (o descartadas con evidencia). Caelestia
+reemplazó a Wayle con la paleta cyberpunk, barra/dashboard/notificaciones,
+migración a kitty, `hyprdev`/`netrunner` y el UPS reconocido como batería.
+`main` == `origin/main`; worktrees y ramas de ola retirados.
+
+### Reproducibilidad entre hosts (leer esto)
+
+`pc`/`laptop`/`vm` importan los mismos módulos, pero Caelestia guarda **estado de
+usuario** que Nix no versiona:
+
+- `~/.config/caelestia/shell.json` — el activation `caelestiaSeedConfig` **solo
+  lo copia si no existe** (para respetar ediciones de Nexus). Un host con un
+  `shell.json` viejo conserva barra/transparencia/acciones viejas.
+- `~/.local/state/caelestia/scheme.json` — lo fija el activation
+  `caelestiaCyberpunkScheme` en cada switch (esto sí es reproducible).
+
+**Bug visto en `laptop` (2026-09-20)**: tras `pull` + rebuild faltaban la
+transparencia/blur de la barra y la acción "Cyberpunk" del launcher `>`. Causa
+raíz = `shell.json` **stale** (preexistente de una migración anterior); no es un
+módulo desincronizado (ambos hosts importan `modules/desktop/caelestia.nix`).
+Fix de una vez por host:
+
+```bash
+rm ~/.config/caelestia/shell.json
+~/.config/hypr/scripts/caelestia-restart.sh   # re-siembra desde shell.default.json
+```
+
+Comprobaciones: el WARN de `workspaceIcons` desaparece, `caelestia scheme get -n`
+→ `cyberpunk`, y el launcher `>` vuelve a listar "Cyberpunk".
+
+### Mejora opcional (decisión de V)
+
+Hacer el re-seed **automático y reproducible**: hashear el seed y copiarlo solo
+cuando el hash cambie (propaga cambios del repo a todos los hosts sin perder
+ediciones de Nexus entre cambios). ~5 líneas en `modules/desktop/caelestia.nix`
+(activation `caelestiaSeedConfig`). No se hace sin OK de V.
+
+### Pendientes NO bloqueantes (documentados, sin construir)
+
+- Watts del UPS: dependen de que el nobreak reporte `EnergyRate` al descargar.
+- Modo ahorro por UPS en `pc`: no construido (decisión de V).
+- Cursor smear real del mouse: no factible sin plugin de compositor (decisión).
 
 ---
 
@@ -775,3 +820,4 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | Ola 9 auditada `APPROVED WITH EXCEPTIONS` (`audits/wave9.md`); el código pasa y el smoke test de shell carga. Excepciones: H1 residual en el `shell.json` vivo + validación en vivo de V | Integración limpia (4 archivos), `flake.lock` intacto |
 | 2026-09-20 | H1: el `shell.json` vivo (stale, con `workspaceIcons` y `defaultPlayer: mpv`) se cierra borrándolo y re-sembrando con `caelestia-restart.sh`; el activation no pisa un archivo real | El WARN sobrevive a rebuild/restart hasta borrar el archivo del usuario |
 | 2026-09-20 | "Candadito" del prompt = `POWERLEVEL9K_LOCK_ICON` de p10k (`U+F023`, dir no escribible), NO un aviso de sudo; `U+F023` sí existe en JetBrainsMono Nerd Font. `p10k configure` no es el fix. `U+2B50` (estrella) sí era el hueco del `symbol_map` y quedó cerrado en la ola 9 | Diagnóstico con fontTools + `internal/icons.zsh` (modo `nerdfont-v3`) |
+| 2026-09-20 | **Proyecto CERRADO**. Bug de `laptop` (barra sin transparencia/blur y sin acción "Cyberpunk" del launcher) = `~/.config/caelestia/shell.json` **stale**; el activation solo siembra si el archivo no existe. Fix por host: `rm shell.json` + `caelestia-restart.sh`. Ambos hosts importan el mismo módulo, no es desincronización de Nix | Reproducibilidad absoluta requiere cerrar el gap de estado de usuario (mejora opcional de hash del seed, decisión de V) |
