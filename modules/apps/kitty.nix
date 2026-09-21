@@ -29,8 +29,9 @@
       shell_integration = "enabled";
       # Emoji a color: fontconfig resuelve símbolos como 🔒 (U+1F512) a
       # Noto Sans Symbols 2 (monocromo) antes que a Noto Color Emoji; el
-      # symbol_map fuerza esos rangos a la fuente de color.
-      symbol_map = "U+1F300-U+1FAFF,U+2600-U+27BF,U+2190-U+21FF Noto Color Emoji";
+      # symbol_map fuerza esos rangos a la fuente de color. Incluye el bloque
+      # U+2B00–U+2BFF (estrella U+2B50 del prompt p10k).
+      symbol_map = "U+1F300-U+1FAFF,U+2600-U+27BF,U+2190-U+21FF,U+2B00-U+2BFF Noto Color Emoji";
       # Wezterm-like: splits nativos de kitty
       enabled_layouts = "splits";
     };
