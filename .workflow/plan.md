@@ -203,7 +203,7 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren) + bolita (color/padding) | audited · absorbida por ola 8 (`audits/wave8.md` §6) |
 | 8 | hyprdev/netrunner como el wezterm original (invocadora reutilizada + cierre en cadena) + emoji en kitty + logo simétrico con las pills | integrated · audit APPROVED WITH EXCEPTIONS (E1 verify débil, H1–H4) |
 | 9 | UPS/nobreak como batería en Caelestia (+ watts en el panel performance), netrunner cierre en cadena, emoji de kitty, limpieza H1 | audited · done (re-seed manual de `shell.json` por host) |
-| 10 | Reproducibilidad del seed de `shell.json`: el activation re-siembra cuando el seed del repo cambia (hash) | planned |
+| 10 | Reproducibilidad del seed de `shell.json`: el activation re-siembra cuando el seed del repo cambia (hash) | audited · APPROVED |
 | — (Mixxx) | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
@@ -211,10 +211,11 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 
 ## Estado: PROYECTO CERRADO (2026-09-20)
 
-Olas 1–9 integradas y auditadas (o descartadas con evidencia). Caelestia
-reemplazó a Wayle con la paleta cyberpunk, barra/dashboard/notificaciones,
-migración a kitty, `hyprdev`/`netrunner` y el UPS reconocido como batería.
-`main` == `origin/main`; worktrees y ramas de ola retirados.
+Olas 1–10 integradas y auditadas (o descartadas con evidencia) — **proyecto
+100% completado**. Caelestia reemplazó a Wayle con la paleta cyberpunk,
+barra/dashboard/notificaciones, migración a kitty, `hyprdev`/`netrunner` y el UPS
+reconocido como batería. `main` == `origin/main`; worktrees y ramas de ola
+retirados (solo queda `main`).
 
 ### Reproducibilidad entre hosts (leer esto)
 
@@ -241,14 +242,13 @@ rm ~/.config/caelestia/shell.json
 Comprobaciones: el WARN de `workspaceIcons` desaparece, `caelestia scheme get -n`
 → `cyberpunk`, y el launcher `>` vuelve a listar "Cyberpunk".
 
-### Mejora opcional (decisión de V)
+### Reproducibilidad del seed (IMPLEMENTADA — ola 10 · APPROVED)
 
-Hacer el re-seed **automático y reproducible**: hashear el seed y copiarlo solo
-cuando el hash cambie (propaga cambios del repo a todos los hosts sin perder
-ediciones de Nexus entre cambios). ~5 líneas en `modules/desktop/caelestia.nix`
-(activation `caelestiaSeedConfig`). No se hace sin OK de V.
-
-> **APROBADA por V (2026-09-20):** se implementa en la **ola 10** (abajo).
+El activation `caelestiaSeedConfig` ahora hashea el seed (`builtins.hashString`)
+y lo re-siembra cuando cambia; si el hash no cambió, respeta lo editado en Nexus.
+Con esto un `nixos-rebuild switch` propaga la config de Caelestia a todos los
+hosts (ya no hace falta el `rm shell.json` manual). Audit:
+`.workflow/audits/wave10.md` (APPROVED).
 
 ### Pendientes NO bloqueantes (documentados, sin construir)
 
@@ -793,6 +793,12 @@ seed no cambió. Nada de QML → smoke test de shell no obligatorio.
   intacto; el verify funcional del brief pasa (re-seed con seed cambiado y
   preservación con seed igual).
 
+### Resultado
+
+Audit: `.workflow/audits/wave10.md` — **APPROVED** (sin excepciones de código).
+Merge `537ab6a`; commit `ce926e2` (`feat(caelestia): re-sembrar shell.json al
+cambiar el seed`); `nix flake check` + toplevel + verify funcional pasan.
+
 ## Mixxx MPRIS real — DESCARTADO (no es una ola)
 
 El humano descartó el soporte MPRIS nativo real (evidencia del hallazgo #9).
@@ -862,3 +868,4 @@ La ola 6 implementa el "engaño" que él mismo pidió.
 | 2026-09-20 | "Candadito" del prompt = `POWERLEVEL9K_LOCK_ICON` de p10k (`U+F023`, dir no escribible), NO un aviso de sudo; `U+F023` sí existe en JetBrainsMono Nerd Font. `p10k configure` no es el fix. `U+2B50` (estrella) sí era el hueco del `symbol_map` y quedó cerrado en la ola 9 | Diagnóstico con fontTools + `internal/icons.zsh` (modo `nerdfont-v3`) |
 | 2026-09-20 | **Proyecto CERRADO**. Bug de `laptop` (barra sin transparencia/blur y sin acción "Cyberpunk" del launcher) = `~/.config/caelestia/shell.json` **stale**; el activation solo siembra si el archivo no existe. Fix por host: `rm shell.json` + `caelestia-restart.sh`. Ambos hosts importan el mismo módulo, no es desincronización de Nix | Reproducibilidad absoluta requiere cerrar el gap de estado de usuario (mejora opcional de hash del seed, decisión de V) |
 | 2026-09-20 | **Ola 10 aprobada por V**: el seed de `shell.json` se versiona con hash (`builtins.hashString`) y el activation re-siembra solo cuando cambia; se respeta lo editado en Nexus cuando no cambia | Único punto que rompía la reproducibilidad absoluta entre hosts |
+| 2026-09-20 | Ola 10 `audited · APPROVED` (`.workflow/audits/wave10.md`). **TODAS LAS OLAS CERRADAS**; `main` == `origin/main`, sin worktrees ni ramas de ola | Proyecto 100% completado |
