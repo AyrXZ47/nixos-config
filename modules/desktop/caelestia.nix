@@ -200,18 +200,10 @@ let
           "hide_in_bar"
           "xwl_popup"
         ];
-        # Wayle deduplicaba por clase (app-icons-dedupe): todas las ventanas de
-        # hyprdev comparten clase hyprdev-<runid>, así que un glob las colapsa
-        # en un icono de terminal. El resto replica el mapeo de los dots.
+        # Solo para clases que el heurístico de .desktop no resuelve (Steam).
+        # hyprdev/netrunner ya son ventanas kitty: el dedupe por
+        # getAppCategoryIcon las colapsa a `terminal` sin entrada propia.
         windowIcons = [
-          {
-            regex = "hyprdev.*";
-            icon = "terminal";
-          }
-          {
-            regex = "^(org\\.wezfurlong\\.wezterm)$";
-            icon = "terminal";
-          }
           {
             regex = "steam(_app_(default|[0-9]+))?";
             icon = "sports_esports";
