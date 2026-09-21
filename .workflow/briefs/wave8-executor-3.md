@@ -1,4 +1,4 @@
-# Brief: Wave 7 · Executor 3
+# Brief: Wave 8 · Executor 3
 
 > Copy this template per executor. The planner fills every section. The
 > executor never touches a file it doesn't own, even "obviously". Deviations
@@ -54,7 +54,7 @@ usa `Workspaces.qml`). No hardcodees hex.
 - `flake.nix` → el `substituteInPlace` de `OsIcon.qml`.
 - `modules/bar/components/StatusIcons.qml` y `.../workspaces/Workspaces.qml`
   (token de ancho de las pills).
-- `.workflow/plan.md` → Wave 7 T3.
+- `.workflow/plan.md` → Wave 8 T3.
 
 ## Verify command
 
@@ -68,7 +68,7 @@ nix flake check --no-build && S=$(nix build --no-link --print-out-paths '.#nixos
   ~72 chars. No AI attribution, no trailers. En español.
 - One commit: `fix(caelestia): bolita del logo simetrica con las pills`.
 - Commit ONLY `flake.nix`.
-- BRANCH ISOLATION (mandatory): `git push origin wave7-executor-3`. Nunca a
+- BRANCH ISOLATION (mandatory): `git push origin wave8-executor-3`. Nunca a
   `main` ni a otra rama.
 
 ## Report back

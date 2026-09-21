@@ -200,8 +200,9 @@ los bugs. Los ejecutores NO necesitan re-descubrirlo.
 | 4 | Logo azul, notificaciones nativas, iconos reales, mpvpaper dedupe, espejo con 2+ monitores | integrated · audit APPROVED WITH EXCEPTIONS · **HOTFIX F3 (shell no carga)** |
 | 5 | Color del icono activo + migración a kitty (config + hyprdev/netrunner + binds) | audited · APPROVED WITH EXCEPTIONS |
 | 6 | hyprdev/netrunner a ventanas kitty independientes, bolita del logo Nix, MPRIS falso de Mixxx, kitty keys/tema, vendor de temas | audited · APPROVED WITH EXCEPTIONS (`E1` verify del brief-4 inválido) |
-| 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren), ajuste de la bolita del logo, limpieza | planned |
-| 8 | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
+| 7 | **HOTFIX**: kitty `--cwd` inválido (hyprdev/netrunner no abren) + bolita (color/padding) | integrated (auditoría pendiente) |
+| 8 | hyprdev/netrunner como el wezterm original (invocadora reutilizada + cierre en cadena) + emoji en kitty + logo simétrico con las pills | planned |
+| 9 | Mixxx MPRIS real — DESCARTADO por el humano (evidencia en hallazgo #9); la ola 6 es el "engaño" aceptado | done |
 
 > Status legend: planned → in-flight → integrated → audited → done.
 > Update after each step, by whoever ran the step.
@@ -468,7 +469,15 @@ Cinco ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
   registra el bus (`busctl --user list | grep mixxx`) sin Mixxx abierto no debe
   romper; verify de cada brief.
 
-## Wave 7 (current) — hyprdev/netrunner como el wezterm original (kitty) + logo + emoji
+## Wave 7 — INTEGRADA (auditoría pendiente)
+
+> Ejecutada por el humano 2026-09-20: `3139acc` (hyprdev/netrunner a `kitty -d`,
+> antes `--cwd` inexistente) y `525195a` (color y padding de la bolita del logo).
+> Merges `2d253d1`/`3422bb9` en `main`. Sin commit de auditoría todavía; la
+> validación de hyprdev/netrunner se re-hace en la ola 8 con los requisitos
+> definitivos.
+
+## Wave 8 (current) — hyprdev/netrunner como el wezterm original (kitty) + logo + emoji
 
 Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 
@@ -493,19 +502,19 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
       - `netrunner`: la terminal que invoca **se convierte en btop** (`exec btop`)
         y **nvtop sale en otra ventana kitty independiente, al lado** (nunca
         debajo). Si no hay terminal que invoque (bind global), el bind la lanza.
-      → brief: `.workflow/briefs/wave7-executor-1.md`
+      → brief: `.workflow/briefs/wave8-executor-1.md`
 - [ ] T2 (kitty.nix + hyprland-home.nix): **emoji en kitty** (fontconfig resuelve
       🔒 a *Noto Sans Symbols 2* monocromo antes que *Noto Color Emoji*):
       `symbol_map` para los rangos emoji → `Noto Color Emoji`. Corregir el
       comentario obsoleto de `kitty.nix` (H2: `hyprdev` ya no usa `kitty @`). Y el
       bind `SUPER + N` → `kitty -d "$HOME" zsh -ic netrunner` (netrunner necesita
       una terminal que lo invoque para reutilizarla como btop).
-      → brief: `.workflow/briefs/wave7-executor-2.md`
+      → brief: `.workflow/briefs/wave8-executor-2.md`
 - [ ] T3 (flake.nix): la bolita del logo: usa `Colours.tPalette.m3surfaceContainer`
       (no `m3surfaceContainerHigh`) y el **diámetro = grosor de las pills**
       (`Tokens.sizes.bar.innerWidth`, igual que las pills de workspaces/status),
       para que quede simétrica con ellas. → brief:
-      `.workflow/briefs/wave7-executor-3.md`
+      `.workflow/briefs/wave8-executor-3.md`
 
 ### Integration plan
 
@@ -533,7 +542,7 @@ Tres ejecutores, archivos disjuntos. Nadie toca `flake.lock`.
 - `nix flake check`; diff = los archivos del mapa; `shell.nix` sin `--cwd`;
   **smoke test de shell (toca QML)**; verify de cada brief.
 
-## Wave 8 — Mixxx MPRIS real (DESCARTADO)
+## Wave 9 — Mixxx MPRIS real (DESCARTADO)
 
 El humano descartó el soporte MPRIS nativo real (evidencia del hallazgo #9).
 La ola 6 implementa el "engaño" que él mismo pidió.
