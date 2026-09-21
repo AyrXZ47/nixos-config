@@ -24,9 +24,13 @@
       confirm_os_window_close = "0";
       enable_audio_bell = "no";
       # Control remoto disponible para uso manual (lanzar ventanas/splits con
-      # el CLI de kitty). hyprdev ya no lo usa.
+      # el CLI de kitty). hyprdev ya no usa `kitty @`.
       allow_remote_control = "yes";
       shell_integration = "enabled";
+      # Emoji a color: fontconfig resuelve símbolos como 🔒 (U+1F512) a
+      # Noto Sans Symbols 2 (monocromo) antes que a Noto Color Emoji; el
+      # symbol_map fuerza esos rangos a la fuente de color.
+      symbol_map = "U+1F300-U+1FAFF,U+2600-U+27BF,U+2190-U+21FF Noto Color Emoji";
       # Wezterm-like: splits nativos de kitty
       enabled_layouts = "splits";
     };
