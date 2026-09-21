@@ -520,7 +520,10 @@ let
       brightnessIncrement = 0.1;
       maxVolume = 1.0;
       smartScheme = true;
-      defaultPlayer = "mpv";
+      # Mixxx no expone MPRIS real (ver hallazgo #9); el servicio falso de
+      # modules/apps/mixxx-mpris.nix publica org.mpris.MediaPlayer2.mixxx y este
+      # default lo hace el player activo del panel de media (logo + bongocat).
+      defaultPlayer = "Mixxx";
       playerAliases = [ ];
     };
 
