@@ -205,9 +205,6 @@ in
       -- multiplique la translucidez propia de kitty (background_opacity) y deja
       -- ver el blur del compositor detrás.
       hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, opacity = "1 override" })
-      -- netrunner (SUPER+N): kitty flotante autónoma (clase propia para no
-      -- heredar la regla de kitty normal ni el mosaico del layout).
-      hl.window_rule({ name = "netrunner-float", match = { class = "netrunner" }, float = true })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
@@ -317,7 +314,9 @@ in
       -- Selector de wallpaper (fuzzel con miniaturas de video). Tambien está
       -- como accion `>Wallpaper` en el launcher de Caelestia.
       hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-menu.sh"))
-      hl.bind("SUPER + N", hl.dsp.exec_cmd("kitty --class netrunner sh -c 'zsh -ic netrunner'"))
+      -- netrunner abre sus propias ventanas kitty independientes (clase
+      -- `kitty` por defecto): el dedupe de Caelestia las colapsa a un icono.
+      hl.bind("SUPER + N", hl.dsp.exec_cmd("zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/lock.sh"))
       -- Esmerilado on/off (blur + transparencia) con notificación.
@@ -480,11 +479,10 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # cliphist: limite de historial en 6 items. Pequeño a propósito: al ser un
-  # clipboard manager captura TODO lo copiado (incluido el "copiar" de
-  # contraseñas desde KeepassXC/otras apps), y menos items = menos superficie
-  # de leaks + menos ruido al elegir.
-  xdg.configFile."cliphist/config".text = "max-items 6\n";
+  # cliphist: limite de historial en 20 items. Era 6, pero el humano perdía
+  # contexto al elegir; 20 mantiene el historial corto sin crecer sin control
+  # (captura TODO lo copiado, incl. contraseñas de KeepassXC).
+  xdg.configFile."cliphist/config".text = "max-items 20\n";
 
   xdg.configFile = {
     "hypr/scripts/time-to-work.sh" = {
@@ -646,6 +644,17 @@ in
         #!/usr/bin/env bash
         # Reinicia el shell de Caelestia tras un rebuild (la instancia viva apunta al
         # store anterior y el IPC `caelestia shell ...` falla con exit 255).
+        #
+        # Self-heal: borrar ~/.config/caelestia/shell.json para adoptar el seed y
+        # reiniciar SIN rebuild dejaba la shell en DEFAULTS (sin blur, sin cava,
+        # sin acciones del launcher). Si falta, se copia del symlink estable
+        # `shell.default.json` (xdg.configFile -> seed del store) antes de relanzar.
+        f="$HOME/.config/caelestia/shell.json"
+        d="$HOME/.config/caelestia/shell.default.json"
+        if [ ! -f "$f" ] && [ -f "$d" ]; then
+          cp "$d" "$f"
+          chmod u+w "$f"
+        fi
         pkill -f 'quickshell.*caelestia-shell' 2>/dev/null
         sleep 0.5
         caelestia shell -d

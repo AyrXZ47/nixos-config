@@ -520,7 +520,10 @@ let
       brightnessIncrement = 0.1;
       maxVolume = 1.0;
       smartScheme = true;
-      defaultPlayer = "mpv";
+      # Mixxx no expone MPRIS real (ver hallazgo #9); el servicio falso de
+      # modules/apps/mixxx-mpris.nix publica org.mpris.MediaPlayer2.mixxx y este
+      # default lo hace el player activo del panel de media (logo + bongocat).
+      defaultPlayer = "Mixxx";
       playerAliases = [ ];
     };
 
@@ -691,6 +694,13 @@ in
         # config.xdg.configHome (opción de Home Manager) no existe.
         wallpaper.postHook = "/home/yovick/.config/hypr/scripts/caelestia-wallpaper.sh";
       };
+
+      # Seed estable de shell.json como symlink al store: shell.json NO puede
+      # serlo (Nexus/Caelestia lo escriben en runtime), pero este archivo es
+      # solo-lectura y lo consume `caelestia-restart.sh` para re-sembrar
+      # shell.json si el usuario lo borra sin rebuild.
+      xdg.configFile."caelestia/shell.default.json".source =
+        config.modules.desktop.caelestia.shellJsonPath;
 
       # --- Siembra de shell.json -----------------------------------------------
       # Corre en CADA `home-manager switch` (activation), no al login. El
