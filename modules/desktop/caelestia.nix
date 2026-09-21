@@ -615,6 +615,11 @@ let
       lockNoNotifsPic = "root:/assets/dino.png";
     };
   };
+
+  # JSON del seed y su hash, calculados UNA vez en eval (no en runtime): el hash
+  # se materializa en el activation para detectar si el seed del repo cambió.
+  shellJson = builtins.toJSON shellConfig;
+  shellJsonHash = builtins.hashString "sha256" shellJson;
 in
 {
   options.modules.desktop.caelestia = {
@@ -641,7 +646,7 @@ in
       pkgs.quickshell
     ] ++ fonts ++ cliRuntime;
 
-    modules.desktop.caelestia.shellJsonPath = pkgs.writeText "caelestia-shell.json" (builtins.toJSON shellConfig);
+    modules.desktop.caelestia.shellJsonPath = pkgs.writeText "caelestia-shell.json" shellJson;
 
     fonts.packages = fonts;
 
@@ -698,26 +703,30 @@ in
       # servicio systemd anterior no arrancaba al cambiar de generación (el
       # target ya estaba activo) y shell.json quedaba sin crear -> Caelestia
       # usaba los defaults y "ningún cambio se aplicaba" (visto 2026-09-19: el
-      # symlink viejo lo borró Home Manager al dejar de gestionarlo). Idempotente:
-      #   - symlink previo al store (migración vieja) -> se reemplaza por copia.
-      #   - archivo real ya editado por Nexus -> se respeta, NO se toca.
-      #   - no existe -> se copia el default del repo.
-      # El shell vigila shell.json (SettingsFile/QFileSystemWatcher) y lo
-      # recarga en caliente, así que tras el switch no hace falta reiniciar.
-      # Para volver al default: borrar ~/.config/caelestia/shell.json y rebuild.
+      # symlink viejo lo borró Home Manager al dejar de gestionarlo).
+      # Reproducible entre hosts: se siembra si el archivo falta O si el seed del
+      # repo cambió (hash sha256 en un sidecar). Si existe y el seed NO cambió, se
+      # respeta lo editado en Nexus. El shell vigila shell.json
+      # (SettingsFile/QFileSystemWatcher) y lo recarga en caliente, así que tras
+      # el switch no hace falta reiniciar.
       home.activation.caelestiaSeedConfig = {
         after = [ "writeBoundary" ];
         before = [ ];
         data = ''
           f="$HOME/.config/caelestia/shell.json"
+          h="$HOME/.config/caelestia/.shell-seed.sha256"
           mkdir -p "$(dirname "$f")"
           # Symlink al store (read-only) de una generación anterior: fuera.
           if [ -L "$f" ]; then rm -f "$f"; fi
-          # Archivo real: es del usuario (editado en Nexus), se respeta.
-          if [ ! -f "$f" ]; then
+          new="${shellJsonHash}"
+          old="$(cat "$h" 2>/dev/null || true)"
+          # Re-siembra si falta O si el seed del repo cambió (reproducibilidad).
+          # Si existe y el seed NO cambió, se respeta lo editado en Nexus.
+          if [ ! -f "$f" ] || [ "$old" != "$new" ]; then
             cp ${config.modules.desktop.caelestia.shellJsonPath} "$f"
             chmod u+w "$f"
           fi
+          printf '%s\n' "$new" > "$h"
         '';
       };
 
