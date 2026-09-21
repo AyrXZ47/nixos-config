@@ -452,8 +452,8 @@ PYEOF
                 }' \
             '    Rectangle {
                     anchors.centerIn: parent
-                    implicitWidth: Math.round(root.height * 1.6)
-                    implicitHeight: Math.round(root.height * 1.6)
+                    implicitWidth: Math.round(Tokens.sizes.bar.innerWidth)
+                    implicitHeight: Math.round(Tokens.sizes.bar.innerWidth)
                     radius: width / 2
                     color: Colours.tPalette.m3surfaceContainer
                 }
