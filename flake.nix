@@ -442,6 +442,28 @@ PYEOF
             'colour: Colours.palette.m3tertiary' \
             'colour: "#5277c3"'
 
+            # Bolita de fondo detras del logo para que el snowflake resalte.
+            substituteInPlace modules/bar/components/OsIcon.qml \
+              --replace-fail \
+            '    Loader {
+                    asynchronous: true
+                    anchors.centerIn: parent
+                    sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+                }' \
+            '    Rectangle {
+                    anchors.centerIn: parent
+                    implicitWidth: root.height
+                    implicitHeight: root.height
+                    radius: width / 2
+                    color: Colours.palette.m3surfaceContainerHigh
+                }
+
+                Loader {
+                    asynchronous: true
+                    anchors.centerIn: parent
+                    sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+                }'
+
             # Notificaciones nativas (caps/num lock incluidos, son toasts): anclar
             # los toasts arriba-derecha, bajo las notificaciones, y darles el mismo
             # fondo que notifications/Notification.qml.
