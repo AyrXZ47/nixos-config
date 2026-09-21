@@ -57,8 +57,8 @@
       # dedupe de Caelestia (Workspace.qml) las colapse a un icono real.
       netrunner() {
         local repo="''${1:-$PWD}"
-        setsid kitty --cwd "$repo" zsh -ic btop >/dev/null 2>&1 &
-        setsid kitty --cwd "$repo" zsh -ic nvtop >/dev/null 2>&1 &
+        setsid kitty -d "$repo" zsh -ic btop >/dev/null 2>&1 &
+        setsid kitty -d "$repo" zsh -ic nvtop >/dev/null 2>&1 &
       }
 
       # `hyprdev [directorio-repo]` — la geometría de trabajo en 4 ventanas
@@ -79,10 +79,10 @@
         local base=$(hyprctl -j clients 2>/dev/null | grep -c '"class": "kitty"')
         local want=$((base + 4))
         # setsid: las ventanas sobreviven a la shell que invocó el comando.
-        setsid kitty --cwd "$repo" zsh -ic "nvim; exec zsh" >/dev/null 2>&1 &
-        setsid kitty --cwd "$repo" zsh -ic opencode >/dev/null 2>&1 &
-        setsid kitty --cwd "$repo" zsh >/dev/null 2>&1 &
-        setsid kitty --cwd "$repo" \
+        setsid kitty -d "$repo" zsh -ic "nvim; exec zsh" >/dev/null 2>&1 &
+        setsid kitty -d "$repo" zsh -ic opencode >/dev/null 2>&1 &
+        setsid kitty -d "$repo" zsh >/dev/null 2>&1 &
+        setsid kitty -d "$repo" \
           zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0" >/dev/null 2>&1 &
         # Espera (máx ~10s) a que las 4 estén mapeadas; si Hyprland tarda y no
         # llegan, se sale igual: ya quedaron lanzadas secuencialmente.
