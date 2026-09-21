@@ -692,6 +692,13 @@ in
         wallpaper.postHook = "/home/yovick/.config/hypr/scripts/caelestia-wallpaper.sh";
       };
 
+      # Seed estable de shell.json como symlink al store: shell.json NO puede
+      # serlo (Nexus/Caelestia lo escriben en runtime), pero este archivo es
+      # solo-lectura y lo consume `caelestia-restart.sh` para re-sembrar
+      # shell.json si el usuario lo borra sin rebuild.
+      xdg.configFile."caelestia/shell.default.json".source =
+        config.modules.desktop.caelestia.shellJsonPath;
+
       # --- Siembra de shell.json -----------------------------------------------
       # Corre en CADA `home-manager switch` (activation), no al login. El
       # servicio systemd anterior no arrancaba al cambiar de generación (el

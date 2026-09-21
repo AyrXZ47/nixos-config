@@ -644,6 +644,17 @@ in
         #!/usr/bin/env bash
         # Reinicia el shell de Caelestia tras un rebuild (la instancia viva apunta al
         # store anterior y el IPC `caelestia shell ...` falla con exit 255).
+        #
+        # Self-heal: borrar ~/.config/caelestia/shell.json para adoptar el seed y
+        # reiniciar SIN rebuild dejaba la shell en DEFAULTS (sin blur, sin cava,
+        # sin acciones del launcher). Si falta, se copia del symlink estable
+        # `shell.default.json` (xdg.configFile -> seed del store) antes de relanzar.
+        f="$HOME/.config/caelestia/shell.json"
+        d="$HOME/.config/caelestia/shell.default.json"
+        if [ ! -f "$f" ] && [ -f "$d" ]; then
+          cp "$d" "$f"
+          chmod u+w "$f"
+        fi
         pkill -f 'quickshell.*caelestia-shell' 2>/dev/null
         sleep 0.5
         caelestia shell -d
