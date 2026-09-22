@@ -39,9 +39,11 @@
       allow_remote_control = "yes";
       # Emoji a color: fontconfig resuelve símbolos como 🔒 (U+1F512) a
       # Noto Sans Symbols 2 (monocromo) antes que a Noto Color Emoji; el
-      # symbol_map fuerza esos rangos a la fuente de color. Incluye el bloque
-      # U+2B00–U+2BFF (estrella U+2B50 del prompt p10k).
-      symbol_map = "U+1F300-U+1FAFF,U+2600-U+27BF,U+2190-U+21FF,U+2B00-U+2BFF Noto Color Emoji";
+      # symbol_map fuerza esos rangos a la fuente de color. Solo bloques emoji
+      # de verdad: meter U+2600–U+27BF o U+2190–U+21FF (que también traen ❯ ❮ ← →)
+      # manda esos glifos a Noto Color Emoji, que NO los tiene, y kitty los deja
+      # en blanco — adiós prompt ❯ y flechas. U+2B00–U+2BFF cubre la estrella ⭐.
+      symbol_map = "U+1F300-U+1FAFF,U+2B00-U+2BFF Noto Color Emoji";
       # Splits nativos de kitty
       enabled_layouts = "splits";
     };
