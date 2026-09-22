@@ -36,23 +36,48 @@ in
       SUBSYSTEM=="usb", ATTR{idVendor}=="06cb", ATTR{idProduct}=="00bd", ATTR{power/control}="on"
     '';
 
-    # Al volver de S3 (el idle de Caelestia ahora suspende) el controlador xHCI
-    # Renesas resetea el bus y el sensor reenumera reportando firmware 0.00:
-    # libfprint lo ignora ("unsupported firmware version") y fprintd deja la
-    # reserva colgada -> sudo deja de pedir la huella (visto 2026-09-19). Un
-    # rebind del USB fuerza una reenumeracion limpia y reiniciar fprintd limpia
-    # la reserva. En hosts sin este sensor el loop no encuentra nada.
+    # Al volver de S3 (el idle de Caelestia suspende) el xHCI Renesas resetea el
+    # bus y el sensor reenumera reportando firmware 0.00: libfprint lo ignora
+    # ("unsupported firmware version") o da "USB error ... Entity not found" si
+    # fprintd lo abre antes de que el bus asiente (el lock arranca fprintd por
+    # D-Bus apenas despierta, antes que este hook). Un rebind del USB fuerza una
+    # reenumeracion limpia, pero un solo intento + restart dejaba la carrera
+    # abierta y fprintd quedaba corriendo SIN device hasta el proximo restart
+    # (visto 2026-09-21: "Ignoring device due to initialization error"). Ahora
+    # soltamos fprintd primero y reintentamos rebind+restart hasta que el
+    # Manager reporte el sensor, con techo de ~20s. En hosts sin el sensor el
+    # loop no encuentra nada y sale enseguida.
     powerManagement.resumeCommands = ''
+      # El sensor solo existe en el laptop; en el resto esto es no-op.
+      sensor=
       for d in /sys/bus/usb/devices/*/; do
         [ -f "$d/idVendor" ] || continue
-        [ "$(cat "$d/idVendor")" = "06cb" ] || continue
-        [ "$(cat "$d/idProduct")" = "00bd" ] || continue
-        dev="$(basename "$d")"
-        echo "$dev" > /sys/bus/usb/drivers/usb/unbind 2>/dev/null || true
-        sleep 1
-        echo "$dev" > /sys/bus/usb/drivers/usb/bind 2>/dev/null || true
+        [ "$(cat "$d/idVendor" 2>/dev/null)" = "06cb" ] || continue
+        [ "$(cat "$d/idProduct" 2>/dev/null)" = "00bd" ] || continue
+        sensor=1
       done
-      systemctl restart fprintd.service 2>/dev/null || true
+      if [ -n "$sensor" ]; then
+        systemctl stop fprintd.service 2>/dev/null || true
+        for _ in 1 2 3 4; do
+          for d in /sys/bus/usb/devices/*/; do
+            [ -f "$d/idVendor" ] || continue
+            [ "$(cat "$d/idVendor" 2>/dev/null)" = "06cb" ] || continue
+            [ "$(cat "$d/idProduct" 2>/dev/null)" = "00bd" ] || continue
+            dev="$(basename "$d")"
+            echo "$dev" > /sys/bus/usb/drivers/usb/unbind 2>/dev/null || true
+            sleep 1
+            echo "$dev" > /sys/bus/usb/drivers/usb/bind 2>/dev/null || true
+          done
+          sleep 2
+          systemctl restart fprintd.service 2>/dev/null || true
+          sleep 3
+          if timeout 5 busctl --system call net.reactivated.Fprint \
+            /net/reactivated/Fprint/Manager net.reactivated.Fprint.Manager \
+            GetDevices 2>/dev/null | grep -q 'Fprint/Device'; then
+            break
+          fi
+        done
+      fi
     '';
   };
 }
