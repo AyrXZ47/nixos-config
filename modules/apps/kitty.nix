@@ -11,6 +11,12 @@
     # como asset para no depender de GitHub en runtime. Trae la paleta completa
     # (colores, cursor, selección), por eso ya no se duplican en `settings`.
     extraConfig = "include ${../../assets/kitty-cyberpunk.conf}";
+    # La shell integration de kitty engancha zle-line-init/zle-line-finish
+    # (cambio de forma del cursor) y eso pisa el widget con el que p10k colapsa
+    # el prompt anterior: kitty mismo lo llama un "minefield" y recomienda
+    # `no-cursor` justamente para no tocar widgets de zle. Sin el hook, p10k
+    # vuelve a mostrar el transient prompt (el `❯`/candado en el historial).
+    shellIntegration.mode = "no-cursor";
     settings = {
       # Vidrio (0.66 como el resto de Caelestia; el blur lo da Hyprland)
       background_opacity = "0.66";
@@ -26,7 +32,6 @@
       # Control remoto disponible para uso manual (lanzar ventanas/splits con
       # el CLI de kitty). hyprdev ya no usa `kitty @`.
       allow_remote_control = "yes";
-      shell_integration = "enabled";
       # Emoji a color: fontconfig resuelve símbolos como 🔒 (U+1F512) a
       # Noto Sans Symbols 2 (monocromo) antes que a Noto Color Emoji; el
       # symbol_map fuerza esos rangos a la fuente de color. Incluye el bloque
