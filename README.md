@@ -68,8 +68,9 @@ flake.nix              # Entry point — hosts & shared modules
 ### Shell & Terminal
 - **Zsh** + Oh My Zsh (`git`, `sudo`) + **powerlevel10k** (instant prompt) +
   autosuggestions + syntax highlighting; word-wise bindings; fzf integration.
-- **WezTerm** — Cyberdyne scheme, JetBrains Mono Nerd, 14px, 0.66 background
-  opacity, no decorations, hidden tab bar, maximizes on start.
+- **kitty** — tema cyberpunk vendorizado (MIT), JetBrains Mono Nerd 14px,
+  0.66 de opacidad de fondo (vidrio vía Hyprland), cursor trail, símbolos a
+  color, splits nativos; `hyprdev`/`netrunner` son ventanas kitty independientes.
 - Aliases: `cat→bat`, `du→dust`, `ps→procs`, `top→btop`, `tree→eza --tree`.
 - **fastfetch** on terminal open, with the repo logo via kitty image protocol.
 
@@ -305,7 +306,7 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 
 | Keys | Action |
 | ---- | ------ |
-| `SUPER Backspace` | Terminal (wezterm) |
+| `SUPER Backspace` | Terminal (kitty) |
 | `SUPER A` / `SUPER R` | rofi drun / run |
 | `SUPER Delete` | Kill window |
 | `SUPER M` | Exit session |
@@ -314,8 +315,8 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 | `SUPER arrows` / `SUPER SHIFT arrows` | Focus / move window |
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
 | `SUPER ALT SHIFT 1-9` | Move ALL windows of active ws to N and follow (GNOME-style) |
-| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox → WezTerm on ws 1-4 |
-| `SUPER N` | *netrunner*: btop + nvtop split |
+| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox → kitty on ws 1-4 |
+| `SUPER N` | *netrunner*: btop + nvtop (2 ventanas kitty) |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |
 | `SUPER P` variants | Screenshot region (`SUPER SHIFT P`) / window (`SUPER ALT P`) / screen (`SUPER P`) |
@@ -329,9 +330,10 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 
 ## Custom Commands
 
-- `dev [repo]` — full dev workspace in WezTerm panes (editor, AI, cava, pipes);
-  con directorio opcional entra al repo antes de partir paneles.
-- `netrunner` — btop 55% + nvtop 45% (split WezTerm).
+- `hyprdev [repo]` — workspace dev en 4 ventanas kitty independientes (opencode,
+  nvim, shell libre, pipes-rs); el directorio opcional entra al repo antes de
+  abrir todo. Cierre en cadena: si cae una ventana, se cierran las demás.
+- `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado, cierre en cadena).
 - `SecDesk` / `Mirror` (+ `_WiFi <ip>`) — scrcpy tablet mirroring, 85 fps,
   h265/opus, virtual 1920x1080 display for a secure desk setup.
 - `ytsong` / `ytlist` — download audio from clipboard (yt-dlp, cookies from Firefox).
@@ -418,7 +420,7 @@ contra `checksums.txt` del release al reemplazarlo. Una vez en el celular:
 **Gotchas del entorno proot** (por qué algunas cosas del PC no van aquí):
 - `btop` no: proot falsifica `/proc/stat` con un stub mínimo que solo soporta `htop`.
 - `fastfetch` corre con su config por defecto (la del PC usa logo PNG y líneas anchas).
-- `dev`/`netrunner` requieren WezTerm — no existe en Android (usa la terminal de la app).
+- `hyprdev`/`netrunner` requieren kitty + Hyprland — no existen en Android (usa la terminal de la app).
 - `ping` funciona solo si el SELinux del fabricante permite raw sockets.
 - El env default de nix-on-droid no trae ni `grep`: el flake añade gnugrep, gnused,
   gnutar, gzip, bzip2, xz, zip, findutils, diffutils, procps, killall.

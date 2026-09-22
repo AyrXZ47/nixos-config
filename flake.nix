@@ -411,7 +411,7 @@ PYEOF
       };
 
       # Caelestia: la barra pinta UN icono de app por VENTANA en cada workspace
-      # (Workspace.qml: `windows.slice(0, maxWindowIcons)`), asi que N wezterms
+      # (Workspace.qml: `windows.slice(0, maxWindowIcons)`), asi que N terminales
       # en el mismo workspace muestran N veces el mismo icono. Wayle deduplicaba
       # por clase; aqui se reimplementa: agrupar por `class` de la ventana y
       # quedarse con una ventana por grupo antes del slice.

@@ -34,7 +34,7 @@ let
   # JSON siempre es válido y se puede editar sin miedo a comas colgantes
   # (escribirlo como text a mano invita a errores). Cubre el inventario Wayle:
   # barra a la izquierda (de fábrica en Caelestia), workspaces con iconos de
-  # ventana (hyprdev/wezterm/steam), statusIcons, dashboard + session, idle
+  # ventana (hyprdev/steam), statusIcons, dashboard + session, idle
   # con los timeouts que antes no existían, lock con fprint del laptop.
   shellConfig = {
     appearance = {

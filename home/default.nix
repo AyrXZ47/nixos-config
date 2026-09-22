@@ -3,7 +3,6 @@
 {
   imports = [
     ../modules/apps/shell.nix
-    ../modules/apps/wezterm.nix
     ../modules/apps/kitty.nix
     ../modules/apps/pantalla.nix
     ../modules/apps/neovim.nix

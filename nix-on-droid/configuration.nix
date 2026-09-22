@@ -82,7 +82,7 @@
 
   # Reutiliza los módulos home del repo (shell con powerlevel10k, nvim con
   # plugins, git). Requiere el home-manager nuevo (ver flake.nix).
-  # No se importan wezterm (Android usa la terminal de Termux), mpd ni firefox
+  # No se importan kitty (Android usa la terminal de Termux), mpd ni firefox
   # (dependen de systemd).
   # fastfetch tampoco: el config del pc usa logo PNG (protocolo kitty) y lineas
   # de 70+ chars que en la terminal angosta del celular envuelven y se pisan.
@@ -196,11 +196,11 @@
       directory = *
   '';
 
-  # Terminal con el esquema Cyberdyne, el mismo de wezterm en la pc
-  # (config.color_scheme = "Cyberdyne" en modules/apps/wezterm.nix): asi el
-  # celular es reflejo exacto de la pc. OJO: cambiar colores aqui (declarativo);
-  # termux-style no funciona porque colors.properties es un symlink de solo
-  # lectura al store de nix y cualquier edicion se pisa en el proximo switch.
+  # Terminal con el esquema Cyberdyne (el que usaba wezterm en la pc; la kitty
+  # actual usa el tema assets/kitty-cyberpunk.conf). OJO: cambiar colores aqui
+  # (declarativo); termux-style no funciona porque colors.properties es un
+  # symlink de solo lectura al store de nix y cualquier edicion se pisa en el
+  # proximo switch.
   terminal.colors = {
     background = "#151144";
     foreground = "#00ff92";
@@ -223,7 +223,7 @@
     color15 = "#ffffff";
   };
 
-  # JetBrainsMono Nerd Font (la misma de wezterm en la pc): la app de Termux lee
+  # JetBrainsMono Nerd Font (la que usa kitty en la pc): la app de Termux lee
   # ~/.termux/font.ttf igual que termux. OJO: debe ir aqui (terminal.font) y NO
   # via home.file: la app corre FUERA del proot y un symlink a /nix/store apunta
   # a una ruta que solo existe dentro del proot -> cae a su fuente default y los

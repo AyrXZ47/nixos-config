@@ -175,7 +175,7 @@ Pregunta: "qué se traga mi batería". Muestreo real de `/proc/<pid>/stat` duran
   (`service.cpp`: `ref()` arranca, `unref()` para). El `ServiceRef` de
   `Visualiser.qml` vive dentro de un `Loader` que solo se activa con
   `shouldBeActive`, y `autoHide=true` lo desactiva cuando hay una ventana
-  tileada. Con wezterm tileado: quickshell 0.1%. Apagarlo no ahorra nada y
+  tileada. Con kitty tileada: quickshell 0.1%. Apagarlo no ahorra nada y
   perdería el cava: se deja `enabled=true` + `autoHide=true`.
 - **mpvpaper se pausa en batería.** `amd-laptop.nix` corre `eppSwitch` por udev
   (AC change) y aplica EPP + `pause=yes` por IPC. En batería no descodifica un
@@ -185,7 +185,7 @@ Pregunta: "qué se traga mi batería". Muestreo real de `/proc/<pid>/stat` duran
   nuevos (lock 5 min, dpms 10, suspend 30) duermen el equipo. Si no hay
   hibernación (solo zram, sin swap en disco), `SessionManager.exec` cae a
   `Suspend` tras `CanHibernate`.
-- Consumidores reales: las apps del propio usuario (opencode/serena, wezterm) y
+- Consumidores reales: las apps del propio usuario (opencode/serena, kitty) y
   el video en AC, no la migración.
 
 ## Notificaciones

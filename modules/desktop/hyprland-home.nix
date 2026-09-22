@@ -80,7 +80,7 @@ in
         decoration = {
           rounding = 12,
           -- Vidrio biselado: translúcido pero legible (0.8 activa / 0.6
-          -- inactiva). Steam, wezterm y reproductores quedan exentos via reglas
+          -- inactiva). Steam y reproductores quedan exentos via reglas
           -- (opacity "N override" fuerza opacidad absoluta).
           active_opacity = 0.8,
           inactive_opacity = 0.6,
@@ -192,18 +192,12 @@ in
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
-      -- wezterm: vidrio esmerilado — blur del compositor detrás de la transparencia
-      -- propia (window_background_opacity). opacity "1 override": fuerza 1.0 absoluto
-      -- (el multiplicador daría 1.0*0.75) para que el texto se mantenga opaco y no se
-      -- apile la opacidad de Hyprland con la de wezterm. El alternador cubre también
-      -- las ventanas de `hyprdev` (clase compartida hyprdev-<runid>, modules/apps/shell.nix):
-      -- con --class propio perderían este match y la opacidad inactiva (0.6) se
-      -- apilaría sobre su fondo 0.4. El match de clase es de cadena COMPLETA
-      -- (regex_match), por eso el .* antes del $.
-      hl.window_rule({ name = "wezterm-glass", match = { class = "^(org.wezfurlong.wezterm|hyprdev-.*)$" }, opacity = "1 override" })
-      -- kitty: mismo vidrio que wezterm. opacity "1 override" evita que Hyprland
-      -- multiplique la translucidez propia de kitty (background_opacity) y deja
-      -- ver el blur del compositor detrás.
+      -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
+      -- vidrio esmerilado — blur del compositor detrás de la transparencia
+      -- propia (background_opacity). opacity "1 override" fuerza 1.0 absoluto
+      -- para que el texto se mantenga opaco y no se apile la opacidad de
+      -- Hyprland con la de kitty. El match de clase es de cadena COMPLETA
+      -- (regex_match), por eso `kitty` a secas basta.
       hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, opacity = "1 override" })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
