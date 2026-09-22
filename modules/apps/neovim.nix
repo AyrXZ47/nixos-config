@@ -289,6 +289,11 @@ let
     end
     vim.opt.rtp:prepend(lazypath)
 
+      -- Scroll del trackpad más fino: cada evento del wheel avanza 1 línea en
+      -- vez de 3 (default). kitty emite muchos eventos de alta precisión, así
+      -- que con 1 línea el gesto se siente suave en lugar de ir a saltos.
+      vim.opt.mousescroll = "ver:1,hor:1"
+
       require("lazy").setup({
         spec = {
           { "LazyVim/LazyVim", import = "lazyvim.plugins" },

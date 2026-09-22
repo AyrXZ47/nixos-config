@@ -29,6 +29,11 @@
       window_padding_width = "10";
       confirm_os_window_close = "0";
       enable_audio_bell = "no";
+      # Scroll del trackpad: en Wayland es un dispositivo de alta precisión, así
+      # que manda `touch_scroll_multiplier` y no `wheel_scroll_multiplier`. El
+      # default 1.0 se siente lento en outputs largos; 3.0 conserva la suavidad
+      # (pixel_scroll sigue en su default `yes`) con más avance por gesto.
+      touch_scroll_multiplier = "3.0";
       # Control remoto disponible para uso manual (lanzar ventanas/splits con
       # el CLI de kitty). hyprdev ya no usa `kitty @`.
       allow_remote_control = "yes";
@@ -37,7 +42,7 @@
       # symbol_map fuerza esos rangos a la fuente de color. Incluye el bloque
       # U+2B00–U+2BFF (estrella U+2B50 del prompt p10k).
       symbol_map = "U+1F300-U+1FAFF,U+2600-U+27BF,U+2190-U+21FF,U+2B00-U+2BFF Noto Color Emoji";
-      # Wezterm-like: splits nativos de kitty
+      # Splits nativos de kitty
       enabled_layouts = "splits";
     };
     keybindings = {
