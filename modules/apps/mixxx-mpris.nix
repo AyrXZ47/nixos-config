@@ -7,12 +7,19 @@ let
   # las interfaces estandar para que Caelestia lo vea como reproductor activo:
   # logo de Mixxx (mpris:artUrl) y bongocat (isPlaying) en el dashboard.
   #
-  # ponytail: techo conocido = heuristica de PipeWire. El estado se deduce del
-  # state del nodo Stream/Output/Audio cuyo nombre contenga "mixxx" (el wrapper
-  # de common-packages lo expone como "PipeWire ALSA [.mixxx-wrapped]"); no hay
-  # metadatos de pista porque Mixxx no los publica, y los metodos de control son
-  # no-op porque Mixxx no tiene API remota. Solo lectura (pw-dump), sin tocar el
-  # audio. Si algun dia Mixxx expone MPRIS nativo, borrar este modulo.
+  # Titulo/artista reales: Mixxx escribe "<Artist> - <Title> | Mixxx" en el
+  # titulo de su ventana (mixxxmainwindow.cpp: slotUpdateWindowTitle) y la barra
+  # de Caelestia pinta ese mismo dato (Hypr.activeToplevel.title). Se reusa
+  # (via `hyprctl -j clients`) para que el panel de media muestre la pista.
+  #
+  # ponytail: techo conocido = heuristica de PipeWire + scraping del titulo de
+  # ventana. El estado se deduce del state del nodo Stream/Output/Audio cuyo
+  # nombre contenga "mixxx" (el wrapper de common-packages lo expone como
+  # "PipeWire ALSA [.mixxx-wrapped]"); el titulo solo aparece cuando Mixxx lo
+  # actualiza (pista cargada/reproduciendose). Los metodos de control son no-op
+  # porque Mixxx 2.5.6 no tiene API remota. Solo lectura (pw-dump + hyprctl);
+  # sin tocar el audio. Si algun dia Mixxx expone MPRIS nativo (PR upstream
+  # #15754), borrar este modulo.
   mixxxMpris = pkgs.writers.writePython3Bin "mixxx-mpris" {
     libraries = [ pkgs.python3Packages.pydbus pkgs.python3Packages.pygobject3 ];
   } ''
@@ -109,6 +116,8 @@ let
 
         def __init__(self):
             self._status = "Stopped"
+            self._title = "Mixxx"
+            self._artist = ""
 
         @property
         def PlaybackStatus(self):
@@ -116,11 +125,14 @@ let
 
         @property
         def Metadata(self):
-            return {
+            metadata = {
                 "mpris:trackid": GLib.Variant("o", TRACK_ID),
-                "xesam:title": GLib.Variant("s", "Mixxx"),
+                "xesam:title": GLib.Variant("s", self._title),
                 "mpris:artUrl": GLib.Variant("s", ART_URL),
             }
+            if self._artist:
+                metadata["xesam:artist"] = GLib.Variant("as", [self._artist])
+            return metadata
 
         # Mixxx no tiene API de control remoto: no-op para que los botones de
         # Caelestia no revienten.
@@ -160,6 +172,16 @@ let
                     [],
                 )
 
+        def set_metadata(self, title, artist):
+            if (title, artist) != (self._title, self._artist):
+                self._title = title
+                self._artist = artist
+                self.PropertiesChanged(
+                    "org.mpris.MediaPlayer2.Player",
+                    {"Metadata": self.Metadata},
+                    [],
+                )
+
 
     def mixxx_states():
         try:
@@ -191,6 +213,37 @@ let
         return states
 
 
+    def mixxx_window_title():
+        # Título de la ventana de Mixxx ("Artist - Title | Mixxx"), el mismo
+        # dato que pinta la barra de Caelestia. Se busca por clase y no por
+        # ventana activa: funciona aunque Mixxx no tenga el foco.
+        try:
+            raw = subprocess.run(
+                ["hyprctl", "-j", "clients"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=True,
+            ).stdout
+            clients = json.loads(raw)
+        except Exception:
+            return None
+        for client in clients:
+            if client.get("class") == "org.mixxx.Mixxx":
+                return client.get("title") or None
+        return None
+
+
+    def split_track(raw):
+        # "Artist - Title | Mixxx" -> ("Title", "Artist"); sin separador,
+        # ("<lo que haya>", ""). Se corta el sufijo " | Mixxx" por la derecha.
+        track = raw.rsplit(" | ", 1)[0].strip()
+        if " - " in track:
+            artist, _, name = track.partition(" - ")
+            return name.strip(), artist.strip()
+        return track, ""
+
+
     def poll(player):
         states = mixxx_states()
         if not states:
@@ -200,6 +253,11 @@ let
         else:
             status = "Paused"
         player.set_status(status)
+        raw = mixxx_window_title()
+        if raw:
+            player.set_metadata(*split_track(raw))
+        else:
+            player.set_metadata("Mixxx", "")
         return True
 
 
