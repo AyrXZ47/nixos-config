@@ -75,9 +75,9 @@ flake.nix              # Entry point — hosts & shared modules
 - **fastfetch** on terminal open, with the repo logo via kitty image protocol.
 
 ### Editor & Dev
-- **Neovim** (LazyVim) — `cyberneon` theme, smear-cursor, render-markdown,
-  obsidian.nvim (`~/Sync/Notes`), img-clip paste, ollama.nvim (`qwen3.6:35b-a3b-mtp-q4_K_M`),
-  mason, rainbow-delimiters, treesitter-context, lsp_lines; multicursor.nvim
+- **Neovim** (LazyVim) — tema NeoCyberVim, smear-cursor, render-markdown,
+  obsidian.nvim (`~/Sync/Notes`), mason, rainbow-delimiters,
+  treesitter-context, lsp_lines; multicursor.nvim
   (`<leader>mj`/`<leader>mk` añaden cursor abajo/arriba, `<leader>mn` al siguiente
   match, Ctrl+click, `<Esc>` cierra); LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.

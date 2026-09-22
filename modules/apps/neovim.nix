@@ -123,46 +123,6 @@ let
         }
       '';
     };
-    ".config/nvim/lua/plugins/img-clip.lua" = {
-      text = ''
-        return {
-          "HakonHarnes/img-clip.nvim",
-          event = "VeryLazy",
-          opts = {
-            default = {
-              dir_path = "assets",
-              extension = "png",
-              prompt_for_file_name = false,
-              drag_and_drop = {
-                insert_mode = true,
-              },
-            },
-          },
-          keys = {
-            { "<leader>p", "<cmd>PasteImage<cr>", desc = "Paste image from clipboard" },
-          },
-        }
-      '';
-    };
-    ".config/nvim/lua/plugins/ollama.lua" = {
-      text = ''
-        return {
-          "nomnivore/ollama.nvim",
-          dependencies = { "nvim-lua/plenary.nvim" },
-          cmd = { "Ollama", "OllamaModel", "OllamaServe", "OllamaServeStop" },
-          opts = {
-            model = "qwen3.6:35b-a3b-mtp-q4_K_M",
-            serve = {
-              on_start = true,
-              command = "ollama",
-              args = { "serve" },
-              stop_command = "pkill",
-              stop_args = { "-SIGTERM", "ollama" },
-            },
-          },
-        }
-      '';
-    };
     ".config/nvim/lua/plugins/mason.lua" = {
       text = ''
         return {
