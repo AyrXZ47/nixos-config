@@ -109,12 +109,15 @@
 
       # `hyprdev [directorio-repo]` — geometría de trabajo en 4 ventanas kitty
       # INDEPENDIENTES que Hyprland tilea (los gaps dejan ver el wallpaper):
-      # esta terminal se REUTILIZA como nvim (`exec`) y solo se abren 3 nuevas
-      # (opencode, shell libre, pipes-rs). Clase por defecto `kitty` para que
-      # el dedupe de Caelestia las colapse a UN icono. Cierre en cadena tipo
-      # IDE: las 4 se rastrean por título `hyprdev-<runid>-<rol>` (-T) más la
-      # address de ESTA ventana capturada antes del exec nvim; armadas las 4,
-      # si cae cualquiera se cierran las demás.
+      # esta terminal se REUTILIZA como opencode (`exec`) y solo se abren 3
+      # nuevas (nvim, shell libre, pipes-rs). opencode va en la ventana
+      # INVOCADORA porque al tilear es la que casi no se redimensiona: opencode
+      # se rompe si nace/queda en una terminal estrecha. Clase por defecto
+      # `kitty` para que el dedupe de Caelestia las colapse a UN icono. Cierre
+      # en cadena tipo IDE: las 4 se rastrean por título
+      # `hyprdev-<runid>-<rol>` (-T) más la address de ESTA ventana capturada
+      # antes del exec opencode; armadas las 4, si cae cualquiera se cierran
+      # las demás.
       hyprdev() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
           echo "Error: Se requiere sesión Hyprland activa."
@@ -124,7 +127,7 @@
         local runid="$(date +%s)$RANDOM"
         local pidfile="/tmp/hyprdev-pids-$runid"
         : > "$pidfile"
-        # Address y pid de ESTA ventana ANTES del exec nvim: tras el exec nvim
+        # Address y pid de ESTA ventana ANTES del exec opencode: tras el exec
         # su título ya no es rastreable, pero address/pid no cambian.
         local inv_info inv_addr inv_pid
         inv_info="$(hyprctl -j activewindow 2>/dev/null)"
@@ -138,7 +141,7 @@
           setsid zsh -c 'pidf=$1; dir=$2; title=$3; shift 3; print -r -- $$ >> "$pidf"; exec kitty -d "$dir" -T "$title" "$@"' \
             hyprdev-spawn "$pidfile" "$repo" "hyprdev-$runid-$role" "$@" >/dev/null 2>&1 &
         }
-        spawn opencode zsh -ic opencode
+        spawn nvim zsh -ic nvim
         spawn free zsh
         spawn pipes zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0"
         # Watcher en sesión propia ANTES del exec: sobrevive a esta shell. Se
@@ -165,7 +168,7 @@
           done
         ' hyprdev-watch "$runid" "$inv_addr" "$inv_pid" "$pidfile" >/dev/null 2>&1 &
         cd "$repo" || return 1
-        exec nvim
+        exec opencode
       }
 
       SecDesk() {
