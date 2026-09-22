@@ -28,12 +28,43 @@ let
         }
       '';
     };
-    ".config/nvim/lua/plugins/visual-multi.lua" = {
+    ".config/nvim/lua/plugins/multicursor.lua" = {
       text = ''
+        -- jake-stewart/multicursor.nvim: multicursor real para Neovim. Clave
+        -- frente a vim-visual-multi: usa "keymap layers", o sea los atajos de
+        -- gestión existen SOLO mientras hay multicursor; no pisa teclas
+        -- globales de insert/normal (por eso no rompe blink.cmp ni mini.pairs).
+        -- Soporta autocompletado y snippets nativos (vim.snippet.expand).
         return {
-          "mg979/vim-visual-multi",
-          init = function()
-            vim.g.VM_mouse_mappings = 1
+          "jake-stewart/multicursor.nvim",
+          branch = "1.0",
+          config = function()
+            local mc = require("multicursor-nvim")
+            mc.setup()
+
+            local set = vim.keymap.set
+
+            -- Añadir cursor abajo/arriba y en el siguiente match (global).
+            set({ "n", "x" }, "<leader>mj", function() mc.lineAddCursor(1) end, { desc = "Multicursor: cursor abajo" })
+            set({ "n", "x" }, "<leader>mk", function() mc.lineAddCursor(-1) end, { desc = "Multicursor: cursor arriba" })
+            set({ "n", "x" }, "<leader>mn", function() mc.matchAddCursor(1) end, { desc = "Multicursor: siguiente match" })
+            set({ "n", "x" }, "<leader>mA", mc.matchAllAddCursors, { desc = "Multicursor: todos los matches" })
+            -- Mouse: Ctrl+click añade/quita cursor.
+            set("n", "<C-LeftMouse>", mc.handleMouse)
+
+            -- Capa que aplica SOLO con multicursor: rotar, borrar y cerrar.
+            mc.addKeymapLayer(function(layerSet)
+              layerSet({ "n", "x" }, "<Left>", mc.prevCursor)
+              layerSet({ "n", "x" }, "<Right>", mc.nextCursor)
+              layerSet({ "n", "x" }, "<leader>md", mc.deleteCursor, { desc = "Multicursor: borrar cursor" })
+              layerSet("n", "<Esc>", function()
+                if not mc.cursorsEnabled() then
+                  mc.enableCursors()
+                else
+                  mc.clearCursors()
+                end
+              end)
+            end)
           end,
         }
       '';

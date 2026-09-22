@@ -76,7 +76,9 @@ flake.nix              # Entry point — hosts & shared modules
 ### Editor & Dev
 - **Neovim** (LazyVim) — `cyberneon` theme, smear-cursor, render-markdown,
   obsidian.nvim (`~/Sync/Notes`), img-clip paste, ollama.nvim (`qwen3.6:35b-a3b-mtp-q4_K_M`),
-  mason, rainbow-delimiters, treesitter-context, lsp_lines; LSPs: lua-language-server,
+  mason, rainbow-delimiters, treesitter-context, lsp_lines; multicursor.nvim
+  (`<leader>mj`/`<leader>mk` añaden cursor abajo/arriba, `<leader>mn` al siguiente
+  match, Ctrl+click, `<Esc>` cierra); LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.
 - **OpenCode** + **Ollama** (local AI stack, `OLLAMA_API_BASE` set).
 - **Ollama version pin** (`modules/apps/ollama-bin.nix`, solo pc): instala el
