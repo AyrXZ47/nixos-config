@@ -41,6 +41,27 @@
 
       [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+      # WezTerm tenía detect_password_input: cambiaba el cursor por un candado
+      # rojo al detectar un prompt de contraseña (eco apagado). kitty no tiene
+      # esa detección; se aproxima con su color-stack: al lanzar `sudo` se
+      # empuja la paleta y se pinta el cursor de rojo (OSC 30001 + OSC 21), y
+      # se restaura al volver al prompt (OSC 30101). Solo en kitty; en otras
+      # terminales (nix-on-droid) no se emite nada.
+      _sudo_cursor_preexec() {
+        [[ -n $KITTY_WINDOW_ID ]] || return 0
+        case $1 in
+          sudo|sudo\ *) printf '\e]30001\e\\\e]21;cursor=rgb:ff/00/3c\e\\'; _sudo_cursor_pushed=1 ;;
+        esac
+      }
+      _sudo_cursor_precmd() {
+        [[ -n $_sudo_cursor_pushed ]] || return 0
+        unset _sudo_cursor_pushed
+        printf '\e]30101\e\\'
+      }
+      autoload -Uz add-zsh-hook
+      add-zsh-hook preexec _sudo_cursor_preexec
+      add-zsh-hook precmd _sudo_cursor_precmd
+
       bindkey "^[[1;5C" forward-word
       bindkey "^[[1;5D" backward-word
       bindkey "^H" backward-delete-word
