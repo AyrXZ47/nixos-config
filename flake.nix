@@ -595,6 +595,49 @@ PYEOF
                             color: contents.accentColour
                             font: Tokens.font.headline.medium
                         }'
+
+            # Huella al volver de suspender: el lock ya estaba "secure" antes de
+            # dormir, asi que onSecureChanged no vuelve a correr y el pam_fprintd
+            # levantado antes de dormir queda muerto (fprintd reporta "Entity not
+            # found" mientras el USB reenumera). Sondea la disponibilidad tras
+            # onResumed hasta que el sensor vuelva; el timer para cuando el pam ya
+            # arranco o se agotan los intentos (~30 s).
+            substituteInPlace modules/lock/Pam.qml \
+              --replace-fail \
+            '        function onResumed(): void {
+                        if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
+                            howdy.start();
+                    }
+
+                    target: SessionManager
+                }' \
+            '        function onResumed(): void {
+                        if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
+                            howdy.start();
+                        fprint.reset();
+                        fprint.available = false;
+                        resumeFprint.attempts = 0;
+                        resumeFprint.start();
+                    }
+
+                    target: SessionManager
+                }
+
+                Timer {
+                    id: resumeFprint
+
+                    property int attempts: 0
+
+                    interval: 3000
+                    repeat: true
+                    onTriggered: {
+                        attempts++;
+                        if (!root.lock.secure || fprint.active || fprint.available || attempts > 10)
+                            stop();
+                        else
+                            fprint.checkAvailable();
+                    }
+                }'
           '';
         });
       };

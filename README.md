@@ -266,6 +266,12 @@ deja de pedir la huella. `fingerprint.nix` lo recupera solo con
 Si pasa en vivo sin querer esperar al reboot: `sudo systemctl restart fprintd` y,
 si sigue, rebind del USB o reboot.
 
+Además, el **lock de Caelestia** ya estaba `secure` antes de dormir, así que al
+despertar no vuelve a montar el `pam_fprintd` (muerto con el suspend) y el lock
+quedaba sin huella hasta el siguiente bloqueo. El flake parchea
+`modules/lock/Pam.qml` para que `onResumed` reinicie el fprint y sondee la
+disponibilidad hasta que el sensor reenumere (~30 s).
+
 ### Autoscroll con botón central (`modules/hardware/wheeltani.nix`)
 Replica el trackpoint del laptop en el PC (solo activo en `pc`): mantener el
 **botón central** y mover el mouse scrolla en esa dirección (la velocidad
