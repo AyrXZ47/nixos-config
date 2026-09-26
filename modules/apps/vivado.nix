@@ -87,7 +87,7 @@ in
     services.udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", MODE="0666"
       ATTRS{idVendor}=="1443", MODE="0666"
-      ACTION=="add", SUBSYSTEM=="usb", DEVTYPE=="usb_device", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", RUN+="${unbindFtdi} %k"
+      ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", RUN+="${unbindFtdi} %k"
     '';
   };
 }
