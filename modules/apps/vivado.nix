@@ -61,6 +61,12 @@ let
     unzip
     nettools
     libGL
+    # Editor externo: Vivado corre en su propio sandbox FHS, así que para que
+    # "Custom editor" encuentre kitty/nvim hay que meterlos aquí. En Vivado:
+    # Tools > Settings > Text Editor > Custom editor
+    #   kitty --detach nvim +[line number] [file name]
+    neovim
+    kitty
   ];
 
   vivadoEnv = pkgs.buildFHSEnv {
