@@ -36,8 +36,8 @@
             <IO_NET_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="9900" show="false"/>
             <IO_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="a5a6a7" line_color="0" show="true"/>
             <JTAG_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="ff8019" line_color="0" show="true"/>
-            <OCCUPIED_NOC_CHANNEL2_UPGRADED draw_fill="false" draw_line="true" fill_color="5b5798" line_color="5b5798" show="true"/>
-            <OCCUPIED_NOC_SWITCH2_UPGRADED draw_fill="false" draw_line="true" fill_color="5b5798" line_color="5b5798" show="true"/>
+            <OCCUPIED_NOC_CHANNEL2_UPGRADED draw_fill="false" draw_line="true" fill_color="777777" line_color="777777" show="true"/>
+            <OCCUPIED_NOC_SWITCH2_UPGRADED draw_fill="false" draw_line="true" fill_color="777777" line_color="777777" show="true"/>
             <PARTIALLY_ROUTED_NET_UPGRADED draw_fill="false" draw_line="true" fill_color="ffff00" line_color="ffff00" show="true"/>
             <PARTITION_PIN_UPGRADED draw_fill="true" draw_line="true" fill_color="cee3f6" line_color="cee3f6" show="true"/>
             <PATH_UPGRADED draw_fill="true" draw_line="true" fill_color="ffc800" line_color="ffc800" show="true"/>
@@ -49,7 +49,7 @@
             <PLACED_ME_DATA_BUFFER_UPGRADED draw_fill="true" draw_line="true" fill_color="ffff" line_color="ffff" show="true"/>
             <PLACED_ME_RESERVED_BUFFER_UPGRADED draw_fill="true" draw_line="true" fill_color="ff6600" line_color="ff6600" show="true"/>
             <PLACED_NOC_COMPONENT_UPGRADED draw_fill="true" draw_line="true" fill_color="209e10" line_color="209e10" show="true"/>
-            <PLACED_NOC_PORT2_UPGRADED draw_fill="false" draw_line="true" fill_color="5b5798" line_color="5b5798" show="true"/>
+            <PLACED_NOC_PORT2_UPGRADED draw_fill="false" draw_line="true" fill_color="777777" line_color="777777" show="true"/>
             <PLACED_PORT_UPGRADED draw_fill="true" draw_line="true" fill_color="ffff" line_color="ffff" show="true"/>
             <POWER_MANAGEMENT_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="ff8019" line_color="0" show="true"/>
             <PPC_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ff00ff" show="true"/>
@@ -446,11 +446,11 @@
         <CLOCK_INTERACTION_TIMED_UNSAFE_UPGRADED color="d10000"/>
         <CLOCK_INTERACTION_TIMED_UPGRADED color="10bc00"/>
         <CLOCK_INTERACTION_USER_IGNORED_PATHS_UPGRADED color="7cd8"/>
-        <CODE_EDITOR_BACKGROUND_UPGRADED color="101116"/>
+        <CODE_EDITOR_BACKGROUND_UPGRADED color="120b10"/>
         <CODE_EDITOR_BREAKPOINT_BACKGROUND_UPGRADED color="5f571e"/>
         <CODE_EDITOR_CURSOR_COLOR_UPGRADED color="ffffff"/>
         <CODE_EDITOR_FIND_HIGHLIGHT_BACKGROUND_UPGRADED color="445a20"/>
-        <CODE_EDITOR_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <CODE_EDITOR_FOREGROUND_UPGRADED color="ff0055"/>
         <CODE_EDITOR_LINE_HIGHLIGHT_UPGRADED color="43433e"/>
         <CODE_EDITOR_MATCHING_WORD_HIGHLIGHT_BACKGROUND_UPGRADED color="24442b"/>
         <CODE_EDITOR_SELECTION_BACKGROUND_UPGRADED color="563466"/>
@@ -462,15 +462,15 @@
         <CONGESTION_LEVEL_6_UPGRADED color="ff6600"/>
         <CONGESTION_LEVEL_7_UPGRADED color="ff6666"/>
         <CONGESTION_LEVEL_8_UPGRADED color="ff0000"/>
-        <CONSOLE_BACKGROUND_UPGRADED color="101116"/>
-        <CONSOLE_COMMAND_TEXT_UPGRADED color="74bcfb"/>
+        <CONSOLE_BACKGROUND_UPGRADED color="120b10"/>
+        <CONSOLE_COMMAND_TEXT_UPGRADED color="00ffc8"/>
         <CONSOLE_CURSOR_COLOR_UPGRADED color="ffffff"/>
         <CONSOLE_ERROR_TEXT_UPGRADED color="ff1865"/>
         <CONSOLE_FIND_HIGHLIGHT_BACKGROUND_UPGRADED color="445a20"/>
-        <CONSOLE_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <CONSOLE_FOREGROUND_UPGRADED color="ff0055"/>
         <CONSOLE_MATCHING_WORD_HIGHLIGHT_BACKGROUND_UPGRADED color="24442b"/>
         <CONSOLE_SELECTION_BACKGROUND_UPGRADED color="563466"/>
-        <CONSOLE_WARNING_TEXT_UPGRADED color="ff9020"/>
+        <CONSOLE_WARNING_TEXT_UPGRADED color="fffc58"/>
         <GE_BACKGROUND_UPGRADED color="0"/>
         <GE_FOREGROUND_UPGRADED color="e3e3e3"/>
         <GE_MARKERS_UPGRADED color="ffff00"/>
@@ -505,18 +505,18 @@
         <HISTOGRAM_PASS_UPGRADED color="7cdb28"/>
         <HISTOGRAM_SELECTION_UPGRADED color="ffffff"/>
         <HISTOGRAM_TICK_UPGRADED color="4c556a"/>
-        <INST_HIER_BACKGROUND_UPGRADED color="101116"/>
+        <INST_HIER_BACKGROUND_UPGRADED color="120b10"/>
         <INST_HIER_FILL_UPGRADED color="2e446d"/>
-        <INST_HIER_FOREGROUND_UPGRADED color="5b5798"/>
+        <INST_HIER_FOREGROUND_UPGRADED color="6766b3"/>
         <INST_HIER_LEAF_CELL_FILL_UPGRADED color="50306c"/>
         <INST_HIER_LINE_UPGRADED color="0"/>
         <INST_HIER_MARKERS_UPGRADED color="ffea00"/>
         <INST_HIER_SELECTION_UPGRADED color="ff0055"/>
-        <INST_HIER_TEXT_UPGRADED color="e6e6e6"/>
-        <LOG_BACKGROUND_UPGRADED color="101116"/>
+        <INST_HIER_TEXT_UPGRADED color="eeffff"/>
+        <LOG_BACKGROUND_UPGRADED color="120b10"/>
         <LOG_CURSOR_COLOR_UPGRADED color="ffffff"/>
         <LOG_FIND_HIGHLIGHT_BACKGROUND_UPGRADED color="445a20"/>
-        <LOG_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <LOG_FOREGROUND_UPGRADED color="eeffff"/>
         <LOG_LINE_HIGHLIGHT_UPGRADED color="43433e"/>
         <LOG_MATCHING_WORD_HIGHLIGHT_BACKGROUND_UPGRADED color="24442b"/>
         <LOG_SELECTION_BACKGROUND_UPGRADED color="563466"/>
@@ -545,101 +545,101 @@
         <NOCVIEW_FOREGROUND_UPGRADED color="ffffff"/>
         <NOCVIEW_MARKERS_UPGRADED color="ffea00"/>
         <NOCVIEW_SELECTION_UPGRADED color="ff0055"/>
-        <RSB_AXI3_CONNECTION_UPGRADED color="5b5798"/>
-        <RSB_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
-        <RSB_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
-        <RSB_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
-        <RSB_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
-        <RSB_BACKGROUND_UPGRADED color="101116"/>
+        <RSB_AXI3_CONNECTION_UPGRADED color="6766b3"/>
+        <RSB_AXI4LITE_CONNECTION_UPGRADED color="6766b3"/>
+        <RSB_AXI4MM_CONNECTION_UPGRADED color="6766b3"/>
+        <RSB_AXI4STREAM_CONNECTION_UPGRADED color="6766b3"/>
+        <RSB_AXIINI_CONNECTION_UPGRADED color="6766b3"/>
+        <RSB_BACKGROUND_UPGRADED color="120b10"/>
         <RSB_BUS_UPGRADED color="9633"/>
         <RSB_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
         <RSB_CLOCK_NET_UPGRADED color="628d30"/>
-        <RSB_COMMENT_BORDER_UPGRADED color="5b5798"/>
-        <RSB_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+        <RSB_COMMENT_BORDER_UPGRADED color="6766b3"/>
+        <RSB_COMMENT_TEXT_UPGRADED color="eeffff"/>
         <RSB_DATA_NET_UPGRADED color="628d30"/>
-        <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+        <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="120b10"/>
         <RSB_HIERARCHY_FILL_UPGRADED color="2e446d"/>
-        <RSB_INSTANCE_BORDER_UPGRADED color="5b5798"/>
+        <RSB_INSTANCE_BORDER_UPGRADED color="6766b3"/>
         <RSB_INSTANCE_NO_GRADIENT_FILL_UPGRADED color="50306c"/>
-        <RSB_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
-        <RSB_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+        <RSB_INSTANCE_TEXT_UPGRADED color="eeffff"/>
+        <RSB_INTERFACE_CONNECTION_UPGRADED color="6766b3"/>
         <RSB_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
         <RSB_INTERFACE_PORT_UPGRADED color="ffffff"/>
         <RSB_INTERRUPT_NET_UPGRADED color="628d30"/>
         <RSB_MARKERS_UPGRADED color="ffff00"/>
         <RSB_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
         <RSB_NET_UPGRADED color="628d30"/>
-        <RSB_PIN_TEXT_UPGRADED color="e6e6e6"/>
+        <RSB_PIN_TEXT_UPGRADED color="eeffff"/>
         <RSB_PORT_FILL_UPGRADED color="f0f0f0"/>
-        <RSB_PORT_TEXT_UPGRADED color="e6e6e6"/>
+        <RSB_PORT_TEXT_UPGRADED color="eeffff"/>
         <RSB_PORT_UPGRADED color="2a5e6f"/>
         <RSB_RESET_NET_UPGRADED color="628d30"/>
         <RSB_SELECTION_UPGRADED color="ff0055"/>
         <SCH_ATTRIBUTE_UPGRADED color="ffffff"/>
-        <SCH_BACKGROUND_UPGRADED color="101116"/>
+        <SCH_BACKGROUND_UPGRADED color="120b10"/>
         <SCH_BUS_RIPPER_UPGRADED color="ffffff"/>
         <SCH_BUS_UPGRADED color="9633"/>
-        <SCH_CELL_TEXT_UPGRADED color="e6e6e6"/>
-        <SCH_EXPAND_HIER_COLOR_UPGRADED color="101116"/>
+        <SCH_CELL_TEXT_UPGRADED color="eeffff"/>
+        <SCH_EXPAND_HIER_COLOR_UPGRADED color="120b10"/>
         <SCH_FILL_0_UPGRADED color="50306c"/>
         <SCH_FILL_1_UPGRADED color="2e446d"/>
         <SCH_FILL_2_UPGRADED color="f0f0f0"/>
-        <SCH_FOREGROUND_UPGRADED color="e6e6e6"/>
-        <SCH_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
-        <SCH_INST_0_UPGRADED color="5b5798"/>
-        <SCH_INST_1_UPGRADED color="5b5798"/>
-        <SCH_INST_2_UPGRADED color="5b5798"/>
+        <SCH_FOREGROUND_UPGRADED color="eeffff"/>
+        <SCH_INSTANCE_TEXT_UPGRADED color="eeffff"/>
+        <SCH_INST_0_UPGRADED color="6766b3"/>
+        <SCH_INST_1_UPGRADED color="6766b3"/>
+        <SCH_INST_2_UPGRADED color="6766b3"/>
         <SCH_MARKERS_UPGRADED color="ffff00"/>
         <SCH_NEG_SLACK_UPGRADED color="e53935"/>
         <SCH_NET_UPGRADED color="628d30"/>
-        <SCH_PIN_TEXT_UPGRADED color="e6e6e6"/>
-        <SCH_PORT_TEXT_UPGRADED color="e6e6e6"/>
+        <SCH_PIN_TEXT_UPGRADED color="eeffff"/>
+        <SCH_PORT_TEXT_UPGRADED color="eeffff"/>
         <SCH_PORT_UPGRADED color="ffffff"/>
         <SCH_SELECTION_UPGRADED color="ff0055"/>
-        <VSI_SYS_AXI3_CONNECTION_UPGRADED color="5b5798"/>
-        <VSI_SYS_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
-        <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
-        <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
-        <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
-        <VSI_SYS_BACKGROUND_UPGRADED color="101116"/>
+        <VSI_SYS_AXI3_CONNECTION_UPGRADED color="6766b3"/>
+        <VSI_SYS_AXI4LITE_CONNECTION_UPGRADED color="6766b3"/>
+        <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="6766b3"/>
+        <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="6766b3"/>
+        <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="6766b3"/>
+        <VSI_SYS_BACKGROUND_UPGRADED color="120b10"/>
         <VSI_SYS_BUS_UPGRADED color="9633"/>
         <VSI_SYS_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
         <VSI_SYS_CLOCK_NET_UPGRADED color="628d30"/>
-        <VSI_SYS_COMMENT_BORDER_UPGRADED color="5b5798"/>
-        <VSI_SYS_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+        <VSI_SYS_COMMENT_BORDER_UPGRADED color="6766b3"/>
+        <VSI_SYS_COMMENT_TEXT_UPGRADED color="eeffff"/>
         <VSI_SYS_DATA_NET_UPGRADED color="628d30"/>
-        <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+        <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="120b10"/>
         <VSI_SYS_HIERARCHY_FILL_UPGRADED color="2e446d"/>
-        <VSI_SYS_INSTANCE_BORDER_UPGRADED color="5b5798"/>
+        <VSI_SYS_INSTANCE_BORDER_UPGRADED color="6766b3"/>
         <VSI_SYS_INSTANCE_FILL_UPGRADED color="50306c"/>
-        <VSI_SYS_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
-        <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+        <VSI_SYS_INSTANCE_TEXT_UPGRADED color="eeffff"/>
+        <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="6766b3"/>
         <VSI_SYS_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
         <VSI_SYS_INTERFACE_PORT_UPGRADED color="ffffff"/>
         <VSI_SYS_INTERRUPT_NET_UPGRADED color="628d30"/>
         <VSI_SYS_MARKERS_UPGRADED color="ffff00"/>
         <VSI_SYS_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
         <VSI_SYS_NET_UPGRADED color="628d30"/>
-        <VSI_SYS_PIN_TEXT_UPGRADED color="e6e6e6"/>
+        <VSI_SYS_PIN_TEXT_UPGRADED color="eeffff"/>
         <VSI_SYS_PORT_FILL_UPGRADED color="f0f0f0"/>
-        <VSI_SYS_PORT_TEXT_UPGRADED color="e6e6e6"/>
+        <VSI_SYS_PORT_TEXT_UPGRADED color="eeffff"/>
         <VSI_SYS_PORT_UPGRADED color="2a5e6f"/>
         <VSI_SYS_RESET_NET_UPGRADED color="628d30"/>
         <VSI_SYS_SELECTION_UPGRADED color="ff0055"/>
-        <WINDOW_BACKGROUND_UPGRADED color="101116"/>
-        <WINDOW_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <WINDOW_BACKGROUND_UPGRADED color="120b10"/>
+        <WINDOW_FOREGROUND_UPGRADED color="eeffff"/>
         <WORLDVIEW_VIEWABLE_AREA_UPGRADED color="ffff00"/>
     </general_color>
     <general_graphical_color>
         <theme1 value="1">
             <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="646464"/>
-            <SCH_CELL_TEXT_UPGRADED color="101116"/>
+            <SCH_CELL_TEXT_UPGRADED color="120b10"/>
             <VSI_SYS_INSTANCE_TEXT_UPGRADED color="0"/>
             <VSI_SYS_INSTANCE_BORDER_UPGRADED color="646464"/>
             <RSB_MARKERS_UPGRADED color="ffff00"/>
             <RSB_CLOCK_ENABLE_NET_UPGRADED color="8bc34a"/>
-            <RSB_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
-            <SCH_FOREGROUND_UPGRADED color="101116"/>
+            <RSB_AXI4MM_CONNECTION_UPGRADED color="777777"/>
+            <SCH_FOREGROUND_UPGRADED color="120b10"/>
             <SCH_BUS_UPGRADED color="9633"/>
             <RSB_INTERFACE_PORT_FILL_UPGRADED color="ddd4d0"/>
             <VSI_SYS_INTERRUPT_NET_UPGRADED color="222222"/>
@@ -650,12 +650,12 @@
             <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="646464"/>
             <VSI_SYS_INSTANCE_FILL_UPGRADED color="d2d2d2"/>
             <SCH_INST_1_UPGRADED color="575d6c"/>
-            <SCH_PIN_TEXT_UPGRADED color="101116"/>
-            <RSB_AXI3_CONNECTION_UPGRADED color="5b5798"/>
-            <RSB_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
+            <SCH_PIN_TEXT_UPGRADED color="120b10"/>
+            <RSB_AXI3_CONNECTION_UPGRADED color="777777"/>
+            <RSB_AXI4STREAM_CONNECTION_UPGRADED color="777777"/>
             <RSB_BUS_UPGRADED color="469cb9"/>
             <VSI_SYS_CLOCK_ENABLE_NET_UPGRADED color="222222"/>
-            <RSB_PORT_TEXT_UPGRADED color="101116"/>
+            <RSB_PORT_TEXT_UPGRADED color="120b10"/>
             <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="fafafa"/>
             <RSB_PORT_FILL_UPGRADED color="ddd4d0"/>
             <VSI_SYS_BUS_UPGRADED color="505050"/>
@@ -664,13 +664,13 @@
             <VSI_SYS_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
             <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="ffffff"/>
             <SCH_PORT_UPGRADED color="0"/>
-            <RSB_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_AXIINI_CONNECTION_UPGRADED color="777777"/>
             <RSB_RESET_NET_UPGRADED color="8bc34a"/>
             <VSI_SYS_NET_UPGRADED color="222222"/>
             <VSI_SYS_RESET_NET_UPGRADED color="222222"/>
             <RSB_INSTANCE_BORDER_UPGRADED color="575d6c"/>
             <SCH_SELECTION_UPGRADED color="396cef"/>
-            <RSB_PIN_TEXT_UPGRADED color="101116"/>
+            <RSB_PIN_TEXT_UPGRADED color="120b10"/>
             <VSI_SYS_COMMENT_BORDER_UPGRADED color="0"/>
             <VSI_SYS_PORT_TEXT_UPGRADED color="0"/>
             <VSI_SYS_HIERARCHY_FILL_UPGRADED color="afafaf"/>
@@ -691,57 +691,57 @@
             <SCH_INST_0_UPGRADED color="575d6c"/>
             <RSB_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
             <SCH_INST_2_UPGRADED color="0"/>
-            <SCH_PORT_TEXT_UPGRADED color="101116"/>
+            <SCH_PORT_TEXT_UPGRADED color="120b10"/>
             <RSB_PORT_UPGRADED color="0"/>
             <VSI_SYS_COMMENT_TEXT_UPGRADED color="0"/>
-            <RSB_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_INTERFACE_CONNECTION_UPGRADED color="777777"/>
             <SCH_BUS_RIPPER_UPGRADED color="0"/>
             <VSI_SYS_DATA_NET_UPGRADED color="222222"/>
             <VSI_SYS_MARKERS_UPGRADED color="ffff00"/>
             <VSI_SYS_PORT_FILL_UPGRADED color="d4d4d4"/>
             <SCH_NEG_SLACK_UPGRADED color="e53935"/>
-            <SCH_INSTANCE_TEXT_UPGRADED color="101116"/>
-            <RSB_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
+            <SCH_INSTANCE_TEXT_UPGRADED color="120b10"/>
+            <RSB_AXI4LITE_CONNECTION_UPGRADED color="777777"/>
             <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="646464"/>
             <VSI_SYS_PORT_UPGRADED color="222222"/>
             <SCH_NET_UPGRADED color="8bc34a"/>
             <RSB_HIERARCHY_FILL_UPGRADED color="cde5ff"/>
-            <RSB_INSTANCE_TEXT_UPGRADED color="101116"/>
+            <RSB_INSTANCE_TEXT_UPGRADED color="120b10"/>
             <VSI_SYS_BACKGROUND_UPGRADED color="ffffff"/>
-            <RSB_COMMENT_TEXT_UPGRADED color="101116"/>
+            <RSB_COMMENT_TEXT_UPGRADED color="120b10"/>
             <RSB_DATA_NET_UPGRADED color="8bc34a"/>
             <SCH_FILL_2_UPGRADED color="f0f0f0"/>
             <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="646464"/>
             <RSB_NET_UPGRADED color="8bc34a"/>
         </theme1>
         <theme2 value="2">
-            <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+            <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="6766b3"/>
             <PACKAGE_SELECTION_UPGRADED color="ffffff"/>
-            <WAVEFORM_AREA_FOREGROUND_UPGRADED color="e6e6e6"/>
-            <SCH_CELL_TEXT_UPGRADED color="e6e6e6"/>
+            <WAVEFORM_AREA_FOREGROUND_UPGRADED color="eeffff"/>
+            <SCH_CELL_TEXT_UPGRADED color="eeffff"/>
             <WAVEFORM_VALUE_WEAK_UPGRADED color="7cdb28"/>
             <WAVEFORM_GRID_LINES_UPGRADED color="ebeef0"/>
-            <SCH_FOREGROUND_UPGRADED color="e6e6e6"/>
+            <SCH_FOREGROUND_UPGRADED color="eeffff"/>
             <VSI_SYS_INTERRUPT_NET_UPGRADED color="628d30"/>
             <WAVEFORM_VALUE_DONT_CARE_UPGRADED color="ebeef0"/>
-            <SCH_EXPAND_HIER_COLOR_UPGRADED color="101116"/>
-            <WAVEFORM_SELECTED_AREA_ITEM_UPGRADED color="e6e6e6"/>
+            <SCH_EXPAND_HIER_COLOR_UPGRADED color="120b10"/>
+            <WAVEFORM_SELECTED_AREA_ITEM_UPGRADED color="eeffff"/>
             <VSI_SYS_SELECTION_UPGRADED color="ff0055"/>
             <VSI_SYS_INSTANCE_FILL_UPGRADED color="50306c"/>
-            <SCH_INST_1_UPGRADED color="5b5798"/>
-            <SCH_PIN_TEXT_UPGRADED color="e6e6e6"/>
-            <RSB_AXI3_CONNECTION_UPGRADED color="5b5798"/>
-            <RSB_PORT_TEXT_UPGRADED color="e6e6e6"/>
+            <SCH_INST_1_UPGRADED color="6766b3"/>
+            <SCH_PIN_TEXT_UPGRADED color="eeffff"/>
+            <RSB_AXI3_CONNECTION_UPGRADED color="6766b3"/>
+            <RSB_PORT_TEXT_UPGRADED color="eeffff"/>
             <VSI_SYS_CLOCK_NET_UPGRADED color="628d30"/>
             <DEVICE_SELECTION_UPGRADED color="ffffff"/>
-            <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+            <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="120b10"/>
             <SCH_PORT_UPGRADED color="ffffff"/>
             <RSB_RESET_NET_UPGRADED color="628d30"/>
             <VSI_SYS_RESET_NET_UPGRADED color="628d30"/>
             <WAVEFORM_CURSOR_UPGRADED color="ffea00"/>
             <SCH_SELECTION_UPGRADED color="ff0055"/>
-            <VSI_SYS_PORT_TEXT_UPGRADED color="e6e6e6"/>
-            <VSI_SYS_PIN_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_PORT_TEXT_UPGRADED color="eeffff"/>
+            <VSI_SYS_PIN_TEXT_UPGRADED color="eeffff"/>
             <SCH_FILL_1_UPGRADED color="2e446d"/>
             <RSB_SELECTION_UPGRADED color="ff0055"/>
             <WAVEFORM_CAPTURE_WINDOW_ODD_UPGRADED color="ffffff"/>
@@ -750,270 +750,270 @@
             <WAVEFORM_VALUE_UNINITIALIZED_UPGRADED color="ffa500"/>
             <RSB_INTERFACE_PORT_UPGRADED color="ffffff"/>
             <VSI_SYS_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
-            <VSI_SYS_AXI3_CONNECTION_UPGRADED color="5b5798"/>
-            <WAVEFORM_NAME_VALUE_AREA_BACKGROUND_UPGRADED color="101116"/>
-            <WAVEFORM_TEXT_UPGRADED color="e6e6e6"/>
-            <SCH_INST_2_UPGRADED color="5b5798"/>
-            <SCH_PORT_TEXT_UPGRADED color="e6e6e6"/>
-            <VSI_SYS_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_AXI3_CONNECTION_UPGRADED color="6766b3"/>
+            <WAVEFORM_NAME_VALUE_AREA_BACKGROUND_UPGRADED color="120b10"/>
+            <WAVEFORM_TEXT_UPGRADED color="eeffff"/>
+            <SCH_INST_2_UPGRADED color="6766b3"/>
+            <SCH_PORT_TEXT_UPGRADED color="eeffff"/>
+            <VSI_SYS_COMMENT_TEXT_UPGRADED color="eeffff"/>
             <WAVEFORM_DIVIDER_BACKGROUND_UPGRADED color="8080ff"/>
-            <RSB_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_INTERFACE_CONNECTION_UPGRADED color="6766b3"/>
             <WAVEFORM_AREA_BACKGROUND_UPGRADED color="0"/>
             <VSI_SYS_DATA_NET_UPGRADED color="628d30"/>
             <WAVEFORM_VALUE_HIZ_UPGRADED color="ff"/>
             <DEVICE_FOREGROUND_UPGRADED color="ffffff"/>
-            <SCH_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
-            <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
-            <PACKAGE_FOREGROUND_UPGRADED color="e6e6e6"/>
+            <SCH_INSTANCE_TEXT_UPGRADED color="eeffff"/>
+            <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="6766b3"/>
+            <PACKAGE_FOREGROUND_UPGRADED color="eeffff"/>
             <WAVEFORM_TRIGGER_POINT_UPGRADED color="bd1a1a"/>
             <VSI_SYS_PORT_UPGRADED color="2a5e6f"/>
             <SCH_NET_UPGRADED color="628d30"/>
             <DEVICE_MARKERS_UPGRADED color="ffff00"/>
             <RSB_HIERARCHY_FILL_UPGRADED color="2e446d"/>
-            <VSI_SYS_BACKGROUND_UPGRADED color="101116"/>
+            <VSI_SYS_BACKGROUND_UPGRADED color="120b10"/>
             <RSB_DATA_NET_UPGRADED color="628d30"/>
             <SCH_FILL_2_UPGRADED color="f0f0f0"/>
-            <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
-            <VSI_SYS_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
-            <VSI_SYS_INSTANCE_BORDER_UPGRADED color="5b5798"/>
+            <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="6766b3"/>
+            <VSI_SYS_INSTANCE_TEXT_UPGRADED color="eeffff"/>
+            <VSI_SYS_INSTANCE_BORDER_UPGRADED color="6766b3"/>
             <RSB_MARKERS_UPGRADED color="ffff00"/>
             <RSB_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
-            <RSB_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_AXI4MM_CONNECTION_UPGRADED color="6766b3"/>
             <SCH_BUS_UPGRADED color="9633"/>
             <RSB_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
             <WAVEFORM_TIME_SCALE_UPGRADED color="ebeef0"/>
             <RSB_INSTANCE_NO_GRADIENT_FILL_UPGRADED color="50306c"/>
             <RSB_CLOCK_NET_UPGRADED color="628d30"/>
-            <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
-            <RSB_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
+            <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="6766b3"/>
+            <RSB_AXI4STREAM_CONNECTION_UPGRADED color="6766b3"/>
             <RSB_BUS_UPGRADED color="9633"/>
             <VSI_SYS_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
-            <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+            <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="120b10"/>
             <RSB_PORT_FILL_UPGRADED color="f0f0f0"/>
             <WAVEFORM_CAPTURE_WINDOW_EVEN_UPGRADED color="0"/>
             <VSI_SYS_BUS_UPGRADED color="9633"/>
-            <SCH_BACKGROUND_UPGRADED color="101116"/>
+            <SCH_BACKGROUND_UPGRADED color="120b10"/>
             <VSI_SYS_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
             <WAVEFORM_VALUE_UNKNOWN_UPGRADED color="bd1a1a"/>
-            <RSB_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_AXIINI_CONNECTION_UPGRADED color="6766b3"/>
             <VSI_SYS_NET_UPGRADED color="628d30"/>
-            <RSB_INSTANCE_BORDER_UPGRADED color="5b5798"/>
-            <RSB_PIN_TEXT_UPGRADED color="e6e6e6"/>
-            <VSI_SYS_COMMENT_BORDER_UPGRADED color="5b5798"/>
+            <RSB_INSTANCE_BORDER_UPGRADED color="6766b3"/>
+            <RSB_PIN_TEXT_UPGRADED color="eeffff"/>
+            <VSI_SYS_COMMENT_BORDER_UPGRADED color="6766b3"/>
             <VSI_SYS_HIERARCHY_FILL_UPGRADED color="2e446d"/>
-            <WAVEFORM_NAME_VALUE_AREA_TEXT_UPGRADED color="e6e6e6"/>
-            <WAVEFORM_AREA_TEXT_UPGRADED color="e6e6e6"/>
+            <WAVEFORM_NAME_VALUE_AREA_TEXT_UPGRADED color="eeffff"/>
+            <WAVEFORM_AREA_TEXT_UPGRADED color="eeffff"/>
             <SCH_ATTRIBUTE_UPGRADED color="ffffff"/>
-            <RSB_COMMENT_BORDER_UPGRADED color="5b5798"/>
+            <RSB_COMMENT_BORDER_UPGRADED color="6766b3"/>
             <WAVEFORM_BACKGROUND_UPGRADED color="0"/>
             <DEVICE_BACKGROUND_UPGRADED color="0"/>
             <PACKAGE_MARKERS_UPGRADED color="ffea00"/>
             <WAVEFORM_FLOATING_RULER_UPGRADED color="e1cf00"/>
-            <RSB_BACKGROUND_UPGRADED color="101116"/>
+            <RSB_BACKGROUND_UPGRADED color="120b10"/>
             <PACKAGE_BACKGROUND_UPGRADED color="0"/>
             <SCH_FILL_0_UPGRADED color="50306c"/>
             <RSB_INTERRUPT_NET_UPGRADED color="628d30"/>
-            <VSI_SYS_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
-            <SCH_INST_0_UPGRADED color="5b5798"/>
+            <VSI_SYS_AXI4LITE_CONNECTION_UPGRADED color="6766b3"/>
+            <SCH_INST_0_UPGRADED color="6766b3"/>
             <RSB_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
             <RSB_PORT_UPGRADED color="2a5e6f"/>
             <SCH_BUS_RIPPER_UPGRADED color="ffffff"/>
             <VSI_SYS_MARKERS_UPGRADED color="ffff00"/>
             <VSI_SYS_PORT_FILL_UPGRADED color="f0f0f0"/>
             <SCH_NEG_SLACK_UPGRADED color="e53935"/>
-            <RSB_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_AXI4LITE_CONNECTION_UPGRADED color="6766b3"/>
             <WAVEFORM_DEFAULT_UPGRADED color="7cdb28"/>
             <WAVEFORM_ASSOCIATION_DEPENDENCY_LINE_UPGRADED color="ffff"/>
             <WAVEFORM_MARKER_UPGRADED color="ff0055"/>
-            <RSB_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
-            <RSB_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+            <RSB_INSTANCE_TEXT_UPGRADED color="eeffff"/>
+            <RSB_COMMENT_TEXT_UPGRADED color="eeffff"/>
             <RSB_NET_UPGRADED color="628d30"/>
         </theme2>
     </general_graphical_color>
     <general>
         <code_editor_syntax_styles_UPGRADED>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED>
         <code_editor_syntax_styles_UPGRADED_Generic>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED_Generic>
         <code_editor_syntax_styles_UPGRADED_Verilog>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED_Verilog>
         <code_editor_syntax_styles_UPGRADED_VHDL>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED_VHDL>
         <code_editor_syntax_styles_UPGRADED_XDC>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED_XDC>
         <code_editor_syntax_styles_UPGRADED_Tcl>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED_Tcl>
         <code_editor_syntax_styles_UPGRADED_TSM>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED_TSM>
         <code_editor_syntax_styles_UPGRADED_SyntaxCheck>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="0"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
             <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
-            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
-            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
-            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
-            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
-            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-2786305" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-49023" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-16711736" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-936" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-16711780" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-65451" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-65451" font_style="0" foreground_color="null" stripe_color="-65451" style_index="11"/>
+            <syntax_style background_color="-11521940" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="-11521940" style_index="12"/>
+            <syntax_style background_color="-15594736" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-10000717" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10000717" stripe_color="null" style_index="20"/>
         </code_editor_syntax_styles_UPGRADED_SyntaxCheck>
         <CODE_EDITOR_FONT font_name="Monospaced" font_size="13"/>
         <RECENT_FILES/>
