@@ -26,6 +26,33 @@ let
   # El rule original de Xilinx (52-xilinx-ftdi-usb.rules) suelta el FT2232H del
   # driver ftdi_sio, que si no lo retiene y Vivado no puede reclamar las
   # interfaces por libusb. Recibe %k (p.ej. "1-2") y suelta sus dos canales.
+  # Puente editor externo de Vivado -> kitty + nvim. Vivado sustituye
+  # `[file name]`/`[line number]` y parte el comando por espacios, así que una
+  # ruta con espacios llega troceada: aquí se reconstruye. Deja traza en
+  # /tmp/vivado-nvim.log para depurar si algún día no abre.
+  vivadoNvim = pkgs.writeShellScriptBin "vivado-nvim" ''
+    log=/tmp/vivado-nvim.log
+    { date -Is; printf 'arg: <%s>\n' "$@"; } >>"$log" 2>&1
+
+    file=""
+    line=""
+    for a in "$@"; do
+      case "$a" in
+        +[0-9]*) line="''${a#+}" ;;
+        +) ;;
+        -*) ;;
+        *) if [ -z "$file" ]; then file="$a"; else file="$file $a"; fi ;;
+      esac
+    done
+    [ -n "$file" ] || { echo "sin archivo en los argumentos" >>"$log"; exit 1; }
+
+    if [ -n "$line" ]; then
+      exec /usr/bin/kitty --detach /usr/bin/nvim "+$line" "$file"
+    else
+      exec /usr/bin/kitty --detach /usr/bin/nvim "$file"
+    fi
+  '';
+
   unbindFtdi = pkgs.writeShellScript "xilinx-ftdi-unbind" ''
     for intf in "$1:1.0" "$1:1.1"; do
       if [ -e "/sys/bus/usb/drivers/ftdi_sio/$intf" ]; then
@@ -64,9 +91,10 @@ let
     # Editor externo: Vivado corre en su propio sandbox FHS, así que para que
     # "Custom editor" encuentre kitty/nvim hay que meterlos aquí. En Vivado:
     # Tools > Settings > Text Editor > Custom editor
-    #   kitty --detach nvim +[line number] [file name]
+    #   vivado-nvim +[line number] [file name]
     neovim
     kitty
+    vivadoNvim
   ];
 
   vivadoEnv = pkgs.buildFHSEnv {
