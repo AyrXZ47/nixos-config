@@ -34,6 +34,13 @@
   # el stylesheet cyberpunk.mplstyle; .source = se versiona como asset.
   xdg.configFile."matplotlib/matplotlibrc".source = ../assets/matplotlib/matplotlibrc;
 
+  # Tema cyberpunk para el IDE de Vivado 2026.1: recoloreado desde el "Dark
+  # Theme" nativo con la paleta de NeoCyberVim (vendoreado, no se redistribuye
+  # el tema de AMD). Vivado lo lista por el nombre del archivo; se elige en
+  # Tools > Settings > Themes > Cyberpunk (una sola vez).
+  home.file.".Xilinx/Vivado/2026.1/newThemes/Cyberpunk.xmltheme".source =
+    ../assets/vivado/Cyberpunk.xmltheme;
+
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [

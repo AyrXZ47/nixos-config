@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?><preferences VERSION="10">
+    <general_object_display/>
+    <general_theme_object_display>
+        <theme2 value="2">
+            <ASSIGNED_INSTANCE_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="8f8301" show="true"/>
+            <BEL_PIN_UPGRADED draw_fill="false" draw_line="true" fill_color="0" line_color="666666" show="true"/>
+            <BEL_UPGRADED draw_fill="false" draw_line="true" fill_color="0" line_color="666666" show="true"/>
+            <BUNDLE_NET_UPGRADED draw_fill="false" draw_line="false" fill_color="ffffff" line_color="ffffff" show="true"/>
+            <CLOCK_CAPABLE_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="97c5ff" line_color="ff0000" show="true"/>
+            <CLOCK_DISTRIBUTION_UPGRADED draw_fill="true" draw_line="true" fill_color="646464" line_color="e9e1bb" show="true"/>
+            <CLOCK_REGION_UPGRADED draw_fill="false" draw_line="true" fill_color="ffafaf" line_color="99ccff" show="true"/>
+            <CONFIG_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="ff8019" line_color="0" show="true"/>
+            <CONFLICT_NET_UPGRADED draw_fill="false" draw_line="true" fill_color="990066" line_color="990066" show="true"/>
+            <DCM_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ffafaf" show="true"/>
+            <FIXED_INSTANCE_UPGRADED draw_fill="true" draw_line="true" fill_color="ff700a" line_color="ff700a" show="true"/>
+            <FIXED_NOC_COMPONENT_UPGRADED draw_fill="true" draw_line="true" fill_color="db5d0a" line_color="db5d0a" show="true"/>
+            <FIXED_PORT_UPGRADED draw_fill="true" draw_line="true" fill_color="ff6600" line_color="ff6600" show="true"/>
+            <FULLY_ROUTED_NET_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="a000" show="true"/>
+            <GIGABIT_TRANSCEIVER_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ff00" show="true"/>
+            <GLOBAL_CLOCK_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="76767a" line_color="ff0000" show="true"/>
+            <GND_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="338a51" line_color="c0c0c0" show="true"/>
+            <GT_CLOCK_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="9999ff" show="true"/>
+            <GT_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="660000" line_color="ff3333" show="true"/>
+            <INPUT_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="a5a6b1" line_color="0" show="true"/>
+            <IO_BANK_0_UPGRADED draw_fill="true" draw_line="true" fill_color="cc00cc" line_color="cc00cc" show="true"/>
+            <IO_BANK_10_UPGRADED draw_fill="true" draw_line="true" fill_color="ffcc99" line_color="ffcc99" show="true"/>
+            <IO_BANK_1_UPGRADED draw_fill="true" draw_line="true" fill_color="cc33" line_color="cc33" show="true"/>
+            <IO_BANK_2_UPGRADED draw_fill="true" draw_line="true" fill_color="cccc" line_color="cccc" show="true"/>
+            <IO_BANK_3_UPGRADED draw_fill="true" draw_line="true" fill_color="ff9999" line_color="ff9999" show="true"/>
+            <IO_BANK_4_UPGRADED draw_fill="true" draw_line="true" fill_color="ffcc00" line_color="ffcc00" show="true"/>
+            <IO_BANK_5_UPGRADED draw_fill="true" draw_line="true" fill_color="ff6666" line_color="ff6666" show="true"/>
+            <IO_BANK_6_UPGRADED draw_fill="true" draw_line="true" fill_color="6666ff" line_color="6666ff" show="true"/>
+            <IO_BANK_7_UPGRADED draw_fill="true" draw_line="true" fill_color="99ff99" line_color="99ff99" show="true"/>
+            <IO_BANK_8_UPGRADED draw_fill="true" draw_line="true" fill_color="9933" line_color="9933" show="true"/>
+            <IO_BANK_9_UPGRADED draw_fill="true" draw_line="true" fill_color="ffff00" line_color="ffff00" show="true"/>
+            <IO_NET_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="9900" show="false"/>
+            <IO_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="a5a6a7" line_color="0" show="true"/>
+            <JTAG_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="ff8019" line_color="0" show="true"/>
+            <OCCUPIED_NOC_CHANNEL2_UPGRADED draw_fill="false" draw_line="true" fill_color="5b5798" line_color="5b5798" show="true"/>
+            <OCCUPIED_NOC_SWITCH2_UPGRADED draw_fill="false" draw_line="true" fill_color="5b5798" line_color="5b5798" show="true"/>
+            <PARTIALLY_ROUTED_NET_UPGRADED draw_fill="false" draw_line="true" fill_color="ffff00" line_color="ffff00" show="true"/>
+            <PARTITION_PIN_UPGRADED draw_fill="true" draw_line="true" fill_color="cee3f6" line_color="cee3f6" show="true"/>
+            <PATH_UPGRADED draw_fill="true" draw_line="true" fill_color="ffc800" line_color="ffc800" show="true"/>
+            <PBLOCK_1_UPGRADED draw_fill="false" draw_line="true" fill_color="0" line_color="cc66ff" show="true"/>
+            <PBLOCK_2_UPGRADED draw_fill="true" draw_line="true" fill_color="aa97bd" line_color="9933ff" show="true"/>
+            <PBLOCK_3_UPGRADED draw_fill="true" draw_line="true" fill_color="e1c4ff" line_color="6600cc" show="true"/>
+            <PHYSICAL_INSTANCE_UPGRADED draw_fill="true" draw_line="true" fill_color="cde16d" line_color="cde16d" show="true"/>
+            <PLACED_INSTANCE_UPGRADED draw_fill="true" draw_line="true" fill_color="37cacc" line_color="37cacc" show="true"/>
+            <PLACED_ME_DATA_BUFFER_UPGRADED draw_fill="true" draw_line="true" fill_color="ffff" line_color="ffff" show="true"/>
+            <PLACED_ME_RESERVED_BUFFER_UPGRADED draw_fill="true" draw_line="true" fill_color="ff6600" line_color="ff6600" show="true"/>
+            <PLACED_NOC_COMPONENT_UPGRADED draw_fill="true" draw_line="true" fill_color="209e10" line_color="209e10" show="true"/>
+            <PLACED_NOC_PORT2_UPGRADED draw_fill="false" draw_line="true" fill_color="5b5798" line_color="5b5798" show="true"/>
+            <PLACED_PORT_UPGRADED draw_fill="true" draw_line="true" fill_color="ffff" line_color="ffff" show="true"/>
+            <POWER_MANAGEMENT_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="ff8019" line_color="0" show="true"/>
+            <PPC_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ff00ff" show="true"/>
+            <RAM_MULT_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ff0000" show="true"/>
+            <SITE_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="b3b3b3" show="true"/>
+            <SPECIAL_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="999999" line_color="0" show="true"/>
+            <SYSMON_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="ff8019" line_color="0" show="true"/>
+            <TEMP_SENSOR_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="ff8019" line_color="0" show="true"/>
+            <TILE_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ff" show="true"/>
+            <UNROUTED_NET_UPGRADED draw_fill="false" draw_line="true" fill_color="d00000" line_color="d00000" show="true"/>
+            <USED_ME_CHANNEL_UPGRADED draw_fill="false" draw_line="true" fill_color="a000" line_color="a000" show="true"/>
+            <USED_ME_CORE_UPGRADED draw_fill="true" draw_line="true" fill_color="37cacc" line_color="37cacc" show="true"/>
+            <USED_ME_MEMORY_BANK_UPGRADED draw_fill="true" draw_line="true" fill_color="a000" line_color="aa00" show="true"/>
+            <USED_ME_PORT_UPGRADED draw_fill="false" draw_line="true" fill_color="a000" line_color="a000" show="true"/>
+            <USED_ME_SWITCH_UPGRADED draw_fill="false" draw_line="true" fill_color="a000" line_color="a000" show="true"/>
+            <USED_STUB_UPGRADED draw_fill="false" draw_line="true" fill_color="ff00ff" line_color="ff00ff" show="false"/>
+            <V4_BRAM_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ff00ff" show="true"/>
+            <V4_CCM_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ffc800" show="true"/>
+            <V4_DSP_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ffff" show="true"/>
+            <V4_REG_CLOCK_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ff0000" show="true"/>
+            <V4_SYSMON_UPGRADED draw_fill="false" draw_line="true" fill_color="ffffff" line_color="ffff00" show="true"/>
+            <VCC_PIN_UPGRADED draw_fill="true" draw_line="false" fill_color="c11f1b" line_color="c0c0c0" show="true"/>
+        </theme2>
+    </general_theme_object_display>
+    <xgd_theme_object_display>
+        <theme2 value="2">
+            <XGD_AI_ENGINE draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_AI_ENGINE_BELS draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_ARCS draw_fill="false" draw_line="true" fill_color="0" line_color="828282" show="true"/>
+            <XGD_ARC_DIRECTION draw_fill="false" draw_line="true" fill_color="0" line_color="a5a5a5" show="true"/>
+            <XGD_BEL_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_BEL_OUTLINE draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_BEL_PINS draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_BEL_PIN_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_BLI draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_BLOCKED_BEL draw_fill="true" draw_line="true" fill_color="ffff00" line_color="ffff00" show="true"/>
+            <XGD_BLOCKED_SITE draw_fill="true" draw_line="true" fill_color="ffff00" line_color="ffff00" show="true"/>
+            <XGD_BRAM draw_fill="false" draw_line="true" fill_color="0" line_color="440714" show="true"/>
+            <XGD_CFG draw_fill="false" draw_line="true" fill_color="0" line_color="a9a9a9" show="true"/>
+            <XGD_CLOCK_CAPABLE_IO_PAD draw_fill="true" draw_line="true" fill_color="7d9eff" line_color="ff0000" show="true"/>
+            <XGD_CLOCK_MANAGEMENT draw_fill="false" draw_line="true" fill_color="0" line_color="aa7c30" show="true"/>
+            <XGD_CLOCK_RESOURCE draw_fill="false" draw_line="true" fill_color="0" line_color="7c4a0b" show="true"/>
+            <XGD_CMAC draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_CONNBOXES draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_CONNBOX_DIRECTION draw_fill="false" draw_line="true" fill_color="0" line_color="a5a5a5" show="true"/>
+            <XGD_CONNBOX_JUMPERS draw_fill="false" draw_line="true" fill_color="0" line_color="828282" show="true"/>
+            <XGD_CONNBOX_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_CONNBOX_PORTS draw_fill="false" draw_line="true" fill_color="0" line_color="6e6e6e" show="true"/>
+            <XGD_DDRMC draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_DSP draw_fill="false" draw_line="true" fill_color="0" line_color="3c00" show="true"/>
+            <XGD_GLOBAL_CLOCK_IO_PAD draw_fill="true" draw_line="true" fill_color="696969" line_color="ff0000" show="true"/>
+            <XGD_GTX draw_fill="true" draw_line="true" fill_color="696969" line_color="3d2d12" show="true"/>
+            <XGD_HARD_IP_BLOCK_0 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_1 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_10 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_11 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_12 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_13 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_14 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_15 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_16 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_17 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_18 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_19 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_2 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_20 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_21 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_22 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_23 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_24 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_25 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_26 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_27 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_28 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_29 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_3 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_30 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_31 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_32 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_33 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_34 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_35 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_36 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_37 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_38 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_39 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_4 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_40 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_41 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_42 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_43 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_44 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_45 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_46 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_47 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_48 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_49 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_5 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_50 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_51 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_52 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_53 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_54 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_55 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_56 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_57 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_58 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_59 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_6 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_60 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_61 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_62 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_63 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_7 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_8 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_HARD_IP_BLOCK_9 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_ILKN draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_IO_BANK_100 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_101 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_102 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_103 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_104 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_105 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_106 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_107 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_108 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_109 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_110 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_111 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_112 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_113 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_114 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_115 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_116 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_117 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_118 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_119 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_120 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_121 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_122 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_123 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_124 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_125 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_126 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_127 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_64 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_65 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_66 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_67 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_68 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_69 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_70 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_71 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_72 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_73 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_74 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_75 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_76 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_77 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_78 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_79 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_80 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_81 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_82 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_83 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_84 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_85 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_86 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_87 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_88 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_89 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_90 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_91 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_92 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_93 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_94 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_95 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_96 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_97 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_98 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BANK_99 draw_fill="false" draw_line="false" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BELS draw_fill="false" draw_line="true" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BEL_OUTLINE draw_fill="false" draw_line="true" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BEL_PINS draw_fill="false" draw_line="true" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_BEL_PIN_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="0" show="true"/>
+            <XGD_IO_LOGIC draw_fill="false" draw_line="true" fill_color="0" line_color="5a5130" show="true"/>
+            <XGD_IO_PAD draw_fill="true" draw_line="true" fill_color="696969" line_color="80" show="true"/>
+            <XGD_LAGUNA draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_LOCALWIRES draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_LONGWIRES draw_fill="false" draw_line="true" fill_color="0" line_color="646464" show="true"/>
+            <XGD_MCB draw_fill="false" draw_line="true" fill_color="0" line_color="ff00ff" show="true"/>
+            <XGD_MMCM draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_MRMAC draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_NOC draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+            <XGD_PCIE draw_fill="false" draw_line="true" fill_color="0" line_color="4d0c6f" show="true"/>
+            <XGD_PINWIRES draw_fill="false" draw_line="true" fill_color="0" line_color="505050" show="true"/>
+            <XGD_PIPS draw_fill="false" draw_line="true" fill_color="0" line_color="828282" show="true"/>
+            <XGD_PIP_JUNCTIONS draw_fill="false" draw_line="true" fill_color="0" line_color="6e6e6e" show="true"/>
+            <XGD_PROCESSORS draw_fill="false" draw_line="true" fill_color="0" line_color="2e8b57" show="true"/>
+            <XGD_RESERVED_SITE draw_fill="true" draw_line="true" fill_color="282828" line_color="282828" show="true"/>
+            <XGD_SITES draw_fill="false" draw_line="true" fill_color="0" line_color="a9a9a9" show="true"/>
+            <XGD_SITE_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_SITE_NETS draw_fill="false" draw_line="true" fill_color="0" line_color="505050" show="true"/>
+            <XGD_SITE_PINS draw_fill="false" draw_line="true" fill_color="0" line_color="a9a9a9" show="true"/>
+            <XGD_SITE_PIN_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="a9a9a9" show="true"/>
+            <XGD_SLICEL draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_SLICEM draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_SLICESR draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_SLICEX draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_SWITCHBOXES draw_fill="false" draw_line="true" fill_color="0" line_color="3c3c3c" show="true"/>
+            <XGD_SWITCHBOX_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_SYSMON draw_fill="false" draw_line="true" fill_color="0" line_color="a9a9a9" show="true"/>
+            <XGD_TEMAC draw_fill="false" draw_line="true" fill_color="0" line_color="ff00" show="true"/>
+            <XGD_TEST_SITE draw_fill="true" draw_line="true" fill_color="282828" line_color="282828" show="true"/>
+            <XGD_TIEOFF draw_fill="false" draw_line="true" fill_color="0" line_color="323232" show="true"/>
+            <XGD_TILE_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="54708b" show="true"/>
+            <XGD_TILE_OUTLINE draw_fill="false" draw_line="true" fill_color="0" line_color="6e" show="true"/>
+            <XGD_UNBONDED_IO_PAD draw_fill="true" draw_line="true" fill_color="6e3b3b" line_color="6e3b3b" show="true"/>
+            <XGD_WIRE_LABELS draw_fill="false" draw_line="true" fill_color="0" line_color="808080" show="true"/>
+            <XGD_XIPHY draw_fill="false" draw_line="true" fill_color="0" line_color="3d2d12" show="true"/>
+        </theme2>
+    </xgd_theme_object_display>
+    <nocxgd_objs_display5>
+        <XGD_ME_CHANNEL draw_fill="false" draw_line="true" fill_color="ffffff" line_color="6e689d" show="true"/>
+        <XGD_ME_NOCSHIM draw_fill="false" draw_line="true" fill_color="ffffff" line_color="af42ae" show="true"/>
+        <XGD_ME_PLSHIM draw_fill="false" draw_line="true" fill_color="ffffff" line_color="af42ae" show="true"/>
+        <XGD_NOC_BOUNDARY draw_fill="false" draw_line="true" fill_color="0" line_color="ffffff" show="true"/>
+        <XGD_NOC_DDRC draw_fill="false" draw_line="true" fill_color="ffffff" line_color="209e10" show="true"/>
+        <XGD_NOC_DRAWING_BLOCK_DDRC draw_fill="true" draw_line="true" fill_color="3f404c" line_color="0" show="true"/>
+        <XGD_NOC_DRAWING_BLOCK_ME draw_fill="true" draw_line="true" fill_color="3f404c" line_color="0" show="true"/>
+        <XGD_NOC_DRAWING_BLOCK_PL draw_fill="true" draw_line="true" fill_color="3f404c" line_color="0" show="true"/>
+        <XGD_NOC_DRAWING_BLOCK_PL_NMU draw_fill="true" draw_line="true" fill_color="3f404c" line_color="0" show="true"/>
+        <XGD_NOC_DRAWING_BLOCK_PL_NSU draw_fill="true" draw_line="true" fill_color="3f404c" line_color="0" show="true"/>
+        <XGD_NOC_DRAWING_BLOCK_PS draw_fill="true" draw_line="true" fill_color="3f404c" line_color="0" show="true"/>
+        <XGD_NOC_MASTER draw_fill="false" draw_line="true" fill_color="ffffff" line_color="3289c3" show="true"/>
+        <XGD_NOC_PORT draw_fill="false" draw_line="true" fill_color="ffffff" line_color="575d6c" show="true"/>
+        <XGD_NOC_SLAVE draw_fill="false" draw_line="true" fill_color="ffffff" line_color="209e10" show="true"/>
+        <XGD_NOC_SWITCH draw_fill="false" draw_line="true" fill_color="ffffff" line_color="575d6c" show="true"/>
+        <XGD_NOC_TEXT draw_fill="false" draw_line="true" fill_color="0" line_color="ffffff" show="true"/>
+        <XGD_NOC_WIRE draw_fill="false" draw_line="true" fill_color="0" line_color="575d6c" show="true"/>
+    </nocxgd_objs_display5>
+    <BUNDLE_NET_UPGRADED>
+        <BUNDLE_NET_UPGRADED-0 color="a10046" from="1" show="false" to="1" width="1"/>
+        <BUNDLE_NET_UPGRADED-1 color="996600" from="2" show="true" to="20" width="2"/>
+        <BUNDLE_NET_UPGRADED-2 color="ff6600" from="21" show="true" to="60" width="4"/>
+        <BUNDLE_NET_UPGRADED-3 color="ff0000" from="61" show="true" to="200" width="6"/>
+        <BUNDLE_NET_UPGRADED-4 color="cc" from="201" show="true" to="500" width="8"/>
+        <BUNDLE_NET_UPGRADED-5 color="33cc00" from="501" show="true" to="1000" width="10"/>
+        <BUNDLE_NET_UPGRADED-6 color="0" from="1001" show="true" to="2147483647" width="12"/>
+    </BUNDLE_NET_UPGRADED>
+    <metric_display>
+        <METRIC_ESTIMATED_SLICE_UTILIZATION_PER_PBLOCK>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="70f"/>
+            <METRIC_BIN_2 color="ffff99" from="70f" show="true" to="85f"/>
+            <METRIC_BIN_3 color="ff9900" from="85f" show="true" to="100f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="100f" show="true" to="Infinity"/>
+        </METRIC_ESTIMATED_SLICE_UTILIZATION_PER_PBLOCK>
+        <METRIC_FF_UTILIZATION_PER_CLB>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="70f"/>
+            <METRIC_BIN_2 color="ffff99" from="70f" show="true" to="85f"/>
+            <METRIC_BIN_3 color="ff9900" from="85f" show="true" to="100f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="100f" show="true" to="Infinity"/>
+        </METRIC_FF_UTILIZATION_PER_CLB>
+        <METRIC_FF_UTILIZATION_PER_CLOCK_REGION>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="33.333f"/>
+            <METRIC_BIN_2 color="ffff99" from="33.333f" show="true" to="66.667f"/>
+            <METRIC_BIN_3 color="ff9900" from="66.667f" show="true" to="100f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="100f" show="true" to="Infinity"/>
+        </METRIC_FF_UTILIZATION_PER_CLOCK_REGION>
+        <METRIC_FF_UTILIZATION_PER_PBLOCK>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="70f"/>
+            <METRIC_BIN_2 color="ffff99" from="70f" show="true" to="85f"/>
+            <METRIC_BIN_3 color="ff9900" from="85f" show="true" to="100f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="100f" show="true" to="Infinity"/>
+        </METRIC_FF_UTILIZATION_PER_PBLOCK>
+        <METRIC_HORIZONTAL_ROUTING_CONGESTION_PER_CLB>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="true" to="66.667f"/>
+            <METRIC_BIN_2 color="febfbf" from="66.667f" show="true" to="133.333f"/>
+            <METRIC_BIN_3 color="fd7f7f" from="133.333f" show="true" to="200f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="200f" show="true" to="Infinity"/>
+        </METRIC_HORIZONTAL_ROUTING_CONGESTION_PER_CLB>
+        <METRIC_HORIZONTAL_ROUTING_CONGESTION_PER_CLB_NEW>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="70f"/>
+            <METRIC_BIN_2 color="ffff99" from="70f" show="true" to="80f"/>
+            <METRIC_BIN_3 color="ffff00" from="80f" show="true" to="90f"/>
+            <METRIC_BIN_4 color="ffcc00" from="90f" show="true" to="100f"/>
+            <METRIC_BIN_5 color="ff9900" from="100f" show="true" to="110f"/>
+            <METRIC_BIN_6 color="ff6600" from="110f" show="true" to="120f"/>
+            <METRIC_BIN_7 color="ff0000" from="120f" show="true" to="Infinity"/>
+        </METRIC_HORIZONTAL_ROUTING_CONGESTION_PER_CLB_NEW>
+        <METRIC_INTERCONNECT_CONGESTION_LEVEL>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="0f"/>
+            <METRIC_BIN_2 color="ffff99" from="1f" show="true" to="1f"/>
+            <METRIC_BIN_3 color="ffff00" from="2f" show="true" to="2f"/>
+            <METRIC_BIN_4 color="ffcc00" from="3f" show="true" to="3f"/>
+            <METRIC_BIN_5 color="ff9900" from="4f" show="true" to="4f"/>
+            <METRIC_BIN_6 color="ff6600" from="5f" show="true" to="5f"/>
+            <METRIC_BIN_7 color="ff00ff" from="6f" show="true" to="6f"/>
+            <METRIC_BIN_8 color="ff0099" from="7f" show="true" to="7f"/>
+            <METRIC_BIN_9 color="ff0000" from="8f" show="true" to="8f"/>
+        </METRIC_INTERCONNECT_CONGESTION_LEVEL>
+        <METRIC_INTERCONNECT_DENSITY>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="50f"/>
+            <METRIC_BIN_2 color="ffff99" from="50f" show="true" to="60f"/>
+            <METRIC_BIN_3 color="ffff00" from="60f" show="true" to="70f"/>
+            <METRIC_BIN_4 color="ffcc00" from="70f" show="true" to="80f"/>
+            <METRIC_BIN_5 color="ff9900" from="80f" show="true" to="90f"/>
+            <METRIC_BIN_6 color="ff6600" from="90f" show="true" to="100f"/>
+            <METRIC_BIN_7 color="ff0000" from="100f" show="true" to="Infinity"/>
+        </METRIC_INTERCONNECT_DENSITY>
+        <METRIC_LUT_UTILIZATION_PER_CLB>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="70f"/>
+            <METRIC_BIN_2 color="ffff99" from="70f" show="true" to="85f"/>
+            <METRIC_BIN_3 color="ff9900" from="85f" show="true" to="100f"/>
+            <METRIC_BIN_4 color="ff0000" from="100f" show="true" to="Infinity"/>
+        </METRIC_LUT_UTILIZATION_PER_CLB>
+        <METRIC_LUT_UTILIZATION_PER_CLOCK_REGION>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="33.333f"/>
+            <METRIC_BIN_2 color="ffff99" from="33.333f" show="true" to="66.667f"/>
+            <METRIC_BIN_3 color="ff9900" from="66.667f" show="true" to="100f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="100f" show="true" to="Infinity"/>
+        </METRIC_LUT_UTILIZATION_PER_CLOCK_REGION>
+        <METRIC_LUT_UTILIZATION_PER_PBLOCK>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="70f"/>
+            <METRIC_BIN_2 color="ffff99" from="70f" show="true" to="85f"/>
+            <METRIC_BIN_3 color="ff9900" from="85f" show="true" to="100f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="100f" show="true" to="Infinity"/>
+        </METRIC_LUT_UTILIZATION_PER_PBLOCK>
+        <METRIC_MIN_SLACK_PER_PBLOCK>
+            <METRIC_BIN_1 color="ff0000" from="-Infinity" show="true" to="-2.5f"/>
+            <METRIC_BIN_2 color="ff0000" from="-2.5f" show="true" to="0f"/>
+            <METRIC_BIN_3 color="ff9900" from="0f" show="true" to="1f"/>
+            <METRIC_BIN_4 color="ffff99" from="1f" show="true" to="2.5f"/>
+            <METRIC_BIN_5 color="ffffff" from="2.5f" show="false" to="Infinity"/>
+        </METRIC_MIN_SLACK_PER_PBLOCK>
+        <METRIC_MIN_SLACK_PER_PLACED_BEL>
+            <METRIC_BIN_1 color="ff0000" from="-Infinity" show="true" to="-2.5f"/>
+            <METRIC_BIN_2 color="ff0000" from="-2.5f" show="true" to="0f"/>
+            <METRIC_BIN_3 color="ff9900" from="0f" show="true" to="1f"/>
+            <METRIC_BIN_4 color="ffff99" from="1f" show="true" to="2.5f"/>
+            <METRIC_BIN_5 color="ffffff" from="2.5f" show="false" to="Infinity"/>
+        </METRIC_MIN_SLACK_PER_PLACED_BEL>
+        <METRIC_PBLOCK_BOUNDARY-CROSSING_NET_COUNT>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="50f"/>
+            <METRIC_BIN_2 color="ffff99" from="50f" show="true" to="100f"/>
+            <METRIC_BIN_3 color="ff9900" from="100f" show="true" to="150f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="150f" show="true" to="Infinity"/>
+        </METRIC_PBLOCK_BOUNDARY-CROSSING_NET_COUNT>
+        <METRIC_TOTAL_NEGATIVE_SLACK_PER_PBLOCK>
+            <METRIC_BIN_1 color="ff0000" from="-Infinity" show="true" to="-900f"/>
+            <METRIC_BIN_2 color="ff0000" from="-900f" show="true" to="-600f"/>
+            <METRIC_BIN_3 color="ffcc00" from="-600f" show="true" to="-300f"/>
+            <METRIC_BIN_4 color="ffff99" from="-300f" show="true" to="0f"/>
+        </METRIC_TOTAL_NEGATIVE_SLACK_PER_PBLOCK>
+        <METRIC_VERTICAL_ROUTING_CONGESTION_PER_CLB>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="true" to="66.667f"/>
+            <METRIC_BIN_2 color="febfbf" from="66.667f" show="true" to="133.333f"/>
+            <METRIC_BIN_3 color="fd7f7f" from="133.333f" show="true" to="200f"/>
+            <METRIC_BIN_4 color="fc3f3f" from="200f" show="true" to="Infinity"/>
+        </METRIC_VERTICAL_ROUTING_CONGESTION_PER_CLB>
+        <METRIC_VERTICAL_ROUTING_CONGESTION_PER_CLB_NEW>
+            <METRIC_BIN_1 color="ffffff" from="0f" show="false" to="70f"/>
+            <METRIC_BIN_2 color="ffff99" from="70f" show="true" to="80f"/>
+            <METRIC_BIN_3 color="ffff00" from="80f" show="true" to="90f"/>
+            <METRIC_BIN_4 color="ffcc00" from="90f" show="true" to="100f"/>
+            <METRIC_BIN_5 color="ff9900" from="100f" show="true" to="110f"/>
+            <METRIC_BIN_6 color="ff6600" from="110f" show="true" to="120f"/>
+            <METRIC_BIN_7 color="ff0000" from="120f" show="true" to="Infinity"/>
+        </METRIC_VERTICAL_ROUTING_CONGESTION_PER_CLB_NEW>
+    </metric_display>
+    <noc_heatmap_display>
+        <NOC_HEATMAP_NOC_CHANNEL_BANDWIDTH_PERCENT_USAGE>
+            <NOC_HEATMAP_BIN_1 color="a0ff" from="0f" show="false" to="20f"/>
+            <NOC_HEATMAP_BIN_2 color="a000" from="20f" show="false" to="40f"/>
+            <NOC_HEATMAP_BIN_3 color="ffff99" from="40f" show="false" to="60f"/>
+            <NOC_HEATMAP_BIN_4 color="ff9900" from="60f" show="false" to="80f"/>
+            <NOC_HEATMAP_BIN_5 color="fc3f3f" from="80f" show="false" to="100f"/>
+        </NOC_HEATMAP_NOC_CHANNEL_BANDWIDTH_PERCENT_USAGE>
+    </noc_heatmap_display>
+    <general_color>
+        <AIE_ARRAY_BACKGROUND_UPGRADED color="0"/>
+        <AIE_ARRAY_FOREGROUND_UPGRADED color="ffffff"/>
+        <AIE_ARRAY_MARKERS_UPGRADED color="ffff00"/>
+        <AIE_ARRAY_SELECTION_UPGRADED color="ff"/>
+        <CLOCK_INTERACTION_ANNOTATION_UPGRADED color="dde1e5"/>
+        <CLOCK_INTERACTION_AXIS_UPGRADED color="697c90"/>
+        <CLOCK_INTERACTION_GRID_UPGRADED color="dde1e5"/>
+        <CLOCK_INTERACTION_NO_PATH_UPGRADED color="0"/>
+        <CLOCK_INTERACTION_PAIR_DATAPATH_ONLY_UPGRADED color="814fb4"/>
+        <CLOCK_INTERACTION_PARTIAL_FALSE_PATH_UNSAFE_UPGRADED color="d38715"/>
+        <CLOCK_INTERACTION_PARTIAL_FALSE_PATH_UPGRADED color="18c7c7"/>
+        <CLOCK_INTERACTION_SELECTION_UPGRADED color="ffffff"/>
+        <CLOCK_INTERACTION_TICK_UPGRADED color="697c90"/>
+        <CLOCK_INTERACTION_TIMED_UNSAFE_UPGRADED color="d10000"/>
+        <CLOCK_INTERACTION_TIMED_UPGRADED color="10bc00"/>
+        <CLOCK_INTERACTION_USER_IGNORED_PATHS_UPGRADED color="7cd8"/>
+        <CODE_EDITOR_BACKGROUND_UPGRADED color="101116"/>
+        <CODE_EDITOR_BREAKPOINT_BACKGROUND_UPGRADED color="5f571e"/>
+        <CODE_EDITOR_CURSOR_COLOR_UPGRADED color="ffffff"/>
+        <CODE_EDITOR_FIND_HIGHLIGHT_BACKGROUND_UPGRADED color="445a20"/>
+        <CODE_EDITOR_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <CODE_EDITOR_LINE_HIGHLIGHT_UPGRADED color="43433e"/>
+        <CODE_EDITOR_MATCHING_WORD_HIGHLIGHT_BACKGROUND_UPGRADED color="24442b"/>
+        <CODE_EDITOR_SELECTION_BACKGROUND_UPGRADED color="563466"/>
+        <CONGESTION_LEVEL_1_UPGRADED color="ffffff"/>
+        <CONGESTION_LEVEL_2_UPGRADED color="ffff99"/>
+        <CONGESTION_LEVEL_3_UPGRADED color="ffff00"/>
+        <CONGESTION_LEVEL_4_UPGRADED color="ffcc00"/>
+        <CONGESTION_LEVEL_5_UPGRADED color="ff9900"/>
+        <CONGESTION_LEVEL_6_UPGRADED color="ff6600"/>
+        <CONGESTION_LEVEL_7_UPGRADED color="ff6666"/>
+        <CONGESTION_LEVEL_8_UPGRADED color="ff0000"/>
+        <CONSOLE_BACKGROUND_UPGRADED color="101116"/>
+        <CONSOLE_COMMAND_TEXT_UPGRADED color="74bcfb"/>
+        <CONSOLE_CURSOR_COLOR_UPGRADED color="ffffff"/>
+        <CONSOLE_ERROR_TEXT_UPGRADED color="ff1865"/>
+        <CONSOLE_FIND_HIGHLIGHT_BACKGROUND_UPGRADED color="445a20"/>
+        <CONSOLE_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <CONSOLE_MATCHING_WORD_HIGHLIGHT_BACKGROUND_UPGRADED color="24442b"/>
+        <CONSOLE_SELECTION_BACKGROUND_UPGRADED color="563466"/>
+        <CONSOLE_WARNING_TEXT_UPGRADED color="ff9020"/>
+        <GE_BACKGROUND_UPGRADED color="0"/>
+        <GE_FOREGROUND_UPGRADED color="e3e3e3"/>
+        <GE_MARKERS_UPGRADED color="ffff00"/>
+        <GE_SELECTION_UPGRADED color="ffff00"/>
+        <HIGHLIGHT_10_UPGRADED color="b16eff"/>
+        <HIGHLIGHT_11_UPGRADED color="46a466"/>
+        <HIGHLIGHT_12_UPGRADED color="caff78"/>
+        <HIGHLIGHT_13_UPGRADED color="ab47bc"/>
+        <HIGHLIGHT_14_UPGRADED color="b4602c"/>
+        <HIGHLIGHT_15_UPGRADED color="c20f8c"/>
+        <HIGHLIGHT_16_UPGRADED color="ffaa"/>
+        <HIGHLIGHT_17_UPGRADED color="ff9fe4"/>
+        <HIGHLIGHT_18_UPGRADED color="ff8019"/>
+        <HIGHLIGHT_19_UPGRADED color="26b3ff"/>
+        <HIGHLIGHT_1_UPGRADED color="fe00f6"/>
+        <HIGHLIGHT_20_UPGRADED color="e5551c"/>
+        <HIGHLIGHT_2_UPGRADED color="ffea00"/>
+        <HIGHLIGHT_3_UPGRADED color="84e413"/>
+        <HIGHLIGHT_4_UPGRADED color="246aff"/>
+        <HIGHLIGHT_5_UPGRADED color="7114d8"/>
+        <HIGHLIGHT_6_UPGRADED color="ffa358"/>
+        <HIGHLIGHT_7_UPGRADED color="ff2b2b"/>
+        <HIGHLIGHT_8_UPGRADED color="e0ff"/>
+        <HIGHLIGHT_9_UPGRADED color="c0ca33"/>
+        <HIGHLIGHT_DEFAULT_UPGRADED color="ffea00"/>
+        <HISTOGRAM_ANNOTATION_FAIL_UPGRADED color="ff6d6a"/>
+        <HISTOGRAM_ANNOTATION_PASS_UPGRADED color="a9ff5d"/>
+        <HISTOGRAM_AXIS_UPGRADED color="4c556a"/>
+        <HISTOGRAM_BACKGROUND_UPGRADED color="0"/>
+        <HISTOGRAM_FAIL_UPGRADED color="e6312d"/>
+        <HISTOGRAM_GRID_UPGRADED color="3a4151"/>
+        <HISTOGRAM_PASS_UPGRADED color="7cdb28"/>
+        <HISTOGRAM_SELECTION_UPGRADED color="ffffff"/>
+        <HISTOGRAM_TICK_UPGRADED color="4c556a"/>
+        <INST_HIER_BACKGROUND_UPGRADED color="101116"/>
+        <INST_HIER_FILL_UPGRADED color="2e446d"/>
+        <INST_HIER_FOREGROUND_UPGRADED color="5b5798"/>
+        <INST_HIER_LEAF_CELL_FILL_UPGRADED color="50306c"/>
+        <INST_HIER_LINE_UPGRADED color="0"/>
+        <INST_HIER_MARKERS_UPGRADED color="ffea00"/>
+        <INST_HIER_SELECTION_UPGRADED color="ff0055"/>
+        <INST_HIER_TEXT_UPGRADED color="e6e6e6"/>
+        <LOG_BACKGROUND_UPGRADED color="101116"/>
+        <LOG_CURSOR_COLOR_UPGRADED color="ffffff"/>
+        <LOG_FIND_HIGHLIGHT_BACKGROUND_UPGRADED color="445a20"/>
+        <LOG_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <LOG_LINE_HIGHLIGHT_UPGRADED color="43433e"/>
+        <LOG_MATCHING_WORD_HIGHLIGHT_BACKGROUND_UPGRADED color="24442b"/>
+        <LOG_SELECTION_BACKGROUND_UPGRADED color="563466"/>
+        <MARK_10_UPGRADED color="b16eff"/>
+        <MARK_11_UPGRADED color="46a466"/>
+        <MARK_12_UPGRADED color="caff78"/>
+        <MARK_13_UPGRADED color="ab47bc"/>
+        <MARK_14_UPGRADED color="b4602c"/>
+        <MARK_15_UPGRADED color="c20f8c"/>
+        <MARK_16_UPGRADED color="ffaa"/>
+        <MARK_17_UPGRADED color="ff9fe4"/>
+        <MARK_18_UPGRADED color="ff8019"/>
+        <MARK_19_UPGRADED color="26b3ff"/>
+        <MARK_1_UPGRADED color="fe00f6"/>
+        <MARK_20_UPGRADED color="e5551c"/>
+        <MARK_2_UPGRADED color="ffea00"/>
+        <MARK_3_UPGRADED color="84e413"/>
+        <MARK_4_UPGRADED color="246aff"/>
+        <MARK_5_UPGRADED color="7114d8"/>
+        <MARK_6_UPGRADED color="ffa358"/>
+        <MARK_7_UPGRADED color="ff2b2b"/>
+        <MARK_8_UPGRADED color="e0ff"/>
+        <MARK_9_UPGRADED color="c0ca33"/>
+        <MARK_DEFAULT_UPGRADED color="ffea00"/>
+        <NOCVIEW_BACKGROUND_UPGRADED color="0"/>
+        <NOCVIEW_FOREGROUND_UPGRADED color="ffffff"/>
+        <NOCVIEW_MARKERS_UPGRADED color="ffea00"/>
+        <NOCVIEW_SELECTION_UPGRADED color="ff0055"/>
+        <RSB_AXI3_CONNECTION_UPGRADED color="5b5798"/>
+        <RSB_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
+        <RSB_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
+        <RSB_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
+        <RSB_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
+        <RSB_BACKGROUND_UPGRADED color="101116"/>
+        <RSB_BUS_UPGRADED color="9633"/>
+        <RSB_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
+        <RSB_CLOCK_NET_UPGRADED color="628d30"/>
+        <RSB_COMMENT_BORDER_UPGRADED color="5b5798"/>
+        <RSB_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+        <RSB_DATA_NET_UPGRADED color="628d30"/>
+        <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+        <RSB_HIERARCHY_FILL_UPGRADED color="2e446d"/>
+        <RSB_INSTANCE_BORDER_UPGRADED color="5b5798"/>
+        <RSB_INSTANCE_NO_GRADIENT_FILL_UPGRADED color="50306c"/>
+        <RSB_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
+        <RSB_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+        <RSB_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
+        <RSB_INTERFACE_PORT_UPGRADED color="ffffff"/>
+        <RSB_INTERRUPT_NET_UPGRADED color="628d30"/>
+        <RSB_MARKERS_UPGRADED color="ffff00"/>
+        <RSB_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
+        <RSB_NET_UPGRADED color="628d30"/>
+        <RSB_PIN_TEXT_UPGRADED color="e6e6e6"/>
+        <RSB_PORT_FILL_UPGRADED color="f0f0f0"/>
+        <RSB_PORT_TEXT_UPGRADED color="e6e6e6"/>
+        <RSB_PORT_UPGRADED color="2a5e6f"/>
+        <RSB_RESET_NET_UPGRADED color="628d30"/>
+        <RSB_SELECTION_UPGRADED color="ff0055"/>
+        <SCH_ATTRIBUTE_UPGRADED color="ffffff"/>
+        <SCH_BACKGROUND_UPGRADED color="101116"/>
+        <SCH_BUS_RIPPER_UPGRADED color="ffffff"/>
+        <SCH_BUS_UPGRADED color="9633"/>
+        <SCH_CELL_TEXT_UPGRADED color="e6e6e6"/>
+        <SCH_EXPAND_HIER_COLOR_UPGRADED color="101116"/>
+        <SCH_FILL_0_UPGRADED color="50306c"/>
+        <SCH_FILL_1_UPGRADED color="2e446d"/>
+        <SCH_FILL_2_UPGRADED color="f0f0f0"/>
+        <SCH_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <SCH_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
+        <SCH_INST_0_UPGRADED color="5b5798"/>
+        <SCH_INST_1_UPGRADED color="5b5798"/>
+        <SCH_INST_2_UPGRADED color="5b5798"/>
+        <SCH_MARKERS_UPGRADED color="ffff00"/>
+        <SCH_NEG_SLACK_UPGRADED color="e53935"/>
+        <SCH_NET_UPGRADED color="628d30"/>
+        <SCH_PIN_TEXT_UPGRADED color="e6e6e6"/>
+        <SCH_PORT_TEXT_UPGRADED color="e6e6e6"/>
+        <SCH_PORT_UPGRADED color="ffffff"/>
+        <SCH_SELECTION_UPGRADED color="ff0055"/>
+        <VSI_SYS_AXI3_CONNECTION_UPGRADED color="5b5798"/>
+        <VSI_SYS_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
+        <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
+        <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
+        <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
+        <VSI_SYS_BACKGROUND_UPGRADED color="101116"/>
+        <VSI_SYS_BUS_UPGRADED color="9633"/>
+        <VSI_SYS_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
+        <VSI_SYS_CLOCK_NET_UPGRADED color="628d30"/>
+        <VSI_SYS_COMMENT_BORDER_UPGRADED color="5b5798"/>
+        <VSI_SYS_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+        <VSI_SYS_DATA_NET_UPGRADED color="628d30"/>
+        <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+        <VSI_SYS_HIERARCHY_FILL_UPGRADED color="2e446d"/>
+        <VSI_SYS_INSTANCE_BORDER_UPGRADED color="5b5798"/>
+        <VSI_SYS_INSTANCE_FILL_UPGRADED color="50306c"/>
+        <VSI_SYS_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
+        <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+        <VSI_SYS_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
+        <VSI_SYS_INTERFACE_PORT_UPGRADED color="ffffff"/>
+        <VSI_SYS_INTERRUPT_NET_UPGRADED color="628d30"/>
+        <VSI_SYS_MARKERS_UPGRADED color="ffff00"/>
+        <VSI_SYS_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
+        <VSI_SYS_NET_UPGRADED color="628d30"/>
+        <VSI_SYS_PIN_TEXT_UPGRADED color="e6e6e6"/>
+        <VSI_SYS_PORT_FILL_UPGRADED color="f0f0f0"/>
+        <VSI_SYS_PORT_TEXT_UPGRADED color="e6e6e6"/>
+        <VSI_SYS_PORT_UPGRADED color="2a5e6f"/>
+        <VSI_SYS_RESET_NET_UPGRADED color="628d30"/>
+        <VSI_SYS_SELECTION_UPGRADED color="ff0055"/>
+        <WINDOW_BACKGROUND_UPGRADED color="101116"/>
+        <WINDOW_FOREGROUND_UPGRADED color="e6e6e6"/>
+        <WORLDVIEW_VIEWABLE_AREA_UPGRADED color="ffff00"/>
+    </general_color>
+    <general_graphical_color>
+        <theme1 value="1">
+            <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="646464"/>
+            <SCH_CELL_TEXT_UPGRADED color="101116"/>
+            <VSI_SYS_INSTANCE_TEXT_UPGRADED color="0"/>
+            <VSI_SYS_INSTANCE_BORDER_UPGRADED color="646464"/>
+            <RSB_MARKERS_UPGRADED color="ffff00"/>
+            <RSB_CLOCK_ENABLE_NET_UPGRADED color="8bc34a"/>
+            <RSB_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
+            <SCH_FOREGROUND_UPGRADED color="101116"/>
+            <SCH_BUS_UPGRADED color="9633"/>
+            <RSB_INTERFACE_PORT_FILL_UPGRADED color="ddd4d0"/>
+            <VSI_SYS_INTERRUPT_NET_UPGRADED color="222222"/>
+            <SCH_EXPAND_HIER_COLOR_UPGRADED color="ffffff"/>
+            <RSB_INSTANCE_NO_GRADIENT_FILL_UPGRADED color="e5c7ff"/>
+            <VSI_SYS_SELECTION_UPGRADED color="ba8b25"/>
+            <RSB_CLOCK_NET_UPGRADED color="8bc34a"/>
+            <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="646464"/>
+            <VSI_SYS_INSTANCE_FILL_UPGRADED color="d2d2d2"/>
+            <SCH_INST_1_UPGRADED color="575d6c"/>
+            <SCH_PIN_TEXT_UPGRADED color="101116"/>
+            <RSB_AXI3_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_BUS_UPGRADED color="469cb9"/>
+            <VSI_SYS_CLOCK_ENABLE_NET_UPGRADED color="222222"/>
+            <RSB_PORT_TEXT_UPGRADED color="101116"/>
+            <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="fafafa"/>
+            <RSB_PORT_FILL_UPGRADED color="ddd4d0"/>
+            <VSI_SYS_BUS_UPGRADED color="505050"/>
+            <VSI_SYS_CLOCK_NET_UPGRADED color="222222"/>
+            <SCH_BACKGROUND_UPGRADED color="ffffff"/>
+            <VSI_SYS_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
+            <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="ffffff"/>
+            <SCH_PORT_UPGRADED color="0"/>
+            <RSB_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_RESET_NET_UPGRADED color="8bc34a"/>
+            <VSI_SYS_NET_UPGRADED color="222222"/>
+            <VSI_SYS_RESET_NET_UPGRADED color="222222"/>
+            <RSB_INSTANCE_BORDER_UPGRADED color="575d6c"/>
+            <SCH_SELECTION_UPGRADED color="396cef"/>
+            <RSB_PIN_TEXT_UPGRADED color="101116"/>
+            <VSI_SYS_COMMENT_BORDER_UPGRADED color="0"/>
+            <VSI_SYS_PORT_TEXT_UPGRADED color="0"/>
+            <VSI_SYS_HIERARCHY_FILL_UPGRADED color="afafaf"/>
+            <VSI_SYS_PIN_TEXT_UPGRADED color="0"/>
+            <SCH_FILL_1_UPGRADED color="cde5ff"/>
+            <SCH_ATTRIBUTE_UPGRADED color="0"/>
+            <RSB_COMMENT_BORDER_UPGRADED color="0"/>
+            <RSB_SELECTION_UPGRADED color="396cef"/>
+            <VSI_SYS_INTERFACE_PORT_UPGRADED color="323232"/>
+            <SCH_MARKERS_UPGRADED color="ffff00"/>
+            <RSB_INTERFACE_PORT_UPGRADED color="2a5e6f"/>
+            <RSB_BACKGROUND_UPGRADED color="ffffff"/>
+            <VSI_SYS_INTERFACE_PORT_FILL_UPGRADED color="dddddd"/>
+            <SCH_FILL_0_UPGRADED color="e5c7ff"/>
+            <RSB_INTERRUPT_NET_UPGRADED color="8bc34a"/>
+            <VSI_SYS_AXI3_CONNECTION_UPGRADED color="646464"/>
+            <VSI_SYS_AXI4LITE_CONNECTION_UPGRADED color="646464"/>
+            <SCH_INST_0_UPGRADED color="575d6c"/>
+            <RSB_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
+            <SCH_INST_2_UPGRADED color="0"/>
+            <SCH_PORT_TEXT_UPGRADED color="101116"/>
+            <RSB_PORT_UPGRADED color="0"/>
+            <VSI_SYS_COMMENT_TEXT_UPGRADED color="0"/>
+            <RSB_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+            <SCH_BUS_RIPPER_UPGRADED color="0"/>
+            <VSI_SYS_DATA_NET_UPGRADED color="222222"/>
+            <VSI_SYS_MARKERS_UPGRADED color="ffff00"/>
+            <VSI_SYS_PORT_FILL_UPGRADED color="d4d4d4"/>
+            <SCH_NEG_SLACK_UPGRADED color="e53935"/>
+            <SCH_INSTANCE_TEXT_UPGRADED color="101116"/>
+            <RSB_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
+            <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="646464"/>
+            <VSI_SYS_PORT_UPGRADED color="222222"/>
+            <SCH_NET_UPGRADED color="8bc34a"/>
+            <RSB_HIERARCHY_FILL_UPGRADED color="cde5ff"/>
+            <RSB_INSTANCE_TEXT_UPGRADED color="101116"/>
+            <VSI_SYS_BACKGROUND_UPGRADED color="ffffff"/>
+            <RSB_COMMENT_TEXT_UPGRADED color="101116"/>
+            <RSB_DATA_NET_UPGRADED color="8bc34a"/>
+            <SCH_FILL_2_UPGRADED color="f0f0f0"/>
+            <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="646464"/>
+            <RSB_NET_UPGRADED color="8bc34a"/>
+        </theme1>
+        <theme2 value="2">
+            <VSI_SYS_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+            <PACKAGE_SELECTION_UPGRADED color="ffffff"/>
+            <WAVEFORM_AREA_FOREGROUND_UPGRADED color="e6e6e6"/>
+            <SCH_CELL_TEXT_UPGRADED color="e6e6e6"/>
+            <WAVEFORM_VALUE_WEAK_UPGRADED color="7cdb28"/>
+            <WAVEFORM_GRID_LINES_UPGRADED color="ebeef0"/>
+            <SCH_FOREGROUND_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_INTERRUPT_NET_UPGRADED color="628d30"/>
+            <WAVEFORM_VALUE_DONT_CARE_UPGRADED color="ebeef0"/>
+            <SCH_EXPAND_HIER_COLOR_UPGRADED color="101116"/>
+            <WAVEFORM_SELECTED_AREA_ITEM_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_SELECTION_UPGRADED color="ff0055"/>
+            <VSI_SYS_INSTANCE_FILL_UPGRADED color="50306c"/>
+            <SCH_INST_1_UPGRADED color="5b5798"/>
+            <SCH_PIN_TEXT_UPGRADED color="e6e6e6"/>
+            <RSB_AXI3_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_PORT_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_CLOCK_NET_UPGRADED color="628d30"/>
+            <DEVICE_SELECTION_UPGRADED color="ffffff"/>
+            <RSB_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+            <SCH_PORT_UPGRADED color="ffffff"/>
+            <RSB_RESET_NET_UPGRADED color="628d30"/>
+            <VSI_SYS_RESET_NET_UPGRADED color="628d30"/>
+            <WAVEFORM_CURSOR_UPGRADED color="ffea00"/>
+            <SCH_SELECTION_UPGRADED color="ff0055"/>
+            <VSI_SYS_PORT_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_PIN_TEXT_UPGRADED color="e6e6e6"/>
+            <SCH_FILL_1_UPGRADED color="2e446d"/>
+            <RSB_SELECTION_UPGRADED color="ff0055"/>
+            <WAVEFORM_CAPTURE_WINDOW_ODD_UPGRADED color="ffffff"/>
+            <VSI_SYS_INTERFACE_PORT_UPGRADED color="ffffff"/>
+            <SCH_MARKERS_UPGRADED color="ffff00"/>
+            <WAVEFORM_VALUE_UNINITIALIZED_UPGRADED color="ffa500"/>
+            <RSB_INTERFACE_PORT_UPGRADED color="ffffff"/>
+            <VSI_SYS_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
+            <VSI_SYS_AXI3_CONNECTION_UPGRADED color="5b5798"/>
+            <WAVEFORM_NAME_VALUE_AREA_BACKGROUND_UPGRADED color="101116"/>
+            <WAVEFORM_TEXT_UPGRADED color="e6e6e6"/>
+            <SCH_INST_2_UPGRADED color="5b5798"/>
+            <SCH_PORT_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+            <WAVEFORM_DIVIDER_BACKGROUND_UPGRADED color="8080ff"/>
+            <RSB_INTERFACE_CONNECTION_UPGRADED color="5b5798"/>
+            <WAVEFORM_AREA_BACKGROUND_UPGRADED color="0"/>
+            <VSI_SYS_DATA_NET_UPGRADED color="628d30"/>
+            <WAVEFORM_VALUE_HIZ_UPGRADED color="ff"/>
+            <DEVICE_FOREGROUND_UPGRADED color="ffffff"/>
+            <SCH_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
+            <PACKAGE_FOREGROUND_UPGRADED color="e6e6e6"/>
+            <WAVEFORM_TRIGGER_POINT_UPGRADED color="bd1a1a"/>
+            <VSI_SYS_PORT_UPGRADED color="2a5e6f"/>
+            <SCH_NET_UPGRADED color="628d30"/>
+            <DEVICE_MARKERS_UPGRADED color="ffff00"/>
+            <RSB_HIERARCHY_FILL_UPGRADED color="2e446d"/>
+            <VSI_SYS_BACKGROUND_UPGRADED color="101116"/>
+            <RSB_DATA_NET_UPGRADED color="628d30"/>
+            <SCH_FILL_2_UPGRADED color="f0f0f0"/>
+            <VSI_SYS_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
+            <VSI_SYS_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_INSTANCE_BORDER_UPGRADED color="5b5798"/>
+            <RSB_MARKERS_UPGRADED color="ffff00"/>
+            <RSB_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
+            <RSB_AXI4MM_CONNECTION_UPGRADED color="5b5798"/>
+            <SCH_BUS_UPGRADED color="9633"/>
+            <RSB_INTERFACE_PORT_FILL_UPGRADED color="f0f0f0"/>
+            <WAVEFORM_TIME_SCALE_UPGRADED color="ebeef0"/>
+            <RSB_INSTANCE_NO_GRADIENT_FILL_UPGRADED color="50306c"/>
+            <RSB_CLOCK_NET_UPGRADED color="628d30"/>
+            <VSI_SYS_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_AXI4STREAM_CONNECTION_UPGRADED color="5b5798"/>
+            <RSB_BUS_UPGRADED color="9633"/>
+            <VSI_SYS_CLOCK_ENABLE_NET_UPGRADED color="628d30"/>
+            <VSI_SYS_EXPANDED_HIERARCHY_FILL_UPGRADED color="101116"/>
+            <RSB_PORT_FILL_UPGRADED color="f0f0f0"/>
+            <WAVEFORM_CAPTURE_WINDOW_EVEN_UPGRADED color="0"/>
+            <VSI_SYS_BUS_UPGRADED color="9633"/>
+            <SCH_BACKGROUND_UPGRADED color="101116"/>
+            <VSI_SYS_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
+            <WAVEFORM_VALUE_UNKNOWN_UPGRADED color="bd1a1a"/>
+            <RSB_AXIINI_CONNECTION_UPGRADED color="5b5798"/>
+            <VSI_SYS_NET_UPGRADED color="628d30"/>
+            <RSB_INSTANCE_BORDER_UPGRADED color="5b5798"/>
+            <RSB_PIN_TEXT_UPGRADED color="e6e6e6"/>
+            <VSI_SYS_COMMENT_BORDER_UPGRADED color="5b5798"/>
+            <VSI_SYS_HIERARCHY_FILL_UPGRADED color="2e446d"/>
+            <WAVEFORM_NAME_VALUE_AREA_TEXT_UPGRADED color="e6e6e6"/>
+            <WAVEFORM_AREA_TEXT_UPGRADED color="e6e6e6"/>
+            <SCH_ATTRIBUTE_UPGRADED color="ffffff"/>
+            <RSB_COMMENT_BORDER_UPGRADED color="5b5798"/>
+            <WAVEFORM_BACKGROUND_UPGRADED color="0"/>
+            <DEVICE_BACKGROUND_UPGRADED color="0"/>
+            <PACKAGE_MARKERS_UPGRADED color="ffea00"/>
+            <WAVEFORM_FLOATING_RULER_UPGRADED color="e1cf00"/>
+            <RSB_BACKGROUND_UPGRADED color="101116"/>
+            <PACKAGE_BACKGROUND_UPGRADED color="0"/>
+            <SCH_FILL_0_UPGRADED color="50306c"/>
+            <RSB_INTERRUPT_NET_UPGRADED color="628d30"/>
+            <VSI_SYS_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
+            <SCH_INST_0_UPGRADED color="5b5798"/>
+            <RSB_MOVE_INSTANCE_COLOR_UPGRADED color="c89900"/>
+            <RSB_PORT_UPGRADED color="2a5e6f"/>
+            <SCH_BUS_RIPPER_UPGRADED color="ffffff"/>
+            <VSI_SYS_MARKERS_UPGRADED color="ffff00"/>
+            <VSI_SYS_PORT_FILL_UPGRADED color="f0f0f0"/>
+            <SCH_NEG_SLACK_UPGRADED color="e53935"/>
+            <RSB_AXI4LITE_CONNECTION_UPGRADED color="5b5798"/>
+            <WAVEFORM_DEFAULT_UPGRADED color="7cdb28"/>
+            <WAVEFORM_ASSOCIATION_DEPENDENCY_LINE_UPGRADED color="ffff"/>
+            <WAVEFORM_MARKER_UPGRADED color="ff0055"/>
+            <RSB_INSTANCE_TEXT_UPGRADED color="e6e6e6"/>
+            <RSB_COMMENT_TEXT_UPGRADED color="e6e6e6"/>
+            <RSB_NET_UPGRADED color="628d30"/>
+        </theme2>
+    </general_graphical_color>
+    <general>
+        <code_editor_syntax_styles_UPGRADED>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED>
+        <code_editor_syntax_styles_UPGRADED_Generic>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED_Generic>
+        <code_editor_syntax_styles_UPGRADED_Verilog>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED_Verilog>
+        <code_editor_syntax_styles_UPGRADED_VHDL>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED_VHDL>
+        <code_editor_syntax_styles_UPGRADED_XDC>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED_XDC>
+        <code_editor_syntax_styles_UPGRADED_Tcl>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED_Tcl>
+        <code_editor_syntax_styles_UPGRADED_TSM>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED_TSM>
+        <code_editor_syntax_styles_UPGRADED_SyntaxCheck>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="0"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="1"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-10791016" stripe_color="null" style_index="2"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-4161281" stripe_color="null" style_index="3"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-4161281" stripe_color="null" style_index="4"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-65451" stripe_color="null" style_index="5"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="0" foreground_color="-9126661" stripe_color="null" style_index="6"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-2786305" stripe_color="null" style_index="7"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-6226144" stripe_color="null" style_index="8"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-1" stripe_color="null" style_index="9"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="1" foreground_color="-59291" stripe_color="null" style_index="10"/>
+            <syntax_style background_color="null" effect="2" effect_color="-59291" font_style="0" foreground_color="null" stripe_color="-59291" style_index="11"/>
+            <syntax_style background_color="-12767982" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="-12767982" style_index="12"/>
+            <syntax_style background_color="-14605781" effect="0" effect_color="null" font_style="0" foreground_color="-1" stripe_color="null" style_index="13"/>
+            <syntax_style background_color="-11127706" effect="0" effect_color="null" font_style="0" foreground_color="-14934232" stripe_color="-11127706" style_index="14"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="15"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="16"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="17"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="18"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="19"/>
+            <syntax_style background_color="null" effect="0" effect_color="null" font_style="2" foreground_color="-14934232" stripe_color="null" style_index="20"/>
+        </code_editor_syntax_styles_UPGRADED_SyntaxCheck>
+        <CODE_EDITOR_FONT font_name="Monospaced" font_size="13"/>
+        <RECENT_FILES/>
+        <RECENT_DIRECTORIES/>
+        <RECENT_PROJECTS/>
+        <RECENT_CHECKPOINTS/>
+        <RECENT_IP/>
+        <RECENT_HARDWARE_SERVERS/>
+        <RECENT_HARDWARE_TARGETS/>
+        <RECENT_VXC_SERVERS/>
+        <BASE_THEME_UPGRADED value="2"/>
+        <ENFORCE_LEGAL_IO_PLACEMENT value="true"/>
+        <THEME_UPGRADED value="Cyberpunk"/>
+        <USE_BLOCK_DESIGN_DARK_MODE_ALWAYS value="false"/>
+        <USE_PACKAGE_DARK_MODE_ALWAYS value="false"/>
+        <USE_SCHEMATIC_DARK_MODE_ALWAYS value="false"/>
+        <USE_WAVEFORM_DARK_MODE_ALWAYS value="false"/>
+    </general>
+    <EMOTIONAL_VIEWS/>
+</preferences>
