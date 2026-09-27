@@ -30,7 +30,11 @@ let
   # /tmp/vivado-nvim.log para depurar.
   vivadoNvim = pkgs.writeShellScriptBin "vivado-nvim" ''
     log=/tmp/vivado-nvim.log
-    { date -Is; printf 'arg: <%s>\n' "$@"; } >>"$log" 2>&1
+    {
+      echo "=== $(date -Is) ==="
+      printf 'arg: <%s>\n' "$@"
+      echo "env: WAYLAND_DISPLAY=''${WAYLAND_DISPLAY:-} XDG_RUNTIME_DIR=''${XDG_RUNTIME_DIR:-} DISPLAY=''${DISPLAY:-}"
+    } >>"$log" 2>&1
 
     file=""
     line=""
@@ -42,25 +46,31 @@ let
         *) if [ -z "$file" ]; then file="$a"; else file="$file $a"; fi ;;
       esac
     done
+    echo "resuelto: file=<$file> line=<$line> existe=$([ -e "$file" ] && echo si || echo no)" >>"$log" 2>&1
     [ -n "$file" ] || { echo "sin archivo en los argumentos" >>"$log"; exit 1; }
 
     # Si ya hay un nvim servidor, ábrelo ahí (una sola ventana). El salto de
     # línea va aparte porque --remote-silent trata +linea/-c como ficheros.
     sock=/tmp/vivado-nvim.sock
     if [ -S "$sock" ]; then
-      if /usr/bin/nvim --server "$sock" --remote-silent "$file" >/dev/null 2>>"$log"; then
-        [ -n "$line" ] && /usr/bin/nvim --server "$sock" \
-          --remote-expr "cursor($line,1)" >/dev/null 2>>"$log"
+      if timeout 3 /usr/bin/nvim --server "$sock" --remote-silent "$file" >>"$log" 2>&1; then
+        [ -n "$line" ] && timeout 3 /usr/bin/nvim --server "$sock" \
+          --remote-expr "cursor($line,1)" >>"$log" 2>&1
         exit 0
       fi
+      echo "servidor nvim no responde; relanzo ventana" >>"$log"
     fi
 
     rm -f "$sock"
     if [ -n "$line" ]; then
-      exec /usr/bin/kitty --detach /usr/bin/nvim --listen "$sock" "+$line" "$file"
+      set -- /usr/bin/kitty --detach /usr/bin/nvim --listen "$sock" "+$line" "$file"
     else
-      exec /usr/bin/kitty --detach /usr/bin/nvim --listen "$sock" "$file"
+      set -- /usr/bin/kitty --detach /usr/bin/nvim --listen "$sock" "$file"
     fi
+    "$@" >>"$log" 2>&1
+    rc=$?
+    echo "kitty rc=$rc" >>"$log"
+    exit $rc
   '';
 
   # La interfaz completa de Vivado (menús, barras, paneles) la pinta el
