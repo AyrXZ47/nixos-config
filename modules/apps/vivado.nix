@@ -23,13 +23,11 @@
 { config, pkgs, lib, ... }:
 
 let
-  # El rule original de Xilinx (52-xilinx-ftdi-usb.rules) suelta el FT2232H del
-  # driver ftdi_sio, que si no lo retiene y Vivado no puede reclamar las
-  # interfaces por libusb. Recibe %k (p.ej. "1-2") y suelta sus dos canales.
   # Puente editor externo de Vivado -> kitty + nvim. Vivado sustituye
   # `[file name]`/`[line number]` y parte el comando por espacios, así que una
-  # ruta con espacios llega troceada: aquí se reconstruye. Deja traza en
-  # /tmp/vivado-nvim.log para depurar si algún día no abre.
+  # ruta con espacios llega troceada: aquí se reconstruye. Si ya hay un nvim
+  # escuchando (--listen) reutiliza ESA ventana; si no, abre una. Traza en
+  # /tmp/vivado-nvim.log para depurar.
   vivadoNvim = pkgs.writeShellScriptBin "vivado-nvim" ''
     log=/tmp/vivado-nvim.log
     { date -Is; printf 'arg: <%s>\n' "$@"; } >>"$log" 2>&1
@@ -46,13 +44,38 @@ let
     done
     [ -n "$file" ] || { echo "sin archivo en los argumentos" >>"$log"; exit 1; }
 
+    # Si ya hay un nvim servidor, ábrelo ahí (una sola ventana). El salto de
+    # línea va aparte porque --remote-silent trata +linea/-c como ficheros.
+    sock=/tmp/vivado-nvim.sock
+    if [ -S "$sock" ]; then
+      if /usr/bin/nvim --server "$sock" --remote-silent "$file" >/dev/null 2>>"$log"; then
+        [ -n "$line" ] && /usr/bin/nvim --server "$sock" \
+          --remote-expr "cursor($line,1)" >/dev/null 2>>"$log"
+        exit 0
+      fi
+    fi
+
+    rm -f "$sock"
     if [ -n "$line" ]; then
-      exec /usr/bin/kitty --detach /usr/bin/nvim "+$line" "$file"
+      exec /usr/bin/kitty --detach /usr/bin/nvim --listen "$sock" "+$line" "$file"
     else
-      exec /usr/bin/kitty --detach /usr/bin/nvim "$file"
+      exec /usr/bin/kitty --detach /usr/bin/nvim --listen "$sock" "$file"
     fi
   '';
 
+  # La interfaz completa de Vivado (menús, barras, paneles) la pinta el
+  # Look&Feel Synthetica desde /ui/images/SyntheticaDarkCustomLookAndFeel.xml,
+  # que vive dentro de planAhead.jar. Se le da a la JVM una copia recoloreada
+  # por delante en el bootclasspath (el classloader la encuentra antes).
+  vivadoLnf = pkgs.runCommand "vivado-cyberpunk-lnf" { } ''
+    mkdir -p $out/ui/images
+    cp ${../../assets/vivado/SyntheticaDarkCustomLookAndFeel.xml} \
+      $out/ui/images/SyntheticaDarkCustomLookAndFeel.xml
+  '';
+
+  # El rule original de Xilinx (52-xilinx-ftdi-usb.rules) suelta el FT2232H del
+  # driver ftdi_sio, que si no lo retiene y Vivado no puede reclamar las
+  # interfaces por libusb. Recibe %k (p.ej. "1-2") y suelta sus dos canales.
   unbindFtdi = pkgs.writeShellScript "xilinx-ftdi-unbind" ''
     for intf in "$1:1.0" "$1:1.1"; do
       if [ -e "/sys/bus/usb/drivers/ftdi_sio/$intf" ]; then
@@ -104,7 +127,7 @@ let
     # no en <install>/Vivado/2026.1/bin como en 2019.2 (la guia del blog es vieja).
     # Los dlopen de Vivado no buscan en /usr/lib64 (donde nixpkgs deja las libs
     # del abi5 compat), se les pasa explicito por LD_LIBRARY_PATH.
-    runScript = "env LD_LIBRARY_PATH=/usr/lib64:/usr/lib\${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} $HOME/opt/Xilinx/2026.1/Vivado/bin/vivado";
+    runScript = "env JAVA_TOOL_OPTIONS=-Xbootclasspath/a:${vivadoLnf} LD_LIBRARY_PATH=/usr/lib64:/usr/lib\${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} $HOME/opt/Xilinx/2026.1/Vivado/bin/vivado";
   };
 in
 {
