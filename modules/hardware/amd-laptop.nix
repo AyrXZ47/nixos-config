@@ -50,6 +50,13 @@ in
 
   services.xserver.videoDrivers = [ "amdgpu" "modesetting" ];
 
+  # PSR (Panel Self Refresh) apagado: en Renoir/Cezanne (5650U) el firmware
+  # DMCUB del display falla ("dc_dmub_srv_log_diagnostic_data: DMCUB error") y
+  # cuelga el sistema entero. Visto 2026-09-26 18:35 (DMCUB error) -> freeze
+  # 18:40 sin ninguna traza mas (ni hung_task ni soft lockup). 0x10 = bit de
+  # DC_DEBUG_MASK para desactivar PSR. Coste: un poco mas de bateria.
+  boot.kernelParams = [ "amdgpu.dcdebugmask=0x10" ];
+
   # Ollama en GPU: Vulkan funciona con cualquier Radeon/APU (RADV) sin rocm pesado.
   services.ollama.package = pkgs.ollama-vulkan;
 
