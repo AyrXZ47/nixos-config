@@ -466,7 +466,7 @@ let
       useWallpaper = false;
       recolourLogo = true;
       enableFprint = true;
-      maxFprintTries = 3;
+      maxFprintTries = 5;
       enableHowdy = false;
       maxHowdyTries = 3;
       triggerHowdyOnWake = false;

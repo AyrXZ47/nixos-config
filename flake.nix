@@ -596,12 +596,12 @@ PYEOF
                             font: Tokens.font.headline.medium
                         }'
 
-            # Huella al volver de suspender: el lock ya estaba "secure" antes de
-            # dormir, asi que onSecureChanged no vuelve a correr y el pam_fprintd
-            # levantado antes de dormir queda muerto (fprintd reporta "Entity not
-            # found" mientras el USB reenumera). Sondea la disponibilidad tras
-            # onResumed hasta que el sensor vuelva; el timer para cuando el pam ya
-            # arranco o se agotan los intentos (~30 s).
+            # Huella: el lock solo chequeaba disponibilidad UNA vez al bloquear.
+            # Como cada `fprintd-list` resetea el USB del sensor (y el pam_fprintd
+            # de despues abre mientras reenumera), si esa unica vez cae en el
+            # reset el lock se queda sin huella toda la sesion. Ahora, si el
+            # chequeo falla estando bloqueado, reintenta cada 3 s (20 intentos =
+            # 60 s) igual que tras onResumed; el timer para al arrancar el pam.
             substituteInPlace modules/lock/Pam.qml \
               --replace-fail \
             '        function onResumed(): void {
@@ -632,12 +632,28 @@ PYEOF
                     repeat: true
                     onTriggered: {
                         attempts++;
-                        if (!root.lock.secure || fprint.active || fprint.available || attempts > 10)
+                        if (!root.lock.secure || fprint.active || fprint.available || attempts > 20)
                             stop();
                         else
                             fprint.checkAvailable();
                     }
-                }'
+                }' \
+              --replace-fail \
+            '        onAvailProcExited: root.restartFprint()' \
+            '        onAvailProcExited: {
+                        root.restartFprint();
+                        if (!available && root.lock.secure && !resumeFprint.running) {
+                            resumeFprint.attempts = 0;
+                            resumeFprint.start();
+                        }
+                    }'
+
+            # PAM con confdir propio (assets/pam.d): al no haber un `other` ahi,
+            # libpam loguea "_pam_init_handlers: no default config other" en cada
+            # contexto (ruido en el journal). Se agrega un fallback que deniega;
+            # los servicios reales (passwd/fprint/howdy) tienen su archivo propio.
+            printf '#%%PAM-1.0\nauth required pam_deny.so\naccount required pam_deny.so\n' \
+              > assets/pam.d/other
           '';
         });
       };
