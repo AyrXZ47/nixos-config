@@ -253,9 +253,7 @@ in
       hl.bind("SUPER + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
       hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
       -- rofi retirado: TODO pasa por el launcher de Caelestia (SUPER+CTRL+Space
-      -- para apps, y `>ack` dentro del launcher para las acciones). SUPER+A
-      -- abre el mismo launcher para no perder la costumbre.
-      hl.bind("SUPER + A", hl.dsp.global("caelestia:launcher"))
+      -- para apps, y `>ack` dentro del launcher para las acciones).
       -- Caelestia: launcher, dashboard, menu de sesion y utilities. Reemplazan
       -- al dropdown dashboard de Wayle. SUPER+N (netrunner) sigue siendo
       -- terminal, por eso el sidebar usa SUPER+CTRL+N.
@@ -304,7 +302,6 @@ in
         hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
       end
 
-      hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       -- Selector de wallpaper (fuzzel con miniaturas de video). Tambien está
       -- como accion `>Wallpaper` en el launcher de Caelestia.
       hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-menu.sh"))

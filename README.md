@@ -313,7 +313,6 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 | Keys | Action |
 | ---- | ------ |
 | `SUPER Backspace` | Terminal (kitty) |
-| `SUPER A` / `SUPER R` | rofi drun / run |
 | `SUPER Delete` | Kill window |
 | `SUPER M` | Exit session |
 | `SUPER V` | Toggle floating |
@@ -321,7 +320,6 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 | `SUPER arrows` / `SUPER SHIFT arrows` | Focus / move window |
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
 | `SUPER ALT SHIFT 1-9` | Move ALL windows of active ws to N and follow (GNOME-style) |
-| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox → kitty on ws 1-4 |
 | `SUPER N` | *netrunner*: btop + nvtop (2 ventanas kitty) |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |
