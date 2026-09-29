@@ -302,9 +302,7 @@ in
         hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
       end
 
-      -- Selector de wallpaper (fuzzel con miniaturas de video). Tambien está
-      -- como accion `>Wallpaper` en el launcher de Caelestia.
-      hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-menu.sh"))
+      hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       -- netrunner abre sus propias ventanas kitty independientes (clase
       -- `kitty` por defecto): el dedupe de Caelestia las colapsa a un icono.
       hl.bind("SUPER + N", hl.dsp.exec_cmd("kitty zsh -ic netrunner"))
