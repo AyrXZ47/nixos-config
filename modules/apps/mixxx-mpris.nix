@@ -25,6 +25,8 @@ let
   } ''
     import json
     import subprocess
+    import urllib.parse
+    import urllib.request
 
     import pydbus
     from pydbus.generic import signal
@@ -36,6 +38,10 @@ let
     ART_URL = (
         "file:///run/current-system/sw/share/icons/hicolor/256x256/apps/mixxx.png"
     )
+
+    # Duración "desconocida" en microsegundos: > INT_MAX segundos, el umbral con
+    # el que Caelestia omite `duration` al pedir letras (y pinta "--:--").
+    UNKNOWN_LENGTH_US = 2147483648 * 1_000_000
 
     NODE_XML = """
     <node>
@@ -118,6 +124,9 @@ let
             self._status = "Stopped"
             self._title = "Mixxx"
             self._artist = ""
+            self._album = ""
+            self._length = UNKNOWN_LENGTH_US
+            self._raw = None
 
         @property
         def PlaybackStatus(self):
@@ -129,9 +138,14 @@ let
                 "mpris:trackid": GLib.Variant("o", TRACK_ID),
                 "xesam:title": GLib.Variant("s", self._title),
                 "mpris:artUrl": GLib.Variant("s", ART_URL),
+                # Sin mpris:length, Quickshell reporta `length` = posición y
+                # Caelestia manda una duración falsa -> lrclib /get da 404.
+                "mpris:length": GLib.Variant("x", self._length),
             }
             if self._artist:
                 metadata["xesam:artist"] = GLib.Variant("as", [self._artist])
+            if self._album:
+                metadata["xesam:album"] = GLib.Variant("s", self._album)
             return metadata
 
         # Mixxx no tiene API de control remoto: no-op para que los botones de
@@ -172,15 +186,38 @@ let
                     [],
                 )
 
-        def set_metadata(self, title, artist):
-            if (title, artist) != (self._title, self._artist):
+        def set_metadata(self, title, artist, album="", length=UNKNOWN_LENGTH_US):
+            if (title, artist, album, length) != (
+                self._title,
+                self._artist,
+                self._album,
+                self._length,
+            ):
                 self._title = title
                 self._artist = artist
+                self._album = album
+                self._length = length
                 self.PropertiesChanged(
                     "org.mpris.MediaPlayer2.Player",
                     {"Metadata": self.Metadata},
                     [],
                 )
+
+        def update_track(self, raw):
+            # Cachea por título crudo: una búsqueda en lrclib por pista, no por
+            # cada tick del poll.
+            if raw == self._raw:
+                return
+            self._raw = raw
+            if not raw:
+                self.set_metadata("Mixxx", "")
+                return
+            title, artist = split_track(raw)
+            canon = lrclib_lookup(title, artist)
+            if canon:
+                self.set_metadata(*canon)
+            else:
+                self.set_metadata(title, artist)
 
 
     def mixxx_states():
@@ -244,6 +281,41 @@ let
         return track, ""
 
 
+    def lrclib_lookup(title, artist):
+        # ponytail: techo conocido = una petición HTTPS a lrclib por cambio de
+        # pista (cacheada por título crudo). Necesaria porque Mixxx no expone
+        # tags canónicos ni duración: sin esto Caelestia pide lrclib /get con el
+        # artista scrapeado y una duración falsa, y da 404 siempre. Devuelve
+        # (title, artist, album, length_us) canónicos, o None si no hay match.
+        params = {"track_name": title}
+        if artist:
+            params["artist_name"] = artist
+        url = "https://lrclib.net/api/search?" + urllib.parse.urlencode(params)
+        req = urllib.request.Request(url, headers={"User-Agent": "mixxx-mpris"})
+        try:
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                results = json.load(resp)
+        except Exception:
+            return None
+        if not isinstance(results, list) or not results:
+            return None
+
+        # Caelestia solo carga letra SINCRONIZADA de lrclib; priorízala.
+        best = next((x for x in results if x.get("syncedLyrics")), results[0])
+        duration = best.get("duration")
+        length_us = (
+            int(round(duration * 1_000_000))
+            if isinstance(duration, (int, float)) and duration > 0
+            else UNKNOWN_LENGTH_US
+        )
+        return (
+            best.get("trackName") or title,
+            best.get("artistName") or artist,
+            best.get("albumName") or "",
+            length_us,
+        )
+
+
     def poll(player):
         states = mixxx_states()
         if not states:
@@ -253,11 +325,7 @@ let
         else:
             status = "Paused"
         player.set_status(status)
-        raw = mixxx_window_title()
-        if raw:
-            player.set_metadata(*split_track(raw))
-        else:
-            player.set_metadata("Mixxx", "")
+        player.update_track(mixxx_window_title())
         return True
 
 
@@ -281,6 +349,7 @@ in
     Unit.Description = "MPRIS falso de Mixxx (org.mpris.MediaPlayer2.mixxx)";
     Service = {
       ExecStart = "${mixxxMpris}/bin/mixxx-mpris";
+      Environment = [ "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt" ];
       Restart = "always";
       RestartSec = 5;
     };
