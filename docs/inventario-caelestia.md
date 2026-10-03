@@ -20,7 +20,7 @@ Notas verificadas leyendo el código fuente de `caelestia-shell` v2.4.0,
 ## Inventario de la barra Wayle
 
 Barra **derecha** (vertical), `scale=0.85`, `bg=transparent`, botones
-`block-prefix`, redondeo `full`, iconos `#ff0066`, botón bg `bg-elevated`.
+`block-prefix`, redondeo `full`, iconos `#ed1044`, botón bg `bg-elevated`.
 
 Grupos y orden:
 

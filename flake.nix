@@ -668,7 +668,7 @@ PYEOF
             scheme_dir=$(echo $out/lib/python*/site-packages/caelestia/data/schemes)
             mkdir -p $scheme_dir/cyberpunk/default
             cat > $scheme_dir/cyberpunk/default/dark.txt <<'SCHEME'
-            primary_paletteKeyColor ff0066
+            primary_paletteKeyColor ed1044
             secondary_paletteKeyColor 00aaff
             tertiary_paletteKeyColor 00ff88
             neutral_paletteKeyColor 141428
@@ -692,12 +692,12 @@ PYEOF
             outlineVariant 1e1e3a
             shadow 000000
             scrim 000000
-            surfaceTint ff0066
-            primary ff0066
+            surfaceTint ed1044
+            primary ed1044
             onPrimary ffffff
             primaryContainer 1e1e3a
             onPrimaryContainer ffb3c9
-            inversePrimary ff0066
+            inversePrimary ed1044
             secondary 00aaff
             onSecondary 001a2e
             secondaryContainer 0d2b44
@@ -711,7 +711,7 @@ PYEOF
             errorContainer 44001a
             onErrorContainer ffb3c4
             primaryFixed ffb3c9
-            primaryFixedDim ff0066
+            primaryFixedDim ed1044
             onPrimaryFixed 3a0018
             onPrimaryFixedVariant 90083a
             secondaryFixed b3e0ff
@@ -727,7 +727,7 @@ PYEOF
             term2 00ff88
             term3 ffcc00
             term4 8888aa
-            term5 ff0066
+            term5 ed1044
             term6 00aaff
             term7 d4d4f0
             term8 555577
@@ -741,7 +741,7 @@ PYEOF
             rosewater ffd4e0
             flamingo ffb3c9
             pink ff66a0
-            mauve ff0066
+            mauve ed1044
             red ff0040
             maroon c40033
             peach ffcc00
@@ -754,8 +754,8 @@ PYEOF
             lavender 8888aa
             klink 00aaff
             klinkSelection 00aaff
-            kvisited ff0066
-            kvisitedSelection ff0066
+            kvisited ed1044
+            kvisitedSelection ed1044
             knegative ff0040
             knegativeSelection ff0040
             kneutral 8888aa

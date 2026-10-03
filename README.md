@@ -10,7 +10,7 @@ headless server — the idea is that whatever works in the VM works identically 
 real hardware.
 
 Built on `nixos-unstable` (nixpkgs pinned in `flake.lock`), Nix flakes, Home Manager,
-and a hand-rolled cyberpunk theme (magenta `#ff0066` / cyan `#00f0ff` on deep navy).
+and a hand-rolled cyberpunk theme (magenta `#ed1044` / cyan `#00f0ff` on deep navy).
 
 ## Hosts
 
