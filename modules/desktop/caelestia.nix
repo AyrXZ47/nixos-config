@@ -733,7 +733,9 @@ in
       # Reproducibilidad de la paleta: el esquema cyberpunk vive en el overlay
       # de caelestia-cli (read-only) y `scheme set` lo persiste en estado de
       # usuario, que NO se comparte entre hosts ni sobrevive a un borrado de
-      # ~/.local/state. Re-aplicarlo aquí garantiza la misma paleta en todos.
+      # ~/.local/state. Se RE-APLICA en cada switch: comparar solo el nombre no
+      # basta, porque si cambia el contenido del esquema (p.ej. el primary) el
+      # nombre sigue siendo cyberpunk y el estado quedaría con la paleta vieja.
       # ponytail: fija cyberpunk a propósito; si se quisieran esquemas
       # dinámicos, basta quitar este activation.
       home.activation.caelestiaCyberpunkScheme = {
@@ -741,10 +743,7 @@ in
         before = [ ];
         data = ''
           if command -v caelestia >/dev/null 2>&1; then
-            cur=$(caelestia scheme get -n 2>/dev/null || true)
-            if [ "$cur" != "cyberpunk" ]; then
-              caelestia scheme set -n cyberpunk >/dev/null 2>&1 || true
-            fi
+            caelestia scheme set -n cyberpunk >/dev/null 2>&1 || true
           fi
         '';
       };
