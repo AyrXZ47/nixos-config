@@ -72,7 +72,7 @@ in
           border_size = 4,
           layout = "dwindle",
           col = {
-            active_border = { colors = { "rgba(ff0066ff)", "rgba(9900ffff)", "rgba(00aaffff)" }, angle = 45 },
+            active_border = { colors = { "rgba(ed1044ff)", "rgba(9900ffff)", "rgba(00aaffff)" }, angle = 45 },
             inactive_border = "rgba(1e1e3aff)",
           },
         },
@@ -91,22 +91,22 @@ in
             ignore_opacity = true,
           },
           -- Neón: la sombra coloreada es el "destello" — glow difuminado (blur)
-          -- alrededor de la ventana, gradiente activo (ff0066→00aaff) vs azul
+          -- alrededor de la ventana, gradiente activo (ed1044→00aaff) vs azul
           -- apagado inactivo.
           shadow = {
             enabled = true,
             range = 20,
             render_power = 2,
-            color = { colors = { "rgba(ff006677)", "rgba(9900ff77)", "rgba(00aaff77)" }, angle = 45 },
+            color = { colors = { "rgba(ed104477)", "rgba(9900ff77)", "rgba(00aaff77)" }, angle = 45 },
             color_inactive = "rgba(1e1e3a44)",
           },
           -- Glow interior nativo: ilumina el vidrio desde el borde hacia dentro.
-          -- Gradiente activo (ff0066→00aaff) vs azul apagado inactivo.
+          -- Gradiente activo (ed1044→00aaff) vs azul apagado inactivo.
           glow = {
             enabled = true,
             range = 30,
             render_power = 2,
-            color = { colors = { "rgba(ff006655)", "rgba(9900ff55)", "rgba(00aaff55)" }, angle = 45 },
+            color = { colors = { "rgba(ed104455)", "rgba(9900ff55)", "rgba(00aaff55)" }, angle = 45 },
             color_inactive = "rgba(1e1e3a33)",
           },
         },
