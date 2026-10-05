@@ -514,7 +514,8 @@ PYEOF
 
 ''${ind}    grade: 0
 ''${ind}    horizontalAlignment: Text.AlignHCenter
-''${ind}    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, \"terminal\")" \
+''${ind}    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, \"terminal\")
+''${ind}    color: root.onOtherMonitor ? root.offMonitorColour : Colours.palette.m3onSurfaceVariant" \
             "''${ind}delegate: Image {
 ''${ind}    id: win
 
