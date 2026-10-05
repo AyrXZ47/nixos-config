@@ -459,27 +459,30 @@ PYEOF
             'colour: "#5277c3"'
 
             # Bolita de fondo detras del logo para que el snowflake resalte.
-            # (ancla de una linea: el multilinea se dedenta y no matchea la
-            # sangria anidada de OsIcon.qml en 2.5.0)
+            # (ancla multilinea con indentacion explicita via $osind: el
+            # multilinea literal se dedenta en Nix y no matchea la sangria real
+            # de OsIcon.qml en 2.5.0)
+            osind='    '
             substituteInPlace modules/bar/components/OsIcon.qml \
               --replace-fail \
-            '        sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon' \
-            '        sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
-    }
+            "''${osind}Loader {
+''${osind}    asynchronous: true
+''${osind}    anchors.centerIn: parent
+''${osind}    sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+''${osind}}" \
+            "''${osind}Rectangle {
+''${osind}    anchors.centerIn: parent
+''${osind}    implicitWidth: Math.round(Tokens.sizes.bar.innerWidth)
+''${osind}    implicitHeight: Math.round(Tokens.sizes.bar.innerWidth)
+''${osind}    radius: width / 2
+''${osind}    color: Colours.tPalette.m3surfaceContainer
+''${osind}}
 
-    Rectangle {
-        anchors.centerIn: parent
-        implicitWidth: Math.round(Tokens.sizes.bar.innerWidth)
-        implicitHeight: Math.round(Tokens.sizes.bar.innerWidth)
-        radius: width / 2
-        color: Colours.tPalette.m3surfaceContainer
-    }
-
-    Loader {
-        asynchronous: true
-        anchors.centerIn: parent
-        sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
-    }'
+''${osind}Loader {
+''${osind}    asynchronous: true
+''${osind}    anchors.centerIn: parent
+''${osind}    sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+''${osind}}"
 
             # Notificaciones nativas (caps/num lock incluidos, son toasts): anclar
             # los toasts arriba-derecha, bajo las notificaciones, y darles el mismo
