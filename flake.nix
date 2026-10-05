@@ -84,6 +84,20 @@
         python3Packages = prev.python3Packages.overrideScope (pfinal: pprev: {
           nanoemoji = fixNanoemoji pprev.nanoemoji;
         });
+
+        # gnuradio 3.10.12.0: el test de check `test_001_real_laplacian_moments`
+        # (qa_fastnoise) es fragil (varianza muestral ~1.9929 vs 2, con places=2)
+        # y rompe el build en la punta de unstable. No es fallo de compilacion;
+        # se desactiva la fase de tests hasta que upstream lo estabilice. El
+        # override va sobre `unwrapped`: `gnuradio` es el wrapper (callPackage
+        # wrapper.nix { unwrapped = ... }) y su core (`unwrapped`) es el que
+        # corre los tests. `.override` (no overrideAttrs) repunta el argumento.
+        # ponytail: techo conocido — cuando nixpkgs arregle el test, borrar esto.
+        gnuradio = prev.gnuradio.override {
+          unwrapped = prev.gnuradio.unwrapped.overrideAttrs (_: {
+            doCheck = false;
+          });
+        };
       };
 
       # nixpkgs congela openrocket en 23.09 (formato de fichero viejo, 3D roto
@@ -425,15 +439,17 @@ PYEOF
           postPatch = (old.postPatch or "") + ''
             substituteInPlace modules/bar/components/workspaces/Workspace.qml \
               --replace-fail \
-            'const windows = Hypr.toplevelsForWs(root.ws);' \
-            'const seen = new Set();
-                        const windows = Hypr.toplevelsForWs(root.ws).filter(w => {
+            'readonly property list<HyprlandToplevel> toplevels: Hypr.toplevelsForWs(ws, GlobalConfig.bar.workspaces.ignoredTags)' \
+            'readonly property list<HyprlandToplevel> toplevels: {
+                        const seen = new Set();
+                        return Hypr.toplevelsForWs(ws, GlobalConfig.bar.workspaces.ignoredTags).filter(w => {
                             const key = w.lastIpcObject.class;
                             if (seen.has(key))
                                 return false;
                             seen.add(key);
                             return true;
-                        });'
+                        });
+                    }'
 
             # Logo NixOS: el shell lo colorea con el color del esquema
             # (m3tertiary); el azul original de NixOS es fijo.
@@ -443,26 +459,27 @@ PYEOF
             'colour: "#5277c3"'
 
             # Bolita de fondo detras del logo para que el snowflake resalte.
+            # (ancla de una linea: el multilinea se dedenta y no matchea la
+            # sangria anidada de OsIcon.qml en 2.5.0)
             substituteInPlace modules/bar/components/OsIcon.qml \
               --replace-fail \
-            '    Loader {
-                    asynchronous: true
-                    anchors.centerIn: parent
-                    sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
-                }' \
-            '    Rectangle {
-                    anchors.centerIn: parent
-                    implicitWidth: Math.round(Tokens.sizes.bar.innerWidth)
-                    implicitHeight: Math.round(Tokens.sizes.bar.innerWidth)
-                    radius: width / 2
-                    color: Colours.tPalette.m3surfaceContainer
-                }
+            '        sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon' \
+            '        sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+    }
 
-                Loader {
-                    asynchronous: true
-                    anchors.centerIn: parent
-                    sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
-                }'
+    Rectangle {
+        anchors.centerIn: parent
+        implicitWidth: Math.round(Tokens.sizes.bar.innerWidth)
+        implicitHeight: Math.round(Tokens.sizes.bar.innerWidth)
+        radius: width / 2
+        color: Colours.tPalette.m3surfaceContainer
+    }
+
+    Loader {
+        asynchronous: true
+        anchors.centerIn: parent
+        sourceComponent: SysInfo.isDefaultLogo ? caelestiaLogo : distroIcon
+    }'
 
             # Notificaciones nativas (caps/num lock incluidos, son toasts): anclar
             # los toasts arriba-derecha, bajo las notificaciones, y darles el mismo
@@ -481,22 +498,29 @@ PYEOF
 
             # Iconos reales de apps: reemplazar el MaterialIcon de categoria por
             # el Image del icono declarado en el .desktop de la ventana.
+            # (indentacion via $ind: el multilinea literal se dedenta en Nix y no
+            # matchea la sangria real de Workspace.qml en 2.5.0)
+            ind='                '
             substituteInPlace modules/bar/components/workspaces/Workspace.qml \
               --replace-fail \
-            'MaterialIcon {
-                                required property var modelData
+            "''${ind}delegate: MaterialIcon {
+''${ind}    id: win
 
-                                grade: 0
-                                text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
-                                color: Colours.palette.m3onSurfaceVariant
-                            }' \
-            'Image {
-                                required property var modelData
+''${ind}    required property var modelData
+''${ind}    required property int index // Needed, LazyListView will fail to set it if it doesn't exist
 
-                                source: Icons.getAppIcon(modelData.lastIpcObject.class, "")
-                                fillMode: Image.PreserveAspectFit
-                                sourceSize: Qt.size(Math.round(Tokens.font.icon.small.pointSize * 1.33), Math.round(Tokens.font.icon.small.pointSize * 1.33))
-                            }'
+''${ind}    grade: 0
+''${ind}    horizontalAlignment: Text.AlignHCenter
+''${ind}    text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, \"terminal\")" \
+            "''${ind}delegate: Image {
+''${ind}    id: win
+
+''${ind}    required property var modelData
+''${ind}    required property int index
+''${ind}    fillMode: Image.PreserveAspectFit
+''${ind}    horizontalAlignment: Image.AlignHCenter
+''${ind}    source: Icons.getAppIcon(modelData.lastIpcObject.class, \"\")
+''${ind}    sourceSize: Qt.size(Math.round(Tokens.font.icon.small.pointSize * 1.33), Math.round(Tokens.font.icon.small.pointSize * 1.33))"
 
             # Icono del workspace activo: el Colouriser recoloreaba todo el
             # contenido del mask a m3onPrimary y aplanaba los iconos reales a un
@@ -512,9 +536,9 @@ PYEOF
             # workspace-bounce de Wayle): escala con overshoot ~1.25 y vuelve.
             substituteInPlace modules/bar/components/workspaces/Workspace.qml \
               --replace-fail \
-            'Behavior on Layout.preferredHeight {
-                    Anim {}
-                }' \
+            'Behavior on LazyListView.visibleHeight {
+        Anim {}
+    }' \
             'Connections {
                     target: root
 
@@ -544,9 +568,9 @@ PYEOF
                     }
                 }
 
-                Behavior on Layout.preferredHeight {
-                    Anim {}
-                }'
+                Behavior on LazyListView.visibleHeight {
+        Anim {}
+    }'
 
             # UPS/nobreak: Quickshell define isLaptopBattery=false para
             # Type=Ups (C++ compilado), asi que el tank/icono de bateria nunca
@@ -564,11 +588,11 @@ PYEOF
             'if (!(UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups)) {'
             substituteInPlace modules/bar/popouts/Battery.qml \
               --replace-fail \
-            'text: UPower.displayDevice.isLaptopBattery ? qsTr("Remaining:' \
-            'text: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) ? qsTr("Remaining:' \
+            'text: UPower.displayDevice.isLaptopBattery ? Tr.trCtx("Remaining:' \
+            'text: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) ? Tr.trCtx("Remaining:' \
               --replace-fail \
-            'text: UPower.displayDevice.isLaptopBattery ? qsTr("Time' \
-            'text: (UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups) ? qsTr("Time'
+            'if (!dev.isLaptopBattery)' \
+            'if (!(dev.isLaptopBattery || dev.type === UPowerDeviceType.Ups))'
             substituteInPlace modules/lock/Fetch.qml \
               --replace-fail \
             'const hasBatt = UPower.displayDevice.isLaptopBattery;' \
@@ -576,25 +600,26 @@ PYEOF
 
             # Watts reales de la bateria/UPS (changeRate = EnergyRate; positivo
             # cargando, negativo descargando). Solo visible si el dato existe.
+            ind='            '
             substituteInPlace modules/dashboard/performance/BatteryTank.qml \
               --replace-fail \
-            '            StyledText {
-                            text: `''${Math.round(UPower.displayDevice.percentage * 100)}%`
-                            color: contents.accentColour
-                            font: Tokens.font.headline.medium
-                        }' \
-            '            StyledText {
-                            visible: Math.abs(UPower.displayDevice.changeRate) > 0.05
-                            text: `''${Math.abs(UPower.displayDevice.changeRate).toFixed(1)} W`
-                            color: contents.subTextColour
-                            font: Tokens.font.body.small
-                        }
+            "''${ind}StyledText {
+''${ind}    text: Strings.percentOne(UPower.displayDevice.percentage)
+''${ind}    color: contents.accentColour
+''${ind}    font: Tokens.font.headline.medium
+''${ind}}" \
+            "''${ind}StyledText {
+''${ind}    visible: Math.abs(UPower.displayDevice.changeRate) > 0.05
+''${ind}    text: Math.abs(UPower.displayDevice.changeRate).toFixed(1) + \" W\"
+''${ind}    color: contents.subTextColour
+''${ind}    font: Tokens.font.body.small
+''${ind}}
 
-                        StyledText {
-                            text: `''${Math.round(UPower.displayDevice.percentage * 100)}%`
-                            color: contents.accentColour
-                            font: Tokens.font.headline.medium
-                        }'
+''${ind}StyledText {
+''${ind}    text: Strings.percentOne(UPower.displayDevice.percentage)
+''${ind}    color: contents.accentColour
+''${ind}    font: Tokens.font.headline.medium
+''${ind}}"
 
             # Huella: el lock solo chequeaba disponibilidad UNA vez al bloquear.
             # Como cada `fprintd-list` resetea el USB del sensor (y el pam_fprintd
@@ -602,42 +627,44 @@ PYEOF
             # reset el lock se queda sin huella toda la sesion. Ahora, si el
             # chequeo falla estando bloqueado, reintenta cada 3 s (20 intentos =
             # 60 s) igual que tras onResumed; el timer para al arrancar el pam.
+            ind='        '
+            indx='    '
             substituteInPlace modules/lock/Pam.qml \
               --replace-fail \
-            '        function onResumed(): void {
-                        if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
-                            howdy.start();
-                    }
+            "''${ind}function onResumed(): void {
+''${ind}    if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
+''${ind}        howdy.start();
+''${ind}}
 
-                    target: SessionManager
-                }' \
-            '        function onResumed(): void {
-                        if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
-                            howdy.start();
-                        fprint.reset();
-                        fprint.available = false;
-                        resumeFprint.attempts = 0;
-                        resumeFprint.start();
-                    }
+''${ind}target: SessionManager
+''${indx}}" \
+            "''${ind}function onResumed(): void {
+''${ind}    if (howdy.canAttempt && !howdy.active && GlobalConfig.lock.triggerHowdyOnWake)
+''${ind}        howdy.start();
+''${ind}    fprint.reset();
+''${ind}    fprint.available = false;
+''${ind}    resumeFprint.attempts = 0;
+''${ind}    resumeFprint.start();
+''${ind}}
 
-                    target: SessionManager
-                }
+''${ind}target: SessionManager
+''${indx}}
 
-                Timer {
-                    id: resumeFprint
+''${indx}Timer {
+''${ind}    id: resumeFprint
 
-                    property int attempts: 0
+''${ind}    property int attempts: 0
 
-                    interval: 3000
-                    repeat: true
-                    onTriggered: {
-                        attempts++;
-                        if (!root.lock.secure || fprint.active || fprint.available || attempts > 20)
-                            stop();
-                        else
-                            fprint.checkAvailable();
-                    }
-                }' \
+''${ind}    interval: 3000
+''${ind}    repeat: true
+''${ind}    onTriggered: {
+''${ind}        attempts++;
+''${ind}        if (!root.lock.secure || fprint.active || fprint.available || attempts > 20)
+''${ind}            stop();
+''${ind}        else
+''${ind}            fprint.checkAvailable();
+''${ind}    }
+''${indx}}" \
               --replace-fail \
             '        onAvailProcExited: root.restartFprint()' \
             '        onAvailProcExited: {
