@@ -767,6 +767,25 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         "$set" "$dir/$pick"
       '';
     };
+    # Hooks que consume lock.sh: perfil RGB "apagado" al bloquear, el de
+    # arranque al desbloquear. Se declaran aqui (scope de Home Manager) y no en
+    # openrgb.nix: alla `home.file` quedaba anidado junto a opciones NixOS del
+    # usuario HM y HM lo descartaba en silencio (los hooks no existian en disco).
+    "hypr/scripts/openrgb-lock-before" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        exec ${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2
+      '';
+    };
+    "hypr/scripts/openrgb-lock-after" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        exec ${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules1
+      '';
+    };
+
     # Bloqueo: lo pinta Caelestia (WlSessionLock), pero ademas hay dos
     # side-effects del repo que el shell no conoce:
     #   1) cliphist wipe: el historial captura TODO (incl. passwords de

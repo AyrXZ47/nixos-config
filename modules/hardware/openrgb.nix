@@ -51,22 +51,10 @@ in
         };
       };
 
-      # Hooks que consume hypr/scripts/lock.sh (ver hyprland-home.nix): perfil
-      # "apagado" al bloquear, normal al desbloquear.
-      home.file."hypr/scripts/openrgb-lock-before" = {
-        executable = true;
-        text = ''
-          #!/usr/bin/env bash
-          exec ${openrgb} --client --nodetect -p ${profileOff}
-        '';
-      };
-      home.file."hypr/scripts/openrgb-lock-after" = {
-        executable = true;
-        text = ''
-          #!/usr/bin/env bash
-          exec ${openrgb} --client --nodetect -p ${profileBoot}
-        '';
-      };
+      # Los hooks de lock/unlock (openrgb-lock-before/after) viven en
+      # hyprland-home.nix, en scope de Home Manager: aqui `home.file` quedaba
+      # anidado junto a opciones NixOS del usuario HM y HM lo descartaba en
+      # silencio.
     };
 
     # Al apagar: perfil "apagado". La sesión (y su servidor) ya se está cerrando, así
