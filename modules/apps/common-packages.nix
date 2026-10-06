@@ -446,6 +446,7 @@ in
     scrcpy
     syncthing
     smartmontools
+    ncdu
     cmatrix
     nvtopPackages.amd
     amdgpu_top
