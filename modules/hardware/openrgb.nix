@@ -21,9 +21,11 @@ in
 
     home-manager.users.yovick = {
       # Un servidor headless detecta el hardware UNA vez al iniciar sesión y aplica
-      # el perfil de arranque. Los eventos (lock/sleep/unlock) solo conectan como
+      # el perfil de arranque. Los eventos (lock/unlock) solo conectan como
       # cliente (--nodetect): sin re-escanear el SMBus no hay riesgo de colgar el
       # equipo (antes cada apertura re-escaneaba todos los buses y podía colgarse).
+      # La única excepción es el resume (ver resumeCommands): el reset USB del
+      # despertar deja el handle muerto y toca reiniciar el servidor.
       systemd.user.services.openrgb = {
         Unit = {
           Description = "OpenRGB: servidor RGB + perfil de arranque";
@@ -37,25 +39,33 @@ in
         };
       };
 
-      # Al suspender/hibernar: perfil "apagado".
-      systemd.user.services."openrgb-sleep" = {
-        Unit = {
-          Description = "OpenRGB: perfil de suspensión";
-        };
-        Service = {
-          Type = "oneshot";
-          ExecStart = "${openrgb} --client --nodetect -p ${profileOff}";
-        };
-        Install = {
-          WantedBy = [ "sleep.target" ];
-        };
-      };
-
       # Los hooks de lock/unlock (openrgb-lock-before/after) viven en
       # hyprland-home.nix, en scope de Home Manager: aqui `home.file` quedaba
       # anidado junto a opciones NixOS del usuario HM y HM lo descartaba en
       # silencio.
+      #
+      # No hay hook de suspensión en scope de usuario: `sleep.target` no existe
+      # en el gestor de usuario (systemd 261), así que un `WantedBy=sleep.target`
+      # aquí nunca corría. El resume se maneja con `resumeCommands` (abajo).
     };
+
+    # Al volver de S3 el xHCI resetea el bus USB y el controlador HID de los
+    # ventiladores (CoolerMaster) reenumera: pierde el efecto aplicado (queda en
+    # el arcoíris de fábrica) y el servidor OpenRGB conserva un handle muerto,
+    # así que el hook de unlock tampoco puede repintarlo. Reiniciar el servidor
+    # fuerza una re-detección. En este equipo el único suspend lo dispara el
+    # watchdog del lock, siempre con la sesión bloqueada, así que re-aplicamos el
+    # perfil de bloqueo; el unlock ya restaura el de arranque.
+    powerManagement.resumeCommands = ''
+      if [ -S /run/user/1000/systemd/private ]; then
+        runuser -u yovick -- env XDG_RUNTIME_DIR=/run/user/1000 \
+          systemctl --user restart openrgb.service || true
+        for _ in $(seq 20); do
+          sleep 1
+          ${openrgb} --client --nodetect -p ${profileOff} 2>/dev/null && break
+        done
+      fi
+    '';
 
     # Al apagar: perfil "apagado". La sesión (y su servidor) ya se está cerrando, así
     # que toca detectar de nuevo (un escaneo más, ~14s). ExecStop corre en shutdown.
