@@ -18,6 +18,12 @@
     # vuelve a mostrar el transient prompt (el `❯`/candado en el historial).
     shellIntegration.mode = "no-cursor";
     settings = {
+      # kitty 0.49: remember_window_size también recuerda si la última ventana
+      # estaba MAXIMIZADA (caché ~/.cache/kitty/main.json, window-state). Con el
+      # default `yes`, toda ventana nueva (hyprdev/netrunner lanzan 3 y 1) nacía
+      # maximizada encima de todo. Hyprland tilea toda kitty, así que recordar
+      # tamaño/estado no aporta: se desactiva.
+      remember_window_size = "no";
       # Vidrio (0.66 como el resto de Caelestia; el blur lo da Hyprland)
       background_opacity = "0.66";
       dynamic_background_opacity = "yes";
