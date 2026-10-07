@@ -13,6 +13,7 @@
     ../../modules/hardware/amd-laptop.nix
     ../../modules/hardware/nvme-dramless.nix
     ../../modules/hardware/fingerprint.nix
+    ../../modules/hardware/sdr.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
@@ -34,6 +35,10 @@
   modules.desktop.caelestia.enable = true;
 
   modules.hardware.fingerprint.enable = true;
+
+  # Dongle RTL-SDR (Realtek RTL2838 DVB-T): blacklist de los módulos DVB,
+  # grupo plugdev y CLI rtl_*; pyrtlsdr va en el python global.
+  modules.hardware.sdr.enable = true;
 
   # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
   environment.systemPackages = [ pkgs.openrgb pkgs.dnsmasq ];

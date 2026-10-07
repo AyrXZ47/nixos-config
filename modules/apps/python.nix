@@ -45,6 +45,10 @@ let
     # sympy = el Symbolic Math Toolbox de MATLAB (álgebra simbólica)
     ps.sympy
     mplcyberpunk
+    # pyrtlsdr: wrapper de librtlsdr para el dongle RTL-SDR (ver sdr.nix).
+    # nixpkgs parchea su find_library al store de pkgs.rtl-sdr, así que el .so
+    # viaja en el cierre del env (no hace falta LD_LIBRARY_PATH).
+    ps.pyrtlsdr
     # termcolor: lo importa check_supported.py (buscador de la librería SPICE).
     # tkinter: lo usa el GUI form_spice.py (SPICE Model Viewer) de la misma
     # librería. Ambos scripts vienen en pkgs.kicad-spice-library (ver flake.nix).

@@ -73,6 +73,20 @@
             hash = "sha256-FysyKC01XBnRiur5RR9fcsTxQqE8x0JJHSoe3q6JtKc=";
           };
         });
+
+        # pyrtlsdr 0.3.0: su rtlsdr/__init__.py hace `import pkg_resources`, que
+        # setuptools >= 82 ya no trae -> el import del modulo falla en runtime
+        # (nixpkgs lo tiene con doCheck=false, por eso colo). Se cambia a
+        # importlib.metadata (stdlib); el try/except de __version__ queda igual.
+        # ponytail: techo conocido — borrar cuando nixpkgs empaquete una version
+        # de pyrtlsdr sin pkg_resources.
+        patchPyrtlsdr = p: p.overridePythonAttrs (old: {
+          postPatch = (old.postPatch or "") + ''
+            substituteInPlace rtlsdr/__init__.py \
+              --replace-fail "import pkg_resources" "from importlib.metadata import version as _pkg_version" \
+              --replace-fail "pkg_resources.require('pyrtlsdr')[0].version" "_pkg_version('pyrtlsdr')"
+          '';
+        });
       in {
         # jetbrains-mono (fuente de ${pkgs.jetbrains-mono}) construye con
         # python313Packages.gftools -> nanoemoji. Sin tocar python313Packages el
@@ -83,7 +97,18 @@
         });
         python3Packages = prev.python3Packages.overrideScope (pfinal: pprev: {
           nanoemoji = fixNanoemoji pprev.nanoemoji;
+          pyrtlsdr = patchPyrtlsdr pprev.pyrtlsdr;
         });
+
+        # TRAMPA: el overrideScope de arriba NO llega a `python3.withPackages`
+        # (el env usa el scope que el interprete capturo al construirse, no el
+        # alias python3Packages). `packageOverrides` del interprete si; mismo
+        # outPath para CPython (no recompila), solo cambia su scope de paquetes.
+        python3 = prev.python3.override {
+          packageOverrides = _: pprev: {
+            pyrtlsdr = patchPyrtlsdr pprev.pyrtlsdr;
+          };
+        };
 
         # gnuradio 3.10.12.0: el test de check `test_001_real_laplacian_moments`
         # (qa_fastnoise) es fragil (varianza muestral ~1.9929 vs 2, con places=2)
