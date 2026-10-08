@@ -122,8 +122,9 @@ let
     nettools
     libGL
     # Editor externo: Vivado corre en su propio sandbox FHS, así que para que
-    # "Custom editor" encuentre kitty/nvim hay que meterlos aquí. En Vivado:
-    # Tools > Settings > Text Editor > Custom editor
+    # "Custom editor" encuentre kitty/nvim hay que meterlos aquí. El ajuste se
+    # siembra solo (home.activation.vivadoNvimEditor en home/default.nix); la
+    # ruta manual equivalente es Tools > Settings > Text Editor > Custom editor
     #   vivado-nvim +[line number] [file name]
     neovim
     kitty

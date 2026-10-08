@@ -1,5 +1,8 @@
 { config, pkgs, lib, ... }:
 
+let
+  vivadoNvimSeed = import ../modules/apps/vivado-nvim-seed.nix { inherit pkgs; };
+in
 {
   imports = [
     ../modules/apps/shell.nix
@@ -40,6 +43,20 @@
   # Tools > Settings > Themes > Cyberpunk (una sola vez).
   home.file.".Xilinx/Vivado/2026.1/newThemes/Cyberpunk.xmltheme".source =
     ../assets/vivado/Cyberpunk.xmltheme;
+
+  # Editor externo de Vivado -> kitty + nvim (wrapper `vivado-nvim`, módulo
+  # modules/apps/vivado.nix). El ajuste nativo vive en las preferencias de
+  # Vivado y se siembra aquí para no clickear Tools > Settings en cada host:
+  # corre en todos los hosts, y solo actúa donde exista ~/.Xilinx/Vivado o una
+  # instalación en ~/opt/Xilinx (no-op en el resto). Idempotente: respeta el
+  # editor si el humano lo cambia a mano.
+  home.activation.vivadoNvimEditor = {
+    after = [ "writeBoundary" ];
+    before = [ ];
+    data = ''
+      ${vivadoNvimSeed}/bin/vivado-nvim-seed
+    '';
+  };
 
   # Rust: rustup en NixOS usa un linker lld "self-contained" cuyo shim
   # (~/.rustup/.../bin/gcc-ld/ld.lld) hardcodea el store path de la derivación

@@ -860,6 +860,40 @@ PYEOF
     {
       packages.x86_64-linux.openrocket = (import nixpkgs { inherit system; overlays = [ openrocketOverlay ]; }).openrocket;
 
+      # Check del sembrado del editor de Vivado (ver modules/apps/vivado-nvim-seed.nix):
+      # crea preferencias si faltan, parchea las existentes y es idempotente.
+      checks.x86_64-linux.vivado-nvim-seed =
+        let
+          pkgs = import nixpkgs { inherit system; };
+          seed = import ./modules/apps/vivado-nvim-seed.nix { inherit pkgs; };
+        in
+        pkgs.runCommand "check-vivado-nvim-seed"
+          { nativeBuildInputs = [ seed pkgs.gnugrep pkgs.coreutils ]; }
+          ''
+            export HOME="$PWD/home"
+            mkdir -p "$HOME/opt/Xilinx/2026.1/Vivado"
+
+            # Instalación sin preferencias -> las crea con el editor.
+            vivado-nvim-seed
+            f="$HOME/.Xilinx/Vivado/2026.1/newvivado.xml"
+            grep -q '<CODE_EDITOR value="Custom Editor..."/>' "$f"
+            grep -q '<CODE_EDITOR_ARGUMENTS value="vivado-nvim +\[line number\] \[file name\]"/>' "$f"
+
+            # Preferencias ya existentes -> inserta sin perder el resto.
+            mkdir -p "$HOME/.Xilinx/Vivado/9"
+            printf '<preferences VERSION="10"><OTHER value="x"/></preferences>' > "$HOME/.Xilinx/Vivado/9/newvivado.xml"
+            vivado-nvim-seed
+            grep -q '<OTHER value="x"/>' "$HOME/.Xilinx/Vivado/9/newvivado.xml"
+            grep -q '<CODE_EDITOR ' "$HOME/.Xilinx/Vivado/9/newvivado.xml"
+
+            # Idempotente: no duplica.
+            n=$(grep -c '<CODE_EDITOR ' "$f")
+            vivado-nvim-seed
+            [ "$(grep -c '<CODE_EDITOR ' "$f")" = "$n" ]
+
+            touch "$out"
+          '';
+
       nixosConfigurations = {
         pc = mkHost "pc" [ ./hosts/pc/configuration.nix ];
         laptop = mkHost "laptop" [ ./hosts/laptop/configuration.nix ];
