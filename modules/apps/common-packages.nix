@@ -382,8 +382,11 @@ in
     # verificar version actual en download.geogebra.org/installers/6.0/.
     xnec2c
     wireshark
-    # GNU Radio + GRC (gnuradio-companion): radio definida por software/SDR
-    gnuradio
+    # GNU Radio + GRC (gnuradio-companion): radio definida por software/SDR.
+    # Se inyecta gr-osmosdr (bloque "osmocom Source") via extraPackages: el
+    # wrapper lo agrega a GRC_BLOCKS_PATH y al python del env. El bloque
+    # "SoapyRTLSDR Source" ya viene de fabrica (gr-soapy + soapyrtlsdr).
+    (gnuradio.override { extraPackages = [ gnuradio.pkgs.osmosdr ]; })
 
     # Audio & Video Production
     audacity
