@@ -11,6 +11,7 @@
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
     ../../modules/hardware/fingerprint.nix
+    ../../modules/hardware/sdr.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
@@ -27,6 +28,7 @@
   modules.desktop.caelestia.enable = true;
 
   modules.hardware.fingerprint.enable = true;
+  modules.hardware.sdr.enable = true;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

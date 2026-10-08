@@ -14,6 +14,7 @@
     ../../modules/hardware/fingerprint.nix
     ../../modules/hardware/openrgb.nix
     ../../modules/hardware/mtp.nix
+    ../../modules/hardware/sdr.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/flatpak.nix
     ../../modules/apps/gaming.nix
@@ -40,6 +41,7 @@
   modules.hardware.openrgb.enable = true;
   modules.hardware.mtp.enable = true;
   modules.hardware.fingerprint.enable = true;
+  modules.hardware.sdr.enable = true;
 
   # openrgb: binario en el PATH para crear/editar los perfiles RGB (la GUI).
   environment.systemPackages = [ pkgs.openrgb ];

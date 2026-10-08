@@ -8,6 +8,7 @@
     ../../modules/core/tailscale.nix
     ../../modules/hardware/amd-common.nix
     ../../modules/hardware/fingerprint.nix
+    ../../modules/hardware/sdr.nix
     ../../modules/apps/common-packages.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/syncthing.nix
@@ -26,6 +27,7 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   modules.hardware.fingerprint.enable = true;
+  modules.hardware.sdr.enable = true;
 
   # Preserva el comportamiento que heredaba de amd-common antes de mover el
   # tuneado de rendimiento a amd-desktop.nix (server sigue a tope).
