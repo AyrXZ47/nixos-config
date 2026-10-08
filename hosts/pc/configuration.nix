@@ -91,13 +91,6 @@
   boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
   boot.kernelModules = [ "ddcci" "ddcci-backlight" ];
 
-  # RTL-SDR: el xHCI AMD de este host detecta el dongle como low-speed y falla
-  # la enumeracion con error -71 (EPROTO = senal USB marginal). old_scheme_first
-  # hace que el core USB reintente con un reset de puerto extra, que mitiga esa
-  # clase de fallo. ponytail: techo conocido - si el dongle queda estable por
-  # otra via (hub/aislador/cable), borrar este param.
-  boot.kernelParams = [ "usbcore.old_scheme_first=1" ];
-
   # ddcci: desde kernel 6.8 el auto-probe de displays esta roto (el driver no
   # instancia el dispositivo por si solo), y sin el, /sys/class/backlight queda
   # vacio -> Caelestia no puede leer el brillo (icono/OSD vacios). Fix:
