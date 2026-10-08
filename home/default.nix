@@ -41,6 +41,20 @@
   home.file.".Xilinx/Vivado/2026.1/newThemes/Cyberpunk.xmltheme".source =
     ../assets/vivado/Cyberpunk.xmltheme;
 
+  # Rust: rustup en NixOS usa un linker lld "self-contained" cuyo shim
+  # (~/.rustup/.../bin/gcc-ld/ld.lld) hardcodea el store path de la derivación
+  # de rustup que instaló el toolchain. Al bumpear rustup en nixpkgs ese path
+  # se GC-ea y todo `cargo build` nativo falla con "ld-wrapper.sh: No such file
+  # or directory" (collect2 exit 127). Forzar bfd (el linker del gcc-wrapper de
+  # Nix, que no tiene shim) esquiva el shim roto sin depender de ningún store path.
+  # Cargo solo lee $CARGO_HOME/config.toml (~/.cargo); ~/.config/cargo NO.
+  # ponytail: techo conocido — bfd en vez del lld self-contained (algo más lento
+  # en builds enormes); quitar cuando nixpkgs arregle el shim de rustup.
+  home.file.".cargo/config.toml".text = ''
+    [target.x86_64-unknown-linux-gnu]
+    rustflags = ["-C", "link-arg=-fuse-ld=bfd"]
+  '';
+
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
