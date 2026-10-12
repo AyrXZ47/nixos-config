@@ -627,6 +627,16 @@ PYEOF
             'const hasBatt = UPower.displayDevice.isLaptopBattery;' \
             'const hasBatt = UPower.displayDevice.isLaptopBattery || UPower.displayDevice.type === UPowerDeviceType.Ups;'
 
+            # Indicador de layout estilo GNOME: codigo corto (ES/EN) en vez de
+            # "latam"/"us", y una talla menor para que la barra no engorde.
+            substituteInPlace modules/bar/components/StatusIcons.qml \
+              --replace-fail \
+            'text: Hypr.kbLayout' \
+            'text: ({ latam: "ES", es: "ES", us: "EN", gb: "EN", fr: "FR", de: "DE", br: "PT", pt: "PT", it: "IT" })[Hypr.kbLayout] ?? Hypr.kbLayout.slice(0, 2).toUpperCase()' \
+              --replace-fail \
+            'font: Tokens.font.mono.medium' \
+            'font: Tokens.font.mono.small'
+
             # Watts reales de la bateria/UPS (changeRate = EnergyRate; positivo
             # cargando, negativo descargando). Solo visible si el dato existe.
             ind='            '
