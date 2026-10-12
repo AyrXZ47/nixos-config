@@ -631,6 +631,10 @@ in
         fi
         pkill -f 'quickshell.*caelestia-shell' 2>/dev/null
         sleep 0.5
+        # El indicador de layout lee estas reglas xkb. Se exporta aqui ademas de
+        # sessionVariables (caelestia.nix) para que valga sin relogin: la sesion
+        # viva no hereda todavia la variable nueva tras un rebuild.
+        export CAELESTIA_XKB_RULES_PATH="${pkgs.xkeyboard-config}/share/X11/xkb/rules/base.lst"
         caelestia shell -d
       '';
     };
