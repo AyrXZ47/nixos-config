@@ -53,12 +53,15 @@ in
     # ventiladores (CoolerMaster) reenumera: pierde el efecto aplicado (queda en
     # el arcoíris de fábrica) y el servidor OpenRGB conserva un handle muerto,
     # así que el hook de unlock tampoco puede repintarlo. Reiniciar el servidor
-    # fuerza una re-detección. En este equipo el único suspend lo dispara el
-    # watchdog del lock, siempre con la sesión bloqueada, así que re-aplicamos el
-    # perfil de bloqueo; el unlock ya restaura el de arranque.
+    # fuerza una re-detección. El suspend es ahora manual (menú de sesión) o al
+    # cerrar la tapa en laptop, casi siempre con la sesión bloqueada, así que
+    # re-aplicamos el perfil de bloqueo; el unlock ya restaura el de arranque.
     powerManagement.resumeCommands = ''
       if [ -S /run/user/1000/systemd/private ]; then
-        runuser -u yovick -- env XDG_RUNTIME_DIR=/run/user/1000 \
+        # runuser NO esta en el PATH del hook (util-linux no se incluye): con el
+        # nombre pelado fallaba "command not found" y el servidor nunca se
+        # reiniciaba, dejando el handle USB muerto sin re-deteccion.
+        ${pkgs.util-linux}/bin/runuser -u yovick -- env XDG_RUNTIME_DIR=/run/user/1000 \
           systemctl --user restart openrgb.service || true
         for _ in $(seq 20); do
           sleep 1
@@ -67,10 +70,10 @@ in
       fi
     '';
 
-    # Al apagar: perfil "apagado". La sesión (y su servidor) ya se está cerrando, así
-    # que toca detectar de nuevo (un escaneo más, ~14s). ExecStop corre en shutdown.
-    # ponytail: si el GUI siguiera vivo, dos instancias escanean el SMBus a la vez;
-    # a la fecha la sesión muere antes y no hay solapamiento.
+    # Al apagar: perfil "apagado". La sesión (y su servidor) ya se está cerrando,
+    # así que toca detectar de nuevo (un escaneo más, ~14s). ExecStop corre en
+    # shutdown. Antes se aplicaba sin detener el servidor de usuario: si seguía
+    # vivo, los dos procesos peleaban por el SMBus y el perfil no se pintaba.
     systemd.services.openrgb-shutdown = {
       description = "OpenRGB: perfil al apagar el equipo";
       wantedBy = [ "multi-user.target" ];
@@ -80,7 +83,12 @@ in
         RemainAfterExit = true;
         User = "yovick";
         ExecStart = "${pkgs.coreutils}/bin/true";
-        ExecStop = "${openrgb} -p ${profileOff}";
+        ExecStop = pkgs.writeShellScript "openrgb-shutdown" ''
+          ${pkgs.systemd}/bin/systemctl --user -M yovick@.host stop openrgb.service 2>/dev/null || true
+          ${pkgs.procps}/bin/pkill -u yovick -f 'openrgb --server' 2>/dev/null || true
+          sleep 2
+          ${openrgb} -p ${profileOff}
+        '';
         TimeoutStopSec = 60;
       };
     };

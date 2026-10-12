@@ -70,16 +70,22 @@ let
         playback = [ "mpv" ];
         explorer = [ "dolphin" ];
       };
-      # Idle del shell: SOLO apaga la pantalla (dpms) a los 10 min. Sin autolock
-      # ni suspensión (sin swap en disco, no habría hibernación real); el lock
-      # es siempre manual.
+      # Idle del shell: a los 15 min bloquea (via lock.sh, para conservar el
+      # wipe de cliphist y los perfiles RGB) y un minuto despues apaga la
+      # pantalla (dpms). NO suspende: el auto-suspend se elimino porque en la PC
+      # el S3 aborta al instante (ver modules/hardware/openrgb.nix) y cada
+      # intento reseteaba los USB. Sin swap en disco tampoco hay hibernacion real.
       idle = {
         lockBeforeSleep = true;
         inhibitWhenAudio = true;
         inhibitWhenCharging = false;
         timeouts = [
           {
-            timeout = 600;
+            timeout = 900;
+            idleAction = [ "/home/yovick/.config/hypr/scripts/lock.sh" ];
+          }
+          {
+            timeout = 960;
             idleAction = "dpms off";
             returnAction = "dpms on";
           }

@@ -453,21 +453,6 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # Watchdog del lock: sin swap en disco no hay hibernación real, el humano
-  # aceptó suspend puro. El nombre "hibernate" se conserva por el brief/plan.
-  systemd.user.services.caelestia-lock-hibernate = {
-    Unit = {
-      Description = "Suspende la sesión tras 5 min con la pantalla bloqueada";
-      After = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${config.xdg.configHome}/hypr/scripts/lock-hibernate.sh";
-      Restart = "always";
-      RestartSec = 5;
-    };
-    Install = { WantedBy = [ "graphical-session.target" ]; };
-  };
-
   # cliphist: limite de historial en 20 items. Era 6, pero el humano perdía
   # contexto al elegir; 20 mantiene el historial corto sin crecer sin control
   # (captura TODO lo copiado, incl. contraseñas de KeepassXC).
@@ -801,42 +786,27 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         cliphist wipe
         [ -x "$HOME/.config/hypr/scripts/openrgb-lock-before" ] && "$HOME/.config/hypr/scripts/openrgb-lock-before"
         caelestia shell lock lock >/dev/null 2>&1 || exit 0
-        # Restaura cuando el lock se libere (poll corto; sale si el shell muere).
+        # Restaura cuando el lock se libere. SIN tope de iteraciones: el lock
+        # puede durar horas (antes 60x2s=120s; al agotarse pintaba RGBRules1
+        # estando aun bloqueada y dejaba de correr, asi que al desbloquear de
+        # verdad RGBRules1 nunca volvia). Solo se rinde si el IPC falla varias
+        # veces seguidas (el shell murio/reinicia), no ante un fallo aislado.
         (
-          for _ in $(seq 60); do
-            sleep 2
-            locked=$(caelestia shell lock isLocked 2>/dev/null || echo "")
+          miss=0
+          while sleep 2; do
+            # Binario nativo (no el CLI Python): el sondeo corre cada 2 s
+            # mientras dure el lock y no vale la pena arrancar un interprete.
+            locked=$(${pkgs.caelestia-shell}/bin/caelestia-shell ipc call lock isLocked 2>/dev/null || echo "")
+            if [ -z "$locked" ]; then
+              miss=$((miss + 1))
+              [ "$miss" -ge 5 ] && exit 0
+              continue
+            fi
+            miss=0
             [ "$locked" = "false" ] && break
-            [ -z "$locked" ] && exit 0
           done
           [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
         ) >/dev/null 2>&1 &
-      '';
-    };
-
-    # Watchdog del lock: a los 5 min bloqueado suspende la máquina (el humano
-    # decidió suspend puro; sin swap en disco no hay hibernación real). Usa el
-    # binario directo `caelestia-shell` (no el CLI) para no depender del wrapper.
-    "hypr/scripts/lock-hibernate.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        # ponytail: sondeo cada 15 s; "idle" se aproxima con "bloqueado" (no
-        # distingue idle real). Techo: hasta 15 s de retardo por granularidad;
-        # upgrade: escuchar eventos de lock en vez de sondear.
-        count=0
-        while sleep 15; do
-          state=$(${pkgs.caelestia-shell}/bin/caelestia-shell ipc call lock isLocked 2>/dev/null || echo "")
-          if [ "$state" = "true" ]; then
-            count=$((count + 15))
-            if [ "$count" -ge 300 ]; then
-              systemctl suspend
-              count=0
-            fi
-          else
-            count=0
-          fi
-        done
       '';
     };
 

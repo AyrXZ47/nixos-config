@@ -57,8 +57,11 @@ flake.nix              # Entry point — hosts & shared modules
 - **SDDM** — Wayland, `sddm-astronaut` "cyberpunk" theme.
 - **Caelestia** — shell Quickshell (Qt6/QML): barra lateral izquierda con
   workspaces, clock, notificaciones, batería, clipboard, emoji, launcher,
-  dashboard (media/perf), utilities y menú de sesión. Lock e idle propios.
-  Config declarativa en `modules/desktop/caelestia.nix` (`shell.json`).
+  dashboard (media/perf), utilities y menú de sesión. Lock e idle propios: a
+  los 15 min de inactividad bloquea (vía `lock.sh`, así corre el wipe de
+  cliphist y el perfil RGB) y al minuto apaga la pantalla; no suspende (el
+  S3 de `pc` aborta al instante, ver `modules/hardware/openrgb.nix`). Config
+  declarativa en `modules/desktop/caelestia.nix` (`shell.json`).
 - **rofi** — drun/run launchers with a custom `cyberpunk.rasi` theme.
 - polkit-gnome agent, `cliphist` clipboard manager, `hyprshot` screenshots,
   animated wallpapers via **mpvpaper** (looped mp4) driven through Caelestia's
@@ -258,8 +261,9 @@ Dónde funciona la huella:
 > `services.fprintd.enable` está activo, así que todos los servicios PAM la
 > heredan salvo que se apague explícitamente.
 
-Al **volver de suspender** (el idle de Caelestia ahora suspende) el xHCI Renesas
-resetea el bus y el sensor reenumera con firmware `0.00`; libfprint lo ignora
+Al **volver de suspender** (suspend manual desde el menú de sesión, o al cerrar
+la tapa en `laptop`) el xHCI Renesas resetea el bus y el sensor reenumera con
+firmware `0.00`; libfprint lo ignora
 (`unsupported firmware version`) y fprintd deja la reserva colgada, así que sudo
 deja de pedir la huella. `fingerprint.nix` lo recupera solo con
 `powerManagement.resumeCommands` (rebind del USB + `systemctl restart fprintd`).
