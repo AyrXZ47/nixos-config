@@ -251,7 +251,7 @@ let
         }
         {
           id = "kbLayout";
-          enabled = false;
+          enabled = true;
         }
         {
           id = "network";
@@ -565,8 +565,8 @@ let
         dndChanged = true;
         audioOutputChanged = true;
         audioInputChanged = true;
-        capsLockChanged = true;
-        numLockChanged = true;
+        capsLockChanged = false;
+        numLockChanged = false;
         kbLayoutChanged = false;
         kbLimit = true;
         vpnChanged = true;
