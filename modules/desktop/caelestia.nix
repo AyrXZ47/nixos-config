@@ -652,6 +652,13 @@ in
       pkgs.quickshell
     ] ++ fonts ++ cliRuntime;
 
+    # El indicador de layout (statusIcon kbLayout) resuelve el código corto
+    # ("latam"/"us") leyendo las reglas xkb; Caelestia busca por defecto
+    # /usr/share/X11/xkb/rules/base.lst, que en NixOS no existe -> mostraba "??".
+    # Se apunta al paquete. Va en sessionVariables para que lo herede el shell
+    # tanto al arrancar con Hyprland como al relanzarlo con caelestia-restart.sh.
+    environment.sessionVariables.CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/X11/xkb/rules/base.lst";
+
     modules.desktop.caelestia.shellJsonPath = pkgs.writeText "caelestia-shell.json" shellJson;
 
     fonts.packages = fonts;
