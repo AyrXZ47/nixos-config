@@ -64,6 +64,13 @@ No tests, no CI, no formatter/linter config. `nix flake check` is the only verif
 - Al finalizar, siempre haz `git commit`. No dejar trabajo sin commitear.
 - Nunca hacer `nixos-rebuild switch` sin que el código tenga commit previo; el rebuild lo corre el usuario, después del commit.
 
+## Gestor de paquetes JS (obligatorio)
+
+- Todo lo JS de este repo usa **pnpm**, nunca `npm`: pnpm ≥10 no ejecuta los
+  lifecycle scripts de las dependencias por defecto (el vector principal de
+  supply-chain en npm). `npm install` solo como excepcion explicita del brief,
+  documentada; herramientas globales van con `pnpm add -g`.
+
 ## Gotchas
 
 - `yovick` is hardcoded in `flake.nix`, `home/default.nix`, and `modules/core/user.nix` — the latter holds `initialPassword` (applies only at first boot). Renaming the user touches all three.
