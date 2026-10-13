@@ -19,10 +19,21 @@
       url = "github:kicad-spice-library/KiCad-Spice-Library";
       flake = false;
     };
+
+    # Pi (earendil-works/pi): harness de agentes, instalado en los 4 hosts via
+    # overlay (`pkgs.pi`). `stable` apunta al ultimo release; actualizar con
+    # `nix flake update pi`. Los nixpkgs del input siguen al del repo: en
+    # x86_64-linux el paquete se construye con nuestro pin y el input darwin
+    # (irrelevante aqui) no agrega un segundo nixpkgs al lock.
+    pi = {
+      url = "github:earendil-works/pi/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    { nixpkgs, home-manager, kicad-spice-library, ... }:
+    { nixpkgs, home-manager, kicad-spice-library, pi, ... }:
     let
       system = "x86_64-linux";
       # Backend del portal RemoteDesktop para el remote input de KDE Connect en Hyprland.
@@ -853,7 +864,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
@@ -869,6 +880,10 @@ PYEOF
     in
     {
       packages.x86_64-linux.openrocket = (import nixpkgs { inherit system; overlays = [ openrocketOverlay ]; }).openrocket;
+
+      # Pi como paquete suelto: `nix build .#pi` lo construye/verifica sin
+      # rebuild completo (misma derivacion que pkgs.pi en los hosts).
+      packages.x86_64-linux.pi = (import nixpkgs { inherit system; overlays = [ pi.overlays.default ]; }).pi;
 
       # Check del sembrado del editor de Vivado (ver modules/apps/vivado-nvim-seed.nix):
       # crea preferencias si faltan, parchea las existentes y es idempotente.

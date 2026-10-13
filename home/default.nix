@@ -85,6 +85,7 @@ in
     libnotify
     obsidian
     opencode
+    pi
     pipes-rs
     ripgrep
     scrcpy
