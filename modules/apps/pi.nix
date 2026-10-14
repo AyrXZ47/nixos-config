@@ -10,16 +10,33 @@ let
   # default aplica y un consumidor lo puede sobreescribir.
   piPackage = config._module.args.piPackage or pkgs.pi;
   gentleAiPackage = config._module.args.gentleAiPackage or pkgs.gentle-ai;
-  # Defaults de arranque de pi: modelo barato (flash) con thinking OFF (sin
-  # reasoning, no quemar tokens) y el tema cyberpunk (el default `system`
-  # hereda el verde de la terminal). Solo se siembra si el archivo NO existe:
-  # pi y gentle-ai lo reescriben (packages, etc.) y no se debe pisar.
+  # Defaults de arranque de pi: el modelo de opencode-go (DeepSeek V4.1 Flash),
+  # thinking OFF (sin reasoning, no quemar tokens) y el tema cyberpunk (el
+  # default `system` hereda el verde de la terminal).
+  # Solo se siembra si el archivo NO existe: pi y gentle-ai lo reescriben
+  # (packages, etc.) y no se debe pisar.
   settingsSeed = pkgs.writeText "pi-settings.json" (builtins.toJSON {
-    defaultProvider = "deepseek";
-    defaultModel = "deepseek-flash";
+    defaultProvider = "opencode-go";
+    defaultModel = "deepseek-v4.1-flash";
     defaultThinkingLevel = "off";
     theme = "cyberpunk";
   });
+
+  # Routing de modelos de gentle-ai: TODOS los roles de agente usan
+  # opencode-go/deepseek-v4.1-flash. Va en el flake para no reconfigurarlo a
+  # mano en cada host ni despues de cada limpieza. El prefijo del proveedor es
+  # obligatorio (`opencode-go/...`): un id pelado se resuelve por el registro
+  # solo si UN proveedor lo tiene.
+  # Roles: las 4 lentes de review + el refuter (que el proveedor lanza cuando
+  # un revisor reporta un hallazgo severo para descartar falsos positivos).
+  modelRouting = {
+    review-reliability.model = "opencode-go/deepseek-v4.1-flash";
+    review-risk.model = "opencode-go/deepseek-v4.1-flash";
+    review-resilience.model = "opencode-go/deepseek-v4.1-flash";
+    review-readability.model = "opencode-go/deepseek-v4.1-flash";
+    review-refuter.model = "opencode-go/deepseek-v4.1-flash";
+  };
+  modelsSeed = pkgs.writeText "gentle-models.json" (builtins.toJSON modelRouting);
 
   # Persona de el Gentleman: `neutral` (espanol neutro, sin voseo ni
   # regionalismos). Config global de gentle-ai; el modo se resuelve
@@ -52,6 +69,20 @@ in
     if [ ! -f "$HOME/.pi/gentle-ai/persona.json" ]; then
       ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/gentle-ai"
       ${pkgs.coreutils}/bin/install -m 600 ${personaSeed} "$HOME/.pi/gentle-ai/persona.json"
+    fi
+  '';
+
+  # Routing de modelos de gentle-ai. A diferencia de los seeds de arriba, aqui
+  # NO basta `! -f`: el archivo ya existe (lo escribio /gentle:models o yo a
+  # mano) y hay que asegurar que apunte al modelo del flake. Se compara el
+  # CONTENIDO y solo se reescribe si difiere, asi el rebuild es idempotente y
+  # no toca el archivo cuando ya esta correcto. Si cambias el modelo a mano con
+  # /gentle:models, el proximo rebuild lo vuelve al del flake: eso es lo pedido
+  # (una sola fuente de verdad), no un efecto colateral.
+  home.activation.gentleModelsSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/gentle-ai"
+    if ! ${pkgs.diffutils}/bin/cmp -s ${modelsSeed} "$HOME/.pi/gentle-ai/models.json" 2>/dev/null; then
+      ${pkgs.coreutils}/bin/install -m 600 ${modelsSeed} "$HOME/.pi/gentle-ai/models.json"
     fi
   '';
 
