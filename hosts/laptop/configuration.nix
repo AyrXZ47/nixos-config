@@ -8,6 +8,7 @@
     ../../modules/core/tailscale.nix
     ../../modules/desktop/hyprland.nix
     ../../modules/desktop/caelestia.nix
+    ../../modules/desktop/virtualisation.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
     ../../modules/hardware/amd-laptop.nix
@@ -33,6 +34,10 @@
 
   modules.desktop.hyprland.enable = true;
   modules.desktop.caelestia.enable = true;
+
+  # KVM/QEMU + libvirt para virt-manager (el paquete ya viene de
+  # common-packages.nix; esto habilita el daemon que el cliente necesita).
+  modules.desktop.virtualisation.enable = true;
 
   modules.hardware.fingerprint.enable = true;
 
