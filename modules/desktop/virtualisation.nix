@@ -61,12 +61,15 @@ in
         $vsh net-start default 2>/dev/null || true
         $vsh net-autostart default 2>/dev/null || true
 
-        # Storage pool default. `pool-define-as` solo falla si ya existe;
-        # build/start/autostart son idempotentes.
+        # Storage pool default. `pool-info` distingue "no existe" de "existe":
+        # sin la condicion, `pool-define-as` falla al repetirse. Dentro del if,
+        # build puede fallar de forma benigna (directorio ya poblado) y con
+        # `set -e` abortaria el script dejando el pool sin arrancar; el destino
+        # ya lo garantiza el mkdir previo.
         if ! $vsh pool-info default >/dev/null 2>&1; then
           ${pkgs.coreutils}/bin/mkdir -p /var/lib/libvirt/images
           $vsh pool-define-as default dir --target /var/lib/libvirt/images
-          $vsh pool-build default
+          $vsh pool-build default 2>/dev/null || true
         fi
         $vsh pool-start default 2>/dev/null || true
         $vsh pool-autostart default 2>/dev/null || true
