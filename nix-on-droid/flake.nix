@@ -43,9 +43,24 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+
+    # Pi (el mismo input que el flake de los hosts de escritorio). OJO: aqui NO
+    # se pone `inputs.nixpkgs.follows = "nixpkgs"`. Dos razones:
+    #  1. El pin 25.11 de este flake NO trae `pkgs.pi` (verificado con nix eval:
+    #     nixpkgs 25.11 no tiene el atributo); el paquete solo existe en el
+    #     nixpkgs que el propio flake de pi trae.
+    #  2. El flake de pi SI declara aarch64-linux (nix eval de
+    #     packages.aarch64-linux.pi -> pi-1.2.0, verificado), que es lo que
+    #     necesita el celular.
+    # Consecuencia: este input agrega un segundo nixpkgs al lock de
+    # nix-on-droid, aislado del pin 25.11 del resto (no afecta el proot).
+    pi = {
+      url = "github:earendil-works/pi";
+      inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, nix-on-droid }:
+  outputs = { self, nixpkgs, home-manager, nix-on-droid, pi }:
     let
       # ponytail: en Android (proot/FUSE) el unpack de srcs de directorio falla:
       # _defaultUnpack copia con `cp -r --preserve=timestamps --reflink=auto`
@@ -70,16 +85,52 @@
             prev.fetchFromGitHub args;
       };
 
+      # gentle-ai: binario Go del release oficial. El overlay de los hosts de
+      # escritorio descarga el tarball linux_amd64 a fuego, y el pin 25.11 de
+      # este flake no trae el paquete en nixpkgs -> aqui va su propio overlay
+      # con el asset linux_arm64 (el release v4.1.1 SI lo publica; hash
+      # obtenido con `nix store prefetch-file`).
+      # Actualizar version: cambiar `version`, la `url` y el `hash`.
+      gentleAiOverlay = final: prev: {
+        gentle-ai = prev.stdenvNoCC.mkDerivation {
+          pname = "gentle-ai";
+          version = "4.1.1";
+          src = prev.fetchurl {
+            url = "https://github.com/Gentleman-Programming/gentle-ai/releases/download/v4.1.1/gentle-ai_4.1.1_linux_arm64.tar.gz";
+            hash = "sha256-X4+jhXPuoPIRCQLwmWqgsAiqxY3A+aarvfMB3LyT9Os=";
+          };
+          sourceRoot = ".";
+          installPhase = ''
+            install -Dm755 gentle-ai $out/bin/gentle-ai
+            install -Dm644 LICENSE $out/share/licenses/gentle-ai/LICENSE
+          '';
+          meta = {
+            description = "Deterministic engineering environment for AI coding agents";
+            homepage = "https://gentle-ai.gentlemanprogramming.com/";
+            license = final.lib.licenses.mit;
+            platforms = final.lib.platforms.linux;
+            mainProgram = "gentle-ai";
+          };
+        };
+      };
+
       pkgs = import nixpkgs {
         system = "aarch64-linux";
         overlays = [
           androidUnpackFix
+          pi.overlays.default
+          gentleAiOverlay
         ];
       };
     in
     {
       nixOnDroidConfigurations.default = nix-on-droid.lib.nixOnDroidConfiguration {
         inherit pkgs;
+        # El submódulo home-manager no hereda el `pkgs` con overlays del
+        # modulo nix-on-droid, asi que se pasan por extraSpecialArgs (la
+        # misma via que ya usan opencodeTarball/rtk) y configuration.nix los
+        # re-expone al home con home-manager.extraSpecialArgs.
+        #
         # opencode NO se declara como derivacion nix: su output standalone no
         # viene de la cache binaria y el store del celular lo pierde (path
         # corrupto/parcial, el env cacheado nunca lo re-materializa y el
@@ -95,6 +146,7 @@
         extraSpecialArgs = {
           opencodeTarball = ./opencode-1.18.16.tar.gz;
           rtkTarball = ./rtk-0.48.0-aarch64.tar.gz;
+          inherit nixpkgs pi gentleAiOverlay;
         };
         modules = [ ./configuration.nix ];
       };
