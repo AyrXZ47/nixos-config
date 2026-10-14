@@ -20,7 +20,7 @@
   },
   "colors": {
     "accent": "magenta",
-    "border": "selection",
+    "border": "cyan",
     "borderAccent": "magenta",
     "borderMuted": "dim",
     "success": "green",
