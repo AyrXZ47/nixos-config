@@ -73,14 +73,23 @@ in
     # Al apagar se pinta RGBRules2 (profileOff), el mismo perfil que al
     # bloquear: el equipo se apaga desde la sesion bloqueada o con el lock
     # inmediato, asi que la regla 2 es el estado coherente al cortar energia.
+    # El perfil de apagado YA NO se aplica aqui. Se aplica al INICIAR el
+    # apagado, con el sistema sano, desde el wrapper `power-with-rgb`
+    # (modules/desktop/hyprland-home.nix) que usan las acciones Shutdown y
+    # Reboot de Caelestia.
     #
-    # La sesion (y su servidor) ya se esta cerrando, asi que toca detectar de
-    # nuevo (un escaneo mas, ~14s) y por eso el openrgb de abajo NO lleva
-    # --nodetect. Antes se aplicaba sin detener el servidor de usuario: si
-    # seguia vivo, los dos procesos peleaban por el SMBus y el perfil no se
-    # pintaba; de ahi el stop + pkill previos.
+    # Por que se movio (bug real, 2026-10-14): este ExecStop corria cuando
+    # systemd ya estaba desmantelando la sesion. `openrgb -p` sin --nodetect
+    # arranca un proceso que re-escanea el SMBus/USB (~6-14s) y moria antes de
+    # pintar nada; los logs mostraban "NetworkClient] Connection attempt
+    # failed". Un `pkill -f 'openrgb --server'` previo empeoraba el cuadro
+    # porque matchea la LINEA DE COMANDOS COMPLETA y el propio script la
+    # contiene, asi que se mataba a si mismo (exit 143).
+    #
+    # Queda solo el apagado limpio del servidor de usuario, para que no quede
+    # un handle vivo peleando por el SMBus durante el teardown.
     systemd.services.openrgb-shutdown = {
-      description = "OpenRGB: perfil al apagar el equipo";
+      description = "OpenRGB: detiene el servidor al apagar el equipo";
       wantedBy = [ "multi-user.target" ];
       stopIfChanged = false;
       serviceConfig = {
@@ -88,11 +97,10 @@ in
         RemainAfterExit = true;
         User = "yovick";
         ExecStart = "${pkgs.coreutils}/bin/true";
+        # Solo detiene el servidor. Sin pkill -f (se mataba a si mismo) y sin
+        # aplicar perfil (eso ya lo hizo el wrapper antes del teardown).
         ExecStop = pkgs.writeShellScript "openrgb-shutdown" ''
           ${pkgs.systemd}/bin/systemctl --user -M yovick@.host stop openrgb.service 2>/dev/null || true
-          ${pkgs.procps}/bin/pkill -u yovick -f 'openrgb --server' 2>/dev/null || true
-          sleep 2
-          ${openrgb} -p ${profileOff}
         '';
         TimeoutStopSec = 60;
       };

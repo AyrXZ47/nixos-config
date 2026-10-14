@@ -767,6 +767,28 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         exec ${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2
       '';
     };
+
+    # Perfil RGB al APAGAR o REINICIAR. Se aplica AQUI (al iniciar el apagado)
+    # y no en el ExecStop de systemd, porque a esa altura el sistema ya se esta
+    # desmantelando: el proceso `openrgb -p ...` arranca, intenta re-detectar el
+    # SMBus/USB (~6-14s) y muere antes de pintar nada. Confirmado en los logs de
+    # OpenRGB: "NetworkClient] Connection attempt failed".
+    #
+    # En este punto la sesion y su servidor OpenRGB siguen VIVOS, asi que basta
+    # el cliente con --nodetect (sin re-escanear el SMBus, que es lo que puede
+    # colgar el equipo). El flag lo decide el primer argumento: "off" = apagar,
+    # "reboot" = reiniciar.
+    "hypr/scripts/power-with-rgb" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Pinta el perfil de apagado ANTES de cortar energia. Best-effort: si
+        # OpenRGB falla, el apagado sigue igual (no se bloquea el poweroff por
+        # un problema de iluminacion).
+        ${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2 >/dev/null 2>&1 || true
+        exec systemctl "$1"
+      '';
+    };
     "hypr/scripts/openrgb-lock-after" = {
       executable = true;
       text = ''

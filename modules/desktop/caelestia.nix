@@ -452,14 +452,18 @@ let
           name = "Shutdown";
           icon = "power_settings_new";
           description = "Apagar";
-          command = [ "poweroff" ];
+          # Wrapper: pinta RGBRules2 ANTES de apagar (ver el script, en
+          # hyprland-home.nix). systemd ya no alcanza a aplicarlo en su
+          # ExecStop porque la sesion se desmantela antes de que OpenRGB
+          # termine de re-detectar el hardware.
+          command = [ "/home/yovick/.config/hypr/scripts/power-with-rgb" "poweroff" ];
           dangerous = true;
         }
         {
           name = "Reboot";
           icon = "restart_alt";
           description = "Reiniciar";
-          command = [ "reboot" ];
+          command = [ "/home/yovick/.config/hypr/scripts/power-with-rgb" "reboot" ];
           dangerous = true;
         }
       ];
