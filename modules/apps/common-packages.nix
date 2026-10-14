@@ -317,17 +317,18 @@ in
   # datos" que necesitamos visible a ruta estable en todos los hosts.
   environment.pathsToLink = [ "/share/kicad-spice-library" ];
 
-  # Compat FHS para postinstalls npm que exigen un extractor de tar en rutas
-  # absolutas /usr/bin/tar o /bin/tar (trust boundary deliberado: no admite
-  # PATH). NixOS no provee ninguna de las dos; /bin/tar -> tar del sistema es
-  # el equivalente exacto al /usr/bin/tar de otras distros. Lo necesita el
-  # postinstall de `gentle-pi` (gentle-shell#548, aun abierto; upstream propone
-  # extraer en Node). ponytail: techo conocido — borrar este shim cuando
-  # gentle-pi deje de requerir el extractor del sistema.
-  system.activationScripts.binTar = {
+  # Compat FHS: el ecosistema (gentle-pi) asume rutas absolutas de distro en
+  # dos sitios — el postinstall busca /usr/bin/tar o /bin/tar como extractor
+  # confiable (gentle-shell#548) y la deteccion de audio de notificaciones solo
+  # mira /usr/bin/paplay|pw-play|aplay. NixOS no tiene ninguna; se crean
+  # symlinks a los binarios del sistema (equivalente exacto a esas rutas en
+  # otras distros). ponytail: techo conocido — borrar cuando upstream deje de
+  # asumir FHS (para el tar, gentle-pi propone extraer en Node).
+  system.activationScripts.fhsShims = {
     text = ''
-      mkdir -p /bin
+      mkdir -p /bin /usr/bin
       ln -sfn ${pkgs.gnutar}/bin/tar /bin/tar
+      ln -sfn ${pkgs.pipewire}/bin/pw-play /usr/bin/pw-play
     '';
   };
 
