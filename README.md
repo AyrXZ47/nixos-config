@@ -101,16 +101,19 @@ flake.nix              # Entry point — hosts & shared modules
   RDD. Actualizar: cambiar tag en `flake.nix` (pi) / `version`+`hash`
   (`gentle-ai`), `nix flake update pi`, rebuild.
 - La pila de paquetes de Pi (`gentle-pi`, `gentle-engram`, `pi-web-access`,
-  `pi-btw`) se instala **una vez por máquina** con `gentle-ai install --agent
-  pi` (vive en `~/.pi/agent`, fuera de nix) y se actualiza con `pi update`.
-  Skills globales (`security-audit`, `ponytail`) van igual: `pi install
-  git:<repo>` + `pi update`.
+  `pi-btw`) y las skills globales (`security-audit`, `ponytail`) se instalan
+  solas en el **primer rebuild de cada máquina** (`home.activation
+  .gentleAiBootstrap` en `modules/apps/pi.nix`; marcador y log en
+  `~/.local/state/gentle-ai/`). Ese primer rebuild necesita red; si falla,
+  reintenta al siguiente. Actualizaciones: `pi update`. Único paso manual por
+  máquina: `pi` → `/login` (la API key es un secreto, no va al repo).
 - Tema `cyberpunk` y defaults (deepseek flash, thinking `low`) en
   `assets/pi/cyberpunk.json` + `modules/apps/pi.nix` (seed solo si
   `settings.json` no existe; después manda el archivo del usuario).
-- `modules/apps/common-packages.nix` crea `/bin/tar`: shim FHS que exige el
-  postinstall de `gentle-pi` en NixOS (issue gentle-shell#548; borrar cuando
-  upstream extraiga en Node).
+- `modules/apps/common-packages.nix` crea los shims FHS que el ecosistema
+  asume: `/bin/tar` (postinstall de `gentle-pi`, gentle-shell#548) y
+  `/usr/bin/pw-play` (la detección de audio de notificaciones de gentle-pi
+  solo mira rutas `/usr/bin`). Borrar cuando upstream deje de asumir FHS.
 
 ### Gaming
 - **Steam** (gamescope session, Remote Play + dedicated server + LAN transfers
