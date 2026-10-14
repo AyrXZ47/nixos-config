@@ -94,7 +94,6 @@
       ../modules/apps/git.nix
       ../modules/apps/neovim.nix
       ../modules/apps/fastfetch.nix
-      ../modules/apps/serena.nix
     ];
 
     # fastfetch con la MISMA config que la pc (separador, titulo, modulos),
