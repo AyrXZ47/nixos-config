@@ -3,7 +3,7 @@
 let
   cfg = config.modules.hardware.openrgb;
   openrgb = "${pkgs.openrgb}/bin/openrgb";
-  profileBoot = "RGBRules1"; # perfil de sesión activa (al arranque)
+  profileBoot = "RGBRules1"; # perfil de sesion activa (al arrancar y al desbloquear)
   profileOff = "RGBRules2"; # perfil al bloquear / suspender / apagar
 in
 {
@@ -70,10 +70,15 @@ in
       fi
     '';
 
-    # Al apagar: perfil "apagado". La sesión (y su servidor) ya se está cerrando,
-    # así que toca detectar de nuevo (un escaneo más, ~14s). ExecStop corre en
-    # shutdown. Antes se aplicaba sin detener el servidor de usuario: si seguía
-    # vivo, los dos procesos peleaban por el SMBus y el perfil no se pintaba.
+    # Al apagar se pinta RGBRules2 (profileOff), el mismo perfil que al
+    # bloquear: el equipo se apaga desde la sesion bloqueada o con el lock
+    # inmediato, asi que la regla 2 es el estado coherente al cortar energia.
+    #
+    # La sesion (y su servidor) ya se esta cerrando, asi que toca detectar de
+    # nuevo (un escaneo mas, ~14s) y por eso el openrgb de abajo NO lleva
+    # --nodetect. Antes se aplicaba sin detener el servidor de usuario: si
+    # seguia vivo, los dos procesos peleaban por el SMBus y el perfil no se
+    # pintaba; de ahi el stop + pkill previos.
     systemd.services.openrgb-shutdown = {
       description = "OpenRGB: perfil al apagar el equipo";
       wantedBy = [ "multi-user.target" ];
