@@ -107,8 +107,8 @@ flake.nix              # Entry point — hosts & shared modules
   `~/.local/state/gentle-ai/`). Ese primer rebuild necesita red; si falla,
   reintenta al siguiente. Actualizaciones: `pi update`. Único paso manual por
   máquina: `pi` → `/login` (la API key es un secreto, no va al repo).
-- Tema `cyberpunk` y defaults (deepseek flash, thinking `low`) en
-  `assets/pi/cyberpunk.json` + `modules/apps/pi.nix` (seed solo si
+- Tema `cyberpunk` y defaults (deepseek flash, thinking `off`: sin reasoning)
+  en `assets/pi/cyberpunk.json` + `modules/apps/pi.nix` (seed solo si
   `settings.json` no existe; después manda el archivo del usuario).
 - `modules/apps/common-packages.nix` crea los shims FHS que el ecosistema
   asume: `/bin/tar` (postinstall de `gentle-pi`, gentle-shell#548) y

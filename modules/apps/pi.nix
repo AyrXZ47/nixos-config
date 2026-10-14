@@ -1,14 +1,14 @@
 { config, pkgs, lib, ... }:
 
 let
-  # Defaults de arranque de pi: modelo barato (flash) en thinking `low` para
-  # no quemar tokens, y el tema cyberpunk (el default `system` hereda el verde
-  # de la terminal). Solo se siembra si el archivo NO existe: pi y gentle-ai lo
-  # reescriben (packages, etc.) y no se debe pisar.
+  # Defaults de arranque de pi: modelo barato (flash) con thinking OFF (sin
+  # reasoning, no quemar tokens) y el tema cyberpunk (el default `system`
+  # hereda el verde de la terminal). Solo se siembra si el archivo NO existe:
+  # pi y gentle-ai lo reescriben (packages, etc.) y no se debe pisar.
   settingsSeed = pkgs.writeText "pi-settings.json" (builtins.toJSON {
     defaultProvider = "deepseek";
     defaultModel = "deepseek-flash";
-    defaultThinkingLevel = "low";
+    defaultThinkingLevel = "off";
     theme = "cyberpunk";
   });
 in
