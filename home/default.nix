@@ -81,6 +81,7 @@ in
     ffmpeg
     fd
     fzf
+    gentle-ai
     gh
     libnotify
     obsidian

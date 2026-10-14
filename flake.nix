@@ -138,6 +138,33 @@
         };
       };
 
+      # Gentle-AI: binario oficial del release linux_amd64 (Go). No esta en
+      # nixpkgs ni tiene flake upstream; se instala el binario firmado del
+      # release (minisign en checksums.txt). Actualizar version: cambiar
+      # `version` y `hash` (nix store prefetch-file <url>).
+      gentleAiOverlay = final: prev: {
+        gentle-ai = prev.stdenvNoCC.mkDerivation {
+          pname = "gentle-ai";
+          version = "4.1.1";
+          src = prev.fetchurl {
+            url = "https://github.com/Gentleman-Programming/gentle-ai/releases/download/v4.1.1/gentle-ai_4.1.1_linux_amd64.tar.gz";
+            hash = "sha256-V4aevNuluplCSTq0E7vBXRRuJFHE3KPqr88WP8vWRrQ=";
+          };
+          sourceRoot = ".";
+          installPhase = ''
+            install -Dm755 gentle-ai $out/bin/gentle-ai
+            install -Dm644 LICENSE $out/share/licenses/gentle-ai/LICENSE
+          '';
+          meta = {
+            description = "Deterministic engineering environment for AI coding agents";
+            homepage = "https://gentle-ai.gentlemanprogramming.com/";
+            license = final.lib.licenses.mit;
+            platforms = final.lib.platforms.linux;
+            mainProgram = "gentle-ai";
+          };
+        };
+      };
+
       # nixpkgs congela openrocket en 23.09 (formato de fichero viejo, 3D roto
       # en NixOS: JOGL sin libGL en LD_LIBRARY_PATH) mientras upstream distribuye
       # 24.12 como jar autocontenido (trae sus JOGL natives, ya no compila:
@@ -866,7 +893,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default gentleAiOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
@@ -886,6 +913,9 @@ PYEOF
       # Pi como paquete suelto: `nix build .#pi` lo construye/verifica sin
       # rebuild completo (misma derivacion que pkgs.pi en los hosts).
       packages.x86_64-linux.pi = (import nixpkgs { inherit system; overlays = [ pi.overlays.default ]; }).pi;
+
+      # Gentle-AI suelto: `nix build .#gentle-ai`.
+      packages.x86_64-linux.gentle-ai = (import nixpkgs { inherit system; overlays = [ gentleAiOverlay ]; }).gentle-ai;
 
       # Check del sembrado del editor de Vivado (ver modules/apps/vivado-nvim-seed.nix):
       # crea preferencias si faltan, parchea las existentes y es idempotente.

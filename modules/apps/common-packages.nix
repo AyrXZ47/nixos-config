@@ -317,6 +317,20 @@ in
   # datos" que necesitamos visible a ruta estable en todos los hosts.
   environment.pathsToLink = [ "/share/kicad-spice-library" ];
 
+  # Compat FHS para postinstalls npm que exigen un extractor de tar en rutas
+  # absolutas /usr/bin/tar o /bin/tar (trust boundary deliberado: no admite
+  # PATH). NixOS no provee ninguna de las dos; /bin/tar -> tar del sistema es
+  # el equivalente exacto al /usr/bin/tar de otras distros. Lo necesita el
+  # postinstall de `gentle-pi` (gentle-shell#548, aun abierto; upstream propone
+  # extraer en Node). ponytail: techo conocido — borrar este shim cuando
+  # gentle-pi deje de requerir el extractor del sistema.
+  system.activationScripts.binTar = {
+    text = ''
+      mkdir -p /bin
+      ln -sfn ${pkgs.gnutar}/bin/tar /bin/tar
+    '';
+  };
+
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
