@@ -21,12 +21,14 @@
     };
 
     # Pi (earendil-works/pi): harness de agentes, instalado en los 4 hosts via
-    # overlay (`pkgs.pi`). `stable` apunta al ultimo release; actualizar con
-    # `nix flake update pi`. Los nixpkgs del input siguen al del repo: en
-    # x86_64-linux el paquete se construye con nuestro pin y el input darwin
-    # (irrelevante aqui) no agrega un segundo nixpkgs al lock.
+    # overlay (`pkgs.pi`). Pinneado a `main` porque el tag v1.2.0 rompe el
+    # build de nix (issue #10881: su installCheck busca esbuild top-level y el
+    # install-lock ya no lo trae; el fix solo esta en main, la rama `stable`
+    # aun apunta a v1.1.0). Volver a tag cuando salga v1.2.1+: cambiar url y
+    # `nix flake update pi`. Nixpkgs del input sigue al del repo; el input
+    # darwin (irrelevante aqui) no agrega un segundo nixpkgs al lock.
     pi = {
-      url = "github:earendil-works/pi/stable";
+      url = "github:earendil-works/pi";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
     };
