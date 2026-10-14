@@ -84,13 +84,33 @@ flake.nix              # Entry point — hosts & shared modules
   (`<leader>mj`/`<leader>mk` añaden cursor abajo/arriba, `<leader>mn` al siguiente
   match, Ctrl+click, `<Esc>` cierra); LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.
-- **OpenCode** + **Ollama** (local AI stack, `OLLAMA_API_BASE` set).
+- **Pi + Gentle-AI** — agente por defecto (ver "AI stack" abajo).
+- **Ollama** (local AI stack, `OLLAMA_API_BASE` set).
 - **Ollama version pin** (`modules/apps/ollama-bin.nix`, solo pc): instala el
   binario oficial v0.32.12 desde los tarballs de la release (base + addon ROCm)
   porque nixpkgs-unstable va con días de retraso y modelos nuevos (ej. qwen3.8)
   exigen releases recientes. Laptop sigue con `ollama-vulkan` de nixpkgs. Para
   subir de versión: cambiar `version` y los dos `sha256` en el módulo (hashes del
   API de GitHub).
+
+### AI stack (Pi + Gentle-AI)
+
+- **pi** (`pkgs.pi`, flake upstream pineado en `flake.nix`) es el harness de
+  agentes; **gentle-ai** (overlay `gentleAiOverlay`, binario firmado del
+  release) aporta la capa determinista: memoria Engram, workflow ODD y review
+  RDD. Actualizar: cambiar tag en `flake.nix` (pi) / `version`+`hash`
+  (`gentle-ai`), `nix flake update pi`, rebuild.
+- La pila de paquetes de Pi (`gentle-pi`, `gentle-engram`, `pi-web-access`,
+  `pi-btw`) se instala **una vez por máquina** con `gentle-ai install --agent
+  pi` (vive en `~/.pi/agent`, fuera de nix) y se actualiza con `pi update`.
+  Skills globales (`security-audit`, `ponytail`) van igual: `pi install
+  git:<repo>` + `pi update`.
+- Tema `cyberpunk` y defaults (deepseek flash, thinking `low`) en
+  `assets/pi/cyberpunk.json` + `modules/apps/pi.nix` (seed solo si
+  `settings.json` no existe; después manda el archivo del usuario).
+- `modules/apps/common-packages.nix` crea `/bin/tar`: shim FHS que exige el
+  postinstall de `gentle-pi` en NixOS (issue gentle-shell#548; borrar cuando
+  upstream extraiga en Node).
 
 ### Gaming
 - **Steam** (gamescope session, Remote Play + dedicated server + LAN transfers
@@ -339,7 +359,7 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 
 ## Custom Commands
 
-- `hyprdev [repo]` — workspace dev en 4 ventanas kitty independientes (opencode,
+- `hyprdev [repo]` — workspace dev en 4 ventanas kitty independientes (pi,
   nvim, shell libre, pipes-rs); el directorio opcional entra al repo antes de
   abrir todo. Cierre en cadena: si cae una ventana, se cierran las demás.
 - `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado, cierre en cadena).

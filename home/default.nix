@@ -14,7 +14,7 @@ in
     ../modules/apps/mpd.nix
     ../modules/apps/firefox.nix
     ../modules/apps/serena.nix
-    ../modules/apps/opencode.nix
+    ../modules/apps/pi.nix
     ../modules/apps/dolphin.nix
     ../modules/apps/gtkwave.nix
     ../modules/apps/miracast.nix
@@ -85,7 +85,6 @@ in
     gh
     libnotify
     obsidian
-    opencode
     pi
     pipes-rs
     ripgrep

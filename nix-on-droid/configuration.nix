@@ -94,7 +94,6 @@
       ../modules/apps/git.nix
       ../modules/apps/neovim.nix
       ../modules/apps/fastfetch.nix
-      ../modules/apps/opencode.nix
       ../modules/apps/serena.nix
     ];
 

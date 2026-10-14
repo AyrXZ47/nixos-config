@@ -130,14 +130,14 @@
 
       # `hyprdev [directorio-repo]` — geometría de trabajo en 4 ventanas kitty
       # INDEPENDIENTES que Hyprland tilea (los gaps dejan ver el wallpaper):
-      # esta terminal se REUTILIZA como opencode (`exec`) y solo se abren 3
-      # nuevas (nvim, shell libre, pipes-rs). opencode va en la ventana
-      # INVOCADORA porque al tilear es la que casi no se redimensiona: opencode
+      # esta terminal se REUTILIZA como pi (`exec`) y solo se abren 3
+      # nuevas (nvim, shell libre, pipes-rs). pi va en la ventana
+      # INVOCADORA porque al tilear es la que casi no se redimensiona: pi
       # se rompe si nace/queda en una terminal estrecha. Clase por defecto
       # `kitty` para que el dedupe de Caelestia las colapse a UN icono. Cierre
       # en cadena tipo IDE: las 4 se rastrean por título
       # `hyprdev-<runid>-<rol>` (-T) más la address de ESTA ventana capturada
-      # antes del exec opencode; armadas las 4, si cae cualquiera se cierran
+      # antes del exec pi; armadas las 4, si cae cualquiera se cierran
       # las demás.
       hyprdev() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
@@ -148,7 +148,7 @@
         local runid="$(date +%s)$RANDOM"
         local pidfile="/tmp/hyprdev-pids-$runid"
         : > "$pidfile"
-        # Address y pid de ESTA ventana ANTES del exec opencode: tras el exec
+        # Address y pid de ESTA ventana ANTES del exec pi: tras el exec
         # su título ya no es rastreable, pero address/pid no cambian.
         local inv_info inv_addr inv_pid
         inv_info="$(hyprctl -j activewindow 2>/dev/null)"
@@ -189,7 +189,7 @@
           done
         ' hyprdev-watch "$runid" "$inv_addr" "$inv_pid" "$pidfile" >/dev/null 2>&1 &
         cd "$repo" || return 1
-        exec opencode
+        exec pi
       }
 
       SecDesk() {
