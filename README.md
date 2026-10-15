@@ -370,9 +370,14 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
   h265/opus, virtual 1920x1080 display for a secure desk setup.
 - `ytsong` / `ytlist` — download audio from clipboard (yt-dlp, cookies from Firefox).
 - `estabilizar_clips` / `estabilizar_clips_gpu` — re-encode clips to CFR 30
-  (CPU x264 or full-VAAPI h264: decode + encode on GPU) for stable editing.
-  `estabilizar_clips_gpu` detects HDR10+ clips (ffprobe) and applies libplacebo
-  tone-mapping via Vulkan before the VA-API encode.
+  (CPU x264, or h264_vaapi encode on GPU) for stable editing. `_gpu` accepts
+  mp4/mov/mkv, applies the clip's own rotation, and re-encodes non-AAC audio to
+  AAC. Only the ENCODE runs on the GPU: on radeonsi the VA-API h264 decoder
+  only allocates surfaces for aligned widths (720p works, 576/832 do not), so
+  decoding stays in RAM and frames are uploaded with `hwupload`. HDR10/HLG
+  clips are tone-mapped on the CPU (`zscale`+`tonemap`): this ffmpeg ships
+  without libplacebo and radeonsi's VPP has no HDR support, so neither
+  `libplacebo` nor `tonemap_vaapi` is usable here.
 - `subtitular <video>` — Whisper (whisper.cpp) Spanish subtitles with VAD.
 - `spice-find <modelo>` — busca un componente en la librería SPICE (~50k
   modelos de kicad-spice-library) y muestra las variantes con su archivo.

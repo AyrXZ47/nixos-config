@@ -289,24 +289,38 @@
         done
       }
 
+      # Re-encode a CFR 30 para Shotcut. Solo el ENCODE va en GPU (h264_vaapi).
+      # El DECODE no puede ir en VA-API: con radeonsi el decoder h264 solo crea
+      # superficies para anchos alineados (720p sí, 576/832 no) y revienta con
+      # "Failed setup for format vaapi" -> -38; el fallback a CPU deja el frame
+      # en RAM y scale_vaapi ya no puede conectarlo ("Impossible to convert").
+      # Decodificando a RAM y subiendo con hwupload funciona en cualquier
+      # resolución a ~20x, indistinguible del decode en GPU (el cuello es el
+      # encoder). NUNCA añadir transpose propio: ffmpeg ya aplica la rotación
+      # del Display Matrix, y rotar otra vez deja los verticales acostados.
       estabilizar_clips_gpu() {
         mkdir -p listos_para_editar
-        for f in *.mp4(N); do
-          if [[ ! -f "listos_para_editar/$f" ]]; then
-            if ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer \
-              -of csv=p=0 "$f" | grep -qE "smpte2084|arib-std-b67"; then
-              echo "HDR ($f): tonemap por GPU (libplacebo)"
-              ffmpeg -hwaccel vaapi -vaapi_device /dev/dri/renderD128 \
-                -init_hw_device vaapi=va:/dev/dri/renderD128 -filter_hw_device va -i "$f" \
-                -vf "libplacebo=tonemapping=hable:format=nv12:colorspace=bt709:color_primaries=bt709:color_trc=bt709,hwupload" \
-                -c:v h264_vaapi -qp 18 -fps_mode cfr -r 30 -c:a copy "listos_para_editar/$f"
-            else
-              echo "SDR ($f): conversión directa por GPU"
-              ffmpeg -hwaccel vaapi -hwaccel_output_format vaapi \
-                -vaapi_device /dev/dri/renderD128 -i "$f" \
-                -vf "scale_vaapi=format=nv12" -c:v h264_vaapi -qp 18 \
-                -fps_mode cfr -r 30 -c:a copy "listos_para_editar/$f"
-            fi
+        for f in *.mp4(N) *.MP4(N) *.mov(N) *.MOV(N) *.mkv(N) *.MKV(N); do
+          [[ -f "listos_para_editar/$f" ]] && continue
+          # -c:a copy solo es seguro con AAC; el resto se re-encoda a AAC.
+          local acodec="$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 "$f" 2>/dev/null)"
+          local amap=(-c:a copy)
+          [[ -n "$acodec" && "$acodec" != "aac" ]] && amap=(-c:a aac -b:a 192k)
+          if ffprobe -v error -select_streams v:0 -show_entries stream=color_transfer \
+            -of csv=p=0 "$f" | grep -qE "smpte2084|arib-std-b67"; then
+            # El tonemap NO puede ir en GPU en esta máquina: el ffmpeg de nixpkgs
+            # va sin libplacebo (--disable-libplacebo) y tonemap_vaapi aborta con
+            # "VAAPI driver doesn't support HDR" en radeonsi. zscale+tonemap en
+            # CPU es vectorizado y barato; el encode sigue en GPU.
+            echo "HDR ($f): tonemap en CPU, encode por GPU"
+            ffmpeg -init_hw_device vaapi=va:/dev/dri/renderD128 -filter_hw_device va -i "$f" \
+              -vf "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=nv12,hwupload" \
+              -c:v h264_vaapi -qp 18 -fps_mode cfr -r 30 "$amap[@]" "listos_para_editar/$f"
+          else
+            echo "SDR ($f): encode por GPU"
+            ffmpeg -init_hw_device vaapi=va:/dev/dri/renderD128 -filter_hw_device va -i "$f" \
+              -vf "format=nv12,hwupload,scale_vaapi=format=nv12" \
+              -c:v h264_vaapi -qp 18 -fps_mode cfr -r 30 "$amap[@]" "listos_para_editar/$f"
           fi
         done
       }
