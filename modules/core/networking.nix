@@ -8,6 +8,21 @@
   # que salía como "tachita" en la barra y abortaba la asociación del Wi-Fi
   # real (`iwd: Operation aborted`, "cannot connect"). El PC ya funcionaba bien
   # precisamente porque NO definía backend.
+  # ── Agente de secretos (por que el Wi-Fi "no deja escribir la contrasena") ──
+  # NM NO guarda la PSK del Wi-Fi solo aqui: al re-autenticar un perfil pide los
+  # secretos por D-Bus a un agente (org.freedesktop.secrets). Sin ninguno
+  # registrado falla al instante con "no secrets: No agents were available for
+  # this request" y el dialogo de contrasena nunca se muestra. El servicio
+  # gnome-keyring-secrets que lo registra vive en
+  # modules/desktop/hyprland-home.nix (es dependiente de la sesion grafica, no
+  # del sistema). No duplicar aqui.
+  #
+  # Rumbo al mismo sintoma: un perfil con `802-11-wireless.bssid` fijo se niega a
+  # asociarse cuando el router cambia de radio/canal o el AP de 5 GHz toma otro
+  # BSSID (un SSID con 2.4G y 5G tiene dos BSSIDs). NM lo crea al fijar el punto
+  # de acceso una vez; para soltarlo:
+  #   nmcli con modify <perfil> 802-11-wireless.bssid ""
+  # Con el BSSID vacio NM elige cualquiera de los dos APs del SSID.
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 

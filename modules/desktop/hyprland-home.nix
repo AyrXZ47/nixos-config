@@ -384,7 +384,45 @@ in
     setxkbmap
     # CLI de self-test de inyeccion de input (--self-test-motion/absolute/scroll)
     hypr-kdeconnect-fix
+    # Agente de secretos de NetworkManager (ver el servicio gnome-keyring-secrets
+    # de abajo). El applet solo aporta el binario `nm-applet`; el agente que NM
+    # necesita para pedir la PSK lo pone gnome-keyring.
+    gnome-keyring
+    networkmanagerapplet
   ];
+
+  # --- Agente de secretos de NetworkManager ---
+  # SIN esto, NM no puede pedir la PSK del Wi-Fi cuando el AP cae y el perfil
+  # tiene que re-autenticar: falla al instante con
+  #   device (wlp4s0): no secrets: No agents were available for this request.
+  # y el dialogo de contrasena NUNCA llega a mostrarse (Caelestia es solo un
+  # front-end de nmcli, no un agente de secretos). Olvidar la red empeora las
+  # cosas: borra la PSK cacheada y ya no hay quien la vuelva a pedir.
+  # Fedora/Arch no lo sufren porque GNOME/KDE arrancan gnome-keyring/kwalletd
+  # con la sesion; una sesion Hyprland minima no arranca ninguno.
+  # gnome-keyring-daemon con --components=secrets registra org.freedesktop.secrets
+  # en la session D-Bus; el paquete ademas instala
+  # share/dbus-1/services/org.freedesktop.secrets.service, asi que el bus puede
+  # re-lanzarlo por activacion. Se corre en --foreground porque systemd exige un
+  # proceso en primer plano para Type=dbus (un --daemonize haria que el ExecStart
+  # devuelva de inmediato y systemd perderia el tracking del servicio).
+  # El keyring nace con password vacia (no hay PAM que lo abra) y la PSK del
+  # Wi-Fi vive en /etc/NetworkManager/system-connections (root, no en el keyring);
+  # el agente aqui solo necesita ESTAR REGISTRADO para que NM pueda pedirla.
+  systemd.user.services.gnome-keyring-secrets = {
+    Unit = {
+      Description = "GNOME Keyring: agente de secretos (org.freedesktop.secrets)";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      Type = "dbus";
+      BusName = "org.freedesktop.secrets";
+      ExecStart = "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --foreground --components=secrets";
+      Restart = "on-failure";
+      RestartSec = "1s";
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
 
   # --- Remote input de KDE Connect (portal RemoteDesktop) ---
   # kdeconnect en Wayland inyecta teclado/raton llamando a org.freedesktop.portal.RemoteDesktop;
