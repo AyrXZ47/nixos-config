@@ -349,6 +349,25 @@
         echo "Listo."
       }
 
+      # Inverso de `subtitular`: texto -> voz, con las voces neuronales de
+      # Microsoft (edge-tts, ver modules/apps/tts.nix). Sale un .mp3 directo
+      # para Shotcut. El guion de 2 min tarda ~3 s; el cuello es la red porque
+      # el texto viaja a Microsoft — para algo confidencial, no usar esto.
+      narravoz() {
+        local FILE="$1"
+        local VOZ="''${2:-es-MX-DaliaNeural}"
+        if [ -z "$FILE" ]; then
+          echo "Falta el archivo de texto"
+          echo "Uso: narravoz <guion.md|txt> [voz]   (por defecto: es-MX-DaliaNeural)"
+          echo "Voces: edge-tts --list-voices | grep es-"
+          return 1
+        fi
+        if [ ! -f "$FILE" ]; then echo "Error: no existe $FILE"; return 1; fi
+        local OUT="''${FILE%.*}.mp3"
+        edge-tts --voice "$VOZ" --file "$FILE" --write-media "$OUT" || return 1
+        echo "Listo: $OUT ($(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT")s)"
+      }
+
       # ONE-SHOT de actualización: flake update + build seco + switch, con
       # guardas. Regla del repo: nunca rebuild sin commit previo y nunca dejar
       # trabajo sin commitear. Con el ISP lento, el build seco avisa ANTES de

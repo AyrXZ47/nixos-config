@@ -379,6 +379,12 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
   without libplacebo and radeonsi's VPP has no HDR support, so neither
   `libplacebo` nor `tonemap_vaapi` is usable here.
 - `subtitular <video>` — Whisper (whisper.cpp) Spanish subtitles with VAD.
+- `narravoz <guion.md|txt> [voz]` — text to speech with Microsoft's neural
+  voices via `edge-tts` (the Edge/Azure ones), default `es-MX-DaliaNeural`.
+  A two-minute script takes about 3 s. The text is sent to Microsoft, so it is
+  not suitable for confidential material; nixpkgs pins 7.2.8, which returns
+  403 because Microsoft rotates its `Sec-MS-GEC` token, so
+  `modules/apps/tts.nix` overrides it to 7.3.1.
 - `spice-find <modelo>` — busca un componente en la librería SPICE (~50k
   modelos de kicad-spice-library) y muestra las variantes con su archivo.
   Equivale al "buscador" de la librería, sin entrar al repo.

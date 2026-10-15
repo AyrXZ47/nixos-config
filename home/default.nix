@@ -6,6 +6,7 @@ in
 {
   imports = [
     ../modules/apps/shell.nix
+    ../modules/apps/tts.nix
     ../modules/apps/kitty.nix
     ../modules/apps/pantalla.nix
     ../modules/apps/neovim.nix
