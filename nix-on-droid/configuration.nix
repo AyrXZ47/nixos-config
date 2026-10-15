@@ -1,4 +1,4 @@
-{ pkgs, opencodeTarball, rtkTarball, pi, nixpkgs, gentleAiOverlay, ... }:
+{ pkgs, opencodeTarball, rtkTarball, piOverlay, nixpkgs, gentleAiOverlay, ... }:
 
 {
   # No tocar sin leer el changelog de nix-on-droid antes de subir de version.
@@ -11,7 +11,7 @@
   # el home no puede resolver pkgs.pi / pkgs.gentle-ai (falla con "attribute
   # 'pi' missing"). Se pasan las derivaciones ya construidas por
   # extraSpecialArgs, que es la misma via que ya usan opencodeTarball/rtk.
-  home-manager.extraSpecialArgs = { inherit opencodeTarball rtkTarball pi nixpkgs gentleAiOverlay; };
+  home-manager.extraSpecialArgs = { inherit opencodeTarball rtkTarball piOverlay nixpkgs gentleAiOverlay; };
 
   # OJO: el default de nix-on-droid es bash. Sin esto la terminal abre en bash:
   # sin p10k, sin aliases (tree/dev/ll), sin fastfetch al abrir, sin fzf. El
@@ -91,7 +91,7 @@
   # fastfetch tampoco: el config del pc usa logo PNG (protocolo kitty) y lineas
   # de 70+ chars que en la terminal angosta del celular envuelven y se pisan.
   # Aqui fastfetch corre con su config por defecto (logo ascii, ajusta ancho).
-  home-manager.config = { config, lib, opencodeTarball, rtkTarball, pi, nixpkgs, gentleAiOverlay, ... }:
+  home-manager.config = { config, lib, opencodeTarball, rtkTarball, piOverlay, nixpkgs, gentleAiOverlay, ... }:
     let
       # Los paquetes de pi/gentle-ai CON los overlays del flake aplicados. El
       # `pkgs` que nix-on-droid pasa a home-manager.config viene pelado (sin
@@ -102,7 +102,7 @@
       # flake, sobre el pin 25.11 de este flake (el que soporta el proot).
       pkgsForHome = import nixpkgs {
         system = "aarch64-linux";
-        overlays = [ pi.overlays.default gentleAiOverlay ];
+        overlays = [ piOverlay gentleAiOverlay ];
       };
     in
   {

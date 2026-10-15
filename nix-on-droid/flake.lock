@@ -199,16 +199,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1792009439,
-        "narHash": "sha256-bLOOldAeYw21FdZbiM9kq7iaUQEVaANTy2zyTcHNF2w=",
+        "lastModified": 1791908251,
+        "narHash": "sha256-67/ovLvVziA+MkAIaSJWZdXTkESdcqvrJc7XsSwsMsg=",
         "owner": "earendil-works",
         "repo": "pi",
-        "rev": "b06c1f2cf1dea6af8748ddeee18c23587d2cb7c6",
+        "rev": "3daa20280f6a7c7cbe0935680c9a38fdc3863005",
         "type": "github"
       },
       "original": {
         "owner": "earendil-works",
         "repo": "pi",
+        "rev": "3daa20280f6a7c7cbe0935680c9a38fdc3863005",
         "type": "github"
       }
     },

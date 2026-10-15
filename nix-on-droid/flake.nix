@@ -54,8 +54,17 @@
     #     necesita el celular.
     # Consecuencia: este input agrega un segundo nixpkgs al lock de
     # nix-on-droid, aislado del pin 25.11 del resto (no afecta el proot).
+    #
+    # Rev fijo AL MISMO commit que el flake de los hosts (ver flake.lock raiz):
+    # `main` sin pin resolvio a b06c1f2 (2026-10-13), que NO compila — su
+    # packages/ai/src/providers/kimi-coding.ts declara
+    # `Provider<"openai-completions">` pero `createProvider` infiere
+    # `Provider<"anthropic-messages">` y tsc muere (el build del celular no
+    # tiene cache de la que salvarse). 3daa202 (2026-10-12) es el rev con el
+    # que los hosts de escritorio ya construyen pi. Al subir de version:
+    # actualizar este rev y `nix flake update pi`.
     pi = {
-      url = "github:earendil-works/pi";
+      url = "github:earendil-works/pi/3daa20280f6a7c7cbe0935680c9a38fdc3863005";
       inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
     };
   };
@@ -83,6 +92,70 @@
             }
           else
             prev.fetchFromGitHub args;
+      };
+
+      # pi (npm) nunca pasa por fetchFromGitHub: su `nix/package.nix` usa
+      # `src = source` (el arbol del flake de pi) y `src = installLock` (un
+      # subdirectorio `.../install-lock`), ambos DIRECTORIOS. El unpack por
+      # defecto de stdenv los copia con `cp -r --preserve=timestamps` y bajo
+      # este proot el store read-only (0555) hace morir el chmod del destino:
+      # "cp: setting permissions for '...': No such file or directory" -> el
+      # hook falla y unpackFile remata con "do not know how to unpack source
+      # archive" (mismo issue nix-community #480 que androidUnpackFix).
+      # androidUnpackFix no sirve aqui (no hay fetchFromGitHub que
+      # interceptar), asi que se envuelve mkDerivation para ANTEPONER un
+      # unpackCmdHook que extrae los directorios con tar (que si funciona);
+      # los tarballs reales siguen cayendo en _defaultUnpack. Ceiling: el
+      # arreglo solo se aplica al stdenv que se le pasa a pi.
+      mkTarUnpackStdenv = stdenv: stdenv // {
+        mkDerivation = args: stdenv.mkDerivation (args // {
+          preUnpack = (args.preUnpack or "") + ''
+            _tarUnpackDir() {
+              local fn="$1"
+              if [ -d "$fn" ]; then
+                local dest
+                dest="$(stripHash "$fn")"
+                mkdir -p "$dest"
+                tar cf - -C "$fn" . | tar xf - -C "$dest" --mode=+w --warning=no-timestamp
+                return 0
+              fi
+              return 1
+            }
+            unpackCmdHooks=( "_tarUnpackDir" ''${unpackCmdHooks[@]} )
+          '';
+        });
+      };
+
+      # nodejs 22.22.2 (V8) lanza hilos de fondo (GC y compilacion concurrente)
+      # que bajo el proot de nix-on-droid corrompen el heap de forma
+      # INTERMITENTE en cargas de memoria sostenidas: tsc compilando pi muere
+      # con "double free or corruption (out)" (SIGABRT, exit 134) ~la mitad de
+      # las veces (verificado con un repro de churn: 4/8 fallos a mano, igual
+      # dentro del builder). --single-threaded fuerza V8 a un hilo y lo
+      # estabiliza (8/8 OK); --jitless y --v8-pool-size=0 NO bastan. Node NO
+      # acepta el flag por NODE_OPTIONS ("not allowed"), asi que se envuelve el
+      # binario con makeWrapper. Se le pasa a package.nix como `nodejs_22`: ese
+      # parametro alimenta tambien el `nodejs` interno, el PATH de
+      # nativeBuildInputs y los shebangs que reescribe patchShebangs, asi que
+      # TODO node del build (npm, tsc, canonicalize-symlinks, installCheck)
+      # queda envuelto. symlinkJoin no recompila node (solo lo enlaza).
+      nodejsSingleThreaded = prev: prev.symlinkJoin {
+        name = "nodejs-22-single-threaded";
+        paths = [ prev.nodejs_22 ];
+        nativeBuildInputs = [ prev.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/node --add-flags "--single-threaded"
+        '';
+      };
+
+      # Mismo paquete que `pi.overlays.default`, pero con el stdenv de arriba
+      # (unpack con tar) y el node de un solo hilo (ver arriba).
+      piOverlay = final: prev: {
+        pi = prev.callPackage "${pi}/nix/package.nix" {
+          source = pi.outPath;
+          stdenv = mkTarUnpackStdenv prev.stdenv;
+          nodejs_22 = nodejsSingleThreaded prev;
+        };
       };
 
       # gentle-ai: binario Go del release oficial. El overlay de los hosts de
@@ -118,7 +191,7 @@
         system = "aarch64-linux";
         overlays = [
           androidUnpackFix
-          pi.overlays.default
+          piOverlay
           gentleAiOverlay
         ];
       };
@@ -146,7 +219,7 @@
         extraSpecialArgs = {
           opencodeTarball = ./opencode-1.18.16.tar.gz;
           rtkTarball = ./rtk-0.48.0-aarch64.tar.gz;
-          inherit nixpkgs pi gentleAiOverlay;
+          inherit nixpkgs pi piOverlay gentleAiOverlay;
         };
         modules = [ ./configuration.nix ];
       };
