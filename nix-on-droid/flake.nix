@@ -145,17 +145,30 @@
         nativeBuildInputs = [ prev.makeWrapper ];
         postBuild = ''
           wrapProgram $out/bin/node --add-flags "--single-threaded"
+          # npm/npx traen shebang ABSOLUTO al node original (varios hilos), que
+          # ignora el wrapper de bin/node: hay que reescribirlos o el `npm
+          # install` del bootstrap de gentle-ai vuelve a morir con double free.
+          for b in npm npx; do
+            if [ -e "$out/bin/$b" ]; then
+              rm -f "$out/bin/$b"
+              makeWrapper $out/bin/node "$out/bin/$b" \
+                --add-flags "--single-threaded ${prev.nodejs_22}/lib/node_modules/npm/bin/$b-cli.js"
+            fi
+          done
         '';
       };
 
       # Mismo paquete que `pi.overlays.default`, pero con el stdenv de arriba
-      # (unpack con tar) y el node de un solo hilo (ver arriba).
+      # (unpack con tar) y el node de un solo hilo (ver arriba). Expone tambien
+      # `singleThreadedNode` para que configuration.nix se lo pase al bootstrap
+      # de gentle-ai (modules/apps/pi.nix) via _module.args.nodePackage.
       piOverlay = final: prev: {
         pi = prev.callPackage "${pi}/nix/package.nix" {
           source = pi.outPath;
           stdenv = mkTarUnpackStdenv prev.stdenv;
           nodejs_22 = nodejsSingleThreaded prev;
         };
+        singleThreadedNode = nodejsSingleThreaded prev;
       };
 
       # gentle-ai: binario Go del release oficial. El overlay de los hosts de

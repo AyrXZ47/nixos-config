@@ -19,6 +19,23 @@
   # esto (en NixOS lo haria users.users.<name>.shell, aqui no existe).
   user.shell = "${pkgs.zsh}/bin/zsh";
 
+  # Compat FHS para el postinstall de gentle-pi (npm:gentle-pi ->
+  # scripts/install-gentle-ai.mjs): exige un extractor tar "de sistema" en ruta
+  # absoluta — /usr/bin/tar o /bin/tar (gentle-shell#548) — y sin el, el
+  # bootstrap de gentle-ai muere con "could not install its package-local
+  # Gentle AI v4.1.1 binary: requires a trusted system tar extractor" (pi sin
+  # gentle-shell/gentle-pi). En los hosts de escritorio lo crea
+  # modules/apps/common-packages.nix (system.activationScripts.fhsShims), que
+  # aqui NO se importa. /usr/bin es escribible en el proot y este hook corre
+  # ANTES de la activacion de home-manager (donde vive gentleAiBootstrap), asi
+  # que el shim ya existe cuando gentle-ai instala. Mismo patron que
+  # linkBinSh/linkUsrBinEnv del propio nix-on-droid.
+  build.activationBefore.fhsTar = ''
+    $DRY_RUN_CMD mkdir $VERBOSE_ARG --parents /usr/bin
+    $DRY_RUN_CMD ln $VERBOSE_ARG --symbolic --force ${pkgs.gnutar}/bin/tar /usr/bin/.tar.tmp
+    $DRY_RUN_CMD mv $VERBOSE_ARG /usr/bin/.tar.tmp /usr/bin/tar
+  '';
+
   # Zona horaria, misma que el resto de los hosts.
   time.timeZone = "America/Mexico_City";
 
@@ -121,9 +138,12 @@
 
     # Derivaciones ya construidas con los overlays, inyectadas al modulo
     # pi.nix. Es el unico punto donde el home recibe pi/gentle-ai en
-    # nix-on-droid: el pkgs disponible no los tiene.
+    # nix-on-droid: el pkgs disponible no los tiene. nodePackage es el node
+    # envuelto con --single-threaded para el bootstrap de gentle-ai (ver el
+    # comentario en modules/apps/pi.nix).
     _module.args.piPackage = pkgsForHome.pi;
     _module.args.gentleAiPackage = pkgsForHome.gentle-ai;
+    _module.args.nodePackage = pkgsForHome.singleThreadedNode;
 
     # Pi y el binario de gentle-ai en el perfil del home. Van aqui (y no en
     # environment.packages) porque el buildEnv de nix-on-droid junta TODO y

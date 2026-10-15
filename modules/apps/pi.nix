@@ -10,6 +10,10 @@ let
   # default aplica y un consumidor lo puede sobreescribir.
   piPackage = config._module.args.piPackage or pkgs.pi;
   gentleAiPackage = config._module.args.gentleAiPackage or pkgs.gentle-ai;
+  # Node para el bootstrap de gentle-ai (ver abajo). En nix-on-droid se inyecta
+  # el node envuelto con --single-threaded (el V8 de node 22 corrompe el heap
+  # bajo proot); en los hosts de escritorio cae al pkgs.nodejs normal.
+  nodePackage = config._module.args.nodePackage or pkgs.nodejs;
   # Defaults de arranque de pi: el modelo de opencode-go (DeepSeek V4.1 Flash),
   # thinking OFF (sin reasoning, no quemar tokens) y el tema cyberpunk (el
   # default `system` hereda el verde de la terminal).
@@ -87,10 +91,19 @@ in
   '';
 
   # Bootstrap del stack gentle-ai en maquinas nuevas: gentle-ai provisiona sus
-  # paquetes de Pi (gentle-pi/engram/gga...) y luego se agregan las skills
-  # globales. Corre UNA vez por maquina (marcador), best-effort: si no hay red
-  # el rebuild no falla y se reintenta en el proximo switch. Log junto al
-  # marcador. Lo unico manual queda `pi` -> /login (la API key es un secreto).
+  # paquetes de Pi (gentle-pi/engram/gga.../gentle-shell) y luego se agregan
+  # las skills globales. Corre UNA vez por maquina (marcador), best-effort: si
+  # no hay red el rebuild no falla y se reintenta en el proximo switch. Log
+  # junto al marcador. Lo unico manual queda `pi` -> /login (la API key es un
+  # secreto).
+  #
+  # El PATH base de la activacion de home-manager es minimo y NO trae
+  # git/curl/node/npm: en NixOS salen del perfil del sistema, pero en
+  # nix-on-droid no (ahi la activacion no ve ~/.nix-profile/bin) y el preflight
+  # de gentle-ai aborta con "missing dependencies: git, curl, node, npm" sin
+  # instalar NADA (sintoma: pi sin gentle-shell/gentle-pi ni skills). Por eso se
+  # agregan explicitos: git (pi install git:...), curl (descargas) y nodePackage
+  # (preflight de node/npm).
   home.activation.gentleAiBootstrap = lib.hm.dag.entryAfter [ "writeBoundary" "piSeedSettings" ] ''
     mark="$HOME/.local/state/gentle-ai/bootstrap.done"
     if [ ! -f "$mark" ]; then
@@ -98,7 +111,7 @@ in
       echo "gentle-ai: bootstrap inicial (requiere red; log en ~/.local/state/gentle-ai/bootstrap.log)"
       if (
         export GENTLE_AI_YES=1
-        export PATH="${piPackage}/bin:${gentleAiPackage}/bin:$HOME/.local/bin:$PATH"
+        export PATH="${piPackage}/bin:${gentleAiPackage}/bin:${pkgs.git}/bin:${pkgs.curl}/bin:${nodePackage}/bin:$HOME/.local/bin:$PATH"
         ${gentleAiPackage}/bin/gentle-ai install --agent pi \
           && ${piPackage}/bin/pi install git:github.com/cloudflare/security-audit-skill \
           && ${piPackage}/bin/pi install git:github.com/DietrichGebert/ponytail
