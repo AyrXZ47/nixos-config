@@ -825,10 +825,17 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       # systemd y que el apagado no se pierda en un subshell.
       text = ''
         #!/usr/bin/env bash
-        # Pinta el perfil de apagado ANTES de cortar energia. Best-effort: si
-        # OpenRGB falla, el apagado sigue igual (no se bloquea el poweroff por
-        # un problema de iluminacion).
-        ${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2 >/dev/null 2>&1 || true
+        # Pinta el perfil de apagado ANTES de cortar energia. Best-effort DE
+        # VERDAD: si OpenRGB falla O SE CUELGA, el apagado sigue igual.
+        #
+        # El `|| true` solo cubre un exit code distinto de cero; un cliente
+        # OpenRGB colgado bloquea el shell para siempre y el `||` nunca se
+        # alcanza, con lo que el menu de sesion dejaba de poder apagar el
+        # equipo (hallazgo R3-OPENRGB-HANG). `timeout` acota la espera y el
+        # repo ya documenta que OpenRGB puede colgarse al hablar por SMBus.
+        # Ruta absoluta del store, igual que openrgb/systemctl: este script no
+        # depende del PATH de quien lo invoca.
+        ${pkgs.coreutils}/bin/timeout 10 ${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2 >/dev/null 2>&1 || true
         exec ${pkgs.systemd}/bin/systemctl "$1"
       '';
     };
