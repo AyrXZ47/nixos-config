@@ -538,11 +538,19 @@ let
         hibernate = "downloading";
         reboot = "cached";
       };
+      # Shutdown/Reboot van por `power-with-rgb` (igual que las acciones del
+      # launcher, arriba): Quickshell ejecuta DIRECTAMENTE estos comandos al
+      # pulsar en el menu de sesion, asi que con `poweroff`/`reboot` pelados el
+      # boton del panel NUNCA pintaba RGBRules2. Confirmado en el journal
+      # (2026-10-16): "poweroff requested from client PID 2864
+      # ('.quickshell-wra')" y ningun openrgb entre ese instante y el teardown.
+      # El wrapper con --nodetect es el unico punto que pinta el perfil con la
+      # sesion (y su servidor OpenRGB) todavia vivos.
       commands = {
         logout = [ "logout" ];
-        shutdown = [ "poweroff" ];
+        shutdown = [ "/home/yovick/.config/hypr/scripts/power-with-rgb" "poweroff" ];
         hibernate = [ "hibernate" ];
-        reboot = [ "reboot" ];
+        reboot = [ "/home/yovick/.config/hypr/scripts/power-with-rgb" "reboot" ];
       };
     };
 
