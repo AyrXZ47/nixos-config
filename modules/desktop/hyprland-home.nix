@@ -818,13 +818,18 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
     # "reboot" = reiniciar.
     "hypr/scripts/power-with-rgb" = {
       executable = true;
+      # `systemctl` y `poweroff` van por RUTA ABSOLUTA del store, no por nombre:
+      # este script es el UNICO camino al apagado desde el menu de sesion
+      # (session.commands), asi que no puede depender del PATH del shell que lo
+      # invoca. `exec` al final garantiza que el codigo de salida sea el de
+      # systemd y que el apagado no se pierda en un subshell.
       text = ''
         #!/usr/bin/env bash
         # Pinta el perfil de apagado ANTES de cortar energia. Best-effort: si
         # OpenRGB falla, el apagado sigue igual (no se bloquea el poweroff por
         # un problema de iluminacion).
         ${pkgs.openrgb}/bin/openrgb --client --nodetect -p RGBRules2 >/dev/null 2>&1 || true
-        exec systemctl "$1"
+        exec ${pkgs.systemd}/bin/systemctl "$1"
       '';
     };
     "hypr/scripts/openrgb-lock-after" = {

@@ -546,11 +546,16 @@ let
       # ('.quickshell-wra')" y ningun openrgb entre ese instante y el teardown.
       # El wrapper con --nodetect es el unico punto que pinta el perfil con la
       # sesion (y su servidor OpenRGB) todavia vivos.
+      #
+      # El wrapper se invoca con `sh -c ... || poweroff`: si el script falta o
+      # no es ejecutable, el apagado NO se pierde (vuelve al `poweroff` pelado
+      # del baseline). Sin esto, un ~/.config dañado dejaba el menu de sesion
+      # incapaz de apagar el equipo (hallazgo R3-001).
       commands = {
         logout = [ "logout" ];
-        shutdown = [ "/home/yovick/.config/hypr/scripts/power-with-rgb" "poweroff" ];
+        shutdown = [ "sh" "-c" "\/home\/yovick\/.config\/hypr\/scripts\/power-with-rgb poweroff || poweroff" ];
         hibernate = [ "hibernate" ];
-        reboot = [ "/home/yovick/.config/hypr/scripts/power-with-rgb" "reboot" ];
+        reboot = [ "sh" "-c" "\/home\/yovick\/.config\/hypr\/scripts\/power-with-rgb reboot || reboot" ];
       };
     };
 
