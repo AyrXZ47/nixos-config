@@ -553,9 +553,9 @@ let
       # incapaz de apagar el equipo (hallazgo R3-001).
       commands = {
         logout = [ "logout" ];
-        shutdown = [ "sh" "-c" "\/home\/yovick\/.config\/hypr\/scripts\/power-with-rgb poweroff || poweroff" ];
+        shutdown = [ "sh" "-c" "/home/yovick/.config/hypr/scripts/power-with-rgb poweroff || poweroff" ];
         hibernate = [ "hibernate" ];
-        reboot = [ "sh" "-c" "\/home\/yovick\/.config\/hypr\/scripts\/power-with-rgb reboot || reboot" ];
+        reboot = [ "sh" "-c" "/home/yovick/.config/hypr/scripts/power-with-rgb reboot || reboot" ];
       };
     };
 
