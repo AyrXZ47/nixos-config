@@ -145,10 +145,10 @@
       gentleAiOverlay = final: prev: {
         gentle-ai = prev.stdenvNoCC.mkDerivation {
           pname = "gentle-ai";
-          version = "4.1.1";
+          version = "4.2.0";
           src = prev.fetchurl {
-            url = "https://github.com/Gentleman-Programming/gentle-ai/releases/download/v4.1.1/gentle-ai_4.1.1_linux_amd64.tar.gz";
-            hash = "sha256-V4aevNuluplCSTq0E7vBXRRuJFHE3KPqr88WP8vWRrQ=";
+            url = "https://github.com/Gentleman-Programming/gentle-ai/releases/download/v4.2.0/gentle-ai_4.2.0_linux_amd64.tar.gz";
+            hash = "sha256-VSwWQv0Q9dls/puxzDtmsw60fTB0zHygVZtZjrCG3vw=";
           };
           sourceRoot = ".";
           installPhase = ''
