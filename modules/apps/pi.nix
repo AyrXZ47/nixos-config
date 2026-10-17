@@ -17,8 +17,12 @@ let
   # Defaults de arranque de pi: el modelo de opencode-go (DeepSeek V4.1 Flash),
   # thinking OFF (sin reasoning, no quemar tokens) y el tema cyberpunk (el
   # default `system` hereda el verde de la terminal).
-  # Solo se siembra si el archivo NO existe: pi y gentle-ai lo reescriben
-  # (packages, etc.) y no se debe pisar.
+  # REGLA: estos 4 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
+  # rebuild abre pi con deepseek-v4.1-flash sin tocar nada, aunque su
+  # settings.json previo dijera otro modelo (pasaba: un host quedaba clavado en
+  # deepseek/deepseek-v4-pro porque el seed solo aplicaba con `! -f`). Las
+  # demas claves (packages, lastChangelogVersion, las que escriben pi y
+  # gentle-ai) se PRESERVAN: el seed fusiona, no pisa el archivo completo.
   settingsSeed = pkgs.writeText "pi-settings.json" (builtins.toJSON {
     defaultProvider = "opencode-go";
     defaultModel = "deepseek-v4.1-flash";
@@ -60,9 +64,31 @@ in
   home.file.".pi/agent/themes/cyberpunk.json".source = ../../assets/pi/cyberpunk.json;
 
   home.activation.piSeedSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if [ ! -f "$HOME/.pi/agent/settings.json" ]; then
-      ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent"
-      ${pkgs.coreutils}/bin/install -m 600 ${settingsSeed} "$HOME/.pi/agent/settings.json"
+    settings="$HOME/.pi/agent/settings.json"
+    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent"
+    if [ ! -f "$settings" ]; then
+      ${pkgs.coreutils}/bin/install -m 600 ${settingsSeed} "$settings"
+    else
+      # Merge: los 4 campos del flake mandan, el resto del archivo se queda.
+      # Se reescribe SOLO si alguno difiere (idempotente: un rebuild sin cambios
+      # no toca el archivo ni su mtime).
+      ${pkgs.python3}/bin/python3 - "$settings" ${settingsSeed} <<'PY'
+import json, sys
+path, seedf = sys.argv[1], sys.argv[2]
+seed = json.load(open(seedf))
+try:
+    cur = json.load(open(path))
+except (OSError, ValueError):
+    cur = {}
+merged = {**cur, **seed}
+if merged != cur:
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(merged, f, indent=2)
+        f.write("\n")
+    import os
+    os.replace(tmp, path)
+PY
     fi
   '';
 
