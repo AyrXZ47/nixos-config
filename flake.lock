@@ -52,6 +52,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-heavy": {
+      "locked": {
+        "lastModified": 1792208399,
+        "narHash": "sha256-mN15cwddbOOIzzXSSwYUeRfOYeizz47Vy6y3Hzq6DuY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7a6522c868711d06e3a520bbcdfafe9806f4337f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7a6522c868711d06e3a520bbcdfafe9806f4337f",
+        "type": "github"
+      }
+    },
     "pi": {
       "inputs": {
         "nixpkgs": [
@@ -80,6 +96,7 @@
         "home-manager": "home-manager",
         "kicad-spice-library": "kicad-spice-library",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-heavy": "nixpkgs-heavy",
         "pi": "pi"
       }
     }

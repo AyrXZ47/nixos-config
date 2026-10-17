@@ -32,12 +32,43 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
     };
+
+    # ── Pin de paquetes pesados (GNU Radio / OMNeT++) ──────────────────────
+    # POR QUE EXISTE: nixpkgs-unstable mueve dependencias de GNU Radio casi
+    # cada semana (boost, uhd, sdl12-compat, libsodium, hooks de cmake), y
+    # Hydra NO precompila gnuradio para cada commit de unstable: cada
+    # `nix flake update` obligaba a compilar 1410 archivos C++ (~28 min) en la
+    # laptop. Verificado: el gnuradio de nixos-unstable da 404 en
+    # cache.nixos.org, mientras que el de los commits que SI construyo Hydra
+    # se baja en segundos.
+    # SOLUCION: este input apunta a un commit CONCRETO de nixpkgs que Hydra ya
+    # construyo (su build de gnuradio esta en cache.nixos.org). El overlay
+    # `heavyPackagesPinOverlay` toma SOLO gnuradio/omnetpp de aqui; el resto del
+    # sistema sigue en nixpkgs-unstable al dia (bleeding edge).
+    #
+    # COMO ACTUALIZARLO (cuando el pin quede viejo):
+    #   1. abrir https://hydra.nixos.org/job/nixpkgs/trunk/gnuradio.x86_64-linux
+    #   2. copiar el commit de nixpkgs del build mas reciente en estado Succeeded
+    #   3. actualizar `rev` aqui y el `narHash` vacio -> nix lo pide al evaluar
+    #      (`nix flake lock --update-input nixpkgs-heavy` lo calcula solo).
+    # ponytail: techo conocido — el pin congela la version de gnuradio/omnetpp
+    # (hoy 3.10.12.0 / 6.4.0) hasta que se suba el rev. Es el precio de no
+    # compilar; subirlo es un commit de 1 linea.
+    nixpkgs-heavy = {
+      url = "github:NixOS/nixpkgs/7a6522c868711d06e3a520bbcdfafe9806f4337f";
+    };
   };
 
   outputs =
-    { nixpkgs, home-manager, kicad-spice-library, pi, ... }:
+    { nixpkgs, nixpkgs-heavy, home-manager, kicad-spice-library, pi, ... }:
     let
       system = "x86_64-linux";
+      # Paquetes que Hydra ya construyo para el commit pinneado en
+      # nixpkgs-heavy (build de gnuradio del 2026-10-17 en cache.nixos.org).
+      heavyPkgs = import nixpkgs-heavy {
+        inherit system;
+        config.allowUnfree = true;
+      };
       # Backend del portal RemoteDesktop para el remote input de KDE Connect en Hyprland.
       # kdeconnect (Wayland) inyecta teclado/raton via org.freedesktop.portal.RemoteDesktop
       # y ni wlr, gtk ni hyprland implementan esa interfaz; este shim la expone y reenvia
@@ -123,19 +154,22 @@
           };
         };
 
-        # gnuradio 3.10.12.0: el test de check `test_001_real_laplacian_moments`
-        # (qa_fastnoise) es fragil (varianza muestral ~1.9929 vs 2, con places=2)
-        # y rompe el build en la punta de unstable. No es fallo de compilacion;
-        # se desactiva la fase de tests hasta que upstream lo estabilice. El
-        # override va sobre `unwrapped`: `gnuradio` es el wrapper (callPackage
-        # wrapper.nix { unwrapped = ... }) y su core (`unwrapped`) es el que
-        # corre los tests. `.override` (no overrideAttrs) repunta el argumento.
-        # ponytail: techo conocido — cuando nixpkgs arregle el test, borrar esto.
-        gnuradio = prev.gnuradio.override {
-          unwrapped = prev.gnuradio.unwrapped.overrideAttrs (_: {
-            doCheck = false;
-          });
-        };
+      # gnuradio 3.10.12.0: el test de check `test_001_real_laplacian_moments`
+      # (qa_fastnoise) es fragil (varianza muestral ~1.9929 vs 2, con places=2)
+      # y rompe el build en la punta de unstable. No es fallo de compilacion;
+      # se desactiva la fase de tests hasta que upstream lo estabilice. El
+      # override va sobre `unwrapped`: `gnuradio` es el wrapper (callPackage
+      # wrapper.nix { unwrapped = ... }) y su core (`unwrapped`) es el que
+      # corre los tests. `.override` (no overrideAttrs) repunta el argumento.
+      # OJO: este override SOLO aplica al gnuradio de nixpkgs-unstable. El que
+      # se usa de verdad viene de heavyPackagesPinOverlay (abajo), ya construido
+      # por Hydra — ahi no hay override y por eso SI hay binario en el cache.
+      # ponytail: techo conocido — cuando nixpkgs arregle el test, borrar esto.
+      gnuradio-upstream = prev.gnuradio.override {
+        unwrapped = prev.gnuradio.unwrapped.overrideAttrs (_: {
+          doCheck = false;
+        });
+      };
       };
 
       # Gentle-AI: binario oficial del release linux_amd64 (Go). No esta en
@@ -889,11 +923,35 @@ PYEOF
         });
       };
 
+      # ── Pin de paquetes pesados ──────────────────────────────────────────
+      # Sustituye SOLO gnuradio/omnetpp por los del commit anclado en
+      # `nixpkgs-heavy`, que Hydra ya construyo (binario en cache.nixos.org).
+      # El resto de `prev` sigue siendo nixpkgs-unstable.
+      #
+      # TRAMPA: hay que arrastrar tambien `gnuradioPackages.osmosdr` (gr-osmosdr),
+      # que compila CONTRA el gnuradio de unstable; si se mezclan versiones el
+      # wrapper peta en runtime (ABI de boost/volk distinta). Se toman ambos del
+      # mismo nixpkgs pinneado para que sean consistentes entre si.
+      # OJO: `heavyPkgs.gnuradio` NO lleva el `doCheck=false` de arriba, y esta
+      # bien: ese override existe solo para que el build de unstable no falle en
+      # los tests, pero rompe el hash y por eso nunca hay binario en cache. Al
+      # usar la derivacion virgen de Hydra se recupera el cache (+ bypass).
+      heavyPackagesPinOverlay = final: prev: {
+        gnuradio = heavyPkgs.gnuradio;
+        gnuradioPackages = heavyPkgs.gnuradioPackages;
+        omnetpp = heavyPkgs.omnetpp;
+      };
+
+      # Ponytail: techo conocido — `gfortran`/`boost` de un gnuradio pinneado
+      # pueden convivir con los de unstable en el mismo store (Nix lo permite,
+      # son rutas distintas). Coste: unas decenas de MB duplicados; beneficio:
+      # 0 compilacion de C++ en cada `nix flake update`.
+
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default gentleAiOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay heavyPackagesPinOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default gentleAiOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
