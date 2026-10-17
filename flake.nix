@@ -33,7 +33,7 @@
       inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
     };
 
-    # ── Pin de paquetes pesados (GNU Radio / OMNeT++) ──────────────────────
+    # ── Pin de paquetes pesados (GNU Radio) ────────────────────────────
     # POR QUE EXISTE: nixpkgs-unstable mueve dependencias de GNU Radio casi
     # cada semana (boost, uhd, sdl12-compat, libsodium, hooks de cmake), y
     # Hydra NO precompila gnuradio para cada commit de unstable: cada
@@ -43,17 +43,17 @@
     # se baja en segundos.
     # SOLUCION: este input apunta a un commit CONCRETO de nixpkgs que Hydra ya
     # construyo (su build de gnuradio esta en cache.nixos.org). El overlay
-    # `heavyPackagesPinOverlay` toma SOLO gnuradio/omnetpp de aqui; el resto del
+    # `heavyPackagesPinOverlay` toma SOLO gnuradio de aqui; el resto del
     # sistema sigue en nixpkgs-unstable al dia (bleeding edge).
     #
     # COMO ACTUALIZARLO (cuando el pin quede viejo):
     #   1. abrir https://hydra.nixos.org/job/nixpkgs/trunk/gnuradio.x86_64-linux
     #   2. copiar el commit de nixpkgs del build mas reciente en estado Succeeded
-    #   3. actualizar `rev` aqui y el `narHash` vacio -> nix lo pide al evaluar
-    #      (`nix flake lock --update-input nixpkgs-heavy` lo calcula solo).
-    # ponytail: techo conocido — el pin congela la version de gnuradio/omnetpp
-    # (hoy 3.10.12.0 / 6.4.0) hasta que se suba el rev. Es el precio de no
-    # compilar; subirlo es un commit de 1 linea.
+    #   3. actualizar el rev de abajo; `nix flake lock --update-input
+    #      nixpkgs-heavy` recalcula el narHash solo.
+    # ponytail: techo conocido — el pin congela la version de gnuradio
+    # (hoy 3.10.12.0) hasta que se suba el rev. Es el precio de no compilar;
+    # subirlo es un commit de 1 linea.
     nixpkgs-heavy = {
       url = "github:NixOS/nixpkgs/7a6522c868711d06e3a520bbcdfafe9806f4337f";
     };
@@ -924,9 +924,9 @@ PYEOF
       };
 
       # ── Pin de paquetes pesados ──────────────────────────────────────────
-      # Sustituye SOLO gnuradio/omnetpp por los del commit anclado en
-      # `nixpkgs-heavy`, que Hydra ya construyo (binario en cache.nixos.org).
-      # El resto de `prev` sigue siendo nixpkgs-unstable.
+      # Sustituye SOLO gnuradio por el del commit anclado en `nixpkgs-heavy`,
+      # que Hydra ya construyo (binario en cache.nixos.org). El resto de `prev`
+      # sigue siendo nixpkgs-unstable (bleeding edge).
       #
       # TRAMPA: hay que arrastrar tambien `gnuradioPackages.osmosdr` (gr-osmosdr),
       # que compila CONTRA el gnuradio de unstable; si se mezclan versiones el
@@ -936,10 +936,14 @@ PYEOF
       # bien: ese override existe solo para que el build de unstable no falle en
       # los tests, pero rompe el hash y por eso nunca hay binario en cache. Al
       # usar la derivacion virgen de Hydra se recupera el cache (+ bypass).
+      #
+      # OMNeT++ NO va aqui: no esta en nixpkgs (se removio hace anios), lo
+      # compila modules/apps/omnetpp.nix desde el tarball oficial. Ese si se
+      # recompila al cambiar nixpkgs (clangStdenv/Qt6), pero es ~5 min y no hay
+      # binario upstream que reusar.
       heavyPackagesPinOverlay = final: prev: {
         gnuradio = heavyPkgs.gnuradio;
         gnuradioPackages = heavyPkgs.gnuradioPackages;
-        omnetpp = heavyPkgs.omnetpp;
       };
 
       # Ponytail: techo conocido — `gfortran`/`boost` de un gnuradio pinneado
