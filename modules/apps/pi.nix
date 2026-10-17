@@ -104,6 +104,11 @@ in
   # instalar NADA (sintoma: pi sin gentle-shell/gentle-pi ni skills). Por eso se
   # agregan explicitos: git (pi install git:...), curl (descargas) y nodePackage
   # (preflight de node/npm).
+  # gzip: el postinstall de gentle-pi extrae su tarball con el /bin/tar del shim
+  # FHS (common-packages.nix), y gnutar no trae gzip embebido: hace execvp("gzip")
+  # contra el PATH. Sin gzip aqui falla con "tar (child): gzip: Cannot exec: No
+  # such file or directory" y el bootstrap NUNCA marca bootstrap.done (sintoma:
+  # reintenta en cada switch y pi queda sin gentle-pi/skills para siempre).
   home.activation.gentleAiBootstrap = lib.hm.dag.entryAfter [ "writeBoundary" "piSeedSettings" ] ''
     mark="$HOME/.local/state/gentle-ai/bootstrap.done"
     if [ ! -f "$mark" ]; then
@@ -111,7 +116,7 @@ in
       echo "gentle-ai: bootstrap inicial (requiere red; log en ~/.local/state/gentle-ai/bootstrap.log)"
       if (
         export GENTLE_AI_YES=1
-        export PATH="${piPackage}/bin:${gentleAiPackage}/bin:${pkgs.git}/bin:${pkgs.curl}/bin:${nodePackage}/bin:$HOME/.local/bin:$PATH"
+        export PATH="${piPackage}/bin:${gentleAiPackage}/bin:${pkgs.git}/bin:${pkgs.curl}/bin:${pkgs.gzip}/bin:${nodePackage}/bin:$HOME/.local/bin:$PATH"
         ${gentleAiPackage}/bin/gentle-ai install --agent pi \
           && ${piPackage}/bin/pi install git:github.com/cloudflare/security-audit-skill \
           && ${piPackage}/bin/pi install git:github.com/DietrichGebert/ponytail
