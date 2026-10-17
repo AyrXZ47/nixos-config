@@ -26,6 +26,15 @@
   # ── Flags experimentales (centralizado) ──────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # ── Dedup automatico del store ───────────────────────────────────────────
+  # Sin esto, cada rebuild deja copias completas de los mismos archivos (el
+  # store llega a 130G+ con versiones viejas de libreoffice/uhd/clang y sources
+  # duplicados de nixpkgs). Con auto-optimise-store cada path nuevo se hardlinkea
+  # contra su contenido identico ya existente: el mismo archivo se guarda UNA vez.
+  # Complementa a nix.optimise.automatic (que ya corre la dedup programada);
+  # esto la hace en el momento de instalar, no horas despues.
+  nix.settings.auto-optimise-store = true;
+
   # ── Basura: máximo 3 generaciones SIEMPRE (por conteo, no por edad) ──────
   # nix-collect-garbage NO acepta "--delete-generations" (flag de nix-env), así
   # que el conteo lo hace trim-generations (diario) con nix-env --delete-generations +3;
