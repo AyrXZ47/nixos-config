@@ -2,7 +2,18 @@
   description = "NixOS configuration — modular, cyberpunk, flake-driven";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs: CANAL nixos-unstable, NO la rama git.
+    # La rama (`github:NixOS/nixpkgs/nixos-unstable`) avanza en cada commit
+    # mergeado (~73 commits/dia) y Hydra NO alcanza ese ritmo: la mayoria de
+    # paquetes quedan sin binario y el rebuild los compila (visto 2026-10-17:
+    # 40 min, shotcut 10 min + 418 derivaciones, con la laptop ahogandose).
+    # El CANAL solo se promueve cuando Hydra termino de construir: todo lo que
+    # pidas tiene binario en cache.nixos.org -> `nix flake update` pasa de
+    # decenas de minutos a descargas de segundos. Sigue siendo bleeding edge
+    # (el canal va ~1-2 dias detras de la rama, no una version atras).
+    # Al ser un tarball de URL movil, `nix flake update` lo avanza solo al
+    # ultimo estado promovido; no hay que tocar el rev a mano.
+    nixpkgs.url = "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -32,43 +43,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
     };
-
-    # ── Pin de paquetes pesados (GNU Radio) ────────────────────────────
-    # POR QUE EXISTE: nixpkgs-unstable mueve dependencias de GNU Radio casi
-    # cada semana (boost, uhd, sdl12-compat, libsodium, hooks de cmake), y
-    # Hydra NO precompila gnuradio para cada commit de unstable: cada
-    # `nix flake update` obligaba a compilar 1410 archivos C++ (~28 min) en la
-    # laptop. Verificado: el gnuradio de nixos-unstable da 404 en
-    # cache.nixos.org, mientras que el de los commits que SI construyo Hydra
-    # se baja en segundos.
-    # SOLUCION: este input apunta a un commit CONCRETO de nixpkgs que Hydra ya
-    # construyo (su build de gnuradio esta en cache.nixos.org). El overlay
-    # `heavyPackagesPinOverlay` toma SOLO gnuradio de aqui; el resto del
-    # sistema sigue en nixpkgs-unstable al dia (bleeding edge).
-    #
-    # COMO ACTUALIZARLO (cuando el pin quede viejo):
-    #   1. abrir https://hydra.nixos.org/job/nixpkgs/trunk/gnuradio.x86_64-linux
-    #   2. copiar el commit de nixpkgs del build mas reciente en estado Succeeded
-    #   3. actualizar el rev de abajo; `nix flake lock --update-input
-    #      nixpkgs-heavy` recalcula el narHash solo.
-    # ponytail: techo conocido — el pin congela la version de gnuradio
-    # (hoy 3.10.12.0) hasta que se suba el rev. Es el precio de no compilar;
-    # subirlo es un commit de 1 linea.
-    nixpkgs-heavy = {
-      url = "github:NixOS/nixpkgs/7a6522c868711d06e3a520bbcdfafe9806f4337f";
-    };
   };
 
   outputs =
-    { nixpkgs, nixpkgs-heavy, home-manager, kicad-spice-library, pi, ... }:
+    { nixpkgs, home-manager, kicad-spice-library, pi, ... }:
     let
       system = "x86_64-linux";
-      # Paquetes que Hydra ya construyo para el commit pinneado en
-      # nixpkgs-heavy (build de gnuradio del 2026-10-17 en cache.nixos.org).
-      heavyPkgs = import nixpkgs-heavy {
-        inherit system;
-        config.allowUnfree = true;
-      };
       # Backend del portal RemoteDesktop para el remote input de KDE Connect en Hyprland.
       # kdeconnect (Wayland) inyecta teclado/raton via org.freedesktop.portal.RemoteDesktop
       # y ni wlr, gtk ni hyprland implementan esa interfaz; este shim la expone y reenvia
@@ -154,22 +134,11 @@
           };
         };
 
-      # gnuradio 3.10.12.0: el test de check `test_001_real_laplacian_moments`
-      # (qa_fastnoise) es fragil (varianza muestral ~1.9929 vs 2, con places=2)
-      # y rompe el build en la punta de unstable. No es fallo de compilacion;
-      # se desactiva la fase de tests hasta que upstream lo estabilice. El
-      # override va sobre `unwrapped`: `gnuradio` es el wrapper (callPackage
-      # wrapper.nix { unwrapped = ... }) y su core (`unwrapped`) es el que
-      # corre los tests. `.override` (no overrideAttrs) repunta el argumento.
-      # OJO: este override SOLO aplica al gnuradio de nixpkgs-unstable. El que
-      # se usa de verdad viene de heavyPackagesPinOverlay (abajo), ya construido
-      # por Hydra — ahi no hay override y por eso SI hay binario en el cache.
-      # ponytail: techo conocido — cuando nixpkgs arregle el test, borrar esto.
-      gnuradio-upstream = prev.gnuradio.override {
-        unwrapped = prev.gnuradio.unwrapped.overrideAttrs (_: {
-          doCheck = false;
-        });
-      };
+        # NOTA: gnuradio NO lleva override de doCheck. nixpkgs corre su suite
+        # en installCheckPhase y el commit pinneado del canal ya la paso, asi
+        # que su derivacion es la de Hydra y SI tiene binario en cache. El
+        # viejo `doCheck = false` rompia el hash y obligaba a compilar 1410
+        # archivos C++ (~28 min) en cada update: no volver a agregarlo.
       };
 
       # Gentle-AI: binario oficial del release linux_amd64 (Go). No esta en
@@ -923,39 +892,11 @@ PYEOF
         });
       };
 
-      # ── Pin de paquetes pesados ──────────────────────────────────────────
-      # Sustituye SOLO gnuradio por el del commit anclado en `nixpkgs-heavy`,
-      # que Hydra ya construyo (binario en cache.nixos.org). El resto de `prev`
-      # sigue siendo nixpkgs-unstable (bleeding edge).
-      #
-      # TRAMPA: hay que arrastrar tambien `gnuradioPackages.osmosdr` (gr-osmosdr),
-      # que compila CONTRA el gnuradio de unstable; si se mezclan versiones el
-      # wrapper peta en runtime (ABI de boost/volk distinta). Se toman ambos del
-      # mismo nixpkgs pinneado para que sean consistentes entre si.
-      # OJO: `heavyPkgs.gnuradio` NO lleva el `doCheck=false` de arriba, y esta
-      # bien: ese override existe solo para que el build de unstable no falle en
-      # los tests, pero rompe el hash y por eso nunca hay binario en cache. Al
-      # usar la derivacion virgen de Hydra se recupera el cache (+ bypass).
-      #
-      # OMNeT++ NO va aqui: no esta en nixpkgs (se removio hace anios), lo
-      # compila modules/apps/omnetpp.nix desde el tarball oficial. Ese si se
-      # recompila al cambiar nixpkgs (clangStdenv/Qt6), pero es ~5 min y no hay
-      # binario upstream que reusar.
-      heavyPackagesPinOverlay = final: prev: {
-        gnuradio = heavyPkgs.gnuradio;
-        gnuradioPackages = heavyPkgs.gnuradioPackages;
-      };
-
-      # Ponytail: techo conocido — `gfortran`/`boost` de un gnuradio pinneado
-      # pueden convivir con los de unstable en el mismo store (Nix lo permite,
-      # son rutas distintas). Coste: unas decenas de MB duplicados; beneficio:
-      # 0 compilacion de C++ en cada `nix flake update`.
-
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay heavyPackagesPinOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default gentleAiOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default gentleAiOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
