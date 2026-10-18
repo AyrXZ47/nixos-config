@@ -509,10 +509,15 @@ let
 
     services = {
       weatherLocation = "";
-      # Celsius explícito: el default se adivina por locale y puede caer en
-      # imperial.
-      useFahrenheit = false;
-      useFahrenheitPerformance = false;
+      # Celsius EXPLICITO (1 = Celsius en el enum TemperatureUnit de
+      # caelestia-config: [Auto, Celsius, Fahrenheit, Kelvin]). El default es
+      # Auto, que resuelve por Qt.locale().measurementSystem; con el locale
+      # en_US.UTF-8 que fija este repo eso da ImperialUSSystem -> Fahrenheit en
+      # TODO (clima, CPU, GPU). Las claves viejas `useFahrenheit` /
+      # `useFahrenheitPerformance` son de Caelestia 1.x y 2.5.0 ya NO las lee:
+      # por eso el shell salia en Fahrenheit aunque estuvieran en false.
+      weatherUnits = 1;
+      sensorUnits = 1;
       gpuType = "Auto";
       # 44 barras + espejo: el visualiser de fondo hereda el look del módulo
       # cava de la barra de Wayle (que en Caelestia no existe como módulo).
