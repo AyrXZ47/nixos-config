@@ -33,23 +33,21 @@ let
         --add-flags "$out/bin/.mixxx-wrapped"
     '';
   };
-  # Shotcut busca `ffmpeg` y `whisper-cli` EN EL MISMO DIRECTORIO que su propio
-  # binario (applicationDirPath): subtitlesdock.cpp:666 y settings.cpp:2049.
-  # En nixpkgs no viven ahí, así que "Import Subtitles" dice "ffmpeg not found"
-  # y el Speech-to-Text invoca al propio shotcut (que rechaza los flags de
-  # whisper). Fix: overrideAttrs que los instala DENTRO del mismo $out del
-  # paquete (NOTA: symlinkJoin NO sirve — Qt resuelve applicationDirPath al
-  # destino real del symlink y apunta al store plano, sin los binarios).
-  # REGLA GENERAL GPU: whisper-cpp va con vulkanSupport (RX 7600).
-  # ponytail: si nixpkgs algún día empaqueta shotcut con ambos adyacentes,
-  # borrar el override y volver al paquete plano.
+  # GPU (RX 7600): whisper-cpp con soporte Vulkan. Va como paquete PROPIO en
+  # systemPackages, NO como symlink dentro de shotcut.
+  #
+  # HISTORIA (por que ya no hay override de shotcut): antes se hacia
+  # `shotcut.overrideAttrs` para plantar ffmpeg y whisper-cli junto a su
+  # binario, porque Shotcut los busca en su applicationDirPath ("Import
+  # Subtitles" en subtitlesdock.cpp:666 y Speech-to-Text en settings.cpp:2049).
+  # El costo oculto: ese override le daba a shotcut un hash unico que NADIE mas
+  # posee, asi que cache.nixos.org devolvia 404 y CADA `nix flake update`
+  # recompilaba 207 archivos C++ (~10 min) en la laptop. Se elimino: shotcut
+  # vuelve al binario de Hydra (cache instantaneo) y whisper-cli se expone en
+  # el PATH del sistema, que es exactamente donde `subtitular` (shell.nix) ya
+  # lo busca. Lo unico que se pierde son los dos menus internos de Shotcut; el
+  # flujo real es generar el .srt con `subtitular` e importarlo como pista.
   whisperVulkan = pkgs.whisper-cpp.override { vulkanSupport = true; };
-  shotcut = pkgs.shotcut.overrideAttrs (old: {
-    postInstall = (old.postInstall or "") + ''
-      ln -s ${pkgs.ffmpeg_8}/bin/ffmpeg $out/bin/ffmpeg
-      ln -s ${whisperVulkan}/bin/whisper-cli $out/bin/whisper-cli
-    '';
-  });
   # Logisim-Evolution: dark mode forzado de forma declarativa. La Look and Feel
   # vive en java.util.prefs (Preferences.userNodeForPackage(Main) = nodo
   # /com/cburch/logisim -> ~/.java/.userPrefs/com/cburch/logisim/prefs.xml), no
@@ -421,11 +419,12 @@ in
     # para agentes tipo opencode (60-90% menos tokens). Los plugins de opencode
     # lo esperan en el PATH, por eso va en systemPackages de todos los hosts.
     rtk
-    # whisper-cpp con GPU ya va DENTRO del wrapper de shotcut (mismo bin/).
-    # Aquí NO se instala suelto para no duplicar el binario en el system path:
-    # el wrapper de shotcut ya expone whisper-cli adyacente a shotcut, que es
-    # donde Shotcut lo busca. `subtitular` (shell.nix) usa el mismo whisper-cli
-    # del PATH, y el wrapper lo provee vía systemPackages.
+    # whisper-cli en el PATH del sistema para `subtitular` (shell.nix). Antes
+    # lo proveia el wrapper de shotcut; al quitar ese override (rompia el cache
+    # del paquete) se instala aqui, con Vulkan para la RX 7600. Es el mismo
+    # binario GPU que usaba Shotcut, solo que ahora vive donde el flujo de
+    # subtitulos ya lo busca.
+    whisperVulkan
 
       # Virtualization
     virt-manager
