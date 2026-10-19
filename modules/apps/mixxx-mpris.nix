@@ -5,12 +5,16 @@ let
   # (verificado: sin bus, sin strings en el binario, sin bridge mantenido). En
   # vez de parchearlo, publicamos nosotros el servicio en el bus de sesion con
   # las interfaces estandar para que Caelestia lo vea como reproductor activo:
-  # logo de Mixxx (mpris:artUrl) y bongocat (isPlaying) en el dashboard.
+  # caratula del track (mpris:artUrl, Caelestia la lee en Players.qml) y
+  # bongocat (isPlaying) en el dashboard.
   #
   # Titulo/artista reales: Mixxx escribe "<Artist> - <Title> | Mixxx" en el
   # titulo de su ventana (mixxxmainwindow.cpp: slotUpdateWindowTitle) y la barra
   # de Caelestia pinta ese mismo dato (Hypr.activeToplevel.title). Se reusa
   # (via `hyprctl -j clients`) para que el panel de media muestre la pista.
+  #
+  # Caratula: la DB de Mixxx (mixxxdb.sqlite) mapea artista+titulo a la ruta del
+  # archivo, y la imagen sale de los tags embebidos del propio archivo. Sin red.
   #
   # ponytail: techo conocido = heuristica de PipeWire + scraping del titulo de
   # ventana. El estado se deduce del state del nodo Stream/Output/Audio cuyo
@@ -24,6 +28,8 @@ let
     libraries = [ pkgs.python3Packages.pydbus pkgs.python3Packages.pygobject3 ];
   } ''
     import json
+    import os
+    import sqlite3
     import subprocess
     import urllib.parse
     import urllib.request
@@ -35,9 +41,12 @@ let
     BUS_NAME = "org.mpris.MediaPlayer2.mixxx"
     OBJECT_PATH = "/org/mpris/MediaPlayer2"
     TRACK_ID = "/org/mpris/MediaPlayer2/mixxx"
-    ART_URL = (
+    FALLBACK_ART_URL = (
         "file:///run/current-system/sw/share/icons/hicolor/256x256/apps/mixxx.png"
     )
+    COVER_DIR = os.path.expanduser("~/.cache/mixxx-mpris")
+    MIXDB = os.path.expanduser("~/.mixxx/mixxxdb.sqlite")
+    FFMPEG = "${pkgs.ffmpeg}/bin/ffmpeg"  # noqa: E501 (store path)
 
     # Duración "desconocida" en microsegundos: > INT_MAX segundos, el umbral con
     # el que Caelestia omite `duration` al pedir letras (y pinta "--:--").
@@ -126,6 +135,7 @@ let
             self._artist = ""
             self._album = ""
             self._length = UNKNOWN_LENGTH_US
+            self._art = FALLBACK_ART_URL
             self._raw = None
 
         @property
@@ -137,7 +147,7 @@ let
             metadata = {
                 "mpris:trackid": GLib.Variant("o", TRACK_ID),
                 "xesam:title": GLib.Variant("s", self._title),
-                "mpris:artUrl": GLib.Variant("s", ART_URL),
+                "mpris:artUrl": GLib.Variant("s", self._art),
                 # Sin mpris:length, Quickshell reporta `length` = posición y
                 # Caelestia manda una duración falsa -> lrclib /get da 404.
                 "mpris:length": GLib.Variant("x", self._length),
@@ -186,17 +196,22 @@ let
                     [],
                 )
 
-        def set_metadata(self, title, artist, album="", length=UNKNOWN_LENGTH_US):
-            if (title, artist, album, length) != (
+        def set_metadata(
+            self, title, artist, album="", length=UNKNOWN_LENGTH_US,
+            art=FALLBACK_ART_URL,
+        ):
+            if (title, artist, album, length, art) != (
                 self._title,
                 self._artist,
                 self._album,
                 self._length,
+                self._art,
             ):
                 self._title = title
                 self._artist = artist
                 self._album = album
                 self._length = length
+                self._art = art
                 self.PropertiesChanged(
                     "org.mpris.MediaPlayer2.Player",
                     {"Metadata": self.Metadata},
@@ -213,11 +228,12 @@ let
                 self.set_metadata("Mixxx", "")
                 return
             title, artist = split_track(raw)
+            art = cover_url(library_track(artist, title))
             canon = lrclib_lookup(title, artist)
             if canon:
-                self.set_metadata(*canon)
+                self.set_metadata(*canon, art=art)
             else:
-                self.set_metadata(title, artist)
+                self.set_metadata(title, artist, art=art)
 
 
     def mixxx_states():
@@ -279,6 +295,65 @@ let
             artist, _, name = track.partition(" - ")
             return name.strip(), artist.strip()
         return track, ""
+
+
+    def library_track(artist, title):
+        # Devuelve (id, ruta) de la pista en la DB de Mixxx. El id nombra el
+        # archivo de caratula cacheado: si la URL no cambia entre pistas, Qt
+        # sirve la imagen vieja de su cache (CoverArt.qml usa FadeImage).
+        # Artista+titulo del titulo de ventana son los mismos tags que Mixxx
+        # guardo en su DB, asi que matchean directo. Read-only: Mixxx tiene la
+        # DB abierta mientras suena la pista.
+        if not artist or not title:
+            return None
+        try:
+            con = sqlite3.connect("file:" + MIXDB + "?mode=ro", uri=True)
+            try:
+                row = con.execute(
+                    "select l.id, tl.location from library l"
+                    " join track_locations tl on tl.id = l.location"
+                    " where l.artist = ? and l.title = ? limit 1",
+                    (artist, title),
+                ).fetchone()
+            finally:
+                con.close()
+        except sqlite3.Error:
+            return None
+        return row
+
+
+    def cover_url(track):
+        # ponytail: techo conocido = un ffmpeg por cambio de pista (copia el
+        # stream de imagen embebido en opus/flac/mp3 a un jpg cacheado). Si la
+        # pista no trae imagen o algo falla, se cae al logo de Mixxx. El -f
+        # image2 es necesario: la extension .tmp no le alcanza a ffmpeg para
+        # inferir el muxer de salida.
+        if not track:
+            return FALLBACK_ART_URL
+        track_id, path = track
+        if not os.path.isfile(path):
+            return FALLBACK_ART_URL
+        dest = os.path.join(COVER_DIR, "cover-" + str(track_id) + ".jpg")
+        tmp = dest + ".tmp"
+        try:
+            os.makedirs(COVER_DIR, exist_ok=True)
+            subprocess.run(
+                [FFMPEG, "-y", "-loglevel", "error", "-i", path, "-an",
+                 "-vcodec", "copy", "-f", "image2", tmp],
+                check=True,
+                capture_output=True,
+                timeout=15,
+            )
+            if not os.path.getsize(tmp):
+                return FALLBACK_ART_URL
+            os.replace(tmp, dest)
+            keep = (os.path.basename(dest), os.path.basename(tmp))
+            for old in os.listdir(COVER_DIR):
+                if old not in keep:
+                    os.unlink(os.path.join(COVER_DIR, old))
+        except Exception:
+            return FALLBACK_ART_URL
+        return "file://" + urllib.parse.quote(dest)
 
 
     def lrclib_lookup(title, artist):
