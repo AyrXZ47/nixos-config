@@ -31,6 +31,7 @@ let
     import os
     import sqlite3
     import subprocess
+    import threading
     import urllib.parse
     import urllib.request
 
@@ -228,12 +229,33 @@ let
                 self.set_metadata("Mixxx", "")
                 return
             title, artist = split_track(raw)
-            art = cover_url(library_track(artist, title))
             canon = lrclib_lookup(title, artist)
             if canon:
-                self.set_metadata(*canon, art=art)
+                self.set_metadata(*canon)
             else:
-                self.set_metadata(title, artist, art=art)
+                self.set_metadata(title, artist)
+            # La caratula se extrae en un hilo: hacerlo aca bloqueaba el loop de
+            # GLib (hasta 15s si ffmpeg se cuelga) y el servicio dejaba de
+            # responder en el bus con la metadata vieja.
+            threading.Thread(
+                target=self._load_art, args=(raw, artist, title), daemon=True
+            ).start()
+
+        def _load_art(self, raw, artist, title):
+            GLib.idle_add(
+                self._apply_art, raw, cover_url(library_track(artist, title))
+            )
+
+        def _apply_art(self, raw, art):
+            # Descarta el resultado si la pista cambio mientras se extraia.
+            if raw != self._raw or art == self._art:
+                return
+            self._art = art
+            self.PropertiesChanged(
+                "org.mpris.MediaPlayer2.Player",
+                {"Metadata": self.Metadata},
+                [],
+            )
 
 
     def mixxx_states():
