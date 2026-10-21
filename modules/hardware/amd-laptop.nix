@@ -89,24 +89,28 @@ in
     SUBSYSTEM=="power_supply", KERNEL=="AC", ACTION=="change", RUN+="${eppSwitch}"
   '';
 
-  # Salud de la bateria: cargar solo hasta 80% (modo "80%" de Lenovo Vantage).
+  # Salud de la bateria: umbrales 90/95.
   # El EC venia en 95/100 de fabrica: la bateria viviendo entre 95 y 100% es el
   # peor escenario para una Li-ion. Medido 2026-10-21: 81.4% de salud (41.5 Wh
-  # reales vs 51 Wh de diseno) con 378 ciclos. 75/80 = empieza a cargar bajo 75%
-  # y corta en 80%. Si necesitas el 100% para una salida larga, se cambia en
-  # vivo y vuelve a 80% al reiniciar:
+  # reales vs 51 Wh de diseno) con 378 ciclos.
+  # 90/95 = llega casi al tope (95%, redondeando es "llena"), arranca a cargar
+  # recien bajo 90% y NUNCA se queda clavada en 100%. Es lo que pidio el user:
+  # maxima autonomia sin el estres de voltaje del 100% permanente.
+  # OJO: el que degrada al 100% no es el calor (cerca del tope la carga entra en
+  # corriente constante y calienta MENOS) sino el voltaje alto sostenido, o sea
+  # envejecimiento de calendario. El pico de calor está entre 20 y 80%, no arriba.
+  # Ajuste en vivo si hace falta una salida larga (vuelve a 95 al reiniciar):
   #   echo 100 | sudo tee /sys/class/power_supply/BAT0/charge_control_end_threshold
-  #   echo 95  | sudo tee /sys/class/power_supply/BAT0/charge_control_start_threshold
   systemd.services.battery-charge-thresholds = {
-    description = "Limita la carga de BAT0 a 80% (salud de la bateria)";
+    description = "Limita la carga de BAT0 a 95% (salud de la bateria)";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
     };
     script = ''
-      echo 75 > /sys/class/power_supply/BAT0/charge_control_start_threshold
-      echo 80 > /sys/class/power_supply/BAT0/charge_control_end_threshold
+      echo 95 > /sys/class/power_supply/BAT0/charge_control_end_threshold
+      echo 90 > /sys/class/power_supply/BAT0/charge_control_start_threshold
     '';
   };
 
