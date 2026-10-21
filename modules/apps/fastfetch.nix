@@ -46,8 +46,8 @@ let
       "type": "kitty-icat",
       "source": "${terminalLogo}",
       "width": 40,
-      "height": 18,
-      "padding": { "top": 2, "left": 4 }
+      "height": 16,
+      "padding": { "top": 1, "left": 4 }
     }
   '';
   # Ancho de la columna de claves: en ascii (celular) se compacta para acercar
@@ -85,7 +85,7 @@ in
                   -print0 2>/dev/null | ${pkgs.coreutils}/bin/shuf -z -n 1 | ${pkgs.coreutils}/bin/tr -d '\0')"
         if [ -n "$logo" ]; then
           exec ${pkgs.fastfetch}/bin/fastfetch --logo-type kitty-icat --logo "$logo" \
-            --logo-width 40 --logo-height 18 --logo-preserve-aspect-ratio true "$@"
+            --logo-width 40 --logo-height 16 --logo-preserve-aspect-ratio true "$@"
         fi
         exec ${pkgs.fastfetch}/bin/fastfetch "$@"
       '')
@@ -127,7 +127,7 @@ in
           "break",
           "break",
           { "type": "custom", "format": "╰{$1}╯" },
-{ "type": "colors", "paddingLeft": ${toString (boxW - dotsW)}, "symbol": "circle" }
+{ "type": "colors", "paddingLeft": ${toString ((boxW - dotsW) / 2)}, "symbol": "circle" }
         ]
       }
     '';
