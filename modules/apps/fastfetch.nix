@@ -41,7 +41,28 @@ in
   };
 
   config = {
-    home.packages = with pkgs; [ fastfetch ];
+    # Wrapper en vez del binario pelado: elige un logo AL AZAR en cada
+    # invocacion de ~/Pictures/Fastfetch (mismo patron que los wallpapers: la
+    # media vive en ~/Pictures, no en el store ni en git). Si el directorio no
+    # existe o esta vacio, cae al PNG de siempre via config.jsonc.
+    # Se instala SOLO el wrapper: referencia el store path del paquete real, sin
+    # colisionar con su bin/fastfetch en el perfil.
+    home.packages = [
+      (pkgs.writeShellScriptBin "fastfetch" ''
+        dir="$HOME/Pictures/Fastfetch"
+        logo=""
+        if [ -d "$dir" ]; then
+          logo="$(find "$dir" -maxdepth 1 -type f \
+                    \( -iname '*.gif' -o -iname '*.png' -o -iname '*.jpg' \
+                       -o -iname '*.jpeg' -o -iname '*.webp' \) \
+                    -print0 2>/dev/null | shuf -z -n 1 | tr -d '\0')"
+        fi
+        if [ -n "$logo" ]; then
+          exec ${pkgs.fastfetch}/bin/fastfetch --logo-type kitty-direct --logo "$logo" "$@"
+        fi
+        exec ${pkgs.fastfetch}/bin/fastfetch "$@"
+      '')
+    ];
 
     xdg.configFile."fastfetch/config.jsonc".text = ''
       {
