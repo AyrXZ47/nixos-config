@@ -75,6 +75,13 @@
       DNSSEC = "true";
       Domains = "~.";
       FallbackDNS = "200.33.146.1 200.33.148.1"; # Telmex (solo si DoT muere)
+      # mDNS lo hace avahi, NO resolved. Con los dos respondiendo habia DOS
+      # stacks mDNS en el mismo host: avahi lo detectaba ("Detected another
+      # IPv4 mDNS stack") y se renombraba a nixos-laptop-3.local por colision,
+      # con lo que KDE Connect dejaba de encontrar al otro host de forma
+      # intermitente (paired pero no reachable). resolved sigue resolviendo
+      # DNS normal por DoT; solo suelta el multicast.
+      MulticastDNS = false;
     };
   };
 
