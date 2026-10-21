@@ -89,6 +89,27 @@ in
     SUBSYSTEM=="power_supply", KERNEL=="AC", ACTION=="change", RUN+="${eppSwitch}"
   '';
 
+  # Salud de la bateria: cargar solo hasta 80% (modo "80%" de Lenovo Vantage).
+  # El EC venia en 95/100 de fabrica: la bateria viviendo entre 95 y 100% es el
+  # peor escenario para una Li-ion. Medido 2026-10-21: 81.4% de salud (41.5 Wh
+  # reales vs 51 Wh de diseno) con 378 ciclos. 75/80 = empieza a cargar bajo 75%
+  # y corta en 80%. Si necesitas el 100% para una salida larga, se cambia en
+  # vivo y vuelve a 80% al reiniciar:
+  #   echo 100 | sudo tee /sys/class/power_supply/BAT0/charge_control_end_threshold
+  #   echo 95  | sudo tee /sys/class/power_supply/BAT0/charge_control_start_threshold
+  systemd.services.battery-charge-thresholds = {
+    description = "Limita la carga de BAT0 a 80% (salud de la bateria)";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      echo 75 > /sys/class/power_supply/BAT0/charge_control_start_threshold
+      echo 80 > /sys/class/power_supply/BAT0/charge_control_end_threshold
+    '';
+  };
+
   # Touchpad Synaptics LEN2073: SIN psmouse.synaptics_intertouch (quitado
   # 2026-08-17). Ese param solo servia para el gesto de 3 dedos de workspaces,
   # que jamas funciono y el user no usa ni quiere (no toca el touchpad). Sin el,
