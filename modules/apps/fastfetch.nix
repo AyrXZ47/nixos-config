@@ -7,6 +7,10 @@ let
   # Termux, asi que ahi se usa el logo ascii original de nixos. La pc sigue
   # con el PNG. fastfetch no admite padding negativo, asi que el espacio que
   # queda entre logo y valores se reduce acortando la columna de claves.
+  # "kitty-direct", NO "kitty": con fastfetch 2.70 el tipo "kitty" no emite
+  # ni un escape del protocolo (el PNG no se dibuja, y salen bloques ANSI
+  # identicos sea cual sea la imagen); "kitty-direct" manda a=T,f=100,t=f con
+  # la ruta y kitty la abre. Verificado comparando la salida de ambos.
   logoJson = if cfg.asciiLogo then ''
     {
       "type": "builtin",
@@ -15,7 +19,7 @@ let
     }
   '' else ''
     {
-      "type": "kitty",
+      "type": "kitty-direct",
       "source": "${terminalLogo}",
       "width": 40,
       "padding": { "top": 2, "left": 4 }
