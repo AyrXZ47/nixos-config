@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ ... }:
 
 {
   # ── Paralelismo absoluto ──────────────────────────────────────────────────
@@ -8,7 +8,8 @@
   nix.settings.max-jobs = "auto";
 
   # ── Scheduler idle → estabilidad en Hyprland ─────────────────────────────
-  # Mientras compila, cede la CPU/IO al desktop para evitar freezes
+  # Mientras compila, cede la CPU/IO al desktop para evitar freezes. Solo pesa
+  # si hay competencia: sin carga, el build corre a full.
   nix.daemonCPUSchedPolicy = "idle";
   nix.daemonIOSchedClass = "idle";
 
@@ -31,96 +32,45 @@
   # store llega a 130G+ con versiones viejas de libreoffice/uhd/clang y sources
   # duplicados de nixpkgs). Con auto-optimise-store cada path nuevo se hardlinkea
   # contra su contenido identico ya existente: el mismo archivo se guarda UNA vez.
-  # Complementa a nix.optimise.automatic (que ya corre la dedup programada);
-  # esto la hace en el momento de instalar, no horas despues.
+  # OJO: es dedup al instalar, no un timer; no cuesta nada en el arranque.
   nix.settings.auto-optimise-store = true;
 
-  # ── Basura: máximo 3 generaciones SIEMPRE (por conteo, no por edad) ──────
-  # nix-collect-garbage NO acepta "--delete-generations" (flag de nix-env), así
-  # que el conteo lo hace trim-generations (diario) con nix-env --delete-generations +3;
-  # nix.gc diario queda sin options = GC puro del store (no toca generaciones).
-  # Antes era por edad ("--delete-older-than 3d") y 20 rebuilds en 3 días
-  # dejaban 20 generaciones (se llegó a 42 durante la puesta a punto).
-  nix.gc = {
-    automatic = true;
-    dates = "daily";
-  };
-  nix.optimise.automatic = true;
-
-  # La dedup del store (nix-optimise.timer 03:45 + Persistent=true) hace
-  # catch-up en cada boot matutino (la maquina esta apagada a esa hora) y lee
-  # 1-3GB del store justo cuando se abren las apps. Con io/CPU idle no congela
-  # el arranque de aplicaciones; la dedup sigue corriendo en los huecos.
-  systemd.services.nix-optimise.serviceConfig = {
-    Nice = 19;
-    IOSchedulingClass = "idle";
-    CPUSchedulingPolicy = "idle";
-  };
-
-  # nix-gc y trim-generations tienen el MISMO catch-up al primer boot del dia
-  # (timers daily + Persistent=true y la maquina apagada en el horario), pero
-  # corrian a prioridad plena: el GC borrando miles de paths del store mientras
-  # arranca la sesion = escritura sostenida justo sobre la NVMe sin DRAM de la
-  # laptop (S20G) -> el controlador se cuelga en silencio (freeze sin traza,
-  # ver nvme-dramless.nix; ocurrio el 2026-08-17 a las 02:50, GC + rebuild al
-  # mismo tiempo). Mismo tratamiento idle que nix-optimise: borran en los
-  # huecos, nunca compitiendo con el arranque.
-  systemd.services.nix-gc.serviceConfig = {
-    Nice = 19;
-    IOSchedulingClass = "idle";
-    CPUSchedulingPolicy = "idle";
-  };
-
-  # ── Límite duro de generaciones: máx 3 por CONTEo, no por edad ────────────
-  # nix-env --delete-generations +3 conserva exactamente las 3 más nuevas del
-  # perfil de sistema; luego GC del store. Diario (antes semanal) para que
-  # NUNCA se acumulen más de 3, ni con 20 rebuilds en un día.
-  systemd.services.trim-generations = {
-    description = "Deja solo las 3 generaciones mas recientes";
-    serviceConfig = {
-      Type = "oneshot";
-      Nice = 19;
-      IOSchedulingClass = "idle";
-      CPUSchedulingPolicy = "idle";
-    };
-    script = ''
-      ${pkgs.nix}/bin/nix-env -p /nix/var/nix/profiles/system --delete-generations +3
-      ${pkgs.nix}/bin/nix-collect-garbage
-    '';
-  };
-
-  systemd.timers.trim-generations = {
-    description = "Limpieza diaria de generaciones";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "daily";
-      Persistent = true;
-    };
-  };
+  # ── Limpieza: A MANO (desde 2026-10-21) ──────────────────────────────────
+  # Se eliminaron las cuatro automatizaciones (nix.gc, trim-generations,
+  # nix.optimise y system.autoUpgrade). Todas eran Persistent=true y la maquina
+  # esta apagada en sus horarios, asi que hacian catch-up SIMULTANEO en el
+  # primer boot del dia: 9-10 min de GC + rebuild no-op sobre la NVMe sin DRAM,
+  # compitiendo con el arranque de la sesion (laptop 2026-10-21: 10m29s de
+  # userspace, con 5.5 min de nixos-upgrade clavado en "unpacking 1 channels").
+  # autoUpgrade era no-op puro: `--upgrade` no hace nada en flakes y switcheaba
+  # a la MISMA generacion cada vez. Con 3 generaciones tope no hay nada que
+  # ganar corriendo esto solo; se corre cuando se hace mantenimiento:
+  #   sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3
+  #   sudo nix-collect-garbage -d
+  #   sudo nix-store --optimise
+  #   nix flake update && sudo nixos-rebuild switch --flake .#<host>
 
   # ── Logs: journald acotado a 100M ─────────────────────────────────────────
   # Sustituye el journalctl --vacuum-size de Fedora: se limita una vez y nunca
   # más hay que vaciar a mano (equivalente al --vacuum-size=100M mensual).
   services.journald.settings.Journal.SystemMaxUse = "100M";
 
-  # ── Actualización automática semanal ──────────────────────────────────────
-  # Rebuild semanal del flake YA CONFIRMADO. No corre `nix flake update`: para
-  # avanzar los inputs bloqueados hay que correrlo a mano y commitear. Si el
-  # repo estuviera sucio (WIP sin commit), el rebuild falla esa semana y
-  # reintenta a la próxima.
-  system.autoUpgrade = {
-    enable = true;
-    # Sin sufijo de host, nixos-upgrade usa el hostname ("nixos-pc") como attr
-    # del flake, pero los attrs son "pc"/"laptop"/"server"/"vm": fallaba en
-    # cada boot. Se deriva del hostname quitando el prefijo "nixos-".
-    flake = "/home/yovick/workspaces/nixos-config#${lib.removePrefix "nixos-" config.networking.hostName}";
-  };
+  # ── Consola: quiet en UN solo sitio, para todos los hosts ─────────────────
+  # `splash` NO va aca: lo agrega el modulo de plymouth en los hosts que lo
+  # tienen (pc/laptop/vm), y meterlo de nuevo solo duplicaba el parametro.
+  # nixpkgs emite SIEMPRE `loglevel=${consoleLogLevel}` (default 4), asi que el
+  # nivel se fija con la opcion, no metiendo otro loglevel= en kernelParams
+  # (eso era justo el duplicado que quedo fuera). 3 y no 0: durante un freeze en
+  # vivo la consola sigue mostrando crit/warn. No afecta al journal, que guarda
+  # todo igual.
+  boot.kernelParams = [ "quiet" ];
+  boot.consoleLogLevel = 3;
 
-  # nixos-upgrade corre como root; libgit2 rechaza el repo del flake por no
-  # ser de root ("not owned by current user") y el autoUpgrade semanal fallaba
-  # en cada boot (29s quemados + 381MB escritos, y con Persistent=true
-  # reintentaba en el siguiente arranque). El safe.directory del home de yovick
-  # no le aplica a root, por eso va en /etc/gitconfig.
+  # ── Rebuild manual como root sobre un repo de yovick ─────────────────────
+  # `sudo nixos-rebuild --flake /home/yovick/...` corre como root y libgit2
+  # rechaza el repo por no ser suyo ("not owned by current user"). El
+  # safe.directory del home de yovick no le aplica a root, por eso va en
+  # /etc/gitconfig.
   environment.etc."gitconfig".text = ''
     [safe]
       directory = /home/yovick/workspaces/nixos-config
@@ -128,7 +78,8 @@
 
   # ── Boot: sin menú de generaciones y solo 3 en el bootloader ─────────────
   # timeout = 0 → systemd-boot arranca el default directo (sin espera ni menú);
-  # configurationLimit = 3 → el bootloader conserva solo 3 entradas de generación.
+  # configurationLimit = 3 → el bootloader conserva solo 3 entradas de generación
+  # (sigue valiendo sin trim automatico: nunca hay mas de 3 entradas en el menu).
   boot.loader.timeout = 0;
   boot.loader.systemd-boot.configurationLimit = 3;
 }

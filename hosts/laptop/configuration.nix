@@ -49,7 +49,10 @@
   environment.systemPackages = [ pkgs.openrgb pkgs.dnsmasq ];
 
   # fwupd: servicio para actualizar firmware (BIOS/SSD). Uso: `fwupdmgr refresh && fwupdmgr update`.
+  # No arranca en boot: el .service es dbus-activatable, asi que `fwupdmgr` lo
+  # levanta cuando se usa. Arrancarlo costaba 38.9s en la cadena critica.
   services.fwupd.enable = true;
+  systemd.services.fwupd.wantedBy = lib.mkForce [ ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

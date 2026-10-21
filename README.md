@@ -240,14 +240,19 @@ Gotchas (vistos en la práctica):
 - `cores = 0`, `max-jobs = auto` — uses every core/thread.
 - CPU/IO scheduler `idle` while building → no freezes on the desktop.
 - Substituters: `cache.nixos.org` + `hyprland.cachix.org` (avoids compiling Hyprland).
-- Daily GC (pure store GC) + daily `trim-generations` service keeping at most 3
-  generations by COUNT (`nix-env --delete-generations +3`); automatic store
-  optimisation. Not age-based — 20 rebuilds in 3 days still leaves exactly 3.
+- No automatic GC/upgrade (removed 2026-10-21): the four `Persistent=true`
+  timers (`nix.gc`, `trim-generations`, `nix.optimise`, `system.autoUpgrade`)
+  all caught up at the first boot of the day and burned 9-10 min of store GC
+  plus a no-op rebuild competing with the login session. Cleanup is manual now
+  — see [Day-to-Day](#day-to-day).
 
 ### Hardware (`modules/hardware/`)
 - Zen kernel everywhere, AMD microcode, `hardware.graphics` 32-bit.
 - `zramSwap` at 50% memory.
-- Common kernel params: `quiet splash loglevel=3 nowatchdog split_lock_detect=off`.
+- `quiet splash loglevel=3` is declared once, in `nix-optimization.nix`, for
+  every host; `loglevel=0` was removed so a live freeze still shows on console.
+- Common kernel params: `split_lock_detect=off`. The NMI watchdog is deliberately
+  left ON — with it off a whole-system freeze leaves no trace at all.
 - Desktop: `amd_pstate=active`, `mitigations=off`, `max_cstate=1`, `performance`
   governor, amdgpu in initrd (early KMS).
 - Laptop: `powersave` governor + EPP `balance_power` (boost bajo demanda, reposo
@@ -333,6 +338,8 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 ### Boot
 - **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (`ironman`
   theme from `adi1090x-plymouth-themes`); quiet boot.
+- `fwupd` does not start at boot (it cost 38.9s on the laptop): the unit is
+  dbus-activatable, so `fwupdmgr` starts it on demand.
 - PipeWire (ALSA/Pulse/JACK) + rtkit for pro audio; ZRAM swap.
 
 ## Keybindings (Hyprland)
@@ -475,6 +482,15 @@ sudo nixos-rebuild --impure switch --flake .#<host>   # apply system + home chan
 home-manager switch --flake .#<host>                  # Home Manager only
 nix flake update                              # bump inputs
 nix flake check                               # evaluate all hosts
+```
+
+No cleanup timers run in background any more (see Performance & Tuning). When a
+host needs maintenance, run this by hand:
+
+```bash
+sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3  # keep 3
+sudo nix-collect-garbage -d                                          # free store
+sudo nix-store --optimise                                            # dedup store
 ```
 
 ## Security Notes

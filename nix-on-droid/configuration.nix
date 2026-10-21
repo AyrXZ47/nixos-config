@@ -218,9 +218,9 @@
     '';
 
     # Máximo 3 generaciones SIEMPRE (por conteo, no por edad), igual que
-    # trim-generations de modules/core/nix-optimization.nix en los hosts de
-    # escritorio: allí lo fuerza un timer systemd diario; aquí no hay systemd,
-    # así que se poda en CADA switch y después se lanza el GC. `|| true` por si
+    # el mantenimiento manual de modules/core/nix-optimization.nix en los hosts
+    # de escritorio (ahí ya no hay timer: se poda a mano cuando toca). Aquí no
+    # hay systemd, así que se poda en CADA switch y después se lanza el GC. `|| true` por si
     # algún perfil todavía no existe (primer switch).
     # OJO proot: nix escanea /proc/*/fd buscando GC roots y proot responde
     # read_symlink: EPERM — es no-fatal, lo imprime como "error:" y ensucia el

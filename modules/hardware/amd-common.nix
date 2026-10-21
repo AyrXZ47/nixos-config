@@ -31,10 +31,9 @@
   security.rtkit.enable = true;
 
   # Performance
+  # quiet/splash/loglevel=3 se declaran UNA vez en nix-optimization.nix (todos
+  # los hosts); duplicarlos aca solo ensuciaba la cmdline.
   boot.kernelParams = [
-    "quiet"
-    "splash"
-    "loglevel=3"
     # NOTA: "nowatchdog" está deliberadamente FUERA. Con el watchdog apagado un
     # freeze de todo el sistema no deja NINGUNA traza en el journal (el congelado
     # del 2026-08-02 de ~10 min fue invisible salvo por el gap). El NMI watchdog
