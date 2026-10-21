@@ -2,6 +2,10 @@
 
 let
   terminalLogo = ../../assets/Terminal/nixTeminal.png;
+  # Logos animados: viven en el repo, estandarizados con ffmpeg+gifsicle
+  # (caja 400x400, <=12 fps, <=4.5 s, paleta 96). 17 MB de originales -> 5.3 MB.
+  # Para sumar uno: dejarlo en assets/Fastfetch/ y rebuildear. Nada mas.
+  logoDir = ../../assets/Fastfetch;
   cfg = config.modules.apps.fastfetch;
   # El celular (nix-on-droid) no soporta el protocolo kitty de la app de
   # Termux, asi que ahi se usa el logo ascii original de nixos. La pc sigue
@@ -42,21 +46,16 @@ in
 
   config = {
     # Wrapper en vez del binario pelado: elige un logo AL AZAR en cada
-    # invocacion de ~/Pictures/Fastfetch (mismo patron que los wallpapers: la
-    # media vive en ~/Pictures, no en el store ni en git). Si el directorio no
-    # existe o esta vacio, cae al PNG de siempre via config.jsonc.
+    # invocacion, entre los GIFs versionados en assets/Fastfetch/ (repo, no
+    # ~/Pictures: asi lo gestiona Nix y llega igual a todos los hosts).
+    # Si el directorio quedara sin archivos, cae al PNG de config.jsonc.
     # Se instala SOLO el wrapper: referencia el store path del paquete real, sin
     # colisionar con su bin/fastfetch en el perfil.
     home.packages = [
       (pkgs.writeShellScriptBin "fastfetch" ''
-        dir="$HOME/Pictures/Fastfetch"
-        logo=""
-        if [ -d "$dir" ]; then
-          logo="$(find "$dir" -maxdepth 1 -type f \
-                    \( -iname '*.gif' -o -iname '*.png' -o -iname '*.jpg' \
-                       -o -iname '*.jpeg' -o -iname '*.webp' \) \
-                    -print0 2>/dev/null | shuf -z -n 1 | tr -d '\0')"
-        fi
+        logo="$(${pkgs.findutils}/bin/find ${logoDir} -maxdepth 1 -type f \
+                  \( -iname '*.gif' -o -iname '*.png' -o -iname '*.webp' \) \
+                  -print0 2>/dev/null | ${pkgs.coreutils}/bin/shuf -z -n 1 | ${pkgs.coreutils}/bin/tr -d '\0')"
         if [ -n "$logo" ]; then
           exec ${pkgs.fastfetch}/bin/fastfetch --logo-type kitty-direct --logo "$logo" "$@"
         fi
