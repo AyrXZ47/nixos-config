@@ -23,7 +23,7 @@ let
     }
   '' else ''
     {
-      "type": "kitty-direct",
+      "type": "kitty-icat",
       "source": "${terminalLogo}",
       "width": 40,
       "padding": { "top": 2, "left": 4 }
@@ -49,6 +49,12 @@ in
     # invocacion, entre los GIFs versionados en assets/Fastfetch/ (repo, no
     # ~/Pictures: asi lo gestiona Nix y llega igual a todos los hosts).
     # Si el directorio quedara sin archivos, cae al PNG de config.jsonc.
+    #
+    # "kitty-icat", NO "kitty-direct": fastfetch 2.70 manda SIEMPRE f=100 (que
+    # en el protocolo de kitty significa "datos PNG") apuntando al archivo. Con
+    # un GIF eso es mentira y kitty no lo decodifica -> logo vacio. kitty-icat
+    # delega en `kitten icat`, que abre el archivo con el cargador propio de
+    # kitty y sí anima GIF/APNG/WebP.
     # Se instala SOLO el wrapper: referencia el store path del paquete real, sin
     # colisionar con su bin/fastfetch en el perfil.
     home.packages = [
@@ -57,7 +63,7 @@ in
                   \( -iname '*.gif' -o -iname '*.png' -o -iname '*.webp' \) \
                   -print0 2>/dev/null | ${pkgs.coreutils}/bin/shuf -z -n 1 | ${pkgs.coreutils}/bin/tr -d '\0')"
         if [ -n "$logo" ]; then
-          exec ${pkgs.fastfetch}/bin/fastfetch --logo-type kitty-direct --logo "$logo" "$@"
+          exec ${pkgs.fastfetch}/bin/fastfetch --logo-type kitty-icat --logo "$logo" "$@"
         fi
         exec ${pkgs.fastfetch}/bin/fastfetch "$@"
       '')
