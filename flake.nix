@@ -902,6 +902,11 @@ PYEOF
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
+              # hostName real ("nixos-laptop", no "laptop"): fastfetch lo usa
+              # para calcular el ancho de su caja con el largo de {host-name}.
+              # El prefijo nixos- lo agrega mkHost porque el attr del flake es
+              # "laptop"/"pc"/... y networking.hostName es nixos-<attr>.
+              extraSpecialArgs = { hostName = "nixos-${hostName}"; };
               users.yovick = import ./home/default.nix;
             };
           }

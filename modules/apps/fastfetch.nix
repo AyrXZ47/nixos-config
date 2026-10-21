@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, hostName, ... }:
 
 let
   terminalLogo = ../../assets/Terminal/nixTeminal.png;
@@ -6,6 +6,26 @@ let
   # (caja 400x400, <=12 fps, <=4.5 s, paleta 96). 17 MB de originales -> 5.3 MB.
   # Para sumar uno: dejarlo en assets/Fastfetch/ y rebuildear. Nada mas.
   logoDir = ../../assets/Fastfetch;
+
+  # ── Caja simetrica en TODOS los hosts ────────────────────────────────────
+  # El titulo lleva {user-name}@{host-name}: "yovick@nixos-pc" mide 15 y
+  # "yovick@nixos-laptop" 19, asi que con guiones fijos el borde de arriba
+  # nunca mide lo mismo que el de abajo (ni entre hosts). Se calcula en build
+  # time con el hostname real, que llega por extraSpecialArgs desde flake.nix.
+  # 🔥 y 🚀 ocupan 2 columnas cada uno en el terminal.
+  boxW = 80;                                   # ancho total de la caja
+  userName = config.home.username;
+  # "[ 🔥 user@host 🔥 ]" = 2 + 2 + 1 + len + 1 + 2 + 2
+  titleLen = 10 + builtins.stringLength "${userName}@${hostName}";
+  sideTotal = boxW - 2 - titleLen;
+  sideL = sideTotal / 2;                       # Nix / es division entera
+  sideR = sideTotal - sideL;
+  dashes = n: lib.concatStrings (lib.replicate n "─");
+  # borde inferior: "( 🚀 )" mide 6 columnas
+  botTotal = boxW - 2 - 6;
+  botL = botTotal / 2;
+  botR = botTotal - botL;
+  dotsW = 15;                                  # "● ● ● ● ● ● ● ●"
   cfg = config.modules.apps.fastfetch;
   # El celular (nix-on-droid) no soporta el protocolo kitty de la app de
   # Termux, asi que ahi se usa el logo ascii original de nixos. La pc sigue
@@ -26,6 +46,7 @@ let
       "type": "kitty-icat",
       "source": "${terminalLogo}",
       "width": 40,
+      "height": 18,
       "padding": { "top": 2, "left": 4 }
     }
   '';
@@ -63,7 +84,8 @@ in
                   \( -iname '*.gif' -o -iname '*.png' -o -iname '*.webp' \) \
                   -print0 2>/dev/null | ${pkgs.coreutils}/bin/shuf -z -n 1 | ${pkgs.coreutils}/bin/tr -d '\0')"
         if [ -n "$logo" ]; then
-          exec ${pkgs.fastfetch}/bin/fastfetch --logo-type kitty-icat --logo "$logo" "$@"
+          exec ${pkgs.fastfetch}/bin/fastfetch --logo-type kitty-icat --logo "$logo" \
+            --logo-width 40 --logo-height 18 --logo-preserve-aspect-ratio true "$@"
         fi
         exec ${pkgs.fastfetch}/bin/fastfetch "$@"
       '')
@@ -78,14 +100,14 @@ in
             "type": "both"
           },
           "constants": [
-            "───────────────────────────────────( 🚀 )────────────────────────────────────"
+            "${dashes botL}( 🚀 )${dashes botR}"
           ]
         },
         "logo": ${logoJson},
         "modules": [
           {
             "type": "title",
-            "format": "╭─────────────────────────────[ 🔥 {user-name-colored}@{host-name-colored} 🔥 ]─────────────────────────────╮"
+            "format": "╭${dashes sideL}[ 🔥 {user-name-colored}@{host-name-colored} 🔥 ]${dashes sideR}╮"
           },
           "break",
           "break",
@@ -105,7 +127,7 @@ in
           "break",
           "break",
           { "type": "custom", "format": "╰{$1}╯" },
-          { "type": "colors", "paddingLeft": 31, "symbol": "circle" }
+{ "type": "colors", "paddingLeft": ${toString (boxW - dotsW)}, "symbol": "circle" }
         ]
       }
     '';
