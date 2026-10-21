@@ -46,7 +46,7 @@
   # a la MISMA generacion cada vez. Con 3 generaciones tope no hay nada que
   # ganar corriendo esto solo; se corre cuando se hace mantenimiento:
   #   sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3
-  #   sudo nix-collect-garbage -d
+  #   sudo nix-collect-garbage        # SIN -d: -d borra TODAS las generaciones
   #   sudo nix-store --optimise
   #   nix flake update && sudo nixos-rebuild switch --flake .#<host>
 

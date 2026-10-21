@@ -489,9 +489,12 @@ host needs maintenance, run this by hand:
 
 ```bash
 sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3  # keep 3
-sudo nix-collect-garbage -d                                          # free store
+sudo nix-collect-garbage                                             # free store
 sudo nix-store --optimise                                            # dedup store
 ```
+
+`nix-collect-garbage -d` is NOT the same thing: `--delete-old` drops *every* old
+generation (no rollback left). Use it only when you mean it.
 
 ## Security Notes
 
