@@ -900,98 +900,6 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       '';
     };
 
-    # Overlay del "smear" del cursor (estela al saltar de ventana con Super+flechas).
-    # Capa layer-shell transparente y click-through; el QML es assets/quickshell.
-    "quickshell/smear/shell.qml".source = ../../assets/quickshell/smear/shell.qml;
-
-    "hypr/scripts/smear.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        # Estela del cursor al saltar de ventana (Super+flechas).
-        #
-        # Wayland no expone la posicion global del puntero, asi que no se puede
-        # leer el cursor: se escucha el socket de eventos de Hyprland y, cuando
-        # cambia la ventana activa, se traza una linea entre el centro de la
-        # anterior y el de la nueva. Hyprland ademas warpea el puntero ahi, asi
-        # que la estela coincide con el salto real.
-        #
-        # Uso: smear.sh start|stop|toggle|listen|test X1 Y1 X2 Y2
-        qsdir="$HOME/.config/quickshell/smear"
-        log="$XDG_RUNTIME_DIR/smear-qs.log"
-        [ -n "$XDG_RUNTIME_DIR" ] || log="/tmp/smear-qs.log"
-
-        running() { pgrep -f "quickshell -c $qsdir" >/dev/null 2>&1; }
-
-        streak() {
-          quickshell -c "$qsdir" ipc call smear streak "$1" "$2" "$3" "$4" >/dev/null 2>&1
-        }
-
-        # centro de la ventana activa, como "cx cy" (vacio si no hay ventana)
-        center() {
-          hyprctl activewindow -j 2>/dev/null | python3 -c '
-import json,sys
-try: d=json.load(sys.stdin)
-except Exception: sys.exit()
-a=d.get("at") or [0,0]; s=d.get("size") or [0,0]
-if d.get("address"): print(a[0]+s[0]//2, a[1]+s[1]//2)
-' 2>/dev/null
-        }
-
-        listen() {
-          # El propio listener escribe su PID: setsid forkea, asi que el $! del
-          # padre es un PID muerto y el guardia de "ya hay uno" nunca funcionaba
-          # (cada toggle dejaba un listener extra y estelas duplicadas).
-          echo $$ > "$XDG_RUNTIME_DIR/smear-listen.pid"
-          sock="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
-          [ -S "$sock" ] || exit 0
-          prev="$(center)"
-          nc -U "$sock" | while read -r ev; do
-            case "$ev" in
-              activewindow*)
-                cur="$(center)"
-                if [ -n "$prev" ] && [ -n "$cur" ] && [ "$prev" != "$cur" ]; then
-                  streak $prev $cur
-                fi
-                prev="$cur"
-                ;;
-            esac
-          done
-        }
-
-        case "$1" in
-          start)
-            if ! running; then
-              setsid quickshell -c "$qsdir" >"$log" 2>&1 &
-              for i in $(seq 40); do
-                sleep 0.05
-                quickshell -c "$qsdir" ipc show >/dev/null 2>&1 && break
-              done
-            fi
-            # pidfile: sin esto, cada toggle dejaba un listener extra escuchando
-            # el socket y se dibujaban estelas duplicadas.
-            pidf="$XDG_RUNTIME_DIR/smear-listen.pid"
-            if ! { [ -f "$pidf" ] && kill -0 "$(cat "$pidf")" 2>/dev/null; }; then
-              setsid "$0" listen >/dev/null 2>&1 &
-            fi
-            ;;
-          stop)
-            pkill -f "quickshell -c $qsdir" 2>/dev/null
-            pidf="$XDG_RUNTIME_DIR/smear-listen.pid"
-            if [ -f "$pidf" ]; then
-              kill -TERM -"$(cat "$pidf")" 2>/dev/null
-              rm -f "$pidf"
-            fi
-            ;;
-          toggle)
-            if running; then "$0" stop; else "$0" start; fi
-            ;;
-          listen) listen ;;
-          test)   streak "$2" "$3" "$4" "$5" ;;
-        esac
-      '';
-    };
-
     "hypr/scripts/toggle-frost.sh" = {
       executable = true;
       text = ''
@@ -1014,13 +922,11 @@ if d.get("address"): print(a[0]+s[0]//2, a[1]+s[1]//2)
           # sólido -> esmerilado + neon
           rm -f "$state"
           hyprctl eval "hl.config({ decoration = { blur = { enabled = true }, active_opacity = 0.8, inactive_opacity = 0.6, shadow = { enabled = true }, glow = { enabled = true } }, general = { col = { active_border = { colors = $NEON, angle = 45 } } } })"
-          "$HOME/.config/hypr/scripts/smear.sh" start
           notify-send -t 2000 -a hyprland -u low "Cyberpunk ON"
         else
           # esmerilado + neon -> sólido
           touch "$state"
           hyprctl eval "hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0, shadow = { enabled = false }, glow = { enabled = false } }, general = { col = { active_border = { colors = $FLAT, angle = 45 } } } })"
-          "$HOME/.config/hypr/scripts/smear.sh" stop
           notify-send -t 2000 -a hyprland -u low "Cyberpunk OFF"
         fi
       '';
