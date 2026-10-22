@@ -98,19 +98,10 @@
           };
         });
 
-        # pyrtlsdr 0.3.0: su rtlsdr/__init__.py hace `import pkg_resources`, que
-        # setuptools >= 82 ya no trae -> el import del modulo falla en runtime
-        # (nixpkgs lo tiene con doCheck=false, por eso colo). Se cambia a
-        # importlib.metadata (stdlib); el try/except de __version__ queda igual.
-        # ponytail: techo conocido — borrar cuando nixpkgs empaquete una version
-        # de pyrtlsdr sin pkg_resources.
-        patchPyrtlsdr = p: p.overridePythonAttrs (old: {
-          postPatch = (old.postPatch or "") + ''
-            substituteInPlace rtlsdr/__init__.py \
-              --replace-fail "import pkg_resources" "from importlib.metadata import version as _pkg_version" \
-              --replace-fail "pkg_resources.require('pyrtlsdr')[0].version" "_pkg_version('pyrtlsdr')"
-          '';
-        });
+        # pyrtlsdr: el patch local murio con el canal del 2026-10-20. pyrtlsdr
+        # 0.5.1 ya importa importlib.metadata en vez de pkg_resources, asi que
+        # el substituteInPlace no matchea y rompia el build del toplevel. Si
+        # algun dia vuelve a romperse por otra razon, el patch va aca de nuevo.
       in {
         # jetbrains-mono (fuente de ${pkgs.jetbrains-mono}) construye con
         # python313Packages.gftools -> nanoemoji. Sin tocar python313Packages el
@@ -121,18 +112,23 @@
         });
         python3Packages = prev.python3Packages.overrideScope (pfinal: pprev: {
           nanoemoji = fixNanoemoji pprev.nanoemoji;
-          pyrtlsdr = patchPyrtlsdr pprev.pyrtlsdr;
         });
 
-        # TRAMPA: el overrideScope de arriba NO llega a `python3.withPackages`
-        # (el env usa el scope que el interprete capturo al construirse, no el
-        # alias python3Packages). `packageOverrides` del interprete si; mismo
-        # outPath para CPython (no recompila), solo cambia su scope de paquetes.
-        python3 = prev.python3.override {
-          packageOverrides = _: pprev: {
-            pyrtlsdr = patchPyrtlsdr pprev.pyrtlsdr;
-          };
-        };
+        # audacity 4.0.0: su unity build mete el enum muse::extensions::Type en
+        # la misma unidad que el codigo que genera Qt 6.12, y el
+        # QQmlPrivate::AOTLookupValidation::Type de Qt lo vuelve ambiguo
+        # ("reference to 'Type' is ambiguous"); no hay binario en Hydra por eso.
+        # Fix de nixpkgs#577022 (aun sin merge): ese target se compila sin unity.
+        # ponytail: techo conocido — borrar el override cuando el PR entre al
+        # canal; si upstream lo arregla, el substitute falla ruidosamente.
+        audacity = prev.audacity.overrideAttrs (old: {
+          postPatch =
+            ''
+              substituteInPlace muse/framework/extensions/qml/Muse/Extensions/CMakeLists.txt \
+                --replace-fail 'ALIAS muse::extensions_qml' 'NO_UNITY ALIAS muse::extensions_qml'
+            ''
+            + (old.postPatch or "");
+        });
 
         # NOTA: gnuradio NO lleva override de doCheck. nixpkgs corre su suite
         # en installCheckPhase y el commit pinneado del canal ya la paso, asi
