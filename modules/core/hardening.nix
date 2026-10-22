@@ -66,12 +66,14 @@
     # elimina la rama de login de root por completo.
     PermitRootLogin = "no";
     AllowUsers = [ "yovick" ];
-    # Contraseña habilitada A PROPÓSITO: todavía no hay authorized_keys en
-    # ningún host (solo ~/.ssh/id_ed25519 local), así que apagarla dejaría el
-    # SSH inaccesible. Antes de pasar a false: instalar la pubkey en
-    # ~/.ssh/authorized_keys de cada host y probar `ssh -o
-    # PasswordAuthentication=no` desde otro nodo de la tailnet.
-    PasswordAuthentication = true;
+    # Login por clave, sin contraseña. Verificado 2026-10-22 con
+    # `ssh -o BatchMode=yes -o PasswordAuthentication=no` en pc y laptop (los
+    # únicos hosts encendidos). server y vm están apagados y todavía NO tienen
+    # la pubkey en ~/.ssh/authorized_keys: antes de reconstruirlos hay que
+    # copiarla (ssh-copy-id) o quedan sin SSH. La consola física sigue siendo
+    # la vía de rescate.
+    PasswordAuthentication = false;
+    KbdInteractiveAuthentication = false;
     MaxAuthTries = 3;
     LoginGraceTime = "30s";
   };
