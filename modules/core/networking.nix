@@ -71,7 +71,14 @@
     enable = true;
     settings.Resolve = {
       DNS = "1.1.1.1#cloudflare-dns.com 8.8.8.8#dns.google";
-      DNSOverTLS = "yes";
+      # opportunistic, NO "yes": con strict, si la red bloquea el UDP/853
+      # (FortiGate de la UAZ, hotel, aeropuerto) resolved marca los dos
+      # servidores como caídos y TODA la resolución falla —"Could not resolve
+      # hostname github.com"— porque FallbackDNS solo se usa cuando no hay
+      # servidores configurados, no cuando los configurados fallan. Con
+      # opportunistic se cifra cuando se puede y se degrada cuando no: la
+      # privacidad sigue, la conectividad también.
+      DNSOverTLS = "opportunistic";
       DNSSEC = "true";
       Domains = "~.";
       FallbackDNS = "200.33.146.1 200.33.148.1"; # Telmex (solo si DoT muere)
