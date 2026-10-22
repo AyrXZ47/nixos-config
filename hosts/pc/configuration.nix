@@ -96,7 +96,28 @@
   # brightnessctl pueden controlar el brillo, sin depender de ddcutil por cada
   # cambio. Sin esto no hay /sys/class/backlight en este PC (monitor externo) y
   # el brillo solo va por DDC.
-  boot.extraModulePackages = [ config.boot.kernelPackages.ddcci-driver ];
+  # ddcci: el paquete instala con `install` propio en vez de kbuild
+  # `modules_install`, y ahi es donde nixpkgs corre cmd_sign=kmodigest. Sin
+  # firma no queda el .ko.cer que el merge de lib/modules espera (desde 7.2.11
+  # concatena un certificado por modulo) y el build muere con
+  # "cat: extra/ddcci.ko.cer: No such file". kmodigest firma el .ko y deja el
+  # .cer al lado; solo se recompila este modulo (segundos, no el kernel).
+  # dontStrip: el strip de fixupPhase reescribe el .ko y tira la firma que
+  # acaba de anexar kmodigest, dejando firma invalida (el kernel rechaza el
+  # modulo). Con el .ko sin tocar, firma y certificado coinciden.
+  # ponytail: techo conocido — borrar el override cuando nixpkgs empaquete
+  # ddcci via modules_install (ya firmado) o suba un fix upstream.
+  boot.extraModulePackages = [
+    (config.boot.kernelPackages.ddcci-driver.overrideAttrs (old: {
+      dontStrip = true;
+      postInstall = (old.postInstall or "") + ''
+        for ko in $out/lib/modules/*/extra/*.ko; do
+          ${pkgs.binutils}/bin/strip -S -p "$ko"
+          ${pkgs.kmodigest}/bin/kmodigest "$ko"
+        done
+      '';
+    }))
+  ];
   boot.kernelModules = [ "ddcci" "ddcci-backlight" ];
 
   # ddcci: desde kernel 6.8 el auto-probe de displays esta roto (el driver no
