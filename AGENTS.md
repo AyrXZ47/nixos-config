@@ -70,6 +70,18 @@ No tests, no CI, no formatter/linter config. `nix flake check` is the only verif
   lifecycle scripts de las dependencias por defecto (el vector principal de
   supply-chain en npm). `npm install` solo como excepcion explicita del brief,
   documentada; herramientas globales van con `pnpm add -g`.
+- El gestor de extensiones de Pi usa `npm` por defecto. Por eso
+  `~/.pi/agent/settings.json` lleva `"npmCommand": ["pnpm"]`: `pi install`,
+  `pi update --extensions` y todo lo que toque `~/.pi/agent/npm` pasa por pnpm.
+  Si ese campo desaparece, Pi vuelve a npm en silencio.
+- pnpm corre con `minimumReleaseAge=1440` (global, `~/.config/pnpm/config.yaml`):
+  una version recien publicada espera 24 h antes de poder instalarse. Eso corta
+  el patron de los incidentes de octubre 2026 (LiteLLM 1.107.0, tensorlake,
+  @subql/common: paquetes maliciosos vivos horas antes de que los bajaran).
+  El costo es que un update de Pi o de una dependencia llega un dia despues.
+- El binario `npm` sigue existiendo en el host porque viaja dentro del paquete
+  `nodejs` de nixpkgs; no se puede quitar sin repaquetar Node. La regla se
+  sostiene por configuracion, no por ausencia del binario.
 
 ## Gotchas
 

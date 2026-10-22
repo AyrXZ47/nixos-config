@@ -512,6 +512,39 @@ generation (no rollback left). Use it only when you mean it.
   anyone can clone and fork.
 - Rebuilds use `--impure` because `user.nix` reads the local password file at eval time.
 
+### Endurecimiento base (`modules/core/hardening.nix`)
+
+Se importa desde `mkHost`, así que aplica a los 4 hosts:
+
+- **sysctl sin costo medible**: `kptr_restrict=2`, `kexec_load_disabled=1`,
+  `suid_dumpable=0`, SIN reenvío de ICMP redirects, `tcp_rfc1337=1`.
+  NixOS ya trae `randomize_va_space`, `ptrace_scope`, `dmesg_restrict`,
+  `unprivileged_bpf_disabled`, `protected_*` y `tcp_syncookies`.
+- **sshd acotado**: sin login de root, solo `yovick`, `MaxAuthTries=3`,
+  `LoginGraceTime=30s`. El puerto 22 **no** está abierto al mundo: el firewall
+  lo deja cerrado salvo en `tailscale0` (`trustedInterfaces`), así que el SSH
+  solo se llega por la tailnet.
+- **Contraseña SSH aún habilitada a propósito**: no hay `authorized_keys` en
+  ningún host. Antes de apagarla, instalar la pubkey y probar
+  `ssh -o PasswordAuthentication=no` desde otro nodo de la tailnet.
+- **sudo solo para `wheel`** (`execWheelOnly`); `wheelNeedsPassword` sigue en
+  `true`.
+
+**Lo que NO se habilita, a propósito:** SELinux y AppArmor. NixOS no trae
+perfiles de AppArmor cargados por defecto: activar el LSM sin escribir perfiles
+por app no protege nada y sí puede romper GPU/IA/juegos. El aislamiento real de
+este setup es el *sandboxing de systemd* que ya aplican los módulos de nixpkgs
+(`ProtectSystem`, `ProtectHome`, `PrivateTmp`, `NoNewPrivileges`, etc.). Si algún
+día se quiere MAC de verdad, el orden es: perfiles de AppArmor para los daemons
+expuestos (primero), no el flag suelto.
+
+**Rendimiento vs. seguridad:** endurecimientos que cuestan CPU (`init_on_alloc`,
+`slab_nomerge`, `page_alloc.shuffle`, mitigaciones de CPU) quedan fuera porque
+este repo prioriza rendimiento. El costo de cada uno se paga en cada `malloc`
+o en cada llamada al sistema — se pueden probar uno por uno con
+`nixos-rebuild test` si en algún momento se prefiere el otro lado.
+
+
 ## License
 
 - **Source code** (`flake.nix`, `modules/`, `hosts/`, `home/`): [GNU GPLv3](LICENSE-SOFTWARE)
