@@ -904,22 +904,28 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Alterna el esmerilado (blur + transparencia) en tiempo real. El estado
-        # vive en un marcador bajo XDG_RUNTIME_DIR (se limpia al cerrar sesión,
-        # volviendo al default esmerilado). Con config Lua "hyprctl keyword" no
-        # funciona: los cambios se aplican con "hyprctl eval" + hl.config.
+        # Alterna de un saque: esmerilado (blur + transparencia) Y neon del marco.
+        # El estado vive en un marcador bajo XDG_RUNTIME_DIR (se limpia al cerrar
+        # sesión, volviendo al default del config). Con config Lua "hyprctl
+        # keyword" no funciona: los cambios se aplican con "hyprctl eval".
+        #
+        # El "neon" es el gradiente de 3 colores del borde activo (45 grados, 4px,
+        # definido en el config de este mismo archivo). Apagado queda un borde
+        # liso gris-azulado: se sigue viendo cual está enfocada, sin neon.
         state="$XDG_RUNTIME_DIR/frost-off"
+        NEON='{ "rgba(ed1044ff)", "rgba(9900ffff)", "rgba(00aaffff)" }'
+        FLAT='{ "rgba(3a3a5aff)", "rgba(3a3a5aff)", "rgba(3a3a5aff)" }'
 
         if [ -f "$state" ]; then
-          # sólido -> esmerilado
+          # sólido -> esmerilado + neon
           rm -f "$state"
-          hyprctl eval 'hl.config({ decoration = { blur = { enabled = true }, active_opacity = 0.8, inactive_opacity = 0.6 } })'
-          notify-send -t 2000 -a hyprland -u low "Blur + transparencia ON"
+          hyprctl eval "hl.config({ decoration = { blur = { enabled = true }, active_opacity = 0.8, inactive_opacity = 0.6 }, general = { col = { active_border = { colors = $NEON, angle = 45 } } } })"
+          notify-send -t 2000 -a hyprland -u low "Blur + transparencia + neon ON"
         else
-          # esmerilado -> sólido
+          # esmerilado + neon -> sólido
           touch "$state"
-          hyprctl eval 'hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0 } })'
-          notify-send -t 2000 -a hyprland -u low "Blur + transparencia OFF"
+          hyprctl eval "hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0 }, general = { col = { active_border = { colors = $FLAT, angle = 45 } } } })"
+          notify-send -t 2000 -a hyprland -u low "Blur + transparencia + neon OFF"
         fi
       '';
     };
