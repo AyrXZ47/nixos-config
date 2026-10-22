@@ -909,9 +909,11 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         # sesión, volviendo al default del config). Con config Lua "hyprctl
         # keyword" no funciona: los cambios se aplican con "hyprctl eval".
         #
-        # El "neon" es el gradiente de 3 colores del borde activo (45 grados, 4px,
-        # definido en el config de este mismo archivo). Apagado queda un borde
-        # liso gris-azulado: se sigue viendo cual está enfocada, sin neon.
+        # El "neon" son TRES cosas: el gradiente de 3 colores del borde activo
+        # (45 grados, 4px), el shadow exterior y el glow interior, los tres con
+        # el mismo gradiente (definidos en el config de este mismo archivo).
+        # Apagado queda un borde liso gris-azulado SIN sombra ni glow: se sigue
+        # viendo cual esta enfocada, sin nada de neon.
         state="$XDG_RUNTIME_DIR/frost-off"
         NEON='{ "rgba(ed1044ff)", "rgba(9900ffff)", "rgba(00aaffff)" }'
         FLAT='{ "rgba(3a3a5aff)", "rgba(3a3a5aff)", "rgba(3a3a5aff)" }'
@@ -919,13 +921,13 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         if [ -f "$state" ]; then
           # sólido -> esmerilado + neon
           rm -f "$state"
-          hyprctl eval "hl.config({ decoration = { blur = { enabled = true }, active_opacity = 0.8, inactive_opacity = 0.6 }, general = { col = { active_border = { colors = $NEON, angle = 45 } } } })"
-          notify-send -t 2000 -a hyprland -u low "Blur + transparencia + neon ON"
+          hyprctl eval "hl.config({ decoration = { blur = { enabled = true }, active_opacity = 0.8, inactive_opacity = 0.6, shadow = { enabled = true }, glow = { enabled = true } }, general = { col = { active_border = { colors = $NEON, angle = 45 } } } })"
+          notify-send -t 2000 -a hyprland -u low "Cyberpunk ON"
         else
           # esmerilado + neon -> sólido
           touch "$state"
-          hyprctl eval "hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0 }, general = { col = { active_border = { colors = $FLAT, angle = 45 } } } })"
-          notify-send -t 2000 -a hyprland -u low "Blur + transparencia + neon OFF"
+          hyprctl eval "hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0, shadow = { enabled = false }, glow = { enabled = false } }, general = { col = { active_border = { colors = $FLAT, angle = 45 } } } })"
+          notify-send -t 2000 -a hyprland -u low "Cyberpunk OFF"
         fi
       '';
     };
