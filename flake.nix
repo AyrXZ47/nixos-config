@@ -912,6 +912,7 @@ PYEOF
           }
 
           ./modules/core/nix-optimization.nix
+          ./modules/core/hardening.nix
         ] ++ hostModules;
       };
     in
