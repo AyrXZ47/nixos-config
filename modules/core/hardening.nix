@@ -76,6 +76,29 @@
     LoginGraceTime = "30s";
   };
 
+  # ── Registro de intentos fallidos (pam_faillock) ─────────────────────────
+  # Lynis marcaba "Logging failed login attempts [DISABLED]". logFailures mete
+  # pam_faillock como módulo `required` en el stack: registra los fallos. NO es
+  # un bloqueo con temporizador (eso necesita preauth/authfail y un tally
+  # configurado), así que no hay riesgo de dejarte afuera de tu propia sesión.
+  security.pam.services.login.logFailures = true;
+  security.pam.services.sshd.logFailures = true;
+
+  # ── auditd: tripwire, no escudo ──────────────────────────────────────────
+  # Vigila escrituras y cambios de atributos solo en los archivos de identidad
+  # y de sudo. Volumen de log cercano a cero (se escribe cuando alguien los
+  # toca). Sirve para responder "¿me cambiaron el shadow?", no para prevenir:
+  #   ausearch -k identity    ausearch -k privilege    ausearch -k sshd
+  security.auditd.enable = true;
+  security.audit.rules = [
+    "-w /etc/passwd -p wa -k identity"
+    "-w /etc/shadow -p wa -k identity"
+    "-w /etc/group -p wa -k identity"
+    "-w /etc/sudoers -p wa -k privilege"
+    "-w /etc/sudoers.d -p wa -k privilege"
+    "-w /etc/ssh/sshd_config -p wa -k sshd"
+  ];
+
   # sudo solo lo puede ejecutar el grupo wheel (si alguien deja un binario
   # setuid suid-root que llama a sudo, ya no le sirve). wheelNeedsPassword ya
   # es true en modules/core/user.nix.

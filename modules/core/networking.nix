@@ -92,9 +92,12 @@
   services.avahi = {
     enable = true;
     nssmdns4 = true;
-    publish = {
-      enable = true;
-      addresses = true;
+    # API nueva de nixpkgs: `publish.*` quedó obsoleto y emite un warning en
+    # cada rebuild. Equivalencia exacta: disable-publishing = !enable,
+    # publish-addresses = addresses.
+    settings.publish = {
+      "disable-publishing" = false;
+      "publish-addresses" = true;
     };
   };
 
