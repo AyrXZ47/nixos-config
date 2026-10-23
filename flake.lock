@@ -49,35 +49,11 @@
         "url": "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz"
       }
     },
-    "pi": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "nixpkgs-darwin-x64": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792621764,
-        "narHash": "sha256-4tJwcgZrZTrNjBrWPZEBABtzA4UQ3f0v6yJEo7+lcHA=",
-        "owner": "earendil-works",
-        "repo": "pi",
-        "rev": "58c0b02ce552adab76014e7ed712ab7981359aa8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "earendil-works",
-        "repo": "pi",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
         "kicad-spice-library": "kicad-spice-library",
-        "nixpkgs": "nixpkgs",
-        "pi": "pi"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

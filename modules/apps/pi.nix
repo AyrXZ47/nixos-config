@@ -4,11 +4,13 @@ let
   # Los paquetes de pi/gentle-ai se resuelven por _module.args para que un
   # consumidor (nix-on-droid, donde el pkgs del home no lleva los overlays)
   # pueda inyectar sus propias derivaciones sin duplicar el modulo. El default
-  # NO puede ir en la firma como `piPackage ? pkgs.pi`: nix trata entonces el
-  # argumento como externo requerido y falla con "attribute 'piPackage'
-  # missing" en los hosts que no lo pasan. Con `or` sobre _module.args el
-  # default aplica y un consumidor lo puede sobreescribir.
-  piPackage = config._module.args.piPackage or pkgs.pi;
+  # NO puede ir en la firma como `piPackage ? pkgs.pi-coding-agent`: nix trata
+  # entonces el argumento como externo requerido y falla con "attribute
+  # 'piPackage' missing" en los hosts que no lo pasan. Con `or` sobre
+  # _module.args el default aplica y un consumidor lo puede sobreescribir.
+  # pi-coding-agent es el paquete de nixpkgs (binario cacheado, version del
+  # canal); el binario que instala es `pi`.
+  piPackage = config._module.args.piPackage or pkgs.pi-coding-agent;
   gentleAiPackage = config._module.args.gentleAiPackage or pkgs.gentle-ai;
   # Node para el bootstrap de gentle-ai (ver abajo). En nix-on-droid se inyecta
   # el node envuelto con --single-threaded (el V8 de node 22 corrompe el heap

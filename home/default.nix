@@ -86,7 +86,7 @@ in
     gh
     libnotify
     obsidian
-    pi
+    pi-coding-agent
     pipes-rs
     ripgrep
     scrcpy

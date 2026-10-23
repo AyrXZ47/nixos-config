@@ -31,22 +31,19 @@
       flake = false;
     };
 
-    # Pi (earendil-works/pi): harness de agentes, instalado en los 4 hosts via
-    # overlay (`pkgs.pi`). Pinneado a `main` porque el tag v1.2.0 rompe el
-    # build de nix (issue #10881: su installCheck busca esbuild top-level y el
-    # install-lock ya no lo trae; el fix solo esta en main, la rama `stable`
-    # aun apunta a v1.1.0). Volver a tag cuando salga v1.2.1+: cambiar url y
-    # `nix flake update pi`. Nixpkgs del input sigue al del repo; el input
-    # darwin (irrelevante aqui) no agrega un segundo nixpkgs al lock.
-    pi = {
-      url = "github:earendil-works/pi";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.nixpkgs-darwin-x64.follows = "nixpkgs";
-    };
+    # Pi (earendil-works/pi) sale de nixpkgs (`pkgs.pi-coding-agent`), que lo
+    # empaqueta con binario en cache.nixos.org. Antes venia de un flake input
+    # pinneado a `main`: eso compilaba pi desde fuente en CADA `nix flake
+    # update` (no hay binario en cache para una derivacion propia) y arrastraba
+    # un segundo clone de earendil-works/pi al lock. La razon original (el tag
+    # v1.2.0 rompia el build de nix) ya no aplica: nixpkgs empaqueta 1.3.0 y su
+    # installCheck pasa. Cuando nixpkgs suba de version, se hereda con el canal.
+    # Si hace falta adelantarse a nixpkgs: `pkgs.pi-coding-agent.overrideAttrs`
+    # con version/src/npmDepsHash nuevos, pero eso vuelve a compilar local.
   };
 
   outputs =
-    { nixpkgs, home-manager, kicad-spice-library, pi, ... }:
+    { nixpkgs, home-manager, kicad-spice-library, ... }:
     let
       system = "x86_64-linux";
       # Backend del portal RemoteDesktop para el remote input de KDE Connect en Hyprland.
@@ -867,7 +864,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay pi.overlays.default gentleAiOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay gentleAiOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
@@ -890,9 +887,9 @@ PYEOF
     {
       packages.x86_64-linux.openrocket = (import nixpkgs { inherit system; overlays = [ openrocketOverlay ]; }).openrocket;
 
-      # Pi como paquete suelto: `nix build .#pi` lo construye/verifica sin
-      # rebuild completo (misma derivacion que pkgs.pi en los hosts).
-      packages.x86_64-linux.pi = (import nixpkgs { inherit system; overlays = [ pi.overlays.default ]; }).pi;
+      # Pi suelto: `nix build .#pi` verifica la misma derivacion que usan los
+      # hosts (pkgs.pi-coding-agent del canal, con binario en cache).
+      packages.x86_64-linux.pi = (import nixpkgs { inherit system; }).pi-coding-agent;
 
       # Gentle-AI suelto: `nix build .#gentle-ai`.
       packages.x86_64-linux.gentle-ai = (import nixpkgs { inherit system; overlays = [ gentleAiOverlay ]; }).gentle-ai;
