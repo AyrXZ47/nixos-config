@@ -79,48 +79,29 @@
         };
       };
 
-      # Overlay de paquetes rotos en la punta de nixos-unstable: cuando el canal
-      # pinna un hash que ya no coincide con el tarball real (GitHub re-genero el
-      # tarball del tag, PyPI re-subio el sdist), un paquete bloquea TODO el
-      # toplevel del sistema. En vez de esperar al fix upstream, se re-pinea el
-      # hash localmente desde el fix de master (misma filosofia que un PKGBUILD
-      # de AUR en Arch: paquete roto de upstream => parche local, sin esperar).
-      # ponytail: techo conocido — cuando nixos-unstable publique el fix, el
-      # override es redundante e inofensivo (mismo hash => misma derivacion);
-      # borrarlo para no arrastrar mantenimiento muerto.
-      unstableFixesOverlay = final: prev: let
-        # Re-pinea SOLO el hash del source de nanoemoji al valor real del tarball
-        # (el que el master de nixpkgs usa hoy). El resto de la derivación queda
-        # igual; fetchFromGitHub es overridable.
-        fixNanoemoji = p: p.overrideAttrs (old: {
-          src = old.src.override {
-            hash = "sha256-FysyKC01XBnRiur5RR9fcsTxQqE8x0JJHSoe3q6JtKc=";
-          };
-        });
-
-        # pyrtlsdr: el patch local murio con el canal del 2026-10-20. pyrtlsdr
-        # 0.5.1 ya importa importlib.metadata en vez de pkg_resources, asi que
-        # el substituteInPlace no matchea y rompia el build del toplevel. Si
-        # algun dia vuelve a romperse por otra razon, el patch va aca de nuevo.
-      in {
-        # jetbrains-mono (fuente de ${pkgs.jetbrains-mono}) construye con
-        # python313Packages.gftools -> nanoemoji. Sin tocar python313Packages el
-        # override no surte efecto (visto en la practica: hash mismatch persiste).
-        nanoemoji = fixNanoemoji prev.nanoemoji;
-        python313Packages = prev.python313Packages.overrideScope (pfinal: pprev: {
-          nanoemoji = fixNanoemoji pprev.nanoemoji;
-        });
-        python3Packages = prev.python3Packages.overrideScope (pfinal: pprev: {
-          nanoemoji = fixNanoemoji pprev.nanoemoji;
-        });
-
+      # Overlay de paquetes rotos en la punta de nixos-unstable: cuando un
+      # paquete bloquea TODO el toplevel del sistema, se parchea localmente en
+      # vez de esperar al canal (misma filosofia que un PKGBUILD de AUR).
+      # ponytail: techo conocido — cuando el fix llegue al canal, el override es
+      # redundante e inofensivo (misma derivacion); borrarlo para no arrastrar
+      # mantenimiento muerto.
+      # NOTA: gnuradio NO lleva override de doCheck. nixpkgs corre su suite en
+      # installCheckPhase y el commit pinneado del canal ya la paso, asi que su
+      # derivacion es la de Hydra y SI tiene binario en cache. El viejo
+      # `doCheck = false` rompia el hash y obligaba a compilar 1410 archivos C++
+      # (~28 min) en cada update: no volver a agregarlo, y en general no tocar
+      # atributos de un paquete solo para "acelerar": cambiar el hash lo saca
+      # de cache.nixos.org y lo compila igual o peor.
+      unstableFixesOverlay = final: prev: {
         # audacity 4.0.0: su unity build mete el enum muse::extensions::Type en
         # la misma unidad que el codigo que genera Qt 6.12, y el
         # QQmlPrivate::AOTLookupValidation::Type de Qt lo vuelve ambiguo
-        # ("reference to 'Type' is ambiguous"); no hay binario en Hydra por eso.
-        # Fix de nixpkgs#577022 (aun sin merge): ese target se compila sin unity.
-        # ponytail: techo conocido — borrar el override cuando el PR entre al
-        # canal; si upstream lo arregla, el substitute falla ruidosamente.
+        # ("reference to 'Type' is ambiguous") -> sin binario en Hydra y el
+        # build falla. Fix de nixpkgs#577022, mergeado 2026-10-23: ese target se
+        # compila sin unity. Mientras el canal pinneado (2026-10-20) no lo
+        # incluya, este override es lo unico que deja audacity instalable.
+        # ponytail: borrar esta entrada — y el overlay entero si queda vacio —
+        # cuando `nix flake update` traiga un canal posterior al merge.
         audacity = prev.audacity.overrideAttrs (old: {
           postPatch =
             ''
@@ -129,12 +110,6 @@
             ''
             + (old.postPatch or "");
         });
-
-        # NOTA: gnuradio NO lleva override de doCheck. nixpkgs corre su suite
-        # en installCheckPhase y el commit pinneado del canal ya la paso, asi
-        # que su derivacion es la de Hydra y SI tiene binario en cache. El
-        # viejo `doCheck = false` rompia el hash y obligaba a compilar 1410
-        # archivos C++ (~28 min) en cada update: no volver a agregarlo.
       };
 
       # Gentle-AI: binario oficial del release linux_amd64 (Go). No esta en
