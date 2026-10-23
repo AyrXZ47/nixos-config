@@ -1,4 +1,4 @@
-{ ... }:
+{ config, lib, ... }:
 
 {
   # ── Paralelismo absoluto ──────────────────────────────────────────────────
@@ -34,6 +34,20 @@
   # contra su contenido identico ya existente: el mismo archivo se guarda UNA vez.
   # OJO: es dedup al instalar, no un timer; no cuesta nada en el arranque.
   nix.settings.auto-optimise-store = true;
+
+  # ── Timers de actualizacion: NINGUNO ──────────────────────────────────────
+  # fwupd-refresh.timer corre CADA HORA con Persistent=true (nixpkgs lo mete en
+  # timers.target): con la maquina apagada hace catch-up en el primer arranque,
+  # el mismo patron que causaba los 9-10 min de arranque descritos abajo. El
+  # chequeo de firmware se corre a mano cuando toca mantenimiento:
+  #   sudo fwupdmgr refresh && sudo fwupdmgr update
+  # (El timer solo baja metadatos, pero es automatico y cuadruplica el patron.)
+  # enable=false no alcanza: el modulo de fwupd declara `wantedBy` sin condicion
+  # y el symlink en timers.target igual se crea, asi que hay que vaciarlo.
+  systemd.timers.fwupd-refresh = lib.mkIf config.services.fwupd.enable {
+    enable = lib.mkForce false;
+    wantedBy = lib.mkForce [ ];
+  };
 
   # ── Limpieza: A MANO (desde 2026-10-21) ──────────────────────────────────
   # Se eliminaron las cuatro automatizaciones (nix.gc, trim-generations,

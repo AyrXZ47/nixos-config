@@ -5,25 +5,14 @@
 
   environment.systemPackages = [ pkgs.flatpak ];
 
-  # Actualización automática semanal de flatpaks (en la sesión de usuario,
-  # porque los flatpaks de este setup son --user). Corre solo cuando estás
-  # logueado; Persistent recupera el update perdido en el siguiente arranque.
-  systemd.user.services.flatpak-update = {
-    description = "Actualiza flatpaks";
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.flatpak}/bin/flatpak update -y --noninteractive";
-    };
-  };
-
-  systemd.user.timers.flatpak-update = {
-    description = "Actualización semanal de flatpaks";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "weekly";
-      Persistent = true;
-    };
-  };
+  # Actualizaciones: MANUALES (2026-10-23). Antes habia un timer semanal
+  # `flatpak-update` con Persistent=true: como la maquina pasa apagada, hacia
+  # catch-up en el primer arranque del dia y competia con el arranque de la
+  # sesion — el mismo patron que ya se elimino del lado de Nix (ver
+  # modules/core/nix-optimization.nix). Nada de esto corre solo: se corre a mano
+  # cuando toca mantenimiento.
+  #   flatpak update -y
+  #   flatpak uninstall --unused -y
 
   systemd.user.services.flatpak-flathub = {
     description = "Add Flathub remote";
