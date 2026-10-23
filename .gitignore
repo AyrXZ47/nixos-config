@@ -28,3 +28,6 @@ id_ecdsa
 credentials
 secrets/
 *.secret
+
+# Salidas de mongodump: jamas al repo (datos de clientes)
+dump/
