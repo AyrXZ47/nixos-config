@@ -458,6 +458,11 @@ in
 
     # Utility
     openssl
+    # mongodb-tools: mongodump/mongorestore/mongoexport para respaldar y
+    # verificar la base de PIGNUS (Atlas M0 no incluye backups: el dump
+    # nocturno es la única red). mongosh viene aparte, más abajo.
+    mongodb-tools
+    mongosh
     qalculate-gtk
     usbutils
     scrcpy
