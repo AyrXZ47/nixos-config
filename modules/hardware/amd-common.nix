@@ -67,6 +67,7 @@
   zramSwap.enable = true;
   zramSwap.memoryPercent = 50;
 
-  # Discos SSD a pleno: TRIM continuo
-  services.fstrim.enable = true;
+  # TRIM: la politica vive en modules/core/nix-optimization.nix (manual, sin
+  # timer). No re-activar services.fstrim aca: era un `enable = true` redundante
+  # con el default y ahora choca con la definicion de ese modulo.
 }

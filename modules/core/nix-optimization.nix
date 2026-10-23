@@ -49,6 +49,15 @@
     wantedBy = lib.mkForce [ ];
   };
 
+  # ── TRIM del SSD: A MANO ────────────────────────────────────────────────
+  # services.fstrim viene enable=true por defecto: timer semanal con
+  # Persistent=true, o sea catch-up en el primer arranque (misma familia de
+  # problemas que los timers de arriba). El TRIM se corre en el mantenimiento:
+  #   sudo fstrim -av
+  # Sin TRIM periodico el SSD (NVMe sin DRAM en la laptop) pierde rendimiento de
+  # escritura a la larga, asi que forma parte de la lista manual obligatoria.
+  services.fstrim.enable = false;
+
   # ── Limpieza: A MANO (desde 2026-10-21) ──────────────────────────────────
   # Se eliminaron las cuatro automatizaciones (nix.gc, trim-generations,
   # nix.optimise y system.autoUpgrade). Todas eran Persistent=true y la maquina
