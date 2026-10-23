@@ -76,39 +76,6 @@
         };
       };
 
-      # Overlay de paquetes rotos en la punta de nixos-unstable: cuando un
-      # paquete bloquea TODO el toplevel del sistema, se parchea localmente en
-      # vez de esperar al canal (misma filosofia que un PKGBUILD de AUR).
-      # ponytail: techo conocido — cuando el fix llegue al canal, el override es
-      # redundante e inofensivo (misma derivacion); borrarlo para no arrastrar
-      # mantenimiento muerto.
-      # NOTA: gnuradio NO lleva override de doCheck. nixpkgs corre su suite en
-      # installCheckPhase y el commit pinneado del canal ya la paso, asi que su
-      # derivacion es la de Hydra y SI tiene binario en cache. El viejo
-      # `doCheck = false` rompia el hash y obligaba a compilar 1410 archivos C++
-      # (~28 min) en cada update: no volver a agregarlo, y en general no tocar
-      # atributos de un paquete solo para "acelerar": cambiar el hash lo saca
-      # de cache.nixos.org y lo compila igual o peor.
-      unstableFixesOverlay = final: prev: {
-        # audacity 4.0.0: su unity build mete el enum muse::extensions::Type en
-        # la misma unidad que el codigo que genera Qt 6.12, y el
-        # QQmlPrivate::AOTLookupValidation::Type de Qt lo vuelve ambiguo
-        # ("reference to 'Type' is ambiguous") -> sin binario en Hydra y el
-        # build falla. Fix de nixpkgs#577022, mergeado 2026-10-23: ese target se
-        # compila sin unity. Mientras el canal pinneado (2026-10-20) no lo
-        # incluya, este override es lo unico que deja audacity instalable.
-        # ponytail: borrar esta entrada — y el overlay entero si queda vacio —
-        # cuando `nix flake update` traiga un canal posterior al merge.
-        audacity = prev.audacity.overrideAttrs (old: {
-          postPatch =
-            ''
-              substituteInPlace muse/framework/extensions/qml/Muse/Extensions/CMakeLists.txt \
-                --replace-fail 'ALIAS muse::extensions_qml' 'NO_UNITY ALIAS muse::extensions_qml'
-            ''
-            + (old.postPatch or "");
-        });
-      };
-
       # Gentle-AI: binario oficial del release linux_amd64 (Go). No esta en
       # nixpkgs ni tiene flake upstream; se instala el binario firmado del
       # release (minisign en checksums.txt). Actualizar version: cambiar
@@ -864,7 +831,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay unstableFixesOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay gentleAiOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay gentleAiOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {

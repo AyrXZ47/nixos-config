@@ -402,7 +402,10 @@ in
     (gnuradio.override { extraPackages = [ gnuradio.pkgs.osmosdr ]; })
 
     # Audio & Video Production
-    audacity
+    # audacity: NO va por nix. Su build local (unity + Qt 6.12, nixpkgs#577022)
+    # fue el ultimo motivo del overlay unstableFixes y el unico paquete que
+    # compilaba en un `nix flake update`. Vive en flathub y se actualiza con el
+    # timer semanal de flatpak-update (modules/apps/flatpak.nix).
     mixxx
     shotcut
     obs-studio
