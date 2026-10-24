@@ -273,7 +273,7 @@
         yt-dlp --no-warnings --ignore-errors --extract-audio --audio-format opus --audio-quality 0 \
           -f "bestaudio/best" \
           --embed-metadata --embed-thumbnail --js-runtimes node \
-          --cookies-from-browser firefox --download-archive historial_descargas.txt \
+          --cookies-from-browser firefox --no-overwrites \
           --sleep-requests 1 --sleep-interval 3 --max-sleep-interval 8 \
           --extractor-args "youtube:player_client=tv_downgraded,tv,visionos" \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"
@@ -397,6 +397,16 @@
     EDITOR = "nvim";
     COLORTERM = "truecolor";
   };
+
+  # ytmusic: cruza la carpeta de musica contra playlists de YT Music y repara los
+  # tags/portadas usando el tag PURL (sin re-descargar audio). Ver
+  # odd/tasks/music-library.md. mutagen reescribe los comentarios vorbis in-place.
+  home.packages = [
+    (pkgs.writeShellScriptBin "ytmusic" ''
+      exec ${pkgs.python3.withPackages (ps: [ ps.mutagen ])}/bin/python3 \
+        ${./music/ytmusic.py} "$@"
+    '')
+  ];
 
   home.sessionPath = [
     "$HOME/.local/bin"
