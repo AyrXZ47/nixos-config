@@ -202,7 +202,14 @@ def index_library(force=False):
 def load_index(rebuild=False):
     if rebuild or not INDEX.exists():
         return index_library(force=rebuild)
-    return json.loads(INDEX.read_text())
+    files = json.loads(INDEX.read_text())
+    # un archivo borrado a mano seguia apareciendo en el indice y `check` lo daba
+    # por presente: eso te haria saltear una descarga que te falta.
+    vivos = [n for n in files if (MUSIC / n).exists()]
+    if len(vivos) != len(files):
+        files = {n: files[n] for n in vivos}
+        INDEX.write_text(json.dumps(files, ensure_ascii=False))
+    return files
 
 
 # --- yt-dlp ---------------------------------------------------------------
