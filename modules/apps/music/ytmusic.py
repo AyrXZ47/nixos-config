@@ -634,6 +634,27 @@ def picture_b64(data, mime):
     return base64.b64encode(p.write()).decode()
 
 
+def pick_artist(cur_a, new_a):
+    """Si el tag actual ya es una simplificacion del credito real, no lo empeoramos
+    ('$uicideboy$' vs '$uicideboy$, Aristos Petrou, Scott Arceneaux Jr.')."""
+    if not new_a:
+        return cur_a or ""
+    ca, na = core(cur_a), core(new_a)
+    if ca and ca in na:
+        return cur_a
+    return new_a
+
+
+def pick_album(cur_al, cur_aa, new_al, title):
+    """El album de yt-dlp para un single repite el titulo (no aporta). El de Picard
+    puede ser una compilacion cualquiera, y ahi si es una mentira: se borra."""
+    if new_al and core(new_al) not in (core(title), "") and len(core(new_al)) > 2:
+        return new_al
+    if (cur_aa or "").strip().lower() in ("various artists", "varios artistas"):
+        return ""
+    return cur_al or ""
+
+
 def target_tags(meta, cur):
     """El otro lado: los tags que la fuente de verdad (YouTube) dice que van."""
     title = meta["t"] or ""
@@ -835,6 +856,28 @@ def self_test():
     assert clean_title("Song (Radio Edit)") == "Song (Radio Edit)"
     assert split_name("Spinnin' Records - ZHU - Faded.opus") == ("Spinnin' Records",
                                                                 "ZHU - Faded")
+    # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
+    # que corre sobre 6000 archivos, asi que se ejercita en el test.
+    meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
+            "d": "2020", "sq": True, "track": False, "thumb": "http://x/y.jpg"}
+    cur = {"TITLE": "Song", "ARTIST": "Artist", "ALBUM": "Album", "DATE": "2020",
+           "GENRE": "Music", "PURL": "https://www.youtube.com/watch?v=abcdefghijk"}
+    want = target_tags(meta, cur)
+    assert want["TITLE"] == "Song" and want["ARTIST"] == "Artist", want
+    assert "GENRE" not in want, "el genero 'Music' no se conserva"
+    assert needs_fix(cur, want, "abcdefghijk") == "GENRE de mas: 'Music'"
+    cur2 = {k: v for k, v in cur.items() if k != "GENRE"}
+    assert needs_fix(cur2, want, "abcdefghijk") is None, needs_fix(cur2, want, "abcdefghijk")
+    # portada: ida y vuelta real con un PNG 1x1 (picture_b64 -> cover_dims -> plan)
+    png1 = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhK"
+        "mMIQAAAABJRU5ErkJggg==")
+    cur_pic = {"METADATA_BLOCK_PICTURE": picture_b64(png1, "image/png")}
+    assert cover_dims(cur_pic) == (1, 1), cover_dims(cur_pic)
+    # ya es 1:1: no hay que tocarla, aunque no haya reemplazo
+    assert cover_plan(cur_pic, {"sq": False, "thumb": "u"}, False, 100)[0] is False
+    # sin portada: se restaura con lo que haya
+    assert cover_plan({}, {"sq": False, "thumb": "u"}, False, 100) == (True, "u")
     print("self-test ok")
 
 
