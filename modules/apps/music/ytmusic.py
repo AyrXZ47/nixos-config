@@ -347,8 +347,11 @@ def _plausible(k, rows_by_dur):
     la duracion cae cerca, se avisa y no se descarga."""
     for r in _near(rows_by_dur, k["dur"], 8):
         rc, c = r["core"], k["core"]
-        if rc and c and (rc == c or rc.endswith(" " + c) or c.endswith(" " + rc)):
-            return r
+        if not (rc and c and (rc == c or rc.endswith(" " + c) or c.endswith(" " + rc))):
+            continue
+        if r["art"] and k["art"] and similar(r["art"], k["art"]) < 0.55:
+            continue            # 'Intro' de otro artista no es el mismo tema
+        return r
     return None
 
 
@@ -613,10 +616,12 @@ def dupes(ber_max=0.12, tol=6.0, as_json=False):
         groups.setdefault(find(n), []).append(n)
     dupes_ = {k: v for k, v in groups.items() if len(v) > 1}
     def _mtime(n):
+        """Si no se puede leer la fecha, va al final (inf): nunca puede quedar como
+        el que se conserva, porque entonces el plan borraria las copias reales."""
         try:
             return (MUSIC / n).stat().st_mtime
         except OSError:
-            return 0.0
+            return float("inf")
 
     plan = []
     for g in dupes_.values():
@@ -1032,6 +1037,15 @@ def self_test():
     assert _safe_name("AC/DC - TNT") == "AC-DC - TNT"
     assert "../fuera" not in _safe_name("../../fuera")
     assert _safe_name("100% puro") == "100%% puro"
+    # dupes: si no puedo leer la fecha, ese archivo no puede quedar como keeper
+    assert float("inf") > 1e9
+    # _plausible no debe confundir dos canciones homonimas de distinto artista
+    loki = {"core": "intro", "art": "loki", "dur": 100.0}
+    otro = {"core": "intro", "art": "skillet", "dur": 100.5}
+    assert _plausible({"core": "intro", "art": "loki", "dur": 100.2},
+                      _bucket([loki, otro])) is not None
+    assert _plausible({"core": "intro", "art": "skillet", "dur": 100.2},
+                      _bucket([loki])) is None, "homonimo de otro artista"
     # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
     # que corre sobre 6000 archivos, asi que se ejercita en el test.
     meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
