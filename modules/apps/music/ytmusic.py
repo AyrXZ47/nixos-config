@@ -44,6 +44,17 @@ FEAT = re.compile(r"\b(?:feat|ft|featuring)\.?\s+(.+)$", re.I)
 TAIL_NOISE = re.compile(
     r"\s*[\(\[]\s*(official\s*(music\s*)?video|official\s*audio|oficial|official|"
     r"lyric\s*video|lyrics?|visuali[sz]er|audio|hd|hq|4k)\s*[\)\]]\s*$", re.I)
+# ruido que se puede sacar de un parentesis sin cambiar que grabacion es. Ojo:
+# 'clean'/'explicit' NO estan aca, porque para el usuario son la diferencia entre
+# una cancion censurada y la buena.
+NOISE_VER = re.compile(
+    r"\b(official|oficial|videoclip|music\s*video|video|lyric\s*video|lyrics?|letra|"
+    r"audio|audio\s*only|visuali[sz]er|hd|hq|4k|8k|mv|m/v|sub\s*espa[nñ]ol|espanol|"
+    r"subtitulado|premiere|out\s*now|free\s*download)\b", re.I)
+
+# etiquetas que no convierten una cancion en otra cosa (el validador apunto esto:
+# rechazar toda diferencia de version hacia que '(Remastered)' no matcheara nunca)
+BENIGN = re.compile(r"^(digital )?remaster(ed)?( \d{4})?$")
 FEAT_IN = re.compile(r"\b(?:feat|ft|featuring|with)\.?\s+.*", re.I)
 
 
@@ -73,7 +84,9 @@ def versions(*titles):
         tail = re.sub(r"\([^)]*\)|\[[^\]]*\]", " ", t)   # feat fuera de parentesis
         for p in re.findall(r"[\(\[]([^\)\]]*)[\)\]]", t) + FEAT.findall(tail):
             p = FEAT_IN.sub(" ", _acc(p).lower())
-            p = NOISE.sub(" ", p)
+            if re.fullmatch(r"\s*((digital|remaster(ed)?|\d{4})\s*)+", p):
+                continue                      # '(Remastered 2011)': misma grabacion
+            p = NOISE_VER.sub(" ", p)
             p = re.sub(r"[^a-z0-9 ]+", " ", p)
             p = re.sub(r"\s+", " ", p).strip()
             if p:
@@ -91,8 +104,14 @@ def clean_title(t):
 
 
 def split_name(fn):
-    """'Canal - Titulo.opus' -> (canal, titulo). Es el template de yt-dlp."""
+    """'Canal - Titulo.opus' -> (canal, titulo). Es el template de yt-dlp.
+    Los canales automaticos se llaman '<Artista> - Topic' y ya traen un ' - ', asi
+    que cortar por el primero dejaba el canal en 'Loki' y el titulo en
+    'Topic - Reguecito': justo los temas de audio oficial nunca matcheaban."""
     stem = re.sub(r"\.opus$", "", fn, flags=re.I)
+    m = re.match(r"^(.*? - Topic) - (.+)$", stem, re.I)
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
     up, _, vt = stem.partition(" - ")
     return (up, vt) if vt else ("", stem)
 
@@ -129,7 +148,11 @@ def same_song(a, b, tol=3.0):
         return 0.0
     exact = a["core"] == b["core"] and dd <= 1.5
     if a["ver"] != b["ver"]:
-        return 0.0            # (club mix), (original mix), (part 1): son otra cosa
+        # (club mix), (original mix), (part 1) son otra cosa; (Remastered) no
+        a_sig = frozenset(v for v in a["ver"] if not BENIGN.match(v))
+        b_sig = frozenset(v for v in b["ver"] if not BENIGN.match(v))
+        if a_sig != b_sig:
+            return 0.0
     if similar(a["art"], b["art"]) < 0.6 and not exact:
         return 0.0
     return t
@@ -196,7 +219,14 @@ def index_library(force=False):
 def load_index(rebuild=False):
     if rebuild or not INDEX.exists():
         return index_library(force=rebuild)
-    return json.loads(INDEX.read_text())
+    files = json.loads(INDEX.read_text())
+    # un archivo borrado a mano seguia apareciendo en el indice y `check` lo daba
+    # por presente: eso te haria saltear una descarga que te falta.
+    vivos = [n for n in files if (MUSIC / n).exists()]
+    if len(vivos) != len(files):
+        files = {n: files[n] for n in vivos}
+        INDEX.write_text(json.dumps(files, ensure_ascii=False))
+    return files
 
 
 # --- yt-dlp ---------------------------------------------------------------
@@ -852,10 +882,17 @@ def self_test():
     j = {"core": "inside", "art": "x", "dur": 200.0,
          "ver": sorted(versions("Inside (Slowed)"))}
     assert same_song(j, i) == 0.0, "un slowed no es el original"
+    # REG-001: un remaster SI es la misma grabacion para efectos de "ya la tengo"
+    k1 = {"core": "song", "art": "a", "dur": 200.0, "ver": sorted(versions("Song (Remastered 2011)"))}
+    k2 = {"core": "song", "art": "a", "dur": 200.5, "ver": []}
+    assert same_song(k1, k2) > 0, "un remaster no puede contar como cancion distinta"
+    k3 = {"core": "song", "art": "a", "dur": 200.0, "ver": sorted(versions("Song (Clean)"))}
+    assert same_song(k3, k2) == 0.0, "clean vs original no es lo mismo (puede estar censurada)"
     assert clean_title("Song (Official Music Video)") == "Song"
     assert clean_title("Song (Radio Edit)") == "Song (Radio Edit)"
     assert split_name("Spinnin' Records - ZHU - Faded.opus") == ("Spinnin' Records",
                                                                 "ZHU - Faded")
+    assert split_name("Loki - Topic - Reguecito.opus") == ("Loki - Topic", "Reguecito")
     # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
     # que corre sobre 6000 archivos, asi que se ejercita en el test.
     meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
@@ -918,4 +955,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (RuntimeError, FileNotFoundError) as e:
+        # playlists borradas o privadas son el caso normal, no un traceback
+        msg = e.args[0] if e.args else e
+        if isinstance(msg, (list, tuple)):
+            msg = " ".join(str(x) for x in msg)
+        print(f"error: {msg}", file=sys.stderr)
+        sys.exit(1)
