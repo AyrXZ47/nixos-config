@@ -21,12 +21,17 @@ let
   # default `system` hereda el verde de la terminal), el cursor REAL del
   # terminal (showHardwareCursor: kitty dibuja `cursor_trail` sobre el cursor
   # de hardware, y con el cursor falso que pi pinta por defecto no hay estela)
-  # y `tuiMode = regular`: en fullscreen pi intercepta la rueda con su
-  # WheelScrollAccelerator (N lineas discretas por evento, sin easing); en
-  # regular el terminal es dueno del scrollback y scrollea kitty, que es mas
-  # suave. Costo: se pierde el scrollbar de fullscreen y la seleccion de
-  # transcript con mouse.
-  # REGLA: estos 6 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
+  # y fullscreen con rueda de 1 linea.
+  #
+  # POR QUE fullscreen y no `regular`: el panel de TODO de gentle-shell es un
+  # rail del sidebar y el sidebar SOLO existe en fullscreen (en regular pi no
+  # es duenio de la pantalla, asi que no hay columna que reservar y el TODO
+  # desaparece de la vista). Se probo `tuiMode = "regular"` para que scrollee
+  # kitty y el costo fue perder el TODO. El scroll se suaviza dentro de
+  # fullscreen con `fullscreenWheelScrollLines = 1`: un evento de rueda = una
+  # linea, la granularidad mas fina que pi permite (en `auto` un giro rapido
+  # avanza hasta 6 lineas por evento).
+  # REGLA: estos 7 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
   # rebuild abre pi con deepseek-v4.1-flash sin tocar nada, aunque su
   # settings.json previo dijera otro modelo (pasaba: un host quedaba clavado en
   # deepseek/deepseek-v4-pro porque el seed solo aplicaba con `! -f`). Las
@@ -38,7 +43,8 @@ let
     defaultThinkingLevel = "off";
     theme = "cyberpunk";
     showHardwareCursor = true;
-    tuiMode = "regular";
+    tuiMode = "fullscreen";
+    fullscreenWheelScrollLines = 1;
   });
 
   # Routing de modelos de gentle-ai: TODOS los roles de agente usan
