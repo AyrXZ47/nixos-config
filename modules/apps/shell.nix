@@ -401,9 +401,13 @@
   # ytmusic: cruza la carpeta de musica contra playlists de YT Music y repara los
   # tags/portadas usando el tag PURL (sin re-descargar audio). Ver
   # odd/tasks/music-library.md. mutagen reescribe los comentarios vorbis in-place.
-  home.packages = [
-    (pkgs.writeShellScriptBin "ytmusic" ''
-      exec ${pkgs.python3.withPackages (ps: [ ps.mutagen ])}/bin/python3 \
+  home.packages = with pkgs; [
+    # fpcalc: huella digital de audio (chromaprint). Sirve para confirmar que dos
+    # archivos son la misma grabación y no solo el mismo título. En el cache
+    # binario de nixpkgs: no compila nada.
+    chromaprint
+    (writeShellScriptBin "ytmusic" ''
+      exec ${python3.withPackages (ps: [ ps.mutagen ])}/bin/python3 \
         ${./music/ytmusic.py} "$@"
     '')
   ];

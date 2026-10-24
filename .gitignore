@@ -31,3 +31,4 @@ secrets/
 
 # Salidas de mongodump: jamas al repo (datos de clientes)
 dump/
+__pycache__/

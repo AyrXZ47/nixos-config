@@ -30,6 +30,13 @@ las canciones faltantes.
 S7. Nivel de escucha: "que no queme bocinas, que no sature canal, que no se escuche
 bajito" (biblioteca real: mediana -8.6 LUFS, rango -19.2 a -4.8).
 
+S8. Certeza absoluta al deduplicar: "si puedes hacer funcionar chromaprint metelo a
+nix". Dos archivos son la misma grabacion si la huella de audio coincide (BER bajo),
+no si el titulo se parece.
+
+S9. Aporte del repo: "no quiero andar recompilando de cero en cada maquina los
+programas". Solo paquetes presentes en el cache binario de nixpkgs, sin overlays.
+
 ## Tasks
 
 | ID | Spec | Ruta | Commit |
@@ -41,6 +48,8 @@ bajito" (biblioteca real: mediana -8.6 LUFS, rango -19.2 a -4.8).
 | T5 | S1, S7 | `ytmusic fix` sobre los 6026 archivos con PURL | (sin commit: datos) |
 | T6 | S3, S5 | `ytmusic check <playlist> --download` | (sin commit: datos) |
 | T7 | S6 | Las 2 playlists publicas del Liked Music (9239 temas) | (sin commit: datos) |
+| T8 | S8, S9 | chromaprint en `home.packages` + `ytmusic dupes` | `feat(music): dupes por huella` |
+| T9 | S6 | `check`+`--download` sobre `list=LM` (9239 likes) | (sin commit: datos) |
 
 ## Log
 
@@ -62,3 +71,16 @@ L4. Evidencia Mixxx: la base esta sincronizada (6023/6219 titulos iguales al tag
 actual), asi que "borrar y reimportar" no arregla nada: el problema son los tags.
 `[Soundcard] Samplerate 44100` contra PipeWire a 48000 y opus de 48000 = doble
 resample. ReplayGain LUFS v2 activo con `InitialDefaultBoost -6`.
+
+L5. `list=LM` si se puede leer con yt-dlp + cookies de Firefox (el script viejo del
+repo linux-tweaks usaba ytmusicapi con browser.json para volcarlo a dos playlists
+publicas; ya no hace falta). Resultado del cruce: 9239 entradas, **999 repetidas
+dentro del propio LM**, 8240 unicas, 5896 ya en la biblioteca, **2344 faltan**.
+
+L6. La huella manda sobre el titulo: de 18 grupos que el matching por metadatos daba
+como duplicados, chromaprint confirmo 15. "Lady Killers III vs II" y "MOTi House Of
+Now vs su edit" quedaron descartados. Y las copias reales suelen estar corridas hasta
+5s (la version de video tiene intro), asi que el BER se busca con corrimiento +-10s.
+
+L7. `RescanOnStartup 0` en Mixxx: nunca relee tags de archivos existentes. Ese era el
+motivo real de los titulos viejos, no la base.
