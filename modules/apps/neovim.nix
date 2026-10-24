@@ -28,6 +28,30 @@ let
         }
       '';
     };
+    # Scroll tipo trackpad. El motor ya lo trae LazyVim (Snacks.scroll anima
+    # <C-d>/<C-u> y tambien <ScrollWheelUp/Down>), esto es solo ajuste fino:
+    # con los defaults (animacion de 200 ms y, tras 100 ms de repeticion, un
+    # "repeat" de 50 ms) un arrastre continuo cae al modo rapido y se siente a
+    # saltos. Aca el total sube a 260 ms y el delay del repeat va a 0, asi el
+    # arrastre anima siempre a la misma velocidad.
+    # OJO: no se puede pedir mas que esto. El scroll sub-lineal y la inercia
+    # (pixel_scroll / momentum_scroll de kitty) son del scrollback de kitty y
+    # no aplican a TUIs con mouse propio como nvim.
+    ".config/nvim/lua/plugins/scroll.lua" = {
+      text = ''
+        return {
+          {
+            "folke/snacks.nvim",
+            opts = {
+              scroll = {
+                animate = { duration = { step = 8, total = 260 }, easing = "linear" },
+                animate_repeat = { delay = 0, duration = { step = 8, total = 260 }, easing = "linear" },
+              },
+            },
+          },
+        }
+      '';
+    };
     ".config/nvim/lua/plugins/multicursor.lua" = {
       text = ''
         -- jake-stewart/multicursor.nvim: multicursor real para Neovim. Clave
