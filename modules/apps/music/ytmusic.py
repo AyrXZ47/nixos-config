@@ -156,6 +156,8 @@ def index_library(force=False):
     files = {}
     seen = 0
     for p in sorted(MUSIC.glob("*.opus")):
+        if p.name.endswith((".temp.opus", ".ytmusic-tmp")):
+            continue          # restos de yt-dlp / de nuestras escrituras atomicas
         try:
             st = p.stat()
         except OSError:
@@ -713,6 +715,9 @@ def needs_fix(cur, want, yid):
             same = core(now) == core(v)
         if not same:
             return f"{k}: {now!r} -> {v!r}"
+    for k in ("TITLE", "ARTIST", "ALBUM", "DATE", "GENRE"):
+        if k in cur and k not in want:
+            return f"{k} de mas: {cur[k]!r}"
     extra = set(cur) - KEEP
     if extra:
         return f"sobran {len(extra)} tags (p.ej. {sorted(extra)[0]})"
