@@ -17,9 +17,12 @@ let
   # bajo proot); en los hosts de escritorio cae al pkgs.nodejs normal.
   nodePackage = config._module.args.nodePackage or pkgs.nodejs;
   # Defaults de arranque de pi: el modelo de opencode-go (DeepSeek V4.1 Flash),
-  # thinking OFF (sin reasoning, no quemar tokens) y el tema cyberpunk (el
-  # default `system` hereda el verde de la terminal).
-  # REGLA: estos 4 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
+  # thinking OFF (sin reasoning, no quemar tokens), el tema cyberpunk (el
+  # default `system` hereda el verde de la terminal) y el cursor REAL del
+  # terminal (showHardwareCursor): kitty dibuja `cursor_trail` sobre el cursor
+  # de hardware, y con el cursor falso que pi pinta por defecto no hay estela
+  # (ver cursor_trail en modules/apps/kitty.nix).
+  # REGLA: estos 5 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
   # rebuild abre pi con deepseek-v4.1-flash sin tocar nada, aunque su
   # settings.json previo dijera otro modelo (pasaba: un host quedaba clavado en
   # deepseek/deepseek-v4-pro porque el seed solo aplicaba con `! -f`). Las
@@ -30,6 +33,7 @@ let
     defaultModel = "deepseek-v4.1-flash";
     defaultThinkingLevel = "off";
     theme = "cyberpunk";
+    showHardwareCursor = true;
   });
 
   # Routing de modelos de gentle-ai: TODOS los roles de agente usan
