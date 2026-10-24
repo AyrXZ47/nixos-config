@@ -91,8 +91,14 @@ def clean_title(t):
 
 
 def split_name(fn):
-    """'Canal - Titulo.opus' -> (canal, titulo). Es el template de yt-dlp."""
+    """'Canal - Titulo.opus' -> (canal, titulo). Es el template de yt-dlp.
+    Los canales automaticos se llaman '<Artista> - Topic' y ya traen un ' - ', asi
+    que cortar por el primero dejaba el canal en 'Loki' y el titulo en
+    'Topic - Reguecito': justo los temas de audio oficial nunca matcheaban."""
     stem = re.sub(r"\.opus$", "", fn, flags=re.I)
+    m = re.match(r"^(.*? - Topic) - (.+)$", stem, re.I)
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
     up, _, vt = stem.partition(" - ")
     return (up, vt) if vt else ("", stem)
 
@@ -856,6 +862,7 @@ def self_test():
     assert clean_title("Song (Radio Edit)") == "Song (Radio Edit)"
     assert split_name("Spinnin' Records - ZHU - Faded.opus") == ("Spinnin' Records",
                                                                 "ZHU - Faded")
+    assert split_name("Loki - Topic - Reguecito.opus") == ("Loki - Topic", "Reguecito")
     # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
     # que corre sobre 6000 archivos, asi que se ejercita en el test.
     meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
