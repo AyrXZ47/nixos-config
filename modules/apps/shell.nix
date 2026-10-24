@@ -407,7 +407,7 @@
     # binario de nixpkgs: no compila nada.
     chromaprint
     (writeShellScriptBin "ytmusic" ''
-      exec ${python3.withPackages (ps: [ ps.mutagen ])}/bin/python3 \
+      exec ${python3.withPackages (ps: [ ps.mutagen ps.ytmusicapi ])}/bin/python3 \
         ${./music/ytmusic.py} "$@"
     '')
   ];

@@ -225,7 +225,8 @@ def ydl_json(url, cookies=False, playlist=False):
 
 def playlist_entries(url, cookies=False):
     d = ydl_json(url, cookies=cookies, playlist=True)
-    return d.get("entries") or []
+    # en listas grandes hay entradas borradas o privadas (title/id en None)
+    return [e for e in (d.get("entries") or []) if e.get("id")]
 
 
 def download(urls, cookies=False):
@@ -306,7 +307,7 @@ def check(urls, do_download=False, cookies=False, as_json=False):
         print(json.dumps({"total": len(uniq), "duplicadas": dropped,
                           "tengo": [{"id": e.get("id"), "title": e.get("title"),
                                      "local": h["t"] or h["vt"]} for e, h in tienen],
-                          "faltan": [{"id": e.get("id"), "title": e.get("title"),
+                          "faltan": [{"id": e.get("id"), "title": e.get("title") or "",
                                       "artist": e.get("channel") or e.get("uploader"),
                                       "dur": e.get("duration")} for e, _ in faltan]},
                          ensure_ascii=False, indent=1))
@@ -317,7 +318,7 @@ def check(urls, do_download=False, cookies=False, as_json=False):
         if faltan:
             print("\nFALTAN:")
             for e, _ in faltan:
-                print(f"  {str(e.get('duration') or '?'):>5}s  {e.get('title','')[:52]:52}"
+                print(f"  {str(e.get('duration') or '?'):>5}s  {(e.get('title') or '')[:52]:52}"
                       f" | {(e.get('channel') or e.get('uploader') or '')[:24]:24}"
                       f" | https://music.youtube.com/watch?v={e.get('id')}")
 
@@ -537,6 +538,56 @@ def fetch_meta(yid, cookies=False):
     return out
 
 
+def _title_match(a, b):
+    """Titulo de YT Music contra el titulo del video (que suele traer 'Artista - ')."""
+    x, y = core(a), core(b)
+    if not x or not y:
+        return False
+    if x == y or similar(x, y) >= 0.85:
+        return True
+    return min(len(x), len(y)) >= 4 and (x.endswith(" " + y) or y.endswith(" " + x))
+
+
+_YT = None
+
+
+def ytmusic_cover(title, artist, dur):
+    """Portada 1:1 desde YT Music: el video oficial solo tiene miniaturas 16:9, pero
+    la ficha de la cancion tiene el arte del album. El CDN acepta cualquier tamano
+    en el sufijo de la URL, asi que se pide a 1080."""
+    global _YT
+    try:
+        from ytmusicapi import YTMusic
+    except ImportError:
+        print("  ! falta ytmusicapi: no puedo buscar portadas", file=sys.stderr)
+        return None
+    try:
+        if _YT is None:
+            _YT = YTMusic()
+        res = _YT.search(f"{artist} {title}".strip(), filter="songs", limit=5)
+    except Exception as e:
+        print(f"  ! busqueda de portada fallo: {e}", file=sys.stderr)
+        return None
+    for x in res:
+        if not _title_match(x.get("title") or "", title):
+            continue
+        d = x.get("duration_seconds")
+        if d is None and x.get("duration"):
+            try:
+                m, sec = str(x["duration"]).split(":")
+                d = int(m) * 60 + int(sec)
+            except Exception:
+                d = None
+        if d and dur and abs(d - dur) > 6:
+            continue
+        th = x.get("thumbnails") or []
+        if not th:
+            continue
+        url = max(th, key=lambda t: (t.get("width") or 0))["url"]
+        return re.sub(r"=w\d+-h\d+", "=w1080-h1080", url)
+    return None
+
+
 def fetch_image(url):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=60) as r:
@@ -682,7 +733,8 @@ def apply_fix(path, want, pic_b64):
     os.replace(tmp, path)
 
 
-def fix(do_apply=False, limit=0, only="", cookies=False, refresh=False):
+def fix(do_apply=False, limit=0, only="", cookies=False, refresh=False,
+        cover_search=False):
     lib = load_index(rebuild=refresh)
     todo = [(n, r) for n, r in lib.items() if r["yid"] and (not only or only in n)]
     if limit:
@@ -694,6 +746,14 @@ def fix(do_apply=False, limit=0, only="", cookies=False, refresh=False):
         try:
             cur, _ = read_tags(path)
             meta = fetch_meta(r["yid"], cookies=cookies)
+            if not meta["sq"] and cover_search:
+                if not meta.get("sq2"):
+                    t = ytmusic_cover(meta["t"], meta["a"], r["dur"])
+                    meta["sq2"] = bool(t)
+                    meta["thumb2"] = t or ""
+                    _save_meta(force=True)
+                if meta.get("sq2"):
+                    meta = dict(meta, sq=True, thumb=meta["thumb2"])
             want = target_tags(meta, cur)
             why = needs_fix(cur, want, r["yid"], meta["sq"])
             if not why:
@@ -776,6 +836,8 @@ def main():
     f.add_argument("--only", default="", help="filtrar por texto del nombre")
     f.add_argument("--cookies", action="store_true")
     f.add_argument("--refresh", action="store_true", help="re-indizar antes")
+    f.add_argument("--cover-search", action="store_true",
+                   help="buscar portada 1:1 en YT Music cuando el video solo tiene 16:9")
     d = sub.add_parser("dupes", help="duplicados confirmados por huella digital")
     d.add_argument("--ber", type=float, default=0.12, help="umbral de diferencia (0..1)")
     d.add_argument("--tol", type=float, default=6.0, help="tolerancia de duracion en s")
@@ -787,7 +849,7 @@ def main():
     elif a.cmd == "check":
         check(a.urls, a.download, a.cookies, a.json)
     elif a.cmd == "fix":
-        fix(a.apply, a.limit, a.only, a.cookies, a.refresh)
+        fix(a.apply, a.limit, a.only, a.cookies, a.refresh, a.cover_search)
     elif a.cmd == "dupes":
         dupes(a.ber, a.tol, a.json)
     else:
