@@ -356,6 +356,64 @@ def check(urls, do_download=False, cookies=False, as_json=False):
     return faltan
 
 
+# --- limpieza de nombres ---------------------------------------------------
+
+def _leading_noise(name):
+    """Cuanto prefijo hay que sacar: emoji y simbolos decorativos al principio.
+    No toca '$uicideboy$' ni '€urotra$h' (categoria Sc), que son parte del nombre."""
+    import unicodedata
+    i = 0
+    while i < len(name):
+        c = name[i]
+        if unicodedata.category(c) in ("So", "Sk", "Cf", "Mn") or c.isspace() or c in ".·":
+            i += 1
+            continue
+        break
+    return i
+
+
+def clean_names(do_apply=False, as_json=False):
+    """Saca el emoji del principio del nombre de archivo. El nombre bueno es el que
+    queda; si el destino ya existe, no pisa nada: lo informa."""
+    lib = load_index()
+    plan, choques = [], []
+    for name in sorted(lib):
+        i = _leading_noise(name)
+        if not i:
+            continue
+        nuevo = name[i:].lstrip(" .·-")
+        if not nuevo or not nuevo.lower().endswith(".opus"):
+            continue
+        if (MUSIC / nuevo).exists():
+            choques.append((name, nuevo))
+            continue
+        plan.append((name, nuevo))
+    if as_json:
+        print(json.dumps({"renombrar": plan, "choques": choques}, ensure_ascii=False, indent=1))
+        return plan
+    print(f"nombres a limpiar: {len(plan)}   destino ya ocupado: {len(choques)}")
+    for a, b in plan[:20]:
+        print(f"  {a[:52]!r}\n    -> {b[:60]!r}")
+    if len(plan) > 20:
+        print(f"  ... y {len(plan)-20} mas")
+    for a, b in choques:
+        print(f"  SALTADO (ya existe {b[:40]!r}): {a[:44]!r}")
+    if not do_apply:
+        print("(dry-run: nada renombrado, usar --apply)")
+        return plan
+    ok = 0
+    for a, b in plan:
+        try:
+            os.rename(MUSIC / a, MUSIC / b)
+            ok += 1
+        except OSError as e:
+            print(f"  ! {a[:40]}: {e}", file=sys.stderr)
+    print(f"renombrados: {ok}/{len(plan)}")
+    if ok:
+        index_library(force=True)
+    return plan
+
+
 # --- duplicados por huella digital (chromaprint) ---------------------------
 
 FP = CACHE / "fp.json"
@@ -893,6 +951,9 @@ def self_test():
     assert split_name("Spinnin' Records - ZHU - Faded.opus") == ("Spinnin' Records",
                                                                 "ZHU - Faded")
     assert split_name("Loki - Topic - Reguecito.opus") == ("Loki - Topic", "Reguecito")
+    assert _leading_noise("😉 009 Sound System - Dreamscape.opus") == 2
+    assert _leading_noise("$uicideboy$ - Escape.opus") == 0
+    assert _leading_noise("€urotra$h - B€NZ.opus") == 0
     # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
     # que corre sobre 6000 archivos, asi que se ejercita en el test.
     meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
@@ -940,6 +1001,9 @@ def main():
     d.add_argument("--ber", type=float, default=0.12, help="umbral de diferencia (0..1)")
     d.add_argument("--tol", type=float, default=6.0, help="tolerancia de duracion en s")
     d.add_argument("--json", action="store_true")
+    r = sub.add_parser("rename", help="saca emojis del principio del nombre")
+    r.add_argument("--apply", action="store_true", help="renombrar (default: dry-run)")
+    r.add_argument("--json", action="store_true")
     sub.add_parser("self-test")
     a = ap.parse_args()
     if a.cmd == "index":
@@ -948,6 +1012,8 @@ def main():
         check(a.urls, a.download, a.cookies, a.json)
     elif a.cmd == "fix":
         fix(a.apply, a.limit, a.only, a.cookies, a.refresh, a.cover_search)
+    elif a.cmd == "rename":
+        clean_names(a.apply, a.json)
     elif a.cmd == "dupes":
         dupes(a.ber, a.tol, a.json)
     else:
