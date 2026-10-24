@@ -592,52 +592,46 @@ def fetch_image(url):
     return data, mime
 
 
+def _img_dims(data):
+    """ancho y alto leidos de la imagen misma. El header del bloque FLAC miente a
+    veces (queda en 0x0 cuando el embed lo hizo ffmpeg)."""
+    import struct
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        return struct.unpack(">II", data[16:24])
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        c = data[12:16]
+        if c == b"VP8X":
+            return (1 + int.from_bytes(data[24:27], "little"),
+                    1 + int.from_bytes(data[27:30], "little"))
+        if c == b"VP8 ":
+            return (struct.unpack("<H", data[26:28])[0] & 0x3fff,
+                    struct.unpack("<H", data[28:30])[0] & 0x3fff)
+        if c == b"VP8L":
+            b = int.from_bytes(data[21:25], "little")
+            return ((b & 0x3fff) + 1, ((b >> 14) & 0x3fff) + 1)
+    i = 2
+    while i < len(data) - 9:
+        if data[i] != 0xFF:
+            i += 1
+            continue
+        mk = data[i + 1]
+        if mk in (0xC0, 0xC1, 0xC2):
+            h = struct.unpack(">H", data[i + 5:i + 7])[0]
+            w = struct.unpack(">H", data[i + 7:i + 9])[0]
+            return w, h
+        if mk in (0xD8, 0xD9) or 0xD0 <= mk <= 0xD7:
+            i += 2
+            continue
+        i += 2 + struct.unpack(">H", data[i + 2:i + 4])[0]
+    return 0, 0
+
+
 def picture_b64(data, mime):
     from mutagen.flac import Picture
-    w = h = 0
-    if mime == "image/png":
-        import struct
-        k = data.find(b"\x89PNG\r\n\x1a\n")
-        w, h = struct.unpack(">II", data[k + 16:k + 24])
-    else:
-        import struct
-        i = 2
-        while i < len(data) - 9:
-            if data[i] != 0xFF:
-                i += 1
-                continue
-            mk = data[i + 1]
-            if mk in (0xC0, 0xC1, 0xC2):
-                h, w = struct.unpack(">HH", data[i + 5:i + 9])
-                break
-            if mk in (0xD8, 0xD9) or 0xD0 <= mk <= 0xD7:
-                i += 2
-                continue
-            i += 2 + struct.unpack(">H", data[i + 2:i + 4])[0]
+    w, h = _img_dims(data)
     p = Picture()
     p.data, p.mime, p.type, p.width, p.height, p.depth = data, mime, 3, w, h, 24
     return base64.b64encode(p.write()).decode()
-
-
-def pick_artist(cur_a, new_a):
-    """Si el tag actual ya es una simplificacion del credito real, no lo empeoramos
-    ('$uicideboy$' vs '$uicideboy$, Aristos Petrou, Scott Arceneaux Jr.')."""
-    if not new_a:
-        return cur_a or ""
-    ca, na = core(cur_a), core(new_a)
-    if ca and ca in na:
-        return cur_a
-    return new_a
-
-
-def pick_album(cur_al, cur_aa, new_al, title):
-    """El album de yt-dlp para un single repite el titulo (no aporta). El de Picard
-    puede ser una compilacion cualquiera, y ahi si es una mentira: se borra."""
-    if new_al and core(new_al) not in (core(title), "") and len(core(new_al)) > 2:
-        return new_al
-    if (cur_aa or "").strip().lower() in ("various artists", "varios artistas"):
-        return ""
-    return cur_al or ""
 
 
 def target_tags(meta, cur):
@@ -674,7 +668,7 @@ def cover_dims(cur):
     try:
         from mutagen.flac import Picture
         p = Picture(base64.b64decode(b))
-        return p.width, p.height
+        return _img_dims(p.data) if p.data else (p.width, p.height)
     except Exception:
         return 0, 0
 
