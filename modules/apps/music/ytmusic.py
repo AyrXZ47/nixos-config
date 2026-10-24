@@ -255,20 +255,55 @@ def playlist_entries(url, cookies=False):
     return [e for e in (d.get("entries") or []) if e.get("id")]
 
 
+def _dest_name(url, cookies=False):
+    """Nombre que usaria yt-dlp para este video (sin descargar)."""
+    cmd = YDL + CLIENTS + ["--skip-download", "--no-playlist",
+                           "--print", "%(uploader)s - %(title)s"]
+    if cookies:
+        cmd += ["--cookies-from-browser", "firefox"]
+    r = subprocess.run(cmd + [url], capture_output=True, text=True)
+    return (r.stdout or "").strip().splitlines()[-1] if r.stdout.strip() else ""
+
+
+def _dest_for(url, cookies=False):
+    """El template 'Canal - Titulo' choca cuando dos videos distintos se llaman
+    igual: con --no-overwrites el segundo se saltea y queda como 'descargado' sin
+    estar. Si el archivo existe y es otro video, se usa un nombre con sufijo; si es
+    el mismo video, devuelve None (ya esta, no hay nada que bajar)."""
+    name = _dest_name(url, cookies)
+    if not name:
+        return "%(uploader)s - %(title)s.%(ext)s"
+    dst = MUSIC / (name + ".opus")
+    if dst.exists():
+        yid = url.split("v=")[-1][:11]
+        try:
+            tags, _ = read_tags(dst)
+            if yid and yid in tags.get("PURL", ""):
+                return None          # ya esta ese mismo video: no se toca
+        except Exception:
+            pass
+        name += " (2)"
+    return name.replace("%", "%%") + ".%(ext)s"
+
+
 def download(urls, cookies=False):
     args = YDL + CLIENTS + [
         "--ignore-errors", "--no-overwrites", "--extract-audio",
         "--audio-format", "opus", "--embed-metadata", "--embed-thumbnail",
         "--js-runtimes", "node", "--sleep-requests", "1",
         "--sleep-interval", "3", "--max-sleep-interval", "8",
-        "-o", "%(uploader)s - %(title)s.%(ext)s", "--newline",
+        "--newline",
     ]
     if cookies:
         args += ["--cookies-from-browser", "firefox"]
     done = 0
     for i, u in enumerate(urls, 1):
-        print(f"[{i}/{len(urls)}] {u}", flush=True)
-        r = subprocess.run(args + [u], cwd=str(MUSIC))
+        out = _dest_for(u, cookies)
+        if out is None:
+            print(f"[{i}/{len(urls)}] ya esta: {u}", flush=True)
+            continue
+        print(f"[{i}/{len(urls)}] {u}\n      -> {out}", flush=True)
+        r = subprocess.run(args + ["-o", out, u], cwd=str(MUSIC))
         done += r.returncode == 0
     return done
 
