@@ -265,6 +265,14 @@ def _dest_name(url, cookies=False):
     return (r.stdout or "").strip().splitlines()[-1] if r.stdout.strip() else ""
 
 
+def _safe_name(name):
+    """El nombre viaja como template de `yt-dlp -o`: un '/' o un '..' en el titulo
+    haria que yt-dlp escriba en subcarpetas o fuera de la carpeta de musica."""
+    n = name.replace("/", "-").replace("\\", "-").replace("\0", "")
+    n = n.replace("..", ".")
+    return n.replace("%", "%%")
+
+
 def _dest_for(url, cookies=False):
     """El template 'Canal - Titulo' choca cuando dos videos distintos se llaman
     igual: con --no-overwrites el segundo se saltea y queda como 'descargado' sin
@@ -283,14 +291,14 @@ def _dest_for(url, cookies=False):
         except Exception:
             pass
         name += " (2)"
-    return name.replace("%", "%%") + ".%(ext)s"
+    return _safe_name(name) + ".%(ext)s"
 
 
 def download(urls, cookies=False):
     args = YDL + CLIENTS + [
         "--ignore-errors", "--no-overwrites", "--extract-audio",
         "--audio-format", "opus", "--embed-metadata", "--embed-thumbnail",
-        "--js-runtimes", "node", "--sleep-requests", "1",
+        "--js-runtimes", "node", "--no-playlist", "--sleep-requests", "1",
         "--sleep-interval", "3", "--max-sleep-interval", "8",
         "--newline",
     ]
@@ -298,11 +306,10 @@ def download(urls, cookies=False):
         args += ["--cookies-from-browser", "firefox"]
     done = 0
     for i, u in enumerate(urls, 1):
+        print(f"[{i}/{len(urls)}] {u}", flush=True)
         out = _dest_for(u, cookies)
         if out is None:
-            print(f"[{i}/{len(urls)}] ya esta: {u}", flush=True)
-            continue
-        print(f"[{i}/{len(urls)}] {u}\n      -> {out}", flush=True)
+            continue                     # ya esta ese mismo video
         r = subprocess.run(args + ["-o", out, u], cwd=str(MUSIC))
         done += r.returncode == 0
     return done
@@ -989,6 +996,10 @@ def self_test():
     assert _leading_noise("😉 009 Sound System - Dreamscape.opus") == 2
     assert _leading_noise("$uicideboy$ - Escape.opus") == 0
     assert _leading_noise("€urotra$h - B€NZ.opus") == 0
+    # el nombre es un template de yt-dlp: nada de separadores ni '..'
+    assert _safe_name("AC/DC - TNT") == "AC-DC - TNT"
+    assert "../fuera" not in _safe_name("../../fuera")
+    assert _safe_name("100% puro") == "100%% puro"
     # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
     # que corre sobre 6000 archivos, asi que se ejercita en el test.
     meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
