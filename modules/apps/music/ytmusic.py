@@ -91,14 +91,8 @@ def clean_title(t):
 
 
 def split_name(fn):
-    """'Canal - Titulo.opus' -> (canal, titulo). Es el template de yt-dlp.
-    Los canales automaticos se llaman '<Artista> - Topic' y ya traen un ' - ', asi
-    que cortar por el primero dejaba el canal en 'Loki' y el titulo en
-    'Topic - Reguecito': justo los temas de audio oficial nunca matcheaban."""
+    """'Canal - Titulo.opus' -> (canal, titulo). Es el template de yt-dlp."""
     stem = re.sub(r"\.opus$", "", fn, flags=re.I)
-    m = re.match(r"^(.*? - Topic) - (.+)$", stem, re.I)
-    if m:
-        return m.group(1).strip(), m.group(2).strip()
     up, _, vt = stem.partition(" - ")
     return (up, vt) if vt else ("", stem)
 
@@ -202,14 +196,7 @@ def index_library(force=False):
 def load_index(rebuild=False):
     if rebuild or not INDEX.exists():
         return index_library(force=rebuild)
-    files = json.loads(INDEX.read_text())
-    # un archivo borrado a mano seguia apareciendo en el indice y `check` lo daba
-    # por presente: eso te haria saltear una descarga que te falta.
-    vivos = [n for n in files if (MUSIC / n).exists()]
-    if len(vivos) != len(files):
-        files = {n: files[n] for n in vivos}
-        INDEX.write_text(json.dumps(files, ensure_ascii=False))
-    return files
+    return json.loads(INDEX.read_text())
 
 
 # --- yt-dlp ---------------------------------------------------------------
@@ -869,7 +856,6 @@ def self_test():
     assert clean_title("Song (Radio Edit)") == "Song (Radio Edit)"
     assert split_name("Spinnin' Records - ZHU - Faded.opus") == ("Spinnin' Records",
                                                                 "ZHU - Faded")
-    assert split_name("Loki - Topic - Reguecito.opus") == ("Loki - Topic", "Reguecito")
     # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
     # que corre sobre 6000 archivos, asi que se ejercita en el test.
     meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
@@ -932,12 +918,4 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except (RuntimeError, FileNotFoundError) as e:
-        # playlists borradas o privadas son el caso normal, no un traceback
-        msg = e.args[0] if e.args else e
-        if isinstance(msg, (list, tuple)):
-            msg = " ".join(str(x) for x in msg)
-        print(f"error: {msg}", file=sys.stderr)
-        sys.exit(1)
+    main()
