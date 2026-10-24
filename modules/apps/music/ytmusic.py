@@ -535,14 +535,31 @@ def ber(a, b, max_shift=80, step=4):
     return best
 
 
-def _verdict(r):
-    """Orden de preferencia para quedarse con una copia: audio oficial de sello
-    primero, despues la que no huele a video, despues la de menor nombre."""
+_DUP_ART = re.compile(r"^(.{2,}?) - \1 - ", re.I)
+_VID_MARK = re.compile(r"official|oficial|lyric|visuali[sz]er|videoclip|"
+                       r"\(audio\)|\[audio\]|music video|video oficial|vevo", re.I)
+
+
+def _name_score(name):
+    """Cuanto mas alto, peor nombre: 'Adele - Adele - Rolling (Official Music
+    Video)' suma mucho; 'Adele - Rolling in the Deep' suma cero."""
+    base = re.sub(r"\.opus$", "", name, flags=re.I)
+    s = 0
+    if _DUP_ART.match(base):
+        s += 3                       # 'Artista - Artista - Titulo'
+    if _VID_MARK.search(base):
+        s += 2
+    if re.search(r"\b(ft|feat)\.?\s", base, re.I):
+        s += 1
+    s += min(len(base) // 40, 2)     # nombres kilometricos
+    return s
+
+
+def _verdict(name, r):
+    """Orden para quedarse con una copia: primero el canal de audio oficial, despues
+    el nombre mas limpio, despues el mas corto."""
     up = r["up"].lower()
-    vt = (r["vt"] or "").lower()
-    bad = sum(1 for w in ("official", "oficial", "video", "videoclip", "lyric",
-                          "letra", "visuali", "audio", "vevo") if w in vt or w in up)
-    return (0 if up.endswith("- topic") else 1, bad)
+    return (0 if up.endswith("- topic") else 1, _name_score(name), len(name))
 
 
 def _fpkey(name, r):
@@ -627,7 +644,7 @@ def dupes(ber_max=0.12, tol=6.0, as_json=False):
     for g in dupes_.values():
         # el mas viejo es el que el usuario curo: las copias que bajamos despues
         # se van, no al reves.
-        s = sorted(g, key=lambda n: (_verdict(lib[n]), _mtime(n)))
+        s = sorted(g, key=lambda n: (_verdict(n, lib[n]), _mtime(n)))
         plan.append({"keep": s[0], "drop": s[1:], "song": lib[s[0]]["core"]})
     plan.sort(key=lambda x: -len(x["drop"]))
     if as_json:
@@ -1037,6 +1054,11 @@ def self_test():
     assert _safe_name("AC/DC - TNT") == "AC-DC - TNT"
     assert "../fuera" not in _safe_name("../../fuera")
     assert _safe_name("100% puro") == "100%% puro"
+    # el nombre limpio gana siempre al de video, aunque sea mas nuevo
+    assert _name_score("Adele - Rolling in the Deep.opus") == 0
+    assert _name_score("Adele - Adele - Rolling in the Deep (Official Music Video).opus") > 3
+    assert _name_score("Nicki Minaj - Only.opus") < _name_score(
+        "Nicki Minaj - Nicki Minaj - Only ft. Drake, Lil Wayne, Chris Brown.opus")
     # dupes: si no puedo leer la fecha, ese archivo no puede quedar como keeper
     assert float("inf") > 1e9
     # _plausible no debe confundir dos canciones homonimas de distinto artista
