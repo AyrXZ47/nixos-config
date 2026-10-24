@@ -341,7 +341,18 @@ def _near(b, dur, span=4):
     return out
 
 
-def check(urls, do_download=False, cookies=False, as_json=False):
+def _plausible(k, rows_by_dur):
+    """Archivo local que podria ser el mismo tema con otra etiqueta o unos segundos
+    de diferencia. Existe para NO bajar un duplicado: si el titulo esta contenido y
+    la duracion cae cerca, se avisa y no se descarga."""
+    for r in _near(rows_by_dur, k["dur"], 8):
+        rc, c = r["core"], k["core"]
+        if rc and c and (rc == c or rc.endswith(" " + c) or c.endswith(" " + rc)):
+            return r
+    return None
+
+
+def check(urls, do_download=False, cookies=False, as_json=False, force=False):
     lib = load_index()
     rows = list(lib.values())
     lib_by_dur = _bucket(rows)
@@ -390,8 +401,21 @@ def check(urls, do_download=False, cookies=False, as_json=False):
                       f" | {(e.get('channel') or e.get('uploader') or '')[:24]:24}"
                       f" | https://music.youtube.com/watch?v={e.get('id')}")
 
+    dudosos = []
     if do_download and faltan:
-        urls_ok = [f"https://music.youtube.com/watch?v={e.get('id')}" for e, _ in faltan]
+        seguros = []
+        for e, _ in faltan:
+            p = None if force else _plausible(entry_key(e), lib_by_dur)
+            if p:
+                dudosos.append((e, p))
+            else:
+                seguros.append(e)
+        if dudosos:
+            print(f"\nNO bajo {len(dudosos)}: ya tenes algo muy parecido "
+                  f"(usar --force para bajarlas igual)")
+            for e, p in dudosos[:10]:
+                print(f"  {e.get('title','')[:38]:38} ~ {p['vt'][:38]}")
+        urls_ok = [f"https://music.youtube.com/watch?v={e.get('id')}" for e in seguros]
         print(f"\ndescargando {len(urls_ok)} temas en {MUSIC} ...", flush=True)
         ok = download(urls_ok, cookies=cookies)
         print(f"descargados {ok}/{len(urls_ok)}")
@@ -1043,6 +1067,8 @@ def main():
     p.add_argument("--download", action="store_true", help="bajar las que faltan")
     p.add_argument("--json", action="store_true")
     p.add_argument("--cookies", action="store_true", help="usar cookies de Firefox")
+    p.add_argument("--force", action="store_true",
+                   help="bajar tambien lo que se parece a algo que ya tenes")
     f = sub.add_parser("fix", help="repara tags + portada por PURL")
     f.add_argument("--apply", action="store_true", help="escribir (default: dry-run)")
     f.add_argument("--limit", type=int, default=0)
@@ -1063,7 +1089,7 @@ def main():
     if a.cmd == "index":
         index_library(force=a.force)
     elif a.cmd == "check":
-        check(a.urls, a.download, a.cookies, a.json)
+        check(a.urls, a.download, a.cookies, a.json, a.force)
     elif a.cmd == "fix":
         fix(a.apply, a.limit, a.only, a.cookies, a.refresh, a.cover_search)
     elif a.cmd == "rename":
