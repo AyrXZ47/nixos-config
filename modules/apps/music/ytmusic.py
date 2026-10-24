@@ -588,9 +588,17 @@ def dupes(ber_max=0.12, tol=6.0, as_json=False):
     for n in order:
         groups.setdefault(find(n), []).append(n)
     dupes_ = {k: v for k, v in groups.items() if len(v) > 1}
+    def _mtime(n):
+        try:
+            return (MUSIC / n).stat().st_mtime
+        except OSError:
+            return 0.0
+
     plan = []
     for g in dupes_.values():
-        s = sorted(g, key=lambda n: (_verdict(lib[n]), n))
+        # el mas viejo es el que el usuario curo: las copias que bajamos despues
+        # se van, no al reves.
+        s = sorted(g, key=lambda n: (_verdict(lib[n]), _mtime(n)))
         plan.append({"keep": s[0], "drop": s[1:], "song": lib[s[0]]["core"]})
     plan.sort(key=lambda x: -len(x["drop"]))
     if as_json:
