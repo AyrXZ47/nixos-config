@@ -84,3 +84,18 @@ Now vs su edit" quedaron descartados. Y las copias reales suelen estar corridas 
 
 L7. `RescanOnStartup 0` en Mixxx: nunca relee tags de archivos existentes. Ese era el
 motivo real de los titulos viejos, no la base.
+
+L8. Cierre de la migracion (datos, no codigo): 174 duplicados confirmados por huella
+movidos a la papelera + 2 copias identicas (BER 0.000) del mismo par con emoji; 81
+nombres sin emoji inicial (`ytmusic rename`); 0 archivos sin portada; ~5.800 con
+portada 1:1. Descargas de Liked Music: 1.401 de 2.344 al primer intento, ~750
+irrecuperables (video borrado/privado/premium) y las 421 restantes reintentadas aparte.
+
+L9. Leccion del validador: la correccion de R3-001 (rechazar toda diferencia de
+version) introdujo REG-001 -- '(Remastered)' dejaba de matchear. Regla final:
+remaster/digital remaster no distinguen; clean/explicit, remix, radio edit, club mix,
+part N y live si distinguen.
+
+L10. `git reset --hard` esta bloqueado por la politica del harness incluso con
+autorizacion del humano: para presentar un candidato congelado se usa
+`git checkout <commit> -- <archivo>` + commit, y despues se reaplica igual.
