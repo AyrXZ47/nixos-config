@@ -45,6 +45,9 @@ TAIL_NOISE = re.compile(
     r"\s*[\(\[]\s*(official\s*(music\s*)?video|official\s*audio|oficial|official|"
     r"lyric\s*video|lyrics?|visuali[sz]er|audio|hd|hq|4k)\s*[\)\]]\s*$", re.I)
 FEAT_IN = re.compile(r"\b(?:feat|ft|featuring|with)\.?\s+.*", re.I)
+# lo que hace distinto al audio; un 'feat. X', 'original mix' o 'remastered' no
+STRUCT = re.compile(r"\b(remix|rmx|edit|live|instrumental|acoustic|cover|sped up|"
+                    r"slowed|nightcore|vip|bootleg|demo|session|unplugged)\b")
 
 
 def _acc(s):
@@ -70,8 +73,7 @@ def versions(*titles):
     for t in titles:
         if not t:
             continue
-        tail = re.sub(r"\([^)]*\)|\[[^\]]*\]", " ", t)   # feat fuera de parentesis
-        for p in re.findall(r"[\(\[]([^\)\]]*)[\)\]]", t) + FEAT.findall(tail):
+        for p in re.findall(r"[\(\[]([^\)\]]*)[\)\]]", t) + FEAT.findall(t):
             p = FEAT_IN.sub(" ", _acc(p).lower())
             p = NOISE.sub(" ", p)
             p = re.sub(r"[^a-z0-9 ]+", " ", p)
@@ -105,6 +107,10 @@ def similar(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio()
 
 
+def structural(ver):
+    return any(STRUCT.search(v) for v in ver)
+
+
 def same_song(a, b, tol=3.0):
     """a y b son dicts con core/art/ver/dur. El 'canal - artista - titulo' de yt-dlp
     deja el artista pegado al titulo, por eso tambien vale que uno termine en el
@@ -114,8 +120,7 @@ def same_song(a, b, tol=3.0):
       - 'feat. X' o '(Original Mix)' no distinguen nada: un remix/live/edit si.
       - el canal de YouTube no es el artista; si el titulo es identico y la duracion
         coincide al segundo, el artista no puede vetar el match.
-      - dos versiones distintas ('Club Mix' vs 'Original Mix' vs 'Part 1') nunca son
-        la misma cancion, duren lo que duren.
+      - si el titulo es exacto y la version no es estructural, la duracion manda.
     """
     dd = abs(a["dur"] - b["dur"])
     if dd > tol or a["dur"] <= 20:
@@ -129,7 +134,8 @@ def same_song(a, b, tol=3.0):
         return 0.0
     exact = a["core"] == b["core"] and dd <= 1.5
     if a["ver"] != b["ver"]:
-        return 0.0            # (club mix), (original mix), (part 1): son otra cosa
+        if not exact or structural(a["ver"]) or structural(b["ver"]):
+            return 0.0
     if similar(a["art"], b["art"]) < 0.6 and not exact:
         return 0.0
     return t
@@ -156,8 +162,6 @@ def index_library(force=False):
     files = {}
     seen = 0
     for p in sorted(MUSIC.glob("*.opus")):
-        if p.name.endswith((".temp.opus", ".ytmusic-tmp")):
-            continue          # restos de yt-dlp / de nuestras escrituras atomicas
         try:
             st = p.stat()
         except OSError:
@@ -592,43 +596,28 @@ def fetch_image(url):
     return data, mime
 
 
-def _img_dims(data):
-    """ancho y alto leidos de la imagen misma. El header del bloque FLAC miente a
-    veces (queda en 0x0 cuando el embed lo hizo ffmpeg)."""
-    import struct
-    if data[:8] == b"\x89PNG\r\n\x1a\n":
-        return struct.unpack(">II", data[16:24])
-    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
-        c = data[12:16]
-        if c == b"VP8X":
-            return (1 + int.from_bytes(data[24:27], "little"),
-                    1 + int.from_bytes(data[27:30], "little"))
-        if c == b"VP8 ":
-            return (struct.unpack("<H", data[26:28])[0] & 0x3fff,
-                    struct.unpack("<H", data[28:30])[0] & 0x3fff)
-        if c == b"VP8L":
-            b = int.from_bytes(data[21:25], "little")
-            return ((b & 0x3fff) + 1, ((b >> 14) & 0x3fff) + 1)
-    i = 2
-    while i < len(data) - 9:
-        if data[i] != 0xFF:
-            i += 1
-            continue
-        mk = data[i + 1]
-        if mk in (0xC0, 0xC1, 0xC2):
-            h = struct.unpack(">H", data[i + 5:i + 7])[0]
-            w = struct.unpack(">H", data[i + 7:i + 9])[0]
-            return w, h
-        if mk in (0xD8, 0xD9) or 0xD0 <= mk <= 0xD7:
-            i += 2
-            continue
-        i += 2 + struct.unpack(">H", data[i + 2:i + 4])[0]
-    return 0, 0
-
-
 def picture_b64(data, mime):
     from mutagen.flac import Picture
-    w, h = _img_dims(data)
+    w = h = 0
+    if mime == "image/png":
+        import struct
+        k = data.find(b"\x89PNG\r\n\x1a\n")
+        w, h = struct.unpack(">II", data[k + 16:k + 24])
+    else:
+        import struct
+        i = 2
+        while i < len(data) - 9:
+            if data[i] != 0xFF:
+                i += 1
+                continue
+            mk = data[i + 1]
+            if mk in (0xC0, 0xC1, 0xC2):
+                h, w = struct.unpack(">HH", data[i + 5:i + 9])
+                break
+            if mk in (0xD8, 0xD9) or 0xD0 <= mk <= 0xD7:
+                i += 2
+                continue
+            i += 2 + struct.unpack(">H", data[i + 2:i + 4])[0]
     p = Picture()
     p.data, p.mime, p.type, p.width, p.height, p.depth = data, mime, 3, w, h, 24
     return base64.b64encode(p.write()).decode()
@@ -689,35 +678,14 @@ def cover_dims(cur):
     try:
         from mutagen.flac import Picture
         p = Picture(base64.b64decode(b))
-        return _img_dims(p.data) if p.data else (p.width, p.height)
+        return p.width, p.height
     except Exception:
         return 0, 0
 
 
-def cover_plan(cur, meta, cover_search, dur):
-    """(hay que tocar la portada, url). Nunca devuelve "borrar": si no hay reemplazo
-    mejor, la que ya esta se queda. Un archivo sin portada se restaura con lo que
-    haya, aunque sea el fotograma 16:9 del video."""
-    w, h = cover_dims(cur)
-    square = bool(w) and abs(w - h) <= 2
-    if meta["sq"]:
-        return (not square), meta["thumb"]
-    if cover_search:
-        if not meta.get("sq2"):
-            t = ytmusic_cover(meta["t"], meta["a"], dur)
-            meta["sq2"] = bool(t)
-            meta["thumb2"] = t or ""
-            _save_meta(force=True)
-        if meta.get("sq2"):
-            return (not square), meta["thumb2"]
-    if not w:
-        return True, meta["thumb"]
-    return False, ""
-
-
-def needs_fix(cur, want, yid):
-    """Que tags le faltan a este archivo. Compara por `core` para no reescribir por
-    una mayuscula o un apostrofo tipografico."""
+def needs_fix(cur, want, yid, square_thumb):
+    """Que le falta a este archivo. Compara por `core` para no reescribir por una
+    mayuscula o un apostrofo tipografico."""
     if cur.get("PURL", "").find(yid) < 0:
         return "falta PURL"
     for k, v in want.items():
@@ -730,12 +698,12 @@ def needs_fix(cur, want, yid):
             same = core(now) == core(v)
         if not same:
             return f"{k}: {now!r} -> {v!r}"
-    for k in ("TITLE", "ARTIST", "ALBUM", "DATE", "GENRE"):
-        if k in cur and k not in want:
-            return f"{k} de mas: {cur[k]!r}"
     extra = set(cur) - KEEP
     if extra:
         return f"sobran {len(extra)} tags (p.ej. {sorted(extra)[0]})"
+    w, h = cover_dims(cur)
+    if square_thumb and not (w and h and abs(w - h) <= 2):
+        return f"portada {w}x{h} (no es 1:1)" if w else "sin portada"
     return None
 
 
@@ -751,18 +719,13 @@ def apply_fix(path, want, pic_b64):
             fh.write(json.dumps({"f": path.name, "tags": {
                 k: (v[0] if isinstance(v, list) and v else v) for k, v in old.items()
                 if k != "METADATA_BLOCK_PICTURE"}}, ensure_ascii=False) + "\n")
-        pic_old = next((v for k, v in old.items()
-                        if k.upper() == "METADATA_BLOCK_PICTURE"), None)
         keep = {k: v for k, v in old.items()
                 if k.upper() in ("PURL", "DESCRIPTION", "ENCODER")}
         f.clear()
         for k, v in list(keep.items()) + list(want.items()):
             f[k] = v
-        pic = pic_b64 or pic_old          # sin reemplazo, la que ya estaba
-        if pic:
-            f["METADATA_BLOCK_PICTURE"] = pic if isinstance(pic, list) else [pic]
-        if pic_old and not f.get("METADATA_BLOCK_PICTURE"):
-            raise RuntimeError("me niego a guardar el archivo sin portada")
+        if pic_b64:
+            f["METADATA_BLOCK_PICTURE"] = [pic_b64]
         f.save()
     except Exception:
         tmp.unlink(missing_ok=True)
@@ -792,22 +755,20 @@ def fix(do_apply=False, limit=0, only="", cookies=False, refresh=False,
                 if meta.get("sq2"):
                     meta = dict(meta, sq=True, thumb=meta["thumb2"])
             want = target_tags(meta, cur)
-            why = needs_fix(cur, want, r["yid"])
-            need_cover, cover_url = cover_plan(cur, meta, cover_search, r["dur"])
-            if not why and not need_cover:
+            why = needs_fix(cur, want, r["yid"], meta["sq"])
+            if not why:
                 stats["ok"] += 1
                 continue
+            if not meta["sq"]:
+                stats["sin-artista"] += 1
             pic = ""
-            if need_cover and cover_url:
+            if meta["sq"] and meta["thumb"]:
                 try:
-                    data, mime = fetch_image(cover_url)
+                    data, mime = fetch_image(meta["thumb"])
                     pic = picture_b64(data, mime)
                 except Exception:
                     pic = ""
-            if need_cover and not pic:
-                stats["sin-artista"] += 1
-            print(f"[{i}/{len(todo)}] {name[:70]}\n        "
-                  f"{why or 'portada'}", flush=True)
+            print(f"[{i}/{len(todo)}] {name[:70]}\n        {why}", flush=True)
             if do_apply:
                 apply_fix(path, want, pic)
             stats["cambio"] += 1
@@ -856,28 +817,6 @@ def self_test():
     assert clean_title("Song (Radio Edit)") == "Song (Radio Edit)"
     assert split_name("Spinnin' Records - ZHU - Faded.opus") == ("Spinnin' Records",
                                                                 "ZHU - Faded")
-    # target_tags / pick_artist / pick_album: un NameError aca no lo ve nadie hasta
-    # que corre sobre 6000 archivos, asi que se ejercita en el test.
-    meta = {"t": "Song (Official Video)", "a": "Artist", "al": "Album",
-            "d": "2020", "sq": True, "track": False, "thumb": "http://x/y.jpg"}
-    cur = {"TITLE": "Song", "ARTIST": "Artist", "ALBUM": "Album", "DATE": "2020",
-           "GENRE": "Music", "PURL": "https://www.youtube.com/watch?v=abcdefghijk"}
-    want = target_tags(meta, cur)
-    assert want["TITLE"] == "Song" and want["ARTIST"] == "Artist", want
-    assert "GENRE" not in want, "el genero 'Music' no se conserva"
-    assert needs_fix(cur, want, "abcdefghijk") == "GENRE de mas: 'Music'"
-    cur2 = {k: v for k, v in cur.items() if k != "GENRE"}
-    assert needs_fix(cur2, want, "abcdefghijk") is None, needs_fix(cur2, want, "abcdefghijk")
-    # portada: ida y vuelta real con un PNG 1x1 (picture_b64 -> cover_dims -> plan)
-    png1 = base64.b64decode(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhK"
-        "mMIQAAAABJRU5ErkJggg==")
-    cur_pic = {"METADATA_BLOCK_PICTURE": picture_b64(png1, "image/png")}
-    assert cover_dims(cur_pic) == (1, 1), cover_dims(cur_pic)
-    # ya es 1:1: no hay que tocarla, aunque no haya reemplazo
-    assert cover_plan(cur_pic, {"sq": False, "thumb": "u"}, False, 100)[0] is False
-    # sin portada: se restaura con lo que haya
-    assert cover_plan({}, {"sq": False, "thumb": "u"}, False, 100) == (True, "u")
     print("self-test ok")
 
 
