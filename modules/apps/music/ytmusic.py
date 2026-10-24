@@ -932,4 +932,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (RuntimeError, FileNotFoundError) as e:
+        # playlists borradas o privadas son el caso normal, no un traceback
+        print(f"error: {e.args[0] if e.args else e}", file=sys.stderr)
+        sys.exit(1)
