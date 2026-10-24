@@ -45,9 +45,6 @@ TAIL_NOISE = re.compile(
     r"\s*[\(\[]\s*(official\s*(music\s*)?video|official\s*audio|oficial|official|"
     r"lyric\s*video|lyrics?|visuali[sz]er|audio|hd|hq|4k)\s*[\)\]]\s*$", re.I)
 FEAT_IN = re.compile(r"\b(?:feat|ft|featuring|with)\.?\s+.*", re.I)
-# lo que hace distinto al audio; un 'feat. X', 'original mix' o 'remastered' no
-STRUCT = re.compile(r"\b(remix|rmx|edit|live|instrumental|acoustic|cover|sped up|"
-                    r"slowed|nightcore|vip|bootleg|demo|session|unplugged)\b")
 
 
 def _acc(s):
@@ -73,7 +70,8 @@ def versions(*titles):
     for t in titles:
         if not t:
             continue
-        for p in re.findall(r"[\(\[]([^\)\]]*)[\)\]]", t) + FEAT.findall(t):
+        tail = re.sub(r"\([^)]*\)|\[[^\]]*\]", " ", t)   # feat fuera de parentesis
+        for p in re.findall(r"[\(\[]([^\)\]]*)[\)\]]", t) + FEAT.findall(tail):
             p = FEAT_IN.sub(" ", _acc(p).lower())
             p = NOISE.sub(" ", p)
             p = re.sub(r"[^a-z0-9 ]+", " ", p)
@@ -107,10 +105,6 @@ def similar(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio()
 
 
-def structural(ver):
-    return any(STRUCT.search(v) for v in ver)
-
-
 def same_song(a, b, tol=3.0):
     """a y b son dicts con core/art/ver/dur. El 'canal - artista - titulo' de yt-dlp
     deja el artista pegado al titulo, por eso tambien vale que uno termine en el
@@ -120,7 +114,8 @@ def same_song(a, b, tol=3.0):
       - 'feat. X' o '(Original Mix)' no distinguen nada: un remix/live/edit si.
       - el canal de YouTube no es el artista; si el titulo es identico y la duracion
         coincide al segundo, el artista no puede vetar el match.
-      - si el titulo es exacto y la version no es estructural, la duracion manda.
+      - dos versiones distintas ('Club Mix' vs 'Original Mix' vs 'Part 1') nunca son
+        la misma cancion, duren lo que duren.
     """
     dd = abs(a["dur"] - b["dur"])
     if dd > tol or a["dur"] <= 20:
@@ -134,8 +129,7 @@ def same_song(a, b, tol=3.0):
         return 0.0
     exact = a["core"] == b["core"] and dd <= 1.5
     if a["ver"] != b["ver"]:
-        if not exact or structural(a["ver"]) or structural(b["ver"]):
-            return 0.0
+        return 0.0            # (club mix), (original mix), (part 1): son otra cosa
     if similar(a["art"], b["art"]) < 0.6 and not exact:
         return 0.0
     return t
@@ -683,9 +677,30 @@ def cover_dims(cur):
         return 0, 0
 
 
-def needs_fix(cur, want, yid, square_thumb):
-    """Que le falta a este archivo. Compara por `core` para no reescribir por una
-    mayuscula o un apostrofo tipografico."""
+def cover_plan(cur, meta, cover_search, dur):
+    """(hay que tocar la portada, url). Nunca devuelve "borrar": si no hay reemplazo
+    mejor, la que ya esta se queda. Un archivo sin portada se restaura con lo que
+    haya, aunque sea el fotograma 16:9 del video."""
+    w, h = cover_dims(cur)
+    square = bool(w) and abs(w - h) <= 2
+    if meta["sq"]:
+        return (not square), meta["thumb"]
+    if cover_search:
+        if not meta.get("sq2"):
+            t = ytmusic_cover(meta["t"], meta["a"], dur)
+            meta["sq2"] = bool(t)
+            meta["thumb2"] = t or ""
+            _save_meta(force=True)
+        if meta.get("sq2"):
+            return (not square), meta["thumb2"]
+    if not w:
+        return True, meta["thumb"]
+    return False, ""
+
+
+def needs_fix(cur, want, yid):
+    """Que tags le faltan a este archivo. Compara por `core` para no reescribir por
+    una mayuscula o un apostrofo tipografico."""
     if cur.get("PURL", "").find(yid) < 0:
         return "falta PURL"
     for k, v in want.items():
@@ -701,9 +716,6 @@ def needs_fix(cur, want, yid, square_thumb):
     extra = set(cur) - KEEP
     if extra:
         return f"sobran {len(extra)} tags (p.ej. {sorted(extra)[0]})"
-    w, h = cover_dims(cur)
-    if square_thumb and not (w and h and abs(w - h) <= 2):
-        return f"portada {w}x{h} (no es 1:1)" if w else "sin portada"
     return None
 
 
@@ -719,13 +731,18 @@ def apply_fix(path, want, pic_b64):
             fh.write(json.dumps({"f": path.name, "tags": {
                 k: (v[0] if isinstance(v, list) and v else v) for k, v in old.items()
                 if k != "METADATA_BLOCK_PICTURE"}}, ensure_ascii=False) + "\n")
+        pic_old = next((v for k, v in old.items()
+                        if k.upper() == "METADATA_BLOCK_PICTURE"), None)
         keep = {k: v for k, v in old.items()
                 if k.upper() in ("PURL", "DESCRIPTION", "ENCODER")}
         f.clear()
         for k, v in list(keep.items()) + list(want.items()):
             f[k] = v
-        if pic_b64:
-            f["METADATA_BLOCK_PICTURE"] = [pic_b64]
+        pic = pic_b64 or pic_old          # sin reemplazo, la que ya estaba
+        if pic:
+            f["METADATA_BLOCK_PICTURE"] = pic if isinstance(pic, list) else [pic]
+        if pic_old and not f.get("METADATA_BLOCK_PICTURE"):
+            raise RuntimeError("me niego a guardar el archivo sin portada")
         f.save()
     except Exception:
         tmp.unlink(missing_ok=True)
@@ -755,20 +772,22 @@ def fix(do_apply=False, limit=0, only="", cookies=False, refresh=False,
                 if meta.get("sq2"):
                     meta = dict(meta, sq=True, thumb=meta["thumb2"])
             want = target_tags(meta, cur)
-            why = needs_fix(cur, want, r["yid"], meta["sq"])
-            if not why:
+            why = needs_fix(cur, want, r["yid"])
+            need_cover, cover_url = cover_plan(cur, meta, cover_search, r["dur"])
+            if not why and not need_cover:
                 stats["ok"] += 1
                 continue
-            if not meta["sq"]:
-                stats["sin-artista"] += 1
             pic = ""
-            if meta["sq"] and meta["thumb"]:
+            if need_cover and cover_url:
                 try:
-                    data, mime = fetch_image(meta["thumb"])
+                    data, mime = fetch_image(cover_url)
                     pic = picture_b64(data, mime)
                 except Exception:
                     pic = ""
-            print(f"[{i}/{len(todo)}] {name[:70]}\n        {why}", flush=True)
+            if need_cover and not pic:
+                stats["sin-artista"] += 1
+            print(f"[{i}/{len(todo)}] {name[:70]}\n        "
+                  f"{why or 'portada'}", flush=True)
             if do_apply:
                 apply_fix(path, want, pic)
             stats["cambio"] += 1
