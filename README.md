@@ -479,6 +479,7 @@ contra `checksums.txt` del release al reemplazarlo. Una vez en el celular:
 ```bash
 sudo nixos-rebuild --impure switch --flake .#<host>   # apply system + home changes
 home-manager switch --flake .#<host>                  # Home Manager only
+deploy <host>                                         # lo mismo, desde cualquier máquina (local o por ssh -t)
 nix flake update                              # bump inputs
 nix flake check                               # evaluate all hosts
 ```

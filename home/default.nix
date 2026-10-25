@@ -19,6 +19,7 @@ in
     ../modules/apps/dolphin.nix
     ../modules/apps/gtkwave.nix
     ../modules/apps/miracast.nix
+    ../modules/apps/deploy.nix
     ../modules/apps/mixxx-mpris.nix
   ];
 
