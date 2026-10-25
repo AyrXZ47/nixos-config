@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   # Cache binaria propia (ver abajo). El workflow de CI usa el MISMO nombre:
@@ -7,6 +7,56 @@ let
   # Clave publica de la cache. Vacia = cache deshabilitada (no se agrega como
   # substituter ni como clave): el sistema queda igual que sin esto.
   binaryCacheKey = "+amyGHz3O38pkhJqZBhmM85KH/mYhCekYmjIolhRIkI=";
+
+  # Mantenimiento con UNA sola regla de sudo (ver abajo). Un solo binario que
+  # corre como root sin contraseña y que NO acepta comandos libres: solo los
+  # subcomandos de su case. No es un sandbox (estos comandos escriben en el
+  # store, el disco y el firmware), pero impide que un agente o un error
+  # ejecute comandos arbitrarios como root.
+  mantenimiento = pkgs.writeShellScriptBin "mantenimiento" ''
+    set -uo pipefail
+    export PATH=/run/current-system/sw/bin:$PATH
+    nvme=/dev/nvme0
+    [ -e "$nvme" ] || nvme=$(ls /dev/nvme[0-9] 2>/dev/null | head -1 || true)
+
+    case "''${1:-}" in
+      audit)
+        echo "== sistema =="; readlink /run/current-system
+        echo "== disco =="; df -h / | tail -1
+        echo "== generaciones =="
+        nix-env -p /nix/var/nix/profiles/system --list-generations | tail -8
+        echo "== errores de este boot =="
+        journalctl -p err -b --no-pager | tail -12
+        ;;
+      trim) fstrim -av ;;
+      scrub) btrfs scrub start -B / && btrfs scrub status / ;;
+      gc)
+        nix-env -p /nix/var/nix/profiles/system --delete-generations +6
+        nix-collect-garbage
+        ;;
+      optimise) nix-store --optimise ;;
+      smart) smartctl -t short "$nvme" ;;
+      smart-log) smartctl -a "$nvme"; smartctl -l selftest "$nvme" ;;
+      fwupd) fwupdmgr refresh ;;
+      # Flash real de firmware: a proposito SEPARADO de `all`. Un corte a mitad
+      # de un flash no lo cubre el rollback de NixOS; lo corre un humano
+      # decidiendo, con la maquina enchufada y quieta.
+      fwupd-apply) fwupdmgr refresh --force; fwupdmgr update ;;
+      all)
+        echo "== 1/5 trim =="; fstrim -av
+        echo "== 2/5 scrub =="; btrfs scrub start -B /; btrfs scrub status /
+        echo "== 3/5 generaciones + gc =="
+        nix-env -p /nix/var/nix/profiles/system --delete-generations +6
+        nix-collect-garbage
+        echo "== 4/5 optimise =="; nix-store --optimise
+        echo "== 5/5 smart (test corto, no bloquea) =="; smartctl -t short "$nvme"
+        ;;
+      *)
+        echo "uso: mantenimiento {audit|all|trim|scrub|gc|optimise|smart|smart-log|fwupd|fwupd-apply}" >&2
+        exit 2
+        ;;
+    esac
+  '';
 in
 {
   # ── Paralelismo absoluto ──────────────────────────────────────────────────
@@ -108,7 +158,7 @@ in
   # es lo que tarda, y el ritual ya lo corre.
   system.activationScripts.pruneSystemGenerations = ''
     ${config.nix.package}/bin/nix-env -p /nix/var/nix/profiles/system \
-      --delete-generations +3 >/dev/null 2>&1 || true
+      --delete-generations +6 >/dev/null 2>&1 || true
   '';
 
   # ── Logs: journald acotado a 100M ─────────────────────────────────────────
@@ -137,10 +187,27 @@ in
       directory = /home/yovick/workspaces/nixos-config
   '';
 
-  # ── Boot: sin menú de generaciones y solo 3 en el bootloader ─────────────
+  # ── Boot: sin menú y 6 generaciones en el bootloader ────────────────────
   # timeout = 0 → systemd-boot arranca el default directo (sin espera ni menú);
-  # configurationLimit = 3 → el bootloader conserva solo 3 entradas de generación
-  # (sigue valiendo sin trim automatico: nunca hay mas de 3 entradas en el menu).
+  # configurationLimit = 6 → el bootloader conserva 6 entradas, en linea con la
+  # poda del perfil (mas entradas no sirven de nada si el perfil no las tiene).
   boot.loader.timeout = 0;
-  boot.loader.systemd-boot.configurationLimit = 3;
+  boot.loader.systemd-boot.configurationLimit = 6;
+
+  # ── Mantenimiento sin contraseña: UNA regla, acotada a un binario ────────
+  # `mantenimiento <sub>` es lo unico que corre como root sin password. El
+  # binario no acepta comandos libres (solo su `case`), asi que ni un error ni
+  # una inyeccion pueden usarlo para otra cosa que no sea la lista de arriba.
+  # Se cubren las dos formas del path porque sudo resuelve symlinks: la del
+  # store (derivacion) y la de /run/current-system.
+  environment.systemPackages = [ mantenimiento ];
+  security.sudo.extraRules = [
+    {
+      users = [ "yovick" ];
+      commands = [
+        { command = "${mantenimiento}/bin/mantenimiento"; options = [ "NOPASSWD" ]; }
+        { command = "/run/current-system/sw/bin/mantenimiento"; options = [ "NOPASSWD" ]; }
+      ];
+    }
+  ];
 }

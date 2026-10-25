@@ -80,6 +80,24 @@ un solo núcleo, y cualquier trabajo que tenga variante GPU usa la GPU.
   pasarlo explícito: `make -j"$(nproc)"`, `cargo -j"$(nproc)"`,
   `xargs -P"$(nproc)"`, `pnpm --workspace-concurrency "$(nproc)"`. Nunca dejar un
   proceso CPU-only en un hilo si acepta `-j`.
+## Overlays: la menor cantidad posible (obligatorio)
+
+Un overlay cambia el hash de la derivacion: la saca de `cache.nixos.org` y la
+hace compilar en cada host, en cada `nix flake update` que toque sus entradas.
+Por eso:
+
+- **Si algo falla: se arregla por la via normal o se hace downgrade. Punto.** No
+  se agrega un overlay para tapar cada cosa que rompe o que uno quiere cambiar.
+- **Antes de crear un overlay se PREGUNTA.** La opcion se propone (que se
+  parchea, por que, que cuesta) y el dueno decide. Nunca se crea por iniciativa
+  propia.
+- Un paquete que **no existe** en nixpkgs (omnetpp) no es un overlay: es una
+  derivacion propia, y va a la cache de Cachix desde el workflow.
+- Un paquete de nixpkgs que se parchea con `overrideAttrs` es deuda doble: se
+  compila siempre y nadie lo va a cachear salvo vos. Es el ultimo recurso
+  (audacity 2026-10 lo pago caro: el overlay `unstableFixes` era la unica razon
+  por la que compilaba en cada update).
+
 - **Elegir variante GPU no justifica parchear.** Si la variante GPU no existe en
   nixpkgs se documenta y se decide; un `overrideAttrs`/overlay cambia el hash,
   saca el paquete de `cache.nixos.org` y lo hace compilar en cada host (ver
