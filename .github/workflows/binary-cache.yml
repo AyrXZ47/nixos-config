@@ -56,3 +56,13 @@ jobs:
             .#nixosConfigurations.pc.pkgs.caelestia-shell \
             .#nixosConfigurations.pc.pkgs.bibata-material-deep-blue \
             .#nixosConfigurations.pc.pkgs.kicad-spice-library
+
+      # omnetpp NO esta en nixpkgs: lo construye modules/apps/omnetpp.nix
+      # (clangStdenv + Qt6, desde el tarball oficial). Por eso no existe como
+      # paquete del flake y cache.nixos.org nunca lo va a tener; es el paquete
+      # mas caro del repo (~689 MB). Se resuelve por evaluacion del host y se
+      # construye por drvPath.
+      - name: Construir y subir omnetpp (definido en un modulo, no en nixpkgs)
+        run: |
+          drv=$(nix eval --impure --raw --expr 'let f = builtins.getFlake (toString ./.); ps = f.nixosConfigurations.pc.config.environment.systemPackages; in (builtins.head (builtins.filter (p: builtins.match "omnetpp.*" (p.name or "") != null) ps)).drvPath')
+          cachix watch-exec ayrxz47-nixos-config -- nix-store --realise "$drv"
