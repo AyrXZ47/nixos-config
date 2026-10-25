@@ -64,6 +64,27 @@ No tests, no CI, no formatter/linter config. `nix flake check` is the only verif
 - Al finalizar, siempre haz `git commit`. No dejar trabajo sin commitear.
 - Nunca hacer `nixos-rebuild switch` sin que el código tenga commit previo; el rebuild lo corre el usuario, después del commit.
 
+## Recursos: GPU siempre que se pueda, CPU siempre con todos los núcleos (obligatorio)
+
+La directiva del repo es **rendimiento al tope**: ningún trabajo CPU-only corre en
+un solo núcleo, y cualquier trabajo que tenga variante GPU usa la GPU.
+
+- **GPU primero.** Si el paquete tiene variante acelerada por GPU, se elige esa:
+  `whisperVulkan` (no `whisper-cpp`), `ffmpeg-full` con Vulkan/VAAPI (no `ffmpeg`
+  plano), `obs-studio` por NVENC/VA-API, `shotcut`/`melt` por GPU, `libplacebo`
+  para tonemap HDR, códecs por `hardware.graphics.extraPackages`. Si nixpkgs no
+  trae variante GPU, se deja una línea de por qué se eligió la de CPU.
+- **CPU: todos los núcleos, siempre.** Los builds de Nix ya lo hacen
+  (`nix.settings.max-jobs = "auto"` y `cores = 0` en
+  `modules/core/nix-optimization.nix`). Para herramientas fuera de Nix hay que
+  pasarlo explícito: `make -j"$(nproc)"`, `cargo -j"$(nproc)"`,
+  `xargs -P"$(nproc)"`, `pnpm --workspace-concurrency "$(nproc)"`. Nunca dejar un
+  proceso CPU-only en un hilo si acepta `-j`.
+- **Elegir variante GPU no justifica parchear.** Si la variante GPU no existe en
+  nixpkgs se documenta y se decide; un `overrideAttrs`/overlay cambia el hash,
+  saca el paquete de `cache.nixos.org` y lo hace compilar en cada host (ver
+  "Gotchas").
+
 ## Gestor de paquetes JS (obligatorio)
 
 - Todo lo JS de este repo usa **pnpm**, nunca `npm`: pnpm ≥10 no ejecuta los

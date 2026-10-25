@@ -71,9 +71,8 @@
   # pero la TV nunca recibe IP / nunca conecta la sesion de video, y GND
   # aborta con "connection established .. connection lost".
   # ponytail: GND 0.99 tiene SIGABRTs conocidos (gitlab #466, flathub #89);
-  # si vuelve a tirar, correr
-  #   flatpak run --env=G_MESSAGES_DEBUG=all org.gnome.NetworkDisplays > gnd.log 2>&1
-  # y comparar con los issues de upstream.
+  # si vuelve a tirar, correr con debug y comparar con los issues de upstream:
+  #   G_MESSAGES_DEBUG=all gnome-network-displays > gnd.log 2>&1
   networking.firewall.allowedTCPPorts = [ 7236 ];
   networking.firewall.allowedUDPPorts = [ 67 123 7236 ];
 
