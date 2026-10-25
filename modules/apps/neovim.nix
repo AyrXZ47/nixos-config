@@ -340,6 +340,11 @@ in
   home.packages = with pkgs; [
     gcc
     lua-language-server
+    # neovide: frontend GUI de neovim, con scroll sub-linea y cursor animado de
+    # verdad (lo que una TUI no puede: kitty solo acelera SU scrollback, no el
+    # de la app). Viene del canal, asi que el rebuild BAJA el binario cacheado
+    # en vez de compilar Rust. Se lanza con `neovide`; lee la misma config.
+    neovide
     stylua
     typescript-language-server
     pyright
