@@ -30,6 +30,7 @@ let
         ;;
       trim) fstrim -av ;;
       scrub) btrfs scrub start -B / && btrfs scrub status / ;;
+      scrub-status) btrfs scrub status / ;;
       gc)
         nix-env -p /nix/var/nix/profiles/system --delete-generations +6
         nix-collect-garbage
@@ -48,7 +49,7 @@ let
       # de un flash no lo cubre el rollback de NixOS; lo corre un humano
       # decidiendo, con la maquina enchufada y quieta.
       fwupd-apply) fwupdmgr refresh --force; fwupdmgr update ;;
-      all)
+      clean|all)
         echo "== 1/5 trim =="; fstrim -av
         echo "== 2/5 scrub =="; btrfs scrub start -B /; btrfs scrub status /
         echo "== 3/5 generaciones + gc =="
@@ -57,8 +58,23 @@ let
         echo "== 4/5 optimise =="; nix-store --optimise
         echo "== 5/5 smart (test corto, no bloquea) =="; smartctl -t short "$nvme"
         ;;
+      # Equivalente al `-Syyu`: aplica el repo tal como está en disco. NO hace
+      # `nix flake update` ni `git pull`: eso lo corre el humano o el agente
+      # como yovick (git como root dejaria archivos con dueno root en el repo).
+      upgrade)
+        repo=/home/yovick/workspaces/nixos-config
+        host="''${HOSTNAME#nixos-}"   # nixos-pc -> pc, nixos-laptop -> laptop
+        echo "== upgrade: $repo#$host =="
+        nixos-rebuild --impure switch --flake "$repo#$host"
+        ;;
+      # Ritual completo de Nix.md: actualizar y despues limpiar. Requiere que el
+      # repo ya este actualizado (nix flake update + commit + push).
+      full)
+        "$0" upgrade
+        "$0" clean
+        ;;
       *)
-        echo "uso: mantenimiento {audit|all|trim|scrub|gc|optimise|smart|smart-log|fwupd|fwupd-apply}" >&2
+        echo "uso: mantenimiento {audit|scrub-status|clean|all|full|upgrade|trim|scrub|gc|optimise|smart|smart-log|fwupd|fwupd-apply}" >&2
         exit 2
         ;;
     esac
