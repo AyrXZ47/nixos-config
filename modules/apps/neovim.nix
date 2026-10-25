@@ -32,17 +32,21 @@ let
     # renderiza con GPU y da scroll sub-linea de verdad, pero se congelaba y
     # terminaba killed sin log util. La TUI de kitty queda como unico cliente.
     # Se deja anotado para no repetir el experimento a ciegas.
-    # Scroll tipo trackpad. El motor ya lo trae LazyVim (Snacks.scroll anima
-    # <C-d>/<C-u> y tambien <ScrollWheelUp/Down>), esto es solo ajuste fino.
+    # Scroll animado (Snacks.scroll, ya activo en LazyVim): anima los scrolls
+    # POR TECLADO (<C-d>/<C-u>, <C-y>/<C-e>, zz). 
+    #
+    # LO QUE NO HACE (medido a mano, que quede claro para no repetirlo): la
+    # RUEDA DEL MOUSE no pasa por aca. El wheel lo maneja el core de neovim en
+    # C y Snacks solo lo detecta para saltearse la animacion; subir `step` de 8
+    # a 400 no cambio nada en la rueda. El scroll sub-linea con inercia que se
+    # siente en kitty es del scrollback de kitty (pixel_scroll/momentum_scroll)
+    # y no aplica a apps con mouse propio: a un TUI solo le llegan eventos de
+    # rueda enteros, de una linea. Para sub-linea de verdad hace falta un
+    # renderer propio (se probo neovide, ver arriba, y se descarto).
+    #
     # IMPORTANTE (snacks.animate): duration = step * lineas, con tope en total.
-    # Con el default step = 8 y una rueda de 1 linea por evento, cada paso
-    # animaba 8*1 = 8 ms: eso se ve como salto, no como deslizamiento. El numero
-    # que manda es `step`; `total` solo limita los saltos grandes (Ctrl-D).
-    # OJO: esto NO elimina el quantum de 1 linea. Un TUI solo recibe eventos de
-    # rueda enteros; el scroll sub-linea con inercia es del scrollback de kitty
-    # (pixel_scroll/momentum_scroll) y no aplica a apps con mouse propio. Para
-    # eso esta neovide. Aca solo se hace mas lento el deslizamiento de cada
-    # linea.
+    # Con step = 400 cada linea de un <C-d> anima 400 ms, o sea que se siente
+    # lento. Si molesta, volver al default step = 8.
     ".config/nvim/lua/plugins/scroll.lua" = {
       text = ''
         return {
