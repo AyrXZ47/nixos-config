@@ -28,6 +28,26 @@ let
         }
       '';
     };
+    # Neovide (frontend GUI de neovim): la TUI tomaba estas cosas de kitty, asi
+    # que en neovide hay que declararlas o se ve distinto:
+    #  - guifont es GUI-only. Sin esto neovide cae a su fuente por defecto. Se
+    #    replica la de kitty (modules/apps/kitty.nix: JetBrainsMono Nerd Font 14).
+    #    Los espacios de la familia van escapados: es sintaxis de guifont.
+    #  - scroll: la TUI de kitty desplaza por pixeles; aca el equivalente es la
+    #    animacion de neovide. El default (0.15 s) se sentia lento.
+    # OJO: este archivo solo define vim.g, no registra plugins, por eso devuelve
+    # una tabla vacia (lo importa `{ import = "plugins" }` de LazyVim).
+    ".config/nvim/lua/plugins/neovide.lua" = {
+      text = ''
+        if vim.g.neovide then
+          vim.o.guifont = "JetBrainsMono\\ Nerd\\ Font:h14"
+          vim.g.neovide_scroll_animation_length = 0.07
+          vim.g.neovide_scroll_animation_far_lines = 4
+          vim.g.neovide_hide_mouse_when_typing = true
+        end
+        return {}
+      '';
+    };
     # Scroll tipo trackpad. El motor ya lo trae LazyVim (Snacks.scroll anima
     # <C-d>/<C-u> y tambien <ScrollWheelUp/Down>), esto es solo ajuste fino.
     # IMPORTANTE (snacks.animate): duration = step * lineas, con tope en total.
