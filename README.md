@@ -141,8 +141,6 @@ flake.nix              # Entry point — hosts & shared modules
 - **Raspberry Pi**: `rpiboot` (mass-storage boot), `raspberrypi-eeprom`,
   `picocom` (serial console).
 - **Rust**: `rustup` (toolchains on demand). **JS**: `pnpm`.
-- **Flatpak** (pc/laptop/vm): service enabled + Flathub remote auto-added at first
-  login (`flatpak-flathub.service`, idempotent oneshot).
 
 ### Applications
 Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Firefox (autohide
