@@ -7,6 +7,9 @@
 {
   home.packages = with pkgs; [
     kdePackages.kdialog
+    # Buscar archivo de Dolphin delega en kfind cuando Baloo no indexa; sin el
+    # binario intenta instalarlo por PackageKit (que en NixOS no existe).
+    kdePackages.kfind
     (writeShellScriptBin "ver-metadatos" ''
       set -u
       file="$1"
