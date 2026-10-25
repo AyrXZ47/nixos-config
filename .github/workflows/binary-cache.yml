@@ -20,6 +20,8 @@ on:
       - "flake.lock"
       - "modules/**"
       - "hosts/**"
+      # El propio workflow: sin esto, editarlo no re-ejecuta la cache.
+      - ".github/workflows/**"
   schedule:
     # Diario: recalienta la cache despues de cada bump de canal.
     - cron: "0 5 * * *"
