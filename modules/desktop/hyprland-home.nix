@@ -260,7 +260,10 @@ in
       hl.bind("SUPER + CTRL + N", hl.dsp.global("caelestia:sidebar"))
       hl.bind("SUPER + CTRL + Space", hl.dsp.global("caelestia:launcher"))
       hl.bind("SUPER + CTRL + D", hl.dsp.global("caelestia:dashboard"))
-      hl.bind("SUPER + CTRL + Q", hl.dsp.global("caelestia:session"))
+      -- SUPER+CTRL+Q (menu de sesion) RETIRADO 2026-08-12: era el atajo que
+      -- dejaba apagar/reiniciar/cerrar sesion a dos teclas y arruinaba trabajo
+      -- en vivo. El bloqueo tiene su propio atajo (SUPER+L) y el idle; las
+      -- acciones destructivas solo quedan por mouse (menu de sesion / launcher).
       hl.bind("SUPER + CTRL + U", hl.dsp.global("caelestia:utilities"))
       hl.bind("SUPER + CTRL + K", hl.dsp.global("caelestia:showall"))
       -- Clipboard/emoji pickers nativos de Caelestia (fuzzel). Sustituyen al
@@ -271,7 +274,9 @@ in
       -- Screenshot nativo (area picker con freeze) ademas de los hyprshot del
       -- repo; el picker de color ya existe arriba via hyprpicker.
       hl.bind("SUPER + Delete", hl.dsp.window.close())
-      hl.bind("SUPER + M", hl.dsp.exit())
+      -- SUPER+M (hl.dsp.exit: mataba la sesion Hyprland entera, con todas las
+      -- apps abiertas) RETIRADO 2026-08-12 por el mismo motivo. Para cerrar
+      -- sesion queda el menu de sesion de Caelestia, que pide un click.
       hl.bind("SUPER + V", hl.dsp.window.float({ action = "toggle" }))
       -- Pin = always on top + visible en todos los workspaces (requiere ventana flotante).
       hl.bind("SUPER + T", hl.dsp.window.pin({ action = "toggle" }))
