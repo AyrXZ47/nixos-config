@@ -229,7 +229,11 @@ let
         # qpwgraph arranca minimizado al tray (patchbay de PipeWire): su icono
         # solo sirve para reabrir la UI, asi que se oculta. El id del
         # StatusNotifierItem es el applicationName de Qt ("qpwgraph").
-        hiddenIcons = [ "qpwgraph" ];
+        # blueman-applet corre solo como agente BlueZ (emparejar HID, ver
+        # hyprland-home.nix) y su blueman-tray duplica el icono de bluetooth de
+        # Caelestia. Su SNI Id es literal "blueman"
+        # (blueman/main/indicators/StatusNotifierItem.py:100).
+        hiddenIcons = [ "qpwgraph" "blueman" ];
       };
       clock = {
         background = false;
