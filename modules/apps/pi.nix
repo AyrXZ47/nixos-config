@@ -21,16 +21,20 @@ let
   # default `system` hereda el verde de la terminal), el cursor REAL del
   # terminal (showHardwareCursor: kitty dibuja `cursor_trail` sobre el cursor
   # de hardware, y con el cursor falso que pi pinta por defecto no hay estela)
-  # y `tuiMode = "regular"`.
+  # y `tuiMode = "fullscreen"` con rueda de 1 linea.
   #
-  # POR QUE regular: en fullscreen pi intercepta la rueda con su
-  # WheelScrollAccelerator (N lineas discretas por evento, sin easing); en
-  # regular el terminal es duenio del scrollback y scrollea kitty, que es
-  # suave. COSTO ACEPTADO: el panel de TODO de gentle-shell es un rail del
-  # sidebar y el sidebar solo existe en fullscreen, asi que en regular no se
-  # ve; la lista igual llega al modelo como mensaje oculto. Se probo volver a
-  # fullscreen y el usuario eligio el scroll suave.
-  # REGLA: estos 6 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
+  # POR QUE fullscreen (se probo regular y se volvio): en `regular` pi usa
+  # TuiMainScreen, NO entra al alternate screen y deja el texto en el
+  # scrollback de kitty, que scrollea por pixeles con inercia (suave de
+  # verdad). Pero al ceder la pantalla se pierde el sidebar de gentle-shell, y
+  # con el el panel de TODO: el rail solo existe en el layout fullscreen. Se
+  # eligio el TODO sobre el scroll suave.
+  # `fullscreenWheelScrollLines = 1` es la granularidad mas fina posible en
+  # fullscreen: un evento de rueda = una linea (en `auto`, un giro rapido
+  # avanza hasta 6 lineas por evento). No hay easing: pi mueve lineas enteras,
+  # y una TUI no puede recibir scroll sub-linea (eso es del scrollback de
+  # kitty, no de una app con mouse propio).
+  # REGLA: estos 7 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
   # rebuild abre pi con deepseek-v4.1-flash sin tocar nada, aunque su
   # settings.json previo dijera otro modelo (pasaba: un host quedaba clavado en
   # deepseek/deepseek-v4-pro porque el seed solo aplicaba con `! -f`). Las
@@ -42,7 +46,8 @@ let
     defaultThinkingLevel = "off";
     theme = "cyberpunk";
     showHardwareCursor = true;
-    tuiMode = "regular";
+    tuiMode = "fullscreen";
+    fullscreenWheelScrollLines = 1;
   });
 
   # Routing de modelos de gentle-ai: TODOS los roles de agente usan
