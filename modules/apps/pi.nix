@@ -17,7 +17,9 @@ let
   # bajo proot); en los hosts de escritorio cae al pkgs.nodejs normal.
   nodePackage = config._module.args.nodePackage or pkgs.nodejs;
   # Defaults de arranque de pi: el modelo de opencode-go (DeepSeek V4.1 Flash),
-  # thinking OFF (sin reasoning, no quemar tokens), el tema cyberpunk (el
+  # thinking MAX (decision del dueno 2026-10-25: lo ponia a mano en cada host
+  # asi que se fija en el flake; se paga en tokens de reasoning a cambio de
+  # mejor criterio), el tema cyberpunk (el
   # default `system` hereda el verde de la terminal), el cursor REAL del
   # terminal (showHardwareCursor: kitty dibuja `cursor_trail` sobre el cursor
   # de hardware, y con el cursor falso que pi pinta por defecto no hay estela)
@@ -49,7 +51,7 @@ let
   settingsSeed = pkgs.writeText "pi-settings.json" (builtins.toJSON {
     defaultProvider = "opencode-go";
     defaultModel = "deepseek-v4.1-flash";
-    defaultThinkingLevel = "off";
+    defaultThinkingLevel = "max";
     theme = "cyberpunk";
     showHardwareCursor = true;
     tuiMode = "fullscreen";
