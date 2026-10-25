@@ -397,6 +397,17 @@ in
     networkmanagerapplet
   ];
 
+  # --- Agente BlueZ (emparejar HID) ---
+  # Caelestia/quickshell 0.3.2 maneja org.bluez.Adapter1 y Device1 (por eso el
+  # panel lista, conecta y hasta llama Pair()) pero NO implementa
+  # org.bluez.Agent1: no tiene forma de contestar el passkey. Sin default agent
+  # bluez corta el pairing con "new_auth() No agent available for request type 2"
+  # y el teclado BLE nunca bonda. El AuthAgent de blueman-applet registra el
+  # default agent con capability KeyboardDisplay: el dialogo de confirmacion
+  # sale del applet (tray), no del shell. Requiere services.blueman.enable en
+  # modules/desktop/hyprland.nix.
+  services.blueman-applet.enable = true;
+
   # --- Agente de secretos de NetworkManager ---
   # SIN esto, NM no puede pedir la PSK del Wi-Fi cuando el AP cae y el perfil
   # tiene que re-autenticar: falla al instante con

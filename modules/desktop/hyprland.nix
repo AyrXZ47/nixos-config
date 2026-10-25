@@ -99,6 +99,15 @@ in
     # bonding (superficie del CVE-2020-27263); si algún día los mandos bondan
     # de verdad, borrar este bloque.
     hardware.bluetooth.input.General.ClassicBondedOnly = false;
+    # Agente BlueZ. Sin un default agent registrado en el bus, bluez aborta el
+    # emparejamiento que pide confirmar passkey:
+    #   src/device.c:new_auth() No agent available for request type 2
+    #   device_confirm_passkey: Operation not permitted
+    # y el teclado se queda sin bondar. El panel de Caelestia solo llama
+    # Device1.Pair() (quickshell 0.3.2 no implementa org.bluez.Agent1), asi que
+    # el agente lo levanta blueman-applet en la sesion (hyprland-home.nix); aqui
+    # se habilita el lado sistema: D-Bus org.blueman.Mechanism y sus units.
+    services.blueman.enable = true;
     services.upower.enable = true;
     # Brillo de monitores externos via DDC/CI (i2c) con ddcutil
     hardware.i2c.enable = true;
