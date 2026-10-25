@@ -26,9 +26,13 @@ let
   # POR QUE fullscreen (se probo regular y se volvio): en `regular` pi usa
   # TuiMainScreen, NO entra al alternate screen y deja el texto en el
   # scrollback de kitty, que scrollea por pixeles con inercia (suave de
-  # verdad). Pero al ceder la pantalla se pierde el sidebar de gentle-shell, y
-  # con el el panel de TODO: el rail solo existe en el layout fullscreen. Se
-  # eligio el TODO sobre el scroll suave.
+  # verdad). El motivo REAL de volver no es el TODO: en regular el input es la
+  # ultima linea del stream (no hay composer fijo), asi que al empezar a
+  # escribir kitty salta al final y uno se pierde entre los outputs, avisos y
+  # pensamiento acumulados. Eso es inherente a ceder la pantalla, no una
+  # opcion. En fullscreen pi tiene layout propio: transcript arriba y
+  # composer clavado abajo. Secundario: el sidebar de gentle-shell (con el
+  # panel de TODO) tambien es solo de fullscreen.
   # `fullscreenWheelScrollLines = 1` es la granularidad mas fina posible en
   # fullscreen: un evento de rueda = una linea (en `auto`, un giro rapido
   # avanza hasta 6 lineas por evento). No hay easing: pi mueve lineas enteras,
