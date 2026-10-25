@@ -418,10 +418,10 @@ in
     # octaveFull trae la GUI Qt; el octave base viene sin GUI (solo CLI).
     octaveFull
     ollama
-    # rtk: proxy CLI que comprime la salida de comandos (git, cargo, grep, etc.)
-    # para agentes tipo opencode (60-90% menos tokens). Los plugins de opencode
-    # lo esperan en el PATH, por eso va en systemPackages de todos los hosts.
-    rtk
+    # rtk: FUERA (2026-10-24). No esta en cache.nixos.org (404): se compilaba en
+    # cada host, su suite de 4265 tests tarda 585 s y falla de forma flaky, y eso
+    # abortaba el switch entero. Si vuelve, que sea release prebuilt commiteado
+    # (patron de nix-on-droid/opencode), nunca `pkgs.rtk`.
     # whisper-cli en el PATH del sistema para `subtitular` (shell.nix). Antes
     # lo proveia el wrapper de shotcut; al quitar ese override (rompia el cache
     # del paquete) se instala aqui, con Vulkan para la RX 7600. Es el mismo
