@@ -45,8 +45,9 @@ let
     # renderer propio (se probo neovide, ver arriba, y se descarto).
     #
     # IMPORTANTE (snacks.animate): duration = step * lineas, con tope en total.
-    # Con step = 400 cada linea de un <C-d> anima 400 ms, o sea que se siente
-    # lento. Si molesta, volver al default step = 8.
+    # `step` esta en 8 (el default), o sea animaciones cortas: para teclado se
+    # siente inmediato. Si alguna vez se quiere deslizamiento lento en teclado,
+    # subir `step` (400 = 400 ms por linea).
     ".config/nvim/lua/plugins/scroll.lua" = {
       text = ''
         return {
@@ -54,8 +55,8 @@ let
             "folke/snacks.nvim",
             opts = {
               scroll = {
-                animate = { duration = { step = 400, total = 400 }, easing = "linear" },
-                animate_repeat = { delay = 0, duration = { step = 400, total = 400 }, easing = "linear" },
+                animate = { duration = { step = 8, total = 400 }, easing = "linear" },
+                animate_repeat = { delay = 0, duration = { step = 8, total = 400 }, easing = "linear" },
               },
             },
           },
