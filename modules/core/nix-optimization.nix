@@ -37,7 +37,13 @@ let
       optimise) nix-store --optimise ;;
       smart) smartctl -t short "$nvme" ;;
       smart-log) smartctl -a "$nvme"; smartctl -l selftest "$nvme" ;;
-      fwupd) fwupdmgr refresh ;;
+      fwupd)
+        # Solo chequeo: lista lo que hay para flashear. El flash real es
+        # `fwupd-apply`, y eso lo corre un humano (ver AGENTS.md).
+        fwupdmgr refresh
+        echo
+        fwupdmgr get-updates || echo "sin actualizaciones de firmware pendientes"
+        ;;
       # Flash real de firmware: a proposito SEPARADO de `all`. Un corte a mitad
       # de un flash no lo cubre el rollback de NixOS; lo corre un humano
       # decidiendo, con la maquina enchufada y quieta.

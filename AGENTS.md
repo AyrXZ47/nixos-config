@@ -80,6 +80,22 @@ un solo núcleo, y cualquier trabajo que tenga variante GPU usa la GPU.
   pasarlo explícito: `make -j"$(nproc)"`, `cargo -j"$(nproc)"`,
   `xargs -P"$(nproc)"`, `pnpm --workspace-concurrency "$(nproc)"`. Nunca dejar un
   proceso CPU-only en un hilo si acepta `-j`.
+## Lo que el agente hace solo y lo que NO (obligatorio)
+
+**Hace solo, sin preguntar:** `mantenimiento audit` y `mantenimiento all` (trim,
+scrub, poda, GC, optimise, test corto de NVMe) en cualquier host, `nix flake
+update`, `nix flake check`, commits y push del repo, `deploy <host>`.
+
+**Nunca hace solo:** `fwupdmgr update` — el flash de firmware. Un corte a mitad
+no lo cubre el rollback de NixOS, así que lo corre el humano, con la máquina
+enchufada y quieta.
+
+**Cuando algo quede pendiente que requiera manos humanas**, el agente NO lo
+ejecuta "para probar": **avisa y deja la lista exacta de comandos**, uno por
+línea, listos para copiar, indicando en qué host va cada uno (por ejemplo
+`sudo mantenimiento fwupd` para listar, y el `fwupdmgr update` resultante por
+host). Si no hay nada pendiente, lo dice en una línea y sigue.
+
 ## Overlays: la menor cantidad posible (obligatorio)
 
 Un overlay cambia el hash de la derivacion: la saca de `cache.nixos.org` y la
