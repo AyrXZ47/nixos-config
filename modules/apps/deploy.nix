@@ -27,13 +27,13 @@ let
 
     # Local: el hostname es nixos-<host> y estamos en esa máquina.
     if [ "$me" = "nixos-$host" ]; then
-      exec sudo nixos-rebuild switch --flake "$repo#$host"
+      exec sudo nixos-rebuild --impure switch --flake "$repo#$host"
     fi
 
     # Remoto: actualizar el repo ALLÁ y rebuildear con TTY para sudo.
     # --ff-only: si el repo remoto divergió, falla en vez de inventar un merge.
     exec ssh -t "yovick@nixos-$host" \
-      "git -C '$repo' pull --ff-only && sudo nixos-rebuild switch --flake '$repo#$host'"
+      "git -C '$repo' pull --ff-only && sudo nixos-rebuild --impure switch --flake '$repo#$host'"
   '';
 in
 {
