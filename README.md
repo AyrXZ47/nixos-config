@@ -58,9 +58,10 @@ flake.nix              # Entry point — hosts & shared modules
 - **Caelestia** — shell Quickshell (Qt6/QML): barra lateral izquierda con
   workspaces, clock, notificaciones, batería, clipboard, emoji, launcher,
   dashboard (media/perf), utilities y menú de sesión. Lock e idle propios: a
-  los 15 min de inactividad bloquea (vía `lock.sh`, así corre el wipe de
-  cliphist y el perfil RGB) y al minuto apaga la pantalla; no suspende (el
-  S3 de `pc` aborta al instante, ver `modules/hardware/openrgb.nix`). Config
+  los 30 min de inactividad bloquea (vía `lock.sh`, así corre el wipe de
+  cliphist y el perfil RGB) y diez minutos después apaga la pantalla; no
+  suspende (el S3 de `pc` aborta al instante, ver
+  `modules/hardware/openrgb.nix`). Config
   declarativa en `modules/desktop/caelestia.nix` (`shell.json`).
 - **rofi** — drun/run launchers with a custom `cyberpunk.rasi` theme.
 - polkit-gnome agent, `cliphist` clipboard manager, `hyprshot` screenshots,
