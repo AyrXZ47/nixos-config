@@ -6,7 +6,7 @@ let
   binaryCacheName = "ayrxz47-nixos-config";
   # Clave publica de la cache. Vacia = cache deshabilitada (no se agrega como
   # substituter ni como clave): el sistema queda igual que sin esto.
-  binaryCacheKey = "";
+  binaryCacheKey = "+amyGHz3O38pkhJqZBhmM85KH/mYhCekYmjIolhRIkI=";
 in
 {
   # ── Paralelismo absoluto ──────────────────────────────────────────────────
