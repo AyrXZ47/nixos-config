@@ -11,7 +11,14 @@
   # el home no puede resolver pkgs.pi / pkgs.gentle-ai (falla con "attribute
   # 'pi' missing"). Se pasan las derivaciones ya construidas por
   # extraSpecialArgs, que es la misma via que ya usan opencodeTarball/rtk.
-  home-manager.extraSpecialArgs = { inherit opencodeTarball rtkTarball piOverlay nixpkgs gentleAiOverlay; };
+  # hostName: en los hosts de escritorio lo inyecta mkHost (flake.nix) y
+  # fastfetch.nix lo exige para calcular el ancho de la caja con el largo de
+  # {host-name}. Bajo proot el kernel reporta "localhost" (sin opcion
+  # networking.hostName en nix-on-droid), asi que ese es el valor a inyectar.
+  home-manager.extraSpecialArgs = {
+    inherit opencodeTarball rtkTarball piOverlay nixpkgs gentleAiOverlay;
+    hostName = "localhost";
+  };
 
   # OJO: el default de nix-on-droid es bash. Sin esto la terminal abre en bash:
   # sin p10k, sin aliases (tree/dev/ll), sin fastfetch al abrir, sin fzf. El
