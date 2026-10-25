@@ -29,14 +29,16 @@ let
       '';
     };
     # Scroll tipo trackpad. El motor ya lo trae LazyVim (Snacks.scroll anima
-    # <C-d>/<C-u> y tambien <ScrollWheelUp/Down>), esto es solo ajuste fino:
-    # con los defaults (animacion de 200 ms y, tras 100 ms de repeticion, un
-    # "repeat" de 50 ms) un arrastre continuo cae al modo rapido y se siente a
-    # saltos. Aca el total sube a 260 ms y el delay del repeat va a 0, asi el
-    # arrastre anima siempre a la misma velocidad.
-    # OJO: no se puede pedir mas que esto. El scroll sub-lineal y la inercia
-    # (pixel_scroll / momentum_scroll de kitty) son del scrollback de kitty y
-    # no aplican a TUIs con mouse propio como nvim.
+    # <C-d>/<C-u> y tambien <ScrollWheelUp/Down>), esto es solo ajuste fino.
+    # IMPORTANTE (snacks.animate): duration = step * lineas, con tope en total.
+    # Con el default step = 8 y una rueda de 1 linea por evento, cada paso
+    # animaba 8*1 = 8 ms: eso se ve como salto, no como deslizamiento. El numero
+    # que manda es `step`; `total` solo limita los saltos grandes (Ctrl-D).
+    # OJO: esto NO elimina el quantum de 1 linea. Un TUI solo recibe eventos de
+    # rueda enteros; el scroll sub-linea con inercia es del scrollback de kitty
+    # (pixel_scroll/momentum_scroll) y no aplica a apps con mouse propio. Para
+    # eso esta neovide. Aca solo se hace mas lento el deslizamiento de cada
+    # linea.
     ".config/nvim/lua/plugins/scroll.lua" = {
       text = ''
         return {
@@ -44,8 +46,8 @@ let
             "folke/snacks.nvim",
             opts = {
               scroll = {
-                animate = { duration = { step = 8, total = 260 }, easing = "linear" },
-                animate_repeat = { delay = 0, duration = { step = 8, total = 260 }, easing = "linear" },
+                animate = { duration = { step = 400, total = 400 }, easing = "linear" },
+                animate_repeat = { delay = 0, duration = { step = 400, total = 400 }, easing = "linear" },
               },
             },
           },
