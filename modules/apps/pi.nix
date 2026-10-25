@@ -38,6 +38,8 @@ let
   # avanza hasta 6 lineas por evento). No hay easing: pi mueve lineas enteras,
   # y una TUI no puede recibir scroll sub-linea (eso es del scrollback de
   # kitty, no de una app con mouse propio).
+  # Va en 3 para ir a la par de neovim (`mousescroll = ver:3`): 1 linea por
+  # evento se sentia absurdamente lento en las dos herramientas.
   # REGLA: estos 7 campos son PROPIEDAD DEL FLAKE — cualquier host que haga
   # rebuild abre pi con deepseek-v4.1-flash sin tocar nada, aunque su
   # settings.json previo dijera otro modelo (pasaba: un host quedaba clavado en
@@ -51,7 +53,7 @@ let
     theme = "cyberpunk";
     showHardwareCursor = true;
     tuiMode = "fullscreen";
-    fullscreenWheelScrollLines = 1;
+    fullscreenWheelScrollLines = 3;
   });
 
   # Routing de modelos de gentle-ai: TODOS los roles de agente usan
