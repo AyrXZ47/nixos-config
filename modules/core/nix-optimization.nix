@@ -94,6 +94,23 @@ in
   #   sudo nix-store --optimise
   #   nix flake update && sudo nixos-rebuild switch --flake .#<host>
 
+  # ── Generaciones: EXACTAMENTE 3, sin timer ────────────────────────────────
+  # `boot.loader.systemd-boot.configurationLimit` (abajo) solo acota las
+  # ENTRADAS del bootloader, no las generaciones del perfil: el perfil crece
+  # igual, y esa es la razon de que el limite de 3 "nunca se respetara". Lo
+  # unico que podaba era `nix.gc` (eliminado el 2026-10-21 por ser timer), asi
+  # que desde entonces se acumulaban hasta que alguien corriera el
+  # `--delete-generations +3` a mano.
+  # Esto lo hace en cada activacion: son milisegundos, borra symlinks de
+  # generacion (NO borra datos del store) y `nix-env` nunca elimina la
+  # generacion en uso, ni siquiera despues de un rollback a una vieja.
+  # Liberar el espacio sigue siendo manual a proposito: `nix-collect-garbage`
+  # es lo que tarda, y el ritual ya lo corre.
+  system.activationScripts.pruneSystemGenerations = ''
+    ${config.nix.package}/bin/nix-env -p /nix/var/nix/profiles/system \
+      --delete-generations +3 >/dev/null 2>&1 || true
+  '';
+
   # ── Logs: journald acotado a 100M ─────────────────────────────────────────
   # Sustituye el journalctl --vacuum-size de Fedora: se limita una vez y nunca
   # más hay que vaciar a mano (equivalente al --vacuum-size=100M mensual).
