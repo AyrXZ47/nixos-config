@@ -4,6 +4,11 @@ result*
 *.qcow2
 .aider*
 
+# Logs de neovide: `neovide --log` escribe TRACE en el CWD (16 MB en un
+# minuto). Nunca al repo; se probo neovide y se descarto, pero si alguien lo
+# vuelve a lanzar con --log desde aca, que no quede suelto.
+neovide_r*.log
+
 # --- Agentes IA: memorias y estado local (NUNCA al repo) ---
 .serena/
 .engram/
