@@ -260,10 +260,11 @@ in
       hl.bind("SUPER + CTRL + N", hl.dsp.global("caelestia:sidebar"))
       hl.bind("SUPER + CTRL + Space", hl.dsp.global("caelestia:launcher"))
       hl.bind("SUPER + CTRL + D", hl.dsp.global("caelestia:dashboard"))
-      -- SUPER+CTRL+Q (menu de sesion) RETIRADO 2026-08-12: era el atajo que
-      -- dejaba apagar/reiniciar/cerrar sesion a dos teclas y arruinaba trabajo
-      -- en vivo. El bloqueo tiene su propio atajo (SUPER+L) y el idle; las
-      -- acciones destructivas solo quedan por mouse (menu de sesion / launcher).
+      -- SUPER+CTRL+Q abre el menu de sesion. Restaurado 2026-08-12: se habia
+      -- retirado junto con SUPER+M, pero el menu NO ejecuta nada por si solo
+      -- (exige un click sobre la accion); lo que mataba el trabajo era SUPER+M
+      -- (hl.dsp.exit), y ese sigue eliminado mas abajo.
+      hl.bind("SUPER + CTRL + Q", hl.dsp.global("caelestia:session"))
       hl.bind("SUPER + CTRL + U", hl.dsp.global("caelestia:utilities"))
       hl.bind("SUPER + CTRL + K", hl.dsp.global("caelestia:showall"))
       -- Clipboard/emoji pickers nativos de Caelestia (fuzzel). Sustituyen al
