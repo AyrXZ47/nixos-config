@@ -55,7 +55,13 @@ let
         echo "== 3/5 generaciones + gc =="
         nix-env -p /nix/var/nix/profiles/system --delete-generations +6
         nix-collect-garbage
-        echo "== 4/5 optimise =="; nix-store --optimise
+        echo "== 4/5 optimise =="
+        # Un gcroot colgado (symlink a un path que el GC ya borro) hace fallar
+        # `nix-store --optimise` con "getting status of ...: No such file".
+        # Se podan ANTES, y si igual falla no corta el ritual: optimise es
+        # dedup (ahorra espacio), no correctitud.
+        find /nix/var/nix/gcroots /nix/var/nix/profiles -xtype l -delete 2>/dev/null || true
+        nix-store --optimise || echo "AVISO: optimise fallo (queda algun gcroot colgado); el ritual sigue"
         echo "== 5/5 smart (test corto, no bloquea) =="; smartctl -t short "$nvme"
         ;;
       # Equivalente al `-Syyu`: aplica el repo tal como está en disco. NO hace
