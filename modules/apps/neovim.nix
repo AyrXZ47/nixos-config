@@ -28,26 +28,10 @@ let
         }
       '';
     };
-    # Neovide (frontend GUI de neovim): la TUI tomaba estas cosas de kitty, asi
-    # que en neovide hay que declararlas o se ve distinto:
-    #  - guifont es GUI-only. Sin esto neovide cae a su fuente por defecto. Se
-    #    replica la de kitty (modules/apps/kitty.nix: JetBrainsMono Nerd Font 14).
-    #    Los espacios de la familia van escapados: es sintaxis de guifont.
-    #  - scroll: la TUI de kitty desplaza por pixeles; aca el equivalente es la
-    #    animacion de neovide. El default (0.15 s) se sentia lento.
-    # OJO: este archivo solo define vim.g, no registra plugins, por eso devuelve
-    # una tabla vacia (lo importa `{ import = "plugins" }` de LazyVim).
-    ".config/nvim/lua/plugins/neovide.lua" = {
-      text = ''
-        if vim.g.neovide then
-          vim.o.guifont = "JetBrainsMono\\ Nerd\\ Font:h14"
-          vim.g.neovide_scroll_animation_length = 0.07
-          vim.g.neovide_scroll_animation_far_lines = 4
-          vim.g.neovide_hide_mouse_when_typing = true
-        end
-        return {}
-      '';
-    };
+    # Neovide: se probo y se descarto. Es un frontend GUI (no un fork) que
+    # renderiza con GPU y da scroll sub-linea de verdad, pero se congelaba y
+    # terminaba killed sin log util. La TUI de kitty queda como unico cliente.
+    # Se deja anotado para no repetir el experimento a ciegas.
     # Scroll tipo trackpad. El motor ya lo trae LazyVim (Snacks.scroll anima
     # <C-d>/<C-u> y tambien <ScrollWheelUp/Down>), esto es solo ajuste fino.
     # IMPORTANTE (snacks.animate): duration = step * lineas, con tope en total.
@@ -362,11 +346,6 @@ in
   home.packages = with pkgs; [
     gcc
     lua-language-server
-    # neovide: frontend GUI de neovim, con scroll sub-linea y cursor animado de
-    # verdad (lo que una TUI no puede: kitty solo acelera SU scrollback, no el
-    # de la app). Viene del canal, asi que el rebuild BAJA el binario cacheado
-    # en vez de compilar Rust. Se lanza con `neovide`; lee la misma config.
-    neovide
     stylua
     typescript-language-server
     pyright
