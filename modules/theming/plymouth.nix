@@ -7,8 +7,9 @@
     themePackages = lib.mkForce [ pkgs.adi1090x-plymouth-themes ];
   };
 
-  boot.initrd.systemd.enable = true;
-  boot.initrd.verbose = false;
+  # initrd con systemd es obligatorio desde que nixpkgs saco el stage 1 scripted
+  # (26.11): `boot.initrd.systemd.enable` y `boot.initrd.verbose` ya no existen
+  # como opciones, su sola definicion es un error de evaluacion.
   # quiet/splash/loglevel viven UNA vez en modules/core/nix-optimization.nix
   # (todos los hosts). consoleLogLevel=0 se saco: fijaba loglevel=0 y dejaba la
   # consola muda justo cuando se necesita ver un freeze en vivo.
