@@ -232,6 +232,9 @@ Gotchas (vistos en la práctica):
 - Las descargas grandes de NetAcad se estancan a mitad (quedan archivos
   `*.deb.part` gigantes en `~/Downloads`): retomar el `.part` o traer el `.deb`
   desde otra máquina por LAN (misma red) es más rápido que reintentar desde cero.
+- Obsidian va píneado a `electron_42` en `home/default.nix`: con el electron que
+  resuelve nixpkgs (43.x) el renderer tira `webFrame ... undefined` y la ventana
+  queda gris. Si un bump de nixpkgs lo arregla, se saca el override.
 
 ## Performance & Tuning
 

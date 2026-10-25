@@ -86,7 +86,10 @@ in
     gentle-ai
     gh
     libnotify
-    obsidian
+    # electron 43 (el que resuelve nixpkgs para obsidian) rompe el renderer de
+    # obsidian 1.14.5: la ventana queda gris. Volver a `obsidian` sin override
+    # cuando nixpkgs pinee de nuevo.
+    (obsidian.override { electron = electron_42; })
     pi-coding-agent
     pipes-rs
     ripgrep
