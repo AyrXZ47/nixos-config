@@ -1,0 +1,58 @@
+name: binary-cache
+
+# Construye SOLO lo que cache.nixos.org nunca puede tener: los paquetes que
+# nacen en los overlays de este flake (y que por lo tanto compilan en cada host
+# en cada bump). El resto del sistema (libreoffice, kicad, JDKs, ollama...) lo
+# sirve cache.nixos.org y no se toca aca.
+#
+# Los runners de GitHub tienen ~14 GB de disco: construir un toplevel completo
+# (48 GB de closure) es imposible, y ademas innecesario. Por eso se construyen
+# los paquetes sueltos, no `nixosConfigurations.<host>`.
+#
+# El nombre de la cache tiene que coincidir con `binaryCacheName` en
+# modules/core/nix-optimization.nix.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "flake.nix"
+      - "flake.lock"
+      - "modules/**"
+      - "hosts/**"
+  schedule:
+    # Diario: recalienta la cache despues de cada bump de canal.
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: binary-cache-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - uses: cachix/cachix-action@v15
+        with:
+          name: ayrxz47-nixos-config
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      # watch-exec sube automaticamente todo lo que la corrida construya.
+      - name: Construir y subir los paquetes no cacheados upstream
+        run: |
+          cachix watch-exec ayrxz47-nixos-config -- nix build -L --no-link \
+            .#packages.x86_64-linux.gentle-ai \
+            .#packages.x86_64-linux.openrocket \
+            .#nixosConfigurations.pc.pkgs.hypr-kdeconnect-fix \
+            .#nixosConfigurations.pc.pkgs.caelestia-shell \
+            .#nixosConfigurations.pc.pkgs.bibata-material-deep-blue \
+            .#nixosConfigurations.pc.pkgs.kicad-spice-library

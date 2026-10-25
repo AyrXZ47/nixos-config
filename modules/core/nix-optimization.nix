@@ -1,5 +1,13 @@
 { config, lib, ... }:
 
+let
+  # Cache binaria propia (ver abajo). El workflow de CI usa el MISMO nombre:
+  # si se cambia aca, cambia tambien en .github/workflows/binary-cache.yml.
+  binaryCacheName = "ayrxz47-nixos-config";
+  # Clave publica de la cache. Vacia = cache deshabilitada (no se agrega como
+  # substituter ni como clave): el sistema queda igual que sin esto.
+  binaryCacheKey = "";
+in
 {
   # ── Paralelismo absoluto ──────────────────────────────────────────────────
   # cores = 0   → Nix no se limita; usa todos los disponibles
@@ -15,14 +23,27 @@
 
   # ── Cachés binarios ──────────────────────────────────────────────────────
   # Evita compilar Hyprland desde cero
-  nix.settings.substituters = [
-    "https://cache.nixos.org"
-    "https://hyprland.cachix.org"
-  ];
+  nix.settings.substituters = (
+    [
+      "https://cache.nixos.org"
+      "https://hyprland.cachix.org"
+    ]
+    # cache.nixos.org solo tiene lo que Hydra construyo desde el ARBOL de
+    # nixpkgs. Los paquetes que nacen en los overlays de este flake no existen
+    # ahi (404) y dos SI compilan: hypr-kdeconnect-fix (C++) y caelestia-shell
+    # (QML parcheado). El workflow los construye en CI y los sube aca, asi que
+    # ningun host los compila mas.
+    #
+    # Puesta en marcha (una vez): crear la cache en cachix.org con este mismo
+    # nombre, `cachix use <nombre>` imprime la clave publica -> pegarla en
+    # binaryCacheKey; y el token como secret del repo:
+    #   gh secret set CACHIX_AUTH_TOKEN -b "$(cachix authtoken)"
+    ++ lib.optional (binaryCacheKey != "") "https://${binaryCacheName}.cachix.org"
+  );
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
     "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-  ];
+  ] ++ lib.optional (binaryCacheKey != "") "${binaryCacheName}-1:${binaryCacheKey}";
 
   # ── Flags experimentales (centralizado) ──────────────────────────────────
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
