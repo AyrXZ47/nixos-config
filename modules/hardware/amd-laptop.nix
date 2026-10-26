@@ -70,10 +70,14 @@ in
   # Ollama en GPU: Vulkan funciona con cualquier Radeon/APU (RADV) sin rocm pesado.
   services.ollama.package = pkgs.ollama-vulkan;
 
-  # Laptop = eficiencia: governor powersave (amd-pstate-epp gestiona boost y EPP),
-  # sin max_cstate=1 (la CPU entra en C-states profundos al reposo) y GPU dpm en
-  # auto (no hereda el amdgpu-perf de amd-desktop). power-profiles-daemon sigue
-  # deshabilitado porque pelearía con el governor.
+  # Laptop = eficiencia: governor powersave, sin max_cstate=1 (la CPU entra en
+  # C-states profundos al reposo) y GPU dpm en auto (no hereda el amdgpu-perf de
+  # amd-desktop). OJO: bajo amd_pstate=active el governor NO es un techo de
+  # frecuencia — el hardware elige la frecuencia y el governor solo expone el
+  # EPP. El techo real de potencia lo pone platform_profile (ver eppSwitch) y el
+  # EPP decide como se gasta dentro de ese techo.
+  # power-profiles-daemon sigue deshabilitado porque escribiria lo mismo que
+  # eppSwitch (dos duenos del mismo sysfs = se pisan).
   powerManagement.cpuFreqGovernor = "powersave";
   services.power-profiles-daemon.enable = lib.mkForce false;
 
@@ -83,7 +87,18 @@ in
   services.scx = {
     enable = true;
     scheduler = "scx_lavd";
+    # En bateria el modo --powersave del scheduler (empaqueta tareas en menos
+    # nucleos, deja al resto dormir) es justo lo que estira las horas. En AC el
+    # boost lo dan igual el EPP=performance y platform_profile=performance del
+    # script de arriba: aca se cambia DONDE se acomodan las tareas, no la freq.
+    # Para A/B en AC: --balanced o --performance (una palabra).
+    extraArgs = [ "--powersave" ];
   };
+
+  # Boot: NetworkManager-wait-online bloquea multi-user.target esperando que
+  # "haya red", y en una laptop con wifi eso son varios segundos de nada.
+  # Solo lo consultan servicios que aca ya corren tarde (cups, etc.).
+  systemd.services.NetworkManager-wait-online.enable = false;
 
   # EPP por estado de energia (medido 2026-08-17): balance_power dejaba el CPU
   # clavado en ~1.4GHz en TODOS los escenarios (idle quemando watts sin bajar de
