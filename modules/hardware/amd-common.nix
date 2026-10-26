@@ -4,13 +4,7 @@
   # AMD CPU microcode
   hardware.cpu.amd.updateMicrocode = true;
 
-  # Kernel CachyOS (overlay de chaotic-nyx, ver flake.nix): 7.3.0 compilado con
-  # clang thin-LTO y -O3, PREEMPT full, HZ 1000, hugepages always, sched_ext.
-  # Se DESCARGA de nyx-cache.chaotic.cx (kernel + modulos cacheados), no compila.
-  # Por que no zen: zen es -O2 sin LTO y el scheduler de CachyOS reparte mejor
-  # la latencia, que es lo que se siente en Hyprland/juegos.
-  boot.kernelPackages = pkgs.linuxPackages_cachyos;
-
+  # El kernel vive en modules/core/kernel-cachyos.nix (igual para los 4 hosts).
   # Common AMD GPU support
   hardware.graphics = {
     enable = true;

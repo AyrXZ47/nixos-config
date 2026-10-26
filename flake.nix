@@ -864,6 +864,8 @@ PYEOF
 
           ./modules/core/nix-optimization.nix
           ./modules/core/hardening.nix
+          # Kernel CachyOS v3 para los 4 hosts (kernel 7.3.0 LTO/-O3, sched_ext).
+          ./modules/core/kernel-cachyos.nix
         ] ++ hostModules;
       };
     in
