@@ -67,6 +67,14 @@ in
   powerManagement.cpuFreqGovernor = "powersave";
   services.power-profiles-daemon.enable = lib.mkForce false;
 
+  # Sched-ext scx_lavd: el mismo reparto por criticidad que en la pc, pensado
+  # para latencia + consumo (es el scheduler que usa Steam Deck). Encaja con
+  # `powersave` + EPP: el governor fija el techo de frecuencia, scx el turno.
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
+
   # EPP por estado de energia (medido 2026-08-17): balance_power dejaba el CPU
   # clavado en ~1.4GHz en TODOS los escenarios (idle quemando watts sin bajar de
   # P-state y sin boost bajo carga) - lo peor de ambos mundos: ni ahorro ni

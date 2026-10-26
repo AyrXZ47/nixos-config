@@ -13,6 +13,16 @@
   # laptop y server NO heredan esto. La laptop usa governor powersave + C-states
   # profundos + GPU dpm auto para batería/temperatura.
   powerManagement.cpuFreqGovernor = "performance";
+
+  # Sched-ext: scx_lavd decide a quien le toca CPU por criticidad de latencia
+  # (Hyprland y juegos por encima de un `nix build`), en userspace sobre el
+  # kernel. Solo necesita CONFIG_SCHED_CLASS_EXT, que trae el kernel de CachyOS
+  # (zen tambien lo trae desde 6.12). Si el kernel no lo soporta, el modulo
+  # arranca condicionado a /sys/kernel/sched_ext y no rompe nada.
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
   boot.kernelParams = [
     "processor.max_cstate=1"
     # ASPM apagado en todo el PCIe (vivia en amd-common, es SOLO pc/server): con
