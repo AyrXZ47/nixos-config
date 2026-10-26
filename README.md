@@ -17,7 +17,7 @@ and a hand-rolled cyberpunk theme (magenta `#ed1044` / cyan `#00f0ff` on deep na
 | Host     | Role      | Hardware                  | GPU          | Tuning                                    |
 | -------- | --------- | ------------------------- | ------------ | ----------------------------------------- |
 | `pc`     | Desktop   | Ryzen 5700X               | RX 7600      | `amd_pstate=active`, governor `performance` |
-| `laptop` | Mobile    | AMD laptop (ThinkPad-ish) | Integrated   | `amd_pstate=active` (común), governor `powersave`, EPP `balance_power` |
+| `laptop` | Mobile    | AMD laptop (ThinkPad-ish) | Integrated   | `amd_pstate=active` (común), governor `powersave`, EPP `power`/`performance` y `platform_profile` `low-power`/`performance` según batería/AC |
 | `server` | Headless  | AMD                       | (none)       | `amd-common` only, no desktop             |
 | `vm`     | Virtual   | QEMU/VMware               | virtio/vmwgfx| virtio initrd, LUKS + btrfs subvols      |
 
@@ -39,7 +39,7 @@ flake.nix              # Entry point — hosts & shared modules
 ├── modules/
 │   ├── apps/          # Applications (system + home)
 │   ├── core/          # User & Nix daemon tuning
-│   ├── desktop/       # Hyprland (system + home), Caelestia shell, rofi
+│   ├── desktop/       # Hyprland (system + home), Caelestia shell
 │   ├── hardware/      # AMD tuning (common, desktop, laptop)
 │   └── theming/       # Cursor/fonts, Plymouth, wallpapers
 ├── home/              # Home Manager entry point (user `yovick`)
@@ -65,7 +65,6 @@ flake.nix              # Entry point — hosts & shared modules
   suspende (el S3 de `pc` aborta al instante, ver
   `modules/hardware/openrgb.nix`). Config
   declarativa en `modules/desktop/caelestia.nix` (`shell.json`).
-- **rofi** — drun/run launchers with a custom `cyberpunk.rasi` theme.
 - polkit-gnome agent, `cliphist` clipboard manager, `hyprshot` screenshots,
   animated wallpapers via **mpvpaper** (looped mp4) driven through Caelestia's
   `wallpaper.postHook` (the shell computes the Material You scheme from the
@@ -260,16 +259,19 @@ Gotchas (vistos en la práctica):
   on the command line so the first switch substitutes instead of compiling.
 - AMD microcode, `hardware.graphics` 32-bit.
 - `zramSwap` at 50% memory.
-- `quiet splash loglevel=3` is declared once, in `nix-optimization.nix`, for
-  every host; `loglevel=0` was removed so a live freeze still shows on console.
+- `quiet` is declared once, in `nix-optimization.nix`, for every host;
+  `splash` lo agrega el módulo de plymouth en los hosts que lo tienen, y
+  `loglevel=0` was removed so a live freeze still shows on console.
 - Common kernel params: `split_lock_detect=off`. The NMI watchdog is deliberately
   left ON — with it off a whole-system freeze leaves no trace at all.
 - Desktop: `amd_pstate=active`, `mitigations=off`, `max_cstate=1`, `performance`
-  governor, amdgpu in initrd (early KMS), `scx_lavd` (sched_ext, userspace).
-- Laptop: `powersave` governor + EPP `balance_power` (boost bajo demanda, reposo
-  profundo), `scx_lavd` (latencia + consumo), sin `max_cstate=1`, touchpad
-  libinput (clickfinger, natural scrolling, RMI4 via
-  `psmouse.synaptics_intertouch=1`), iio sensors, NetworkManager with iwd.
+  governor, `scx_lavd --performance` (sched_ext, userspace), `MESA_SHADER_CACHE_MAX_SIZE=8G`.
+- Laptop: `powersave` governor + EPP `power` en batería y `performance` en AC,
+  `platform_profile` `low-power`/`performance` por el mismo script, `scx_lavd
+  --powersave`, sin `max_cstate=1`, touchpad libinput (clickfinger, natural
+  scrolling), iio sensors, NetworkManager con wpa_supplicant.
+- Root en `pc`/`laptop`: btrfs montado con `discard=async` (`modules/core/btrfs.nix`),
+  TRIM continuo sin timer `fstrim`.
 - VM: virtio/VMware guest modules, QEMU guest agent, SPICE.
 
 ### Fingerprint (`modules/hardware/fingerprint.nix`)
@@ -316,37 +318,6 @@ quedaba sin huella hasta el siguiente bloqueo. El flake parchea
 `modules/lock/Pam.qml` para que `onResumed` reinicie el fprint y sondee la
 disponibilidad hasta que el sensor reenumere (~30 s).
 
-### Autoscroll con botón central (`modules/hardware/wheeltani.nix`)
-Replica el trackpoint del laptop en el PC (solo activo en `pc`): mantener el
-**botón central** y mover el mouse scrolla en esa dirección (la velocidad
-sigue la distancia al punto de presión). Lo hace **wayland-wheeltani**
-(input flake, no va en nixpkgs), daemon evdev→uinput que graba el mouse físico
-y emite un mouse virtual — funciona con cualquier compositor Wayland.
-
-- El mouse se empareja por USB ids (`device.vendorId`/`productId`), así
-  sobrevive reinicios y cambios de puerto. PC: SHARKOON vía su dongle
-  **`0c45:fefe`** (OJO: no usar el ID de lsusb de la base de carga `1ea7:0064`,
-  no expone nodo de input; el ID correcto se ve con
-  `wayland-wheeltani --list-devices` o `/proc/bus/input/devices`).
-- Permisos: `yovick` en el grupo `input` (leer eventX + EVIOCGRAB) y udev rule
-  que da el grupo `input` sobre `/dev/uinput`.
-- Servicio: `systemd --user` (`wayland-wheeltani.service`), arranca con la
-  sesión gráfica. Ver logs: `journalctl --user -u wayland-wheeltani -f`.
-- Un click corto sin mover = click central normal (paste en X11, etc.).
-
-**Activar en otro host** (laptop nueva con mouse genérico, etc.): el daemon
-solo empareja UN mouse por USB ids (no hay modo "cualquier mouse", verificado
-en el source), así que por host se declaran los IDs del mouse que le toque:
-
-1. Importar `../../modules/hardware/wheeltani.nix` en `hosts/<host>/configuration.nix`.
-2. `modules.hardware.wheeltani = { enable = true; device = { vendorId = "vvvv"; productId = "pppp"; }; }`
-   — los IDs NO salen de `lsusb` a ciegas: ratones inalámbricos exponen el nodo
-   de puntero con los IDs del **dongle** (busca el "2.4G Dongle"/"2.4G Mouse" en
-   `wayland-wheeltani --list-devices` o `/proc/bus/input/devices`).
-3. Rebuild. El daemon espera a que exista el mouse que matchea y lo agarra al
-   vuelo (hotplug); un mouse sin IDs asignados no se toca. Hosts sin sesión
-   gráfica (server) no aplican: el servicio arranca con `graphical-session.target`.
-
 ### Boot
 - **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (`ironman`
   theme from `adi1090x-plymouth-themes`); quiet boot.
@@ -360,7 +331,6 @@ en el source), así que por host se declaran los IDs del mouse que le toque:
 | ---- | ------ |
 | `SUPER Backspace` | Terminal (kitty) |
 | `SUPER Delete` | Kill window |
-| `SUPER M` | Exit session |
 | `SUPER V` | Toggle floating |
 | `SUPER J` | Toggle split |
 | `SUPER arrows` / `SUPER SHIFT arrows` | Focus / move window |
@@ -501,7 +471,7 @@ No cleanup timers run in background any more (see Performance & Tuning). When a
 host needs maintenance, run this by hand:
 
 ```bash
-sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3  # keep 3
+sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +6  # keep 6
 sudo nix-collect-garbage                                             # free store
 sudo nix-store --optimise                                            # dedup store
 ```
