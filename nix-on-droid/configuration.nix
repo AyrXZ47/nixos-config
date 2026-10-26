@@ -112,9 +112,11 @@
   # plugins, git). Requiere el home-manager nuevo (ver flake.nix).
   # No se importan kitty (Android usa la terminal de Termux), mpd ni firefox
   # (dependen de systemd).
-  # fastfetch tampoco: el config del pc usa logo PNG (protocolo kitty) y lineas
-  # de 70+ chars que en la terminal angosta del celular envuelven y se pisan.
-  # Aqui fastfetch corre con su config por defecto (logo ascii, ajusta ancho).
+  # fastfetch SI se importa (mas abajo): mismo config que la pc, pero con
+  # modules.apps.fastfetch.asciiLogo, porque el logo grafico va por protocolo
+  # kitty y la app de Termux no lo soporta. Con asciiLogo el modulo no instala
+  # el wrapper de GIFs (sus --logo pisaban el config y fastfetch caia a Tux):
+  # va el binario pelado y manda el logo ascii de nixos del config.jsonc.
   home-manager.config = { config, lib, opencodeTarball, rtkTarball, piOverlay, nixpkgs, gentleAiOverlay, ... }:
     let
       # Los paquetes de pi/gentle-ai CON los overlays del flake aplicados. El

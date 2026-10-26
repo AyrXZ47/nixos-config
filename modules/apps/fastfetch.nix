@@ -78,7 +78,12 @@ in
     # kitty y sí anima GIF/APNG/WebP.
     # Se instala SOLO el wrapper: referencia el store path del paquete real, sin
     # colisionar con su bin/fastfetch en el perfil.
-    home.packages = [
+    #
+    # En el celular (asciiLogo) NO va el wrapper: --logo/--logo-type ganan
+    # sobre el logo de config.jsonc, y sin el renderer kitty-icat fastfetch cae
+    # a la deteccion automatica (Tux). Ahi va el binario pelado y manda el
+    # `builtin nixos` del config.
+    home.packages = if cfg.asciiLogo then [ pkgs.fastfetch ] else [
       (pkgs.writeShellScriptBin "fastfetch" ''
         logo="$(${pkgs.findutils}/bin/find ${logoDir} -maxdepth 1 -type f \
                   \( -iname '*.gif' -o -iname '*.png' -o -iname '*.webp' \) \
