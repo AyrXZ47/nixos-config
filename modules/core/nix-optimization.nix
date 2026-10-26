@@ -10,9 +10,12 @@ let
 
   # Mantenimiento con UNA sola regla de sudo (ver abajo). Un solo binario que
   # corre como root sin contraseña y que NO acepta comandos libres: solo los
-  # subcomandos de su case. No es un sandbox (estos comandos escriben en el
-  # store, el disco y el firmware), pero impide que un agente o un error
-  # ejecute comandos arbitrarios como root.
+  # subcomandos de su case.
+  # LIMITE REAL, esto NO es un sandbox: `upgrade` y `full` corren
+  # `nixos-rebuild --flake ~/workspaces/nixos-config`, o sea que quien pueda
+  # escribir en ese repo ejecuta codigo como root sin password. El repo es de
+  # confianza por construccion; si algun dia vive en un path compartido, la
+  # regla de sudo tiene que desaparecer junto con esos dos subcomandos.
   mantenimiento = pkgs.writeShellScriptBin "mantenimiento" ''
     set -uo pipefail
     export PATH=/run/current-system/sw/bin:$PATH
@@ -148,18 +151,26 @@ in
   # (El timer solo baja metadatos, pero es automatico y cuadruplica el patron.)
   # enable=false no alcanza: el modulo de fwupd declara `wantedBy` sin condicion
   # y el symlink en timers.target igual se crea, asi que hay que vaciarlo.
+  # El .service sigue siendo dbus-activatable: `fwupdmgr` lo levanta solo, no
+  # hace falta en la cadena critica de boot (costaba 38.9s).
   systemd.timers.fwupd-refresh = lib.mkIf config.services.fwupd.enable {
     enable = lib.mkForce false;
     wantedBy = lib.mkForce [ ];
   };
+  systemd.services.fwupd = lib.mkIf config.services.fwupd.enable {
+    wantedBy = lib.mkForce [ ];
+  };
 
-  # ── TRIM del SSD: A MANO ────────────────────────────────────────────────
+  # ── TRIM del SSD ────────────────────────────────────────────────────────
   # services.fstrim viene enable=true por defecto: timer semanal con
   # Persistent=true, o sea catch-up en el primer arranque (misma familia de
-  # problemas que los timers de arriba). El TRIM se corre en el mantenimiento:
-  #   sudo fstrim -av
-  # Sin TRIM periodico el SSD (NVMe sin DRAM en la laptop) pierde rendimiento de
-  # escritura a la larga, asi que forma parte de la lista manual obligatoria.
+  # problemas que los timers de arriba). Por eso el timer sigue apagado.
+  # El TRIM corre igual sin timer en los hosts con btrfs (pc y laptop), por la
+  # via del propio filesystem: modules/core/btrfs.nix monta la raiz con
+  # `discard=async`, batcheado y sin ventana horaria. Importa sobre todo en la
+  # NVMe sin DRAM de la laptop, donde sin TRIM la escritura se degrada.
+  # server/vm son ext4 y NO lo importan (el `discard` sincronico castiga).
+  # El `fstrim -av` manual queda como extra en el mantenimiento (barato).
   services.fstrim.enable = false;
 
   # ── Limpieza: A MANO (desde 2026-10-21) ──────────────────────────────────
@@ -170,20 +181,20 @@ in
   # compitiendo con el arranque de la sesion (laptop 2026-10-21: 10m29s de
   # userspace, con 5.5 min de nixos-upgrade clavado en "unpacking 1 channels").
   # autoUpgrade era no-op puro: `--upgrade` no hace nada en flakes y switcheaba
-  # a la MISMA generacion cada vez. Con 3 generaciones tope no hay nada que
-  # ganar corriendo esto solo; se corre cuando se hace mantenimiento:
-  #   sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3
+  # a la MISMA generacion cada vez. Con 6 generaciones tope (ver abajo) no hay
+  # nada que ganar corriendo esto solo; se corre cuando se hace mantenimiento:
+  #   sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +6
   #   sudo nix-collect-garbage        # SIN -d: -d borra TODAS las generaciones
   #   sudo nix-store --optimise
   #   nix flake update && sudo nixos-rebuild switch --flake .#<host>
 
-  # ── Generaciones: EXACTAMENTE 3, sin timer ────────────────────────────────
+  # ── Generaciones: EXACTAMENTE 6, sin timer ────────────────────────────────
   # `boot.loader.systemd-boot.configurationLimit` (abajo) solo acota las
   # ENTRADAS del bootloader, no las generaciones del perfil: el perfil crece
-  # igual, y esa es la razon de que el limite de 3 "nunca se respetara". Lo
+  # igual, y esa es la razon de que el limite de 6 "nunca se respetara". Lo
   # unico que podaba era `nix.gc` (eliminado el 2026-10-21 por ser timer), asi
   # que desde entonces se acumulaban hasta que alguien corriera el
-  # `--delete-generations +3` a mano.
+  # `--delete-generations +6` a mano.
   # Esto lo hace en cada activacion: son milisegundos, borra symlinks de
   # generacion (NO borra datos del store) y `nix-env` nunca elimina la
   # generacion en uso, ni siquiera despues de un rollback a una vieja.
@@ -229,8 +240,9 @@ in
 
   # ── Mantenimiento sin contraseña: UNA regla, acotada a un binario ────────
   # `mantenimiento <sub>` es lo unico que corre como root sin password. El
-  # binario no acepta comandos libres (solo su `case`), asi que ni un error ni
-  # una inyeccion pueden usarlo para otra cosa que no sea la lista de arriba.
+  # binario no acepta comandos libres (solo su `case`), con las dos excepciones
+  # documentadas arriba: `upgrade` y `full` ejecutan el flake del repo como
+  # root. Ni un error ni una inyeccion pueden usarlo para otra cosa.
   # Se cubren las dos formas del path porque sudo resuelve symlinks: la del
   # store (derivacion) y la de /run/current-system.
   environment.systemPackages = [ mantenimiento ];

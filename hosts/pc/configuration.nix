@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/core/user.nix
+    ../../modules/core/btrfs.nix
     ../../modules/core/networking.nix
     ../../modules/core/tailscale.nix
     ../../modules/desktop/hyprland.nix
@@ -47,18 +48,13 @@
   modules.hardware.fingerprint.enable = true;
   modules.hardware.sdr.enable = true;
 
-  # openrgb: binario en el PATH para crear/editar los perfiles RGB (la GUI).
-  environment.systemPackages = [ pkgs.openrgb ];
+  # openrgb: el binario ya lo trae modules/hardware/openrgb.nix.
 
   # fwupd: servicio para actualizar firmware (BIOS/SSD). Uso: `fwupdmgr refresh && fwupdmgr update`.
-  # No arranca en boot: el .service es dbus-activatable, asi que `fwupdmgr` lo
-  # levanta cuando se usa. Arrancarlo costaba 38.9s en la cadena critica.
+  # El `wantedBy = mkForce []` (no arrancar en boot) vive en nix-optimization.nix.
   services.fwupd.enable = true;
-  systemd.services.fwupd.wantedBy = lib.mkForce [ ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
+  # Loader, openssh, zona, locale e identidad de git: modules/core/common-host.nix.
   system.stateVersion = "26.05";
 
   networking.hostName = "nixos-pc";
@@ -177,21 +173,9 @@
     options = [ "nofail" ];
   };
 
-  time.timeZone = "America/Mexico_City";
-
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  services.openssh.enable = true;
-
   # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
   programs.kdeconnect.enable = true;
 
-  # Identidad de git: se define aquí (por host), NO en modules/apps/git.nix, para
-  # que quien clone este repo no herede la identidad del autor (default null ->
-  # home-manager omite la clave). Quien haga fork debería cambiar estos valores.
-  home-manager.users.yovick.modules.apps.git = {
-    name = "Yovick RZ";
-    email = "66042604+AyrXZ47@users.noreply.github.com";
-  };
+  # Identidad de git: modules/core/common-host.nix (misma en los 4 hosts).
 
 }

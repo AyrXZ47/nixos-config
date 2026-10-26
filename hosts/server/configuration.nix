@@ -15,16 +15,10 @@
     ../../modules/apps/docker.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
+  # Loader, openssh, zona, locale e identidad de git: modules/core/common-host.nix.
   system.stateVersion = "26.05";
 
   networking.hostName = "nixos-server";
-
-  time.timeZone = "America/Mexico_City";
-
-  i18n.defaultLocale = "en_US.UTF-8";
 
   modules.hardware.fingerprint.enable = true;
   modules.hardware.sdr.enable = true;
@@ -36,14 +30,5 @@
   # amd-common ya no lo incluye (es solo para los hosts de escritorio/servidor
   # con ADATA SATA; la laptop lo perdio a proposito, le costaria bateria).
   boot.kernelParams = [ "processor.max_cstate=1" "pcie_aspm=off" ];
-
-  services.openssh.enable = true;
-
-  # Identidad de git por host (NO en modules/apps/git.nix) para no filtrar
-  # identidad a quien clone el repo. Default null -> home-manager omite la clave.
-  home-manager.users.yovick.modules.apps.git = {
-    name = "Yovick RZ";
-    email = "66042604+AyrXZ47@users.noreply.github.com";
-  };
 
 }

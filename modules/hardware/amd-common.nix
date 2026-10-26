@@ -11,6 +11,10 @@
     enable32Bit = true;
   };
 
+  # X11/Wayland: amdgpu + modesetting en todos los hosts con GPU AMD. La VM no
+  # hereda esto (no importa amd-common): usa solo modesetting, su virtio-gpu.
+  services.xserver.videoDrivers = [ "amdgpu" "modesetting" ];
+
   # Mesa cachea los shaders compilados; el tope por defecto es 1 GB y al
   # llenarse expulsa entradas viejas -> recompilacion en caliente = stutter en
   # el primer minuto de cada juego (y de cada actualizacion de mesa). 8 GB es un
@@ -23,16 +27,7 @@
   # colgaba ~38s en el probe MST/DP ([drm] pre_validate_dsc) y atrasaba el boot
   # entero, sin ganancia real (no hace falta KMS temprano).
 
-  # PipeWire for pro audio
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-
-  security.rtkit.enable = true;
+  # audio (pipewire/rtkit) vive en modules/core/audio.nix: igual en los 4.
 
   # Performance
   # quiet/splash/loglevel=3 se declaran UNA vez en nix-optimization.nix (todos

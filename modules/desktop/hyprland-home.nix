@@ -373,10 +373,6 @@ in
     '';
   };
 
-  programs.rofi = lib.mkForce {
-    enable = false;
-  };
-
   home.packages = with pkgs; [
     # hyprlock/hypridle fuera: lock e idle los hace Caelestia (module caelestia.nix).
     brightnessctl

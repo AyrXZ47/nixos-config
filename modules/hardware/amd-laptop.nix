@@ -58,7 +58,7 @@ in
     ./amd-common.nix
   ];
 
-  services.xserver.videoDrivers = [ "amdgpu" "modesetting" ];
+  # amdgpu + modesetting los declara amd-common.nix (igual que la pc).
 
   # PSR (Panel Self Refresh) apagado: en Renoir/Cezanne (5650U) el firmware
   # DMCUB del display falla ("dc_dmub_srv_log_diagnostic_data: DMCUB error") y
@@ -76,10 +76,10 @@ in
   # frecuencia — el hardware elige la frecuencia y el governor solo expone el
   # EPP. El techo real de potencia lo pone platform_profile (ver eppSwitch) y el
   # EPP decide como se gasta dentro de ese techo.
-  # power-profiles-daemon sigue deshabilitado porque escribiria lo mismo que
-  # eppSwitch (dos duenos del mismo sysfs = se pisan).
+  # power-profiles-daemon NO se toca aca: su default ya es false y nada en el
+  # repo lo habilita (antes habia un mkForce inutil). Si algun dia alguien lo
+  # prende, escribiria el mismo EPP que eppSwitch -> dos duenos del mismo sysfs.
   powerManagement.cpuFreqGovernor = "powersave";
-  services.power-profiles-daemon.enable = lib.mkForce false;
 
   # Sched-ext scx_lavd: el mismo reparto por criticidad que en la pc, pensado
   # para latencia + consumo (es el scheduler que usa Steam Deck). Encaja con

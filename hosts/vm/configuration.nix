@@ -29,10 +29,8 @@
   modules.hardware.fingerprint.enable = true;
   modules.hardware.sdr.enable = true;
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  boot.loader.timeout = 0;
+  # Loader, timeout, openssh, zona, locale e identidad de git:
+  # modules/core/common-host.nix + modules/core/nix-optimization.nix.
   # Mismo kernel que los hosts fisicos: modules/core/kernel-cachyos.nix.
   boot.initrd.kernelModules = [ "virtio_gpu" "vmwgfx" ];
 
@@ -40,37 +38,16 @@
 
   networking.hostName = "nixos-vm";
 
-  time.timeZone = "America/Mexico_City";
-
-  i18n.defaultLocale = "en_US.UTF-8";
-
   services.qemuGuest.enable = true;
   services.spice-vdagentd.enable = true;
   virtualisation.vmware.guest.enable = true;
 
   services.xserver.videoDrivers = [ "modesetting" ];
 
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-
-  security.rtkit.enable = true;
-
-  services.openssh.enable = true;
+  # pipewire/rtkit: modules/core/audio.nix (igual que los hosts fisicos).
 
   systemd.tmpfiles.rules = [
     "d /nix/var/nix/profiles/per-user/yovick 1777 root root"
   ];
-
-  # Identidad de git por host (NO en modules/apps/git.nix) para no filtrar
-  # identidad a quien clone el repo. Default null -> home-manager omite la clave.
-  home-manager.users.yovick.modules.apps.git = {
-    name = "Yovick RZ";
-    email = "66042604+AyrXZ47@users.noreply.github.com";
-  };
 
 }

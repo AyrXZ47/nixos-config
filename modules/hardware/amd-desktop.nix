@@ -6,8 +6,7 @@
     ../../modules/apps/ollama-bin.nix
   ];
 
-  # RX 7600 GPU
-  services.xserver.videoDrivers = [ "amdgpu" "modesetting" ];
+  # RX 7600: el driver (amdgpu + modesetting) lo declara amd-common.nix.
 
   # Tuneado de rendimiento del escritorio (vivía en amd-common, ahora solo aquí):
   # laptop y server NO heredan esto. La laptop usa governor powersave + C-states

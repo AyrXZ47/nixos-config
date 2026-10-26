@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/core/user.nix
+    ../../modules/core/btrfs.nix
     ../../modules/core/networking.nix
     ../../modules/core/tailscale.nix
     ../../modules/desktop/hyprland.nix
@@ -47,15 +48,11 @@
   # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
   environment.systemPackages = [ pkgs.openrgb pkgs.dnsmasq ];
 
-  # fwupd: servicio para actualizar firmware (BIOS/SSD). Uso: `fwupdmgr refresh && fwupdmgr update`.
-  # No arranca en boot: el .service es dbus-activatable, asi que `fwupdmgr` lo
-  # levanta cuando se usa. Arrancarlo costaba 38.9s en la cadena critica.
+  # fwupd: servicio para actualizar firmware. El `wantedBy = mkForce []` (no
+  # arrancar en boot) vive en nix-optimization.nix.
   services.fwupd.enable = true;
-  systemd.services.fwupd.wantedBy = lib.mkForce [ ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
+  # Loader, openssh, zona, locale e identidad de git: modules/core/common-host.nix.
   system.stateVersion = "26.05";
 
   networking.hostName = "nixos-laptop";
@@ -76,17 +73,6 @@
   networking.firewall.allowedTCPPorts = [ 7236 ];
   networking.firewall.allowedUDPPorts = [ 67 123 7236 ];
 
-  time.timeZone = "America/Mexico_City";
-
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  services.openssh.enable = true;
-
-  # Identidad de git por host (NO en modules/apps/git.nix) para no filtrar
-  # identidad a quien clone el repo. Default null -> home-manager omite la clave.
-  home-manager.users.yovick.modules.apps.git = {
-    name = "Yovick RZ";
-    email = "66042604+AyrXZ47@users.noreply.github.com";
-  };
+  # Identidad de git: modules/core/common-host.nix (misma en los 4 hosts).
 
 }
