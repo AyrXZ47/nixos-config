@@ -61,7 +61,12 @@ let
         # Se podan ANTES, y si igual falla no corta el ritual: optimise es
         # dedup (ahorra espacio), no correctitud.
         find /nix/var/nix/gcroots /nix/var/nix/profiles -xtype l -delete 2>/dev/null || true
-        nix-store --optimise || echo "AVISO: optimise fallo (queda algun gcroot colgado); el ritual sigue"
+        nix-store --optimise || {
+          echo "AVISO: optimise fallo. Suele ser un path en la DB que ya no esta en disco"
+          echo "(se borro fuera de nix). Paths que la DB reporta como invalidos:"
+          nix-store --verify 2>&1 | grep -iE "invalid|missing|disappear" | head -10
+          echo "Para repararlo (una vez, como humano): sudo nix-store --verify --repair"
+        }
         echo "== 5/5 smart (test corto, no bloquea) =="; smartctl -t short "$nvme"
         ;;
       # Equivalente al `-Syyu`: aplica el repo tal como está en disco. NO hace
