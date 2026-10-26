@@ -22,6 +22,9 @@
   services.scx = {
     enable = true;
     scheduler = "scx_lavd";
+    # scx_lavd tiene tres modos de energia mutuamente excluyentes
+    # (--performance / --balanced / --powersave). La pc vive enchufada: maximo.
+    extraArgs = [ "--performance" ];
   };
   boot.kernelParams = [
     "processor.max_cstate=1"
@@ -59,8 +62,13 @@
             sleep 1
           done
         fi
-        if [ -f "$d/pp_power_profile" ]; then
-          echo 1 > "$d/pp_power_profile" 2>/dev/null || true
+        # Perfil 3D_FULL_SCREEN (1). OJO: el nodo se llama pp_power_profile_mode,
+        # NO pp_power_profile (ese nunca existio: el write viejo era un no-op
+        # silencioso, la GPU quedaba en BOOTUP_DEFAULT). Con
+        # power_dpm_force_performance_level=high los clocks ya estan clavados al
+        # maximo; esto es el perfil fino para cuando se use auto/manual.
+        if [ -f "$d/pp_power_profile_mode" ]; then
+          echo 1 > "$d/pp_power_profile_mode" 2>/dev/null || true
         fi
         # Power limit al máximo que permite el firmware (desktop: 145W -> 162W).
         # Solo escribe power1_cap_max, asi cada tarjeta queda en su propio maximo.
