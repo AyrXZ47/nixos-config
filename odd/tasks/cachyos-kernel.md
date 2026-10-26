@@ -16,7 +16,7 @@ Filosofía: exprimir cada gramo de silicio. Base: `nixos-unstable`, flake, 4 hos
 | -- | ----- | ---- | ------ | ------ |
 | T1 | S1 S2 | input `chaotic` + `nyx-overlay`/`nyx-cache` + `linuxPackages_cachyos` en pc/laptop/server/vm | hecha | `2e99da0` |
 | T2 | S4 | `services.scx` con `scx_lavd` en pc y laptop | hecha | `3f6477f` |
-| T3 | S3 | kernel `GENERIC_V3` compilado en pc + push a Cachix + flip de los 4 hosts | bloqueada: falta token de Cachix | — |
+| T3 | S3 | kernel `GENERIC_V3` compilado en pc + push a Cachix + flip de los 4 hosts | bloqueada: la torre de Rust de nixpkgs no está cacheada (2-4 h) | — |
 | T4 | S1 | verificación: `nix flake check` verde + kernel/módulos se sustituyen + ddcci compila contra 7.3.0 | hecha (parcial) | — |
 
 ## Log
@@ -48,7 +48,10 @@ Filosofía: exprimir cada gramo de silicio. Base: `nixos-unstable`, flake, 4 hos
 
 - **L7** — T3 bloqueada: `cachix` no está instalado ni hay token en `~/.config/cachix`, así que el push del kernel `GENERIC_V3` a `ayrxz47-nixos-config.cachix.org` requiere un paso humano (`cachix authtoken`). Sin artefacto en la cache, flipear los hosts a v3 los haría compilar, que es justo lo que S3 prohíbe.
 
-- **L8** — verificación observada (2026-10-26):
+- **L9** — 2026-10-26, intento real de v3: el dry-run del kernel `GENERIC_V3` lista 26 store paths a construir, incluida la torre de Rust. Medido contra las caches: `rustc-1.99.0` (+doc/+man) y `rust-bindgen` dan 404 en cache.nixos.org y 200 en nyx-cache; `cargo-1.99.0`, `rustc-wrapper`, `cargo-auditable`, `cargo-nextest`, `rustfmt-nightly` y `kmodigest` dan 404 en ambas. Causa: el kernel de CachyOS lleva `CONFIG_RUST=y`, y este canal de nixpkgs no publicó rustc. Costo: 2-4 h la primera vez, ~1-1.5 h por bump, ~1.5 GB de `rustc` en la Cachix gratis, a cambio de ~1-2%. `cachyOverride` sólo acepta los atributos declarados (`cachyVars`, `extraMakeFlags`, `withoutDebug`, `ogKernelConfigfile`, `packagesExtend`…) y `CONFIG_RUST` no está entre los knobs.
+  Decisión: `modules/core/kernel-cachyos.nix` queda con el kernel genérico cacheado y el camino a v3 documentado en el mismo archivo. Se revisa cuando el narinfo de `rustc` vuelva a dar 200 en cache.nixos.org: en ese momento v3 cuesta sólo el kernel (~30 min en la pc) y se pushea a la Cachix del repo. El token de Cachix ya funciona (push de prueba OK), así que ese paso ya no es bloqueo.
+
+- **L10** — refactor: el kernel se define una sola vez en `modules/core/kernel-cachyos.nix` (importado por `mkHost`), en vez de estar en `amd-common.nix` + `vm/configuration.nix`. Los 4 hosts evalúan al mismo store path `xdvygnax…-7.3.0` (el cacheado por nyx).
   - `nix flake check` → `all checks passed!` (4 configs evalúan con el overlay de nyx).
   - Los 4 hosts evalúan al MISMO store path: `/nix/store/xdvygnax…-linux-x86_64-unknown-linux-gnu-7.3.0`, que es exactamente el que sirve `nyx-cache.chaotic.cx` (narinfo 200; también 200 para `…-modules` y `…-dev`).
   - Firma del narinfo verificada con ed25519 (`openssl pkeyutl`) contra la clave que declara nyx (`dJxTrg…`): **válida** → la sustitución funciona en cuanto el build corre como root (mi usuario no está en `trusted-users`, así que no pude probarla localmente sin sudo).
