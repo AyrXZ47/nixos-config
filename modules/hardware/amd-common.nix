@@ -11,6 +11,12 @@
     enable32Bit = true;
   };
 
+  # Mesa cachea los shaders compilados; el tope por defecto es 1 GB y al
+  # llenarse expulsa entradas viejas -> recompilacion en caliente = stutter en
+  # el primer minuto de cada juego (y de cada actualizacion de mesa). 8 GB es un
+  # TOPE, no reserva nada: solo crece si hace falta.
+  environment.sessionVariables.MESA_SHADER_CACHE_MAX_SIZE = "8G";
+
   # AMD kernel modules
   boot.kernelModules = [ "kvm-amd" "amdgpu" ];
   # amdgpu SOLO en userspace: cargarlo en el initrd (boot.initrd.kernelModules)
