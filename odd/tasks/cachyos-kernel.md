@@ -14,10 +14,10 @@ Filosofía: exprimir cada gramo de silicio. Base: `nixos-unstable`, flake, 4 hos
 
 | ID | Specs | Ruta | Estado | Commit |
 | -- | ----- | ---- | ------ | ------ |
-| T1 | S1 S2 | input `chaotic` + `nyx-overlay`/`nyx-cache` + `linuxPackages_cachyos` en pc/laptop/server/vm | hecha | (ver Log) |
-| T2 | S4 | `services.scx` con `scx_lavd` en pc y laptop | hecha | (ver Log) |
+| T1 | S1 S2 | input `chaotic` + `nyx-overlay`/`nyx-cache` + `linuxPackages_cachyos` en pc/laptop/server/vm | hecha | `2e99da0` |
+| T2 | S4 | `services.scx` con `scx_lavd` en pc y laptop | hecha | `3f6477f` |
 | T3 | S3 | kernel `GENERIC_V3` compilado en pc + push a Cachix + flip de los 4 hosts | bloqueada: falta token de Cachix | — |
-| T4 | S1 | verificación: `nix flake check` verde + kernel/módulos se sustituyen + ddcci compila contra 7.3.0 | hecha | (ver Log) |
+| T4 | S1 | verificación: `nix flake check` verde + kernel/módulos se sustituyen + ddcci compila contra 7.3.0 | hecha (parcial) | — |
 
 ## Log
 
@@ -47,3 +47,12 @@ Filosofía: exprimir cada gramo de silicio. Base: `nixos-unstable`, flake, 4 hos
 - **L6** — T2 hecho: `services.scx.scheduler = "scx_lavd"` en pc (amd-desktop) y laptop (amd-laptop). Server y vm quedan con el scheduler del kernel.
 
 - **L7** — T3 bloqueada: `cachix` no está instalado ni hay token en `~/.config/cachix`, así que el push del kernel `GENERIC_V3` a `ayrxz47-nixos-config.cachix.org` requiere un paso humano (`cachix authtoken`). Sin artefacto en la cache, flipear los hosts a v3 los haría compilar, que es justo lo que S3 prohíbe.
+
+- **L8** — verificación observada (2026-10-26):
+  - `nix flake check` → `all checks passed!` (4 configs evalúan con el overlay de nyx).
+  - Los 4 hosts evalúan al MISMO store path: `/nix/store/xdvygnax…-linux-x86_64-unknown-linux-gnu-7.3.0`, que es exactamente el que sirve `nyx-cache.chaotic.cx` (narinfo 200; también 200 para `…-modules` y `…-dev`).
+  - Firma del narinfo verificada con ed25519 (`openssl pkeyutl`) contra la clave que declara nyx (`dJxTrg…`): **válida** → la sustitución funciona en cuanto el build corre como root (mi usuario no está en `trusted-users`, así que no pude probarla localmente sin sudo).
+  - Módulos que el repo exige, presentes en el config de CachyOS: `kvm-amd`=m, `amdgpu`=m, `nvme`=m, `btrfs`=y, `i2c-dev`=m, `zram`=m, `virtio_gpu`=m, `vmwgfx`=m, `vmxnet3`=m, `ps2-synaptics`=y, `amd-pstate`=y.
+  - `scx`: `enable=true` en pc y laptop con `scx_lavd`; false en server y vm.
+  - `deploy` (derivación construida, `bash -n` OK) pasa `--option extra-substituters https://nyx-cache.chaotic.cx/ …`, así el primer switch no compila el kernel.
+  - PENDIENTE: `ddcci-driver` evalúa como `ddcci-driver-7.3.0-…` pero su compilación real no se pudo correr sin root (necesita `kernel.dev`, que no puedo sustituir como usuario no confiado). Se valida en `sudo nixos-rebuild` de la pc; si falla, el rebuild aborta antes del switch y el brillo DDC sigue por la generación vieja.
