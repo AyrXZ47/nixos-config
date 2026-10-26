@@ -40,10 +40,21 @@
     # installCheck pasa. Cuando nixpkgs suba de version, se hereda con el canal.
     # Si hace falta adelantarse a nixpkgs: `pkgs.pi-coding-agent.overrideAttrs`
     # con version/src/npmDepsHash nuevos, pero eso vuelve a compilar local.
+
+    # Chaotic-Nyx: unico lugar donde existe el kernel de CachyOS (el arbol de
+    # nixpkgs solo trae zen/xanmod/lqx, ninguno con LTO -O3 ni el scheduler de
+    # CachyOS). `nyxpkgs-unstable` es la rama que ellos mantienen cacheada en
+    # nyx-cache.chaotic.cx; `main` avanza sin cache.
+    # NO se le pone `inputs.nixpkgs.follows`: nyx construye el kernel contra SU
+    # nixpkgs pinneado y ese es el hash que esta en su cache. Con follows el
+    # hash cambia y cada host compila el kernel (30+ min) en cada update.
+    chaotic = {
+      url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+    };
   };
 
   outputs =
-    { nixpkgs, home-manager, kicad-spice-library, ... }:
+    { nixpkgs, home-manager, chaotic, kicad-spice-library, ... }:
     let
       system = "x86_64-linux";
       # Backend del portal RemoteDesktop para el remote input de KDE Connect en Hyprland.
@@ -832,6 +843,11 @@ PYEOF
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
           { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay gentleAiOverlay ]; }
+          # Kernel de CachyOS (pkgs.linuxPackages_cachyos): el overlay que lo
+          # expone + el substituter nyx-cache.chaotic.cx, donde vive ya
+          # compilado. Sin el segundo, los hosts compilan el kernel.
+          chaotic.nixosModules.nyx-overlay
+          chaotic.nixosModules.nyx-cache
           home-manager.nixosModules.home-manager
           {
             home-manager = {

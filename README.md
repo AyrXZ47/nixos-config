@@ -21,7 +21,9 @@ and a hand-rolled cyberpunk theme (magenta `#ed1044` / cyan `#00f0ff` on deep na
 | `server` | Headless  | AMD                       | (none)       | `amd-common` only, no desktop             |
 | `vm`     | Virtual   | QEMU/VMware               | virtio/vmwgfx| virtio initrd, LUKS + btrfs subvols      |
 
-Every host is `x86_64-linux`, runs the Zen kernel, enables the `yovick` user with
+Every host is `x86_64-linux`, runs the CachyOS kernel (`linuxPackages_cachyos`,
+7.3.0 with clang thin-LTO and `-O3`, from the `chaotic-nyx` flake), enables the
+`yovick` user with
 Home Manager, and stores its mounts in `hosts/<name>/hardware-configuration.nix`
 (`disk-by-label` for `pc`/`laptop`/`server`, generated for `vm`).
 
@@ -249,17 +251,25 @@ Gotchas (vistos en la práctica):
   — see [Day-to-Day](#day-to-day).
 
 ### Hardware (`modules/hardware/`)
-- Zen kernel everywhere, AMD microcode, `hardware.graphics` 32-bit.
+- Kernel: `linuxPackages_cachyos` (flake input `chaotic` → overlay + cache
+  `nyx-cache.chaotic.cx`) in every host. nixpkgs has no CachyOS kernel, and zen
+  is `-O2` without LTO. It ships 7.3.0 as clang thin-LTO `-O3`, `PREEMPT` full,
+  HZ 1000, hugepages `always` and sched_ext. The `chaotic` input deliberately
+  does **not** follow `nixpkgs`: nyx builds the kernel against its own pin, and
+  that pin is what its binary cache holds. `deploy` passes the nyx substituter
+  on the command line so the first switch substitutes instead of compiling.
+- AMD microcode, `hardware.graphics` 32-bit.
 - `zramSwap` at 50% memory.
 - `quiet splash loglevel=3` is declared once, in `nix-optimization.nix`, for
   every host; `loglevel=0` was removed so a live freeze still shows on console.
 - Common kernel params: `split_lock_detect=off`. The NMI watchdog is deliberately
   left ON — with it off a whole-system freeze leaves no trace at all.
 - Desktop: `amd_pstate=active`, `mitigations=off`, `max_cstate=1`, `performance`
-  governor, amdgpu in initrd (early KMS).
+  governor, amdgpu in initrd (early KMS), `scx_lavd` (sched_ext, userspace).
 - Laptop: `powersave` governor + EPP `balance_power` (boost bajo demanda, reposo
-  profundo), sin `max_cstate=1`, touchpad libinput (clickfinger, natural scrolling,
-  RMI4 via `psmouse.synaptics_intertouch=1`), iio sensors, NetworkManager with iwd.
+  profundo), `scx_lavd` (latencia + consumo), sin `max_cstate=1`, touchpad
+  libinput (clickfinger, natural scrolling, RMI4 via
+  `psmouse.synaptics_intertouch=1`), iio sensors, NetworkManager with iwd.
 - VM: virtio/VMware guest modules, QEMU guest agent, SPICE.
 
 ### Fingerprint (`modules/hardware/fingerprint.nix`)

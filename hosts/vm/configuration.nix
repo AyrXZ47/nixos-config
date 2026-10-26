@@ -33,7 +33,10 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.loader.timeout = 0;
-  boot.kernelPackages = pkgs.linuxPackages_zen;
+  # Mismo kernel que los hosts fisicos (overlay de nyx): una sola cmdline y un
+  # solo juego de modulos que mantener. El guest casi no gana rendimiento, pero
+  # la cache de nyx lo sirve igual de rapido que a los demas.
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
   boot.initrd.kernelModules = [ "virtio_gpu" "vmwgfx" ];
 
   system.stateVersion = "26.05";
