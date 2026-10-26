@@ -22,12 +22,22 @@ let
     }
     if on_battery; then
       epp=power; paused=yes
+      # platform_profile: el TECHO de potencia que impone el firmware (ACPI
+      # platform profile del ThinkPad). En bateria low-power; en AC performance,
+      # o sea boost sin freno. El governor/EPP decide a que frecuencia ir dentro
+      # de ese techo; esto decide cuanto puede pedir. Antes quedaba fijo en
+      # `balanced` en los dos modos: se pagaba bateria de mas y se perdia boost.
+      profile=low-power
     else
       epp=performance; paused=no
+      profile=performance
     fi
     for d in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
       echo "$epp" > "$d" 2>/dev/null || true
     done
+    if [ -w /sys/firmware/acpi/platform_profile ]; then
+      echo "$profile" > /sys/firmware/acpi/platform_profile 2>/dev/null || true
+    fi
     sock=/run/user/1000/mpvpaper.sock
     if [ -S "$sock" ]; then
       ${pkgs.python3}/bin/python3 - "$paused" "$sock" <<'PY'
