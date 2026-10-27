@@ -122,7 +122,10 @@ in
 
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";
-      WLR_NO_HARDWARE_CURSORS = "1";
+      # Aca vivia WLR_NO_HARDWARE_CURSORS=1: apagaba el plano de cursor por
+      # hardware y obligaba a un repintado del compositor por CADA movimiento del
+      # mouse. Con amdgpu/RADV el cursor va por hardware (gratis). Si algun dia
+      # aparece un cursor duplicado o con lag, esa es la linea a devolver.
     };
 
     environment.systemPackages = with pkgs; [

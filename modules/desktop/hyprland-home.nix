@@ -148,6 +148,13 @@ in
 
         misc = {
           disable_xdg_env_checks = true,
+          -- VRR (FreeSync): el panel refresca cuando la GPU entrega el frame, en
+          -- vez de a un reloj fijo. No da mas FPS: saca el tearing y el judder
+          -- cuando el juego no clava justo los Hz del monitor.
+          -- 2 = solo con una ventana en fullscreen (juegos); el escritorio y las
+          -- ventanas normales quedan al refresco fijo de siempre, que es donde
+          -- VRR molesta (flicker con fps bajos). Si el panel parpadea, volver a 0.
+          vrr = 2,
         },
       })
 
