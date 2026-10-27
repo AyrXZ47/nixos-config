@@ -40,6 +40,13 @@
     "pcie_aspm=off"
   ];
 
+  # Boot: NetworkManager-wait-online se comia 8.079s de la cadena critica
+  # (medido 2026-10-27) esperando "conectividad" en una maquina por ethernet.
+  # docker.service esta ordenado After=network-online.target pero el daemon no
+  # necesita red para arrancar (los contenedores con restart reintentan solos).
+  # La laptop ya lo tenia apagado; ahora los dos hosts con escritorio igual.
+  systemd.services.NetworkManager-wait-online.enable = false;
+
   # GPU AMD a tope desde el arranque: power_dpm_force_performance_level=high (clocks
   # máximos) + pp_power_profile=1 (3D fullscreen). Sin cuello de botella por throttling.
   # Reintenta la escritura porque el reinicio de udevd durante el switch puede devolver

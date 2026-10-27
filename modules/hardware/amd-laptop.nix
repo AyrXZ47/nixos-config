@@ -116,10 +116,14 @@ in
     };
   };
 
-  # Re-evalua el EPP al instante al conectar/desconectar el cargador
-  # (KERNEL=="AC": el supply de Mains de esta laptop se llama "AC").
+  # Re-evalua EPP/platform_profile al instante cuando cambia CUALQUIER supply.
+  # Antes filtraba KERNEL=="AC" y en este ThinkPad el evento de AC no siempre
+  # llega (queda BAT0 cambiando de estado): el servicio se quedaba con el perfil
+  # de bateria estando enchufado (visto 2026-10-27: AC online=1 con EPP=power y
+  # platform_profile=low-power). El script es idempotente y barato, asi que se
+  # dispara con cualquier cambio de power_supply y decide el mismo.
   services.udev.extraRules = ''
-    SUBSYSTEM=="power_supply", KERNEL=="AC", ACTION=="change", RUN+="${eppSwitch}"
+    SUBSYSTEM=="power_supply", ACTION=="change", RUN+="${eppSwitch}"
   '';
 
   # Salud de la bateria: umbrales 85/90.
