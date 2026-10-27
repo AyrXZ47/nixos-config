@@ -151,14 +151,18 @@
         # dir del device: "<n>-0037" (bus i2c-n), no "$bus/0-0037".
         n="''${bus#i2c-}"
         dev="/sys/bus/i2c/devices/$n-0037"
-        for i in $(seq 1 15); do
+        # Poll cada 0.5s (antes 2s): el monitor tarda ~6s en contestar DDC/CI
+        # despues de display-manager, y con granularidad de 2s el servicio se
+        # quedaba hasta 7.9s en la cadena de boot. Con 0.5s termina apenas el
+        # monitor responde. 40 intentos = 20s de techo, igual que antes.
+        for i in $(seq 1 40); do
           [ -L "$dev/driver" ] && break
           # Ojo: el guard y los writes usan la MISMA ruta absoluta. Antes los
           # writes iban a "$bus/new_device" (relativo al cwd del servicio, /),
           # fallaban con ENOENT y ddcci nunca se instanciaba.
           [ -e "$dev" ] && echo 0x37 > "/sys/bus/i2c/devices/$bus/delete_device" 2>/dev/null || true
           echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device" 2>/dev/null || true
-          sleep 2
+          sleep 0.5
         done
       done
     '';
