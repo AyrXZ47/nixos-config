@@ -26,7 +26,10 @@
     extraArgs = [ "--performance" ];
   };
   boot.kernelParams = [
-    "processor.max_cstate=1"
+    # `processor.max_cstate=1` vivia aca y se fue el 2026-10-26: el boost de Zen3
+    # se alimenta del presupuesto de potencia que libera la residencia en
+    # C-states, asi que capar el C1 era pagar vatios de idle para "despertar
+    # mas rapido" en una maquina de 16 hilos donde ese wake no se siente.
     # ASPM apagado en todo el PCIe (vivia en amd-common, es SOLO pc/server): con
     # APST ya off, el freeze (btrfs endio-write en wait_current_trans, journald
     # en watchdog timeout) volvio a ocurrir el 2026-08-01 con escritura sostenida.

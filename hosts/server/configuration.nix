@@ -29,6 +29,8 @@
   # pcie_aspm=off tambien lo heredaba de amd-common; se re-declara aqui porque
   # amd-common ya no lo incluye (es solo para los hosts de escritorio/servidor
   # con ADATA SATA; la laptop lo perdio a proposito, le costaria bateria).
-  boot.kernelParams = [ "processor.max_cstate=1" "pcie_aspm=off" ];
+  # `processor.max_cstate=1` se fue el 2026-10-26 (igual que en la pc): es el
+  # mismo freno al boost y este server pasa enchufado igual que la pc.
+  boot.kernelParams = [ "pcie_aspm=off" ];
 
 }

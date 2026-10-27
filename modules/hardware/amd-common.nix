@@ -41,8 +41,9 @@
     # documentar por qué.
     "split_lock_detect=off"
     # CPU: driver pstate activo y sin mitigaciones (elección de rendimiento).
-    # max_cstate=1 (sin deep C-states) vive en amd-desktop.nix, NO aquí: la
-    # laptop necesita C-states profundos para reposar y ahorrar batería.
+    # `processor.max_cstate=1` vivia en amd-desktop.nix y se elimino: capar los
+    # C-states le quita residencia al boost. La laptop nunca lo tuvo (necesita
+    # C-states profundos para reposar y ahorrar bateria).
     "amd_pstate=active"
     "mitigations=off"
     # GPU: desbloquea todo el rango de clocks/OC/fan vía /sys (no cambia nada solo)
