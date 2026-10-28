@@ -48,7 +48,17 @@ let
     # pyrtlsdr: wrapper de librtlsdr para el dongle RTL-SDR (ver sdr.nix).
     # nixpkgs parchea su find_library al store de pkgs.rtl-sdr, así que el .so
     # viaja en el cierre del env (no hace falta LD_LIBRARY_PATH).
-    ps.pyrtlsdr
+    #
+    # El `rtl-sdr` de nixpkgs es rtl-sdr-blog, y pyrtlsdr 0.5.1 (canal del
+    # 2026-10-20, antes era 0.3.0) exige rtlsdr_set_dithering y
+    # rtlsdr_set_and_get_tuner_bandwidth, que SOLO exporta el fork librtlsdr:
+    # con el de blog el import muere con "undefined symbol:
+    # rtlsdr_set_dithering". Se le pasa el fork a pyrtlsdr; el CLI rtl_* sigue
+    # con el de blog (hardware.rtl-sdr), que para eso anda bien.
+    # ponytail: techo conocido — recompila solo pyrtlsdr (python puro, segundos,
+    # nada de Qt ni deps nativas). Borrar el override cuando nixpkgs empareje
+    # pyrtlsdr con rtl-sdr-librtlsdr.
+    (ps.pyrtlsdr.override { rtl-sdr = pkgs.rtl-sdr-librtlsdr; })
     # termcolor: lo importa check_supported.py (buscador de la librería SPICE).
     # tkinter: lo usa el GUI form_spice.py (SPICE Model Viewer) de la misma
     # librería. Ambos scripts vienen en pkgs.kicad-spice-library (ver flake.nix).
