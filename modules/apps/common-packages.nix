@@ -349,6 +349,12 @@ in
     gimp
     krita
     inkscape
+    # realesrgan-ncnn-vulkan: upscale x2/x3/x4 con Real-ESRGAN (red GAN) por
+    # Vulkan en la GPU. Sirve para rescatar archivos que vienen chicos antes de
+    # mandarlos a imprenta. Modelos: realesrgan-x4plus (foto/arte mixto),
+    # realesrgan-x4plus-anime (arte plano duro), realesrnet-x4plus (mas fiel,
+    # menos nitido). En vm no corre: no hay GPU que pueda abrir Vulkan.
+    realesrgan-ncnn-vulkan
 
     # Engineering & Simulation
     kicad
