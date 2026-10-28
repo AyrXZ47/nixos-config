@@ -374,6 +374,17 @@ disponibilidad hasta que el sensor reenumere (~30 s).
   not suitable for confidential material; nixpkgs pins 7.2.8, which returns
   403 because Microsoft rotates its `Sec-MS-GEC` token, so
   `modules/apps/tts.nix` overrides it to 7.3.1.
+- `pdf2md <pdf>...` — PDF to Markdown, meant for feeding documents to an LLM
+  as context. A PDF cannot be read raw (its content streams are compressed),
+  so it extracts the text layer with pymupdf on CPU — no OCR, no models, ~0.5 s
+  for 13 pages — and rebuilds the structure from the page geometry: headings
+  from font size/bold, and the line breaks the PDF inserts mid-sentence joined
+  back into paragraphs. Writes `<name>.md` next to each PDF (`-o <file>` for a
+  single destination, `-o -` for stdout). A scan with no text layer is refused
+  with a non-zero exit instead of writing a Markdown full of holes: silently
+  partial context is worse than none. It deliberately avoids `pymupdf4llm`,
+  whose list detection turns a wrapped line starting with `o ` into a bullet
+  and eats the letter.
 - `spice-find <modelo>` — busca un componente en la librería SPICE (~50k
   modelos de kicad-spice-library) y muestra las variantes con su archivo.
   Equivale al "buscador" de la librería, sin entrar al repo.

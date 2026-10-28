@@ -917,6 +917,48 @@ PYEOF
             touch "$out"
           '';
 
+      # Check de pdf2md (ver modules/apps/pdf2md.nix): reconstruye titulos y une
+      # las frases que el PDF corta, y se niega a convertir un escaneo sin capa
+      # de texto (un markdown incompleto como contexto es peor que ninguno).
+      checks.x86_64-linux.pdf2md =
+        let
+          pkgs = import nixpkgs { inherit system; };
+          pdf2md = import ./modules/apps/pdf2md.nix { inherit pkgs; };
+          pdfPython = pkgs.python3.withPackages (ps: [ ps.pymupdf ]);
+        in
+        pkgs.runCommand "check-pdf2md"
+          { nativeBuildInputs = [ pdf2md pdfPython pkgs.gnugrep pkgs.coreutils ]; }
+          ''
+            # Fixtures al vuelo: un PDF con texto y otro solo con un rectangulo
+            # (lo que se ve en un escaneo: pagina sin capa de texto).
+            python3 - <<'PY'
+            import pymupdf
+
+            d = pymupdf.open()
+            p = d.new_page()
+            p.insert_text((72, 72), "TITULO", fontsize=20)
+            p.insert_text((72, 120), "una frase que el PDF corta", fontsize=10)
+            p.insert_text((72, 135), "en dos renglones.", fontsize=10)
+            d.save("texto.pdf")
+
+            d = pymupdf.open()
+            d.new_page().draw_rect(pymupdf.Rect(50, 50, 500, 700))
+            d.save("escaneo.pdf")
+            PY
+
+            pdf2md texto.pdf
+            grep -qx '## TITULO' texto.md
+            grep -q 'una frase que el PDF corta en dos renglones\.' texto.md
+
+            if pdf2md escaneo.pdf; then
+              echo "pdf2md acepto un PDF sin capa de texto" >&2
+              exit 1
+            fi
+            test ! -e escaneo.md
+
+            touch "$out"
+          '';
+
       nixosConfigurations = {
         pc = mkHost "pc" [ ./hosts/pc/configuration.nix ];
         laptop = mkHost "laptop" [ ./hosts/laptop/configuration.nix ];

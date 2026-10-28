@@ -48,6 +48,9 @@ let
   # lo busca. Lo unico que se pierde son los dos menus internos de Shotcut; el
   # flujo real es generar el .srt con `subtitular` e importarlo como pista.
   whisperVulkan = pkgs.whisper-cpp.override { vulkanSupport = true; };
+  # pdf2md: PDF -> markdown con pymupdf (CPU). El modulo vive aparte porque el
+  # check de `nix flake check` importa la misma derivacion que los hosts.
+  pdf2md = import ./pdf2md.nix { inherit pkgs; };
   # Logisim-Evolution: dark mode forzado de forma declarativa. La Look and Feel
   # vive en java.util.prefs (Preferences.userNodeForPackage(Main) = nodo
   # /com/cburch/logisim -> ~/.java/.userPrefs/com/cburch/logisim/prefs.xml), no
@@ -433,6 +436,8 @@ in
     # octaveFull trae la GUI Qt; el octave base viene sin GUI (solo CLI).
     octaveFull
     ollama
+    # pdf2md: PDF -> markdown para dar contexto (ver modules/apps/pdf2md.nix).
+    pdf2md
     # rtk: FUERA (2026-10-24). No esta en cache.nixos.org (404): se compilaba en
     # cada host, su suite de 4265 tests tarda 585 s y falla de forma flaky, y eso
     # abortaba el switch entero. Si vuelve, que sea release prebuilt commiteado
