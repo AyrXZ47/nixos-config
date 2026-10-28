@@ -284,14 +284,23 @@ in
     # overhead 1GiB ollama llega a 7.8 GiB totales -> headroom real 0.2 GiB ->
     # Hyprland cae a GTT -> micro-congelamientos. El overhead debe cubrir el uso
     # del escritorio (0.9 GiB) + margen: 2GiB = ~1.1 GiB libres de verdad.
-    # 2147483648 = 2GiB. Coste: ~8 t/s (27 vs 35 medidos) - aceptado.
+    # 2147483648 = 2GiB. Cada capa que se queda fuera de la GPU se paga caro
+    # (medido: bajar de 11 a 9 capas en el MoE = 25.6 -> 18.6 t/s), asi que subir
+    # este overhead "para que el escritorio respire" es la palanca equivocada.
     OLLAMA_GPU_OVERHEAD = "2147483648";
-    # Micro-congelamientos parte 2: saturación de CPU. Con 23 GB de modelo y
-    # 8 GiB de VRAM, ollama corre ~73% del cómputo en CPU (medido: 73%/27%
-    # CPU/GPU) y los 16 hilos se saturan -> Hyprland no tiene CPU. Limitar a 12
-    # hilos deja 4 garantizados al escritorio; coste ~10% de t/s.
-    # La combinación 2GiB overhead + 12 hilos es la que elimina AMBAS causas.
-    OLLAMA_CPU_THREADS = "12";
+    # Micro-congelamientos parte 2: saturacion de CPU. Medido el 2026-10-28 con
+    # un MoE de 36B/3B activos (23 GB) en esta RX 7600:
+    #   hilos:  6 -> 26.0 t/s | 8 -> 25.1 | 10 -> 23.4 | 12 -> 22.0 | 16 -> 16.5
+    # Mas hilos EMPEORA: el decode es bandwidth-bound (los expertos viven en
+    # RAM) y el SMT (16 hilos sobre 8 nucleos) solo agrega contencion al
+    # controlador de memoria. 6 hilos deja dos nucleos fisicos libres para
+    # Hyprland y ademas es el mas rapido: no hay trade-off.
+    OLLAMA_CPU_THREADS = "6";
+    # Un solo modelo y un solo slot: cada slot paralelo duplica el KV cache y con
+    # 8 GiB eso saca capas de la GPU. Tambien evita que un segundo modelo pelee
+    # por la VRAM mientras el primero esta cargado.
+    OLLAMA_NUM_PARALLEL = "1";
+    OLLAMA_MAX_LOADED_MODELS = "1";
   };
 
   environment.etc."xdg/menus/applications.menu".text = ''
