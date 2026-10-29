@@ -371,8 +371,15 @@ in
       hl.bind("XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"))
       hl.bind("SUPER + F12", hl.dsp.global("caelestia:brightnessUp"))
       hl.bind("SUPER + F11", hl.dsp.global("caelestia:brightnessDown"))
-      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.global("caelestia:brightnessUp"))
-      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.global("caelestia:brightnessDown"))
+      -- Brillo del knob: SUPER + perilla. NO usa caelestia:brightness* porque ese
+      -- servicio hace un `brightnessctl s N%` por evento (ver Brightness.qml) y
+      -- cada write DDC/CI cuesta 26-66 ms: la perilla emite decenas por segundo,
+      -- la cola crece y el panel queda segundos atras. brightness-knob.sh
+      -- actualiza el objetivo al instante y aplica SOLO el ultimo valor cada
+      -- 60 ms, asi se siente como el volumen (que es software y no tiene cola).
+      -- Las teclas XF86 sueltas siguen por Caelestia (con su OSD).
+      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness-knob.sh up"))
+      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness-knob.sh down"))
       -- ponytail: sin panel interno, el unico backlight es ddcci8 y CADA cambio
       -- es una transaccion DDC/CI por i2c AUX: medidos 66 ms por write el
       -- 2026-10-28 (10 writes encadenados = 653 ms, el driver los serializa;
@@ -533,6 +540,23 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
+  # Sunshine (host de Moonlight): unidad de USUARIO, en la sesion grafica. Un
+  # servicio de sistema no ve la sesion Wayland y la captura por screencopy
+  # falla. Los puertos del firewall viven en modules/apps/sunshine.nix.
+  # Primer arranque: abre http://localhost:47990 para crear usuario/password y
+  # emparejar desde la app Moonlight de la TV (te muestra un PIN de 4 digitos).
+  systemd.user.services.sunshine = {
+    Unit = {
+      Description = "Sunshine game stream host";
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.sunshine}/bin/sunshine";
+      Restart = "on-failure";
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
+
   # cliphist: limite de historial en 20 items. Era 6, pero el humano perdía
   # contexto al elegir; 20 mantiene el historial corto sin crecer sin control
   # (captura TODO lo copiado, incl. contraseñas de KeepassXC).
@@ -631,6 +655,56 @@ in
         done
         "${config.xdg.configHome}/hypr/scripts/workspace-bind.sh" || true
         notify-send "Extended"
+      '';
+    };
+
+    # Coalescer del brillo para el knob (SUPER + perilla de volumen).
+    "hypr/scripts/brightness-knob.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        max=$(cat /sys/class/backlight/*/max_brightness 2>/dev/null | head -1)
+        max="''${max:-100}"
+        state="''${XDG_RUNTIME_DIR:-/tmp}/brightness-knob.target"
+        step=$(( max * 5 / 100 )); [ "$step" -ge 1 ] || step=1
+
+        # La lectura-modificacion-escritura del objetivo va bajo su PROPIO lock
+        # corto: sin el, 8 eventos en paralelo leen el mismo valor y se pisan
+        # (los incrementos se pierden y el brillo salta). Medido: 8 eventos
+        # concurrentes quedaban en 15% en vez de 90%.
+        exec 8>"$state.rmw"
+        flock 8
+        cur=$(cat "$state" 2>/dev/null || cat /sys/class/backlight/*/brightness 2>/dev/null | head -1 || echo "$max")
+        case "''${1:-}" in
+          up)   cur=$(( cur + step )) ;;
+          down) cur=$(( cur - step )) ;;
+          *) exit 1 ;;
+        esac
+        [ "$cur" -gt "$max" ] && cur="$max"
+        [ "$cur" -lt 1 ] && cur=1
+        echo "$cur" > "$state"
+        exec 8>&-
+
+        # Si ya hay un flusher, este evento solo actualiza el objetivo y sale.
+        exec 9>"$state.lock"
+        flock -n 9 || exit 0
+
+        # Flusher: aplica el ultimo valor, como maximo uno cada 60 ms, y sale
+        # ~300 ms despues del ultimo cambio.
+        last=""; idle=0
+        while :; do
+          v=$(cat "$state")
+          p=$(( v * 100 / max ))
+          if [ "$p" != "$last" ]; then
+            brightnessctl set "$p%" >/dev/null 2>&1 || true
+            last="$p"; idle=0
+          else
+            idle=$(( idle + 1 ))
+            [ "$idle" -ge 5 ] && break
+          fi
+          sleep 0.06
+        done
       '';
     };
 

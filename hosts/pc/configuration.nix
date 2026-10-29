@@ -18,6 +18,7 @@
     ../../modules/hardware/mtp.nix
     ../../modules/hardware/sdr.nix
     ../../modules/apps/common-packages.nix
+    ../../modules/apps/sunshine.nix
     ../../modules/apps/gaming.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/packettracer.nix
