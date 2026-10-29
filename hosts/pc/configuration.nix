@@ -126,6 +126,16 @@
   # a subir es un backlight por software (gamma) si se quiere latencia cero real.
   boot.extraModprobeConfig = "options ddcci delay=20";
 
+  # ddcci-instantiate corre una sola vez en graphical.target, para los conectores
+  # que estaban conectados en ese momento. Si despues se apaga y se prende un
+  # monitor (o se cambia de puerto), ese conector queda SIN backlight DDC/CI y el
+  # brillo no lo afecta: por eso "solo responde uno". Esta regla udev lo relanza
+  # en cada cambio de estado de un conector DRM. --no-block: udev no espera (el
+  # servicio sondea hasta 20 s).
+  services.udev.extraRules = ''
+    SUBSYSTEM=="drm", ACTION=="change", RUN+="${pkgs.systemd}/bin/systemctl --no-block restart ddcci-instantiate.service"
+  '';
+
   # ddcci: desde kernel 6.8 el auto-probe de displays esta roto (el driver no
   # instancia el dispositivo por si solo), y sin el, /sys/class/backlight queda
   # vacio -> Caelestia no puede leer el brillo (icono/OSD vacios). Fix:

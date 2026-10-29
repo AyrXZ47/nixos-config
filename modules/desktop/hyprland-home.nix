@@ -265,6 +265,12 @@ in
       -- no habia forma de saber cual te tocaba.
       hl.bind("SUPER + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh mirror"))
       hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh extended"))
+      -- Foco entre monitores SIN cambiar de escritorio: el cursor/foco salta al
+      -- otro monitor y cada uno sigue mostrando lo suyo (lo que ya hacias a
+      -- mano con el mouse). Verificado 2026-10-28: hl.dsp.focus({ monitor = "r" })
+      -- funciona; "right" no (responde "monitor not found").
+      hl.bind("SUPER + ALT + Right", hl.dsp.focus({ monitor = "r" }))
+      hl.bind("SUPER + ALT + Left", hl.dsp.focus({ monitor = "l" }))
       -- rofi retirado: TODO pasa por el launcher de Caelestia (SUPER+CTRL+Space
       -- para apps, y `>ack` dentro del launcher para las acciones).
       -- Caelestia: launcher, dashboard, menu de sesion y utilities. Reemplazan
@@ -648,22 +654,37 @@ in
         mons=$(hyprctl monitors -j | jq -c '[.[] | select(.disabled == false)]')
         [ "$(echo "$mons" | jq 'length')" -ge 1 ] || exit 0
 
-        # Principal = el monitor enfocado; si ninguno lo esta, el primero. Para
-        # forzar otro, enfocalo con el mouse y volve a correr el script.
+        # Principal = el monitor en x=0 (el que Hyprland deja mas a la
+        # izquierda); si ninguno, el enfocado. Para forzar otro, pasar el nombre
+        # como 3er argumento.
         main=$(echo "$mons" | jq -r '(map(select(.focused == true))[0] // .[0]) | .name')
 
         # 1..MAIN_LAST quedan en el principal; de ahi en adelante van al primer
         # secundario. Asi el secundario queda clavado a los escritorios 9+, que
         # el humano no usa, y SUPER+9 lo alcanza comodo. Con un solo monitor,
         # todo cae en el principal. Arg 2 = ultimo escritorio del principal.
+        # Principal = el monitor en x=0 (el que Hyprland deja mas a la
+        # izquierda). Antes era el ENFOCADO, y con el cursor en el otro monitor
+        # el bind se aplicaba al que no era: eso hacia imposible recuperar el
+        # principal despues de apagar y prender un monitor. Override: 3er arg.
+        # 2do arg = ultimo escritorio del principal (default 8).
         main_last="''${2:-8}"
+        main="''${3:-}"
+        [ -n "$main" ] || main=$(echo "$mons" | jq -r 'map(select(.x == 0))[0].name // empty')
+        [ -n "$main" ] || main=$(echo "$mons" | jq -r '(map(select(.focused == true))[0] // .[0]) | .name')
+
         secondary=$(echo "$mons" | jq -r --arg m "$main" '[.[] | select(.name != $m)][0].name // empty')
         for n in $(seq 1 "$last"); do
           target="$main"
           if [ -n "$secondary" ] && [ "$n" -gt "$main_last" ]; then
             target="$secondary"
           fi
-          hyprctl eval "hl.workspace_rule({ workspace = \"$n\", monitor = \"$target\" })" >/dev/null
+          # persistent=true ademas MUEVE el workspace si ya existia en el otro
+          # monitor (verificado 2026-10-28: ws 3 paso de HDMI-A-2 a DP-2). Una
+          # regla sin persistent solo aplica a workspaces nuevos, y por eso el
+          # 9 seguia respondiendo al principal hasta reiniciar la sesion.
+          # default=true NO sirve para esto (probado: no migra).
+          hyprctl eval "hl.workspace_rule({ workspace = \"$n\", monitor = \"$target\", persistent = true })" >/dev/null
         done
       '';
     };
