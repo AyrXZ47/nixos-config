@@ -70,6 +70,40 @@ flake.nix              # Entry point — hosts & shared modules
   `wallpaper.postHook` (the shell computes the Material You scheme from the
   video's first frame; mpvpaper keeps painting the real background).
 
+### Pantalla inalámbrica (Miracast) y disposición de monitores
+- **Miracast** (`modules/apps/miracast.nix`) — GNOME Network Displays, lo mismo
+  que "Windows+K" en Windows: la app pide el screencast al portal y lo manda a
+  la TV por Wi-Fi Direct. Necesita dos cosas, y las dos viven en módulos
+  compartidos a propósito: `dnsmasq` en el PATH (GND lo invoca por nombre para
+  servir DHCP en la interfaz `p2p-dev-*`) y los puertos 67/udp, 123/udp y
+  7236/tcp+udp en `modules/core/networking.nix`. Sin cualquiera de las dos el
+  link P2P se arma, la TV nunca recibe IP y GND aborta con "connection
+  established .. connection lost" — o se queda cinco minutos colgado y cierra
+  en silencio. Funcionaba en la laptop y estaba roto en el `pc` porque el fix
+  se había quedado en `hosts/laptop` mientras la app la importa
+  `home/default.nix` en los 4 hosts. Diagnóstico: `G_MESSAGES_DEBUG=all
+  gnome-network-displays > gnd.log 2>&1`.
+- **Espejo / extender** — `SUPER+D` alterna, `SUPER+SHIFT+D` fuerza espejo.
+  `monitor-mirror.sh` tiene dos invariantes: no toca nunca el monitor principal
+  (reaplicarle geometría era el bug de "extender falla") y, al espejar, le da
+  al secundario el **mismo timing** del principal (el modo más cercano de su
+  propia lista) en vez de `preferred`, porque con timings distintos Hyprland
+  muestra cuadros viejos y tearing en la salida espejada. `mirror="none"` es
+  lo que des-espeja; `mirror=false` no parsea ("string type requires a
+  string").
+- **Por qué Windows se porta mejor espejando** — DWM clona en el pipe de
+  display de la GPU con timings que negocia el driver; Hyprland re-renderiza
+  cada salida con su propio damage tracking, así que si las dos salidas no
+  corren el mismo modo la clonada puede mostrar frames viejos. De ahí el ajuste
+  de timing del punto anterior: no es un bug de NixOS ni del kernel.
+- **Dark mode** — GTK3/Qt salen de `gtk3/gtk4.extraConfig` y
+  `qt.platformTheme`. Las apps GTK4/libadwaita (GNOME Network Displays,
+  Nautilus) **ignoran** `gtk-application-prefer-dark-theme`: preguntan el
+  esquema al portal, que lo responde leyendo `org.gnome.desktop.interface`.
+  Por eso `modules/desktop/hyprland.nix` habilita `programs.dconf` y siembra
+  `color-scheme = prefer-dark` en dconf: sin eso la app sale en blanco aunque
+  el resto del escritorio esté en oscuro.
+
 ### Shell & Terminal
 - **Zsh** + Oh My Zsh (`git`, `sudo`) + **powerlevel10k** (instant prompt) +
   autosuggestions + syntax highlighting; word-wise bindings; fzf integration.
@@ -347,6 +381,7 @@ disponibilidad hasta que el sensor reenumere (~30 s).
 | `SUPER CTRL K` | Caelestia show-all (launcher + dashboard + OSD) |
 | `SUPER SHIFT V` / `SUPER Period` | Clipboard history / emoji picker (Caelestia) |
 | `SUPER F6/F7/F8` | Media prev / play-pause / next (Caelestia MPRIS) |
+| `SUPER D` / `SUPER SHIFT D` | Toggle mirror↔extend / force mirror |
 | Media keys | Volume (wpctl), mic mute, brightness (brightnessctl) |
 
 ## Custom Commands
