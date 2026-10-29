@@ -17,7 +17,8 @@
 - **S9** — "hubo un momento en la historia de este repo en que tuve wayle y no caelestia... subir y bajar el brillo era instantaneo, quiero que esto se arregle de una vez por todas"
 - **S10** — "MI LAPTOP DEBE SER ESPEJO DE MI PC Y VICEVERSA... espero eso deje de ser un problema"
 - **S11** — "el modo extended... los escritorios 1,2,3,4,5,6... al infinito deberían de funcionar solamente en el monitor principal, mientras que el segundo monitor se queda sin nada a la espera de que le arrastre alguna ventana"
-- **S12** — "lanzo el comando 'time to work' (super w) y en mi pantalla veo todo menos lo de un escritorio que se va a la segunda pantalla. Eso está mal."
+- **S13** — "busca como estaba resuelto el tema del brillo porque funcionaba en ese entonces 'a tiempo real'. Literal solo es simular como funciona la pantalla de la laptop. Sé que el problema no es el monitor."
+- **S14** — "que sea el workspace 9 porque puedo presionar super 9 y llegar cómodamente a él, jamás llego a usar hasta el workspace 9, por lo que que quede clavado el segundo monitor a los workspaces del 9 en adelante me sirve"
 
 ## Tasks
 
@@ -32,6 +33,8 @@
 | T7 | S11 S12 | `workspace-bind.sh`: 1..12 atados al monitor principal al arrancar y al pasar a Extended; el secundario recibe el siguiente número libre y queda vacío | hecha + verificado con salida HEADLESS (el secundario tomó 13) | este commit |
 | T8 | S10 | regla de paridad pc/laptop en `AGENTS.md` | hecha | este commit |
 | T9 | S1 | GND sigue fallando **igual en pc y laptop** después del rebuild: barra gris y desconexión sola a los minutos. Bloqueada: falta el log `G_MESSAGES_DEBUG=all` y confirmar si la ONN alguna vez aceptó Miracast (Win+K) desde Windows | bloqueada | — |
+| T10 | S13 | `options ddcci delay=20` (el default de 60 ms es el 90% de los 66 ms medidos por write); verificado que el resto del camino es correcto (`getvcp 10` lee 30/100 después de escribir) | hecha, sin verificar en vivo (necesita rebuild) | este commit |
+| T11 | S14 | `workspace-bind.sh` con corte: 1..8 al principal, 9..12 al primer secundario | hecha + **verificado con dos monitores reales** (kitty en ws 10 nació en HDMI-A-2) | este commit |
 
 ## Log
 
@@ -105,3 +108,15 @@
     al hotplug, Hyprland le da el siguiente número libre.
   - Verificado con salida `HEADLESS`: con 1..12 atados a `DP-1`, un segundo monitor recién creado
     tomó el escritorio **13** y los numerados se quedaron en `DP-1`.
+
+- **L5** — arqueología del brillo (2026-10-28), pedido de S13:
+  - Hasta `c24c715` (2026-09-20, migración a Caelestia) el camino era `brightness.sh`, y para un
+    monitor externo con ddcci cargado el branch que corría era `brightnessctl s ±10%` — **el mismo
+    `sysfs` de ddcci que usa Caelestia hoy**. El branch `ddcutil setvcp` + `flock` era el fallback
+    para hosts sin ddcci. O sea: el script viejo no era más rápido que el actual.
+  - `modinfo ddcci` → **`parm: delay` = "default delay after bus writes (in ms, default 60)"**. Los
+    66 ms medidos son 60 de delay del driver + ~6 de trabajo real. Ese costo estaba igual en la
+    época "instantánea": lo que cambió no fue el script.
+  - Palanca real: `options ddcci delay=20` → ~26 ms por write. Si el panel empieza a perder writes
+    (discrepancia entre el kernel y `ddcutil --bus 8 getvcp 10`), subir a 30-40. Latencia cero real
+    solo con backlight por software (gamma), no con DDC/CI.

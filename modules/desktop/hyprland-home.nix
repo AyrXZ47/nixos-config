@@ -652,11 +652,18 @@ in
         # forzar otro, enfocalo con el mouse y volve a correr el script.
         main=$(echo "$mons" | jq -r '(map(select(.focused == true))[0] // .[0]) | .name')
 
-        # Con 1..N atados al principal, Hyprland le da al secundario el siguiente
-        # numero libre (N+1) cuando se conecta: queda vacio y no se roba ninguno
-        # de los del principal. Es exactamente el extended de GNOME.
+        # 1..MAIN_LAST quedan en el principal; de ahi en adelante van al primer
+        # secundario. Asi el secundario queda clavado a los escritorios 9+, que
+        # el humano no usa, y SUPER+9 lo alcanza comodo. Con un solo monitor,
+        # todo cae en el principal. Arg 2 = ultimo escritorio del principal.
+        main_last="''${2:-8}"
+        secondary=$(echo "$mons" | jq -r --arg m "$main" '[.[] | select(.name != $m)][0].name // empty')
         for n in $(seq 1 "$last"); do
-          hyprctl eval "hl.workspace_rule({ workspace = \"$n\", monitor = \"$main\" })" >/dev/null
+          target="$main"
+          if [ -n "$secondary" ] && [ "$n" -gt "$main_last" ]; then
+            target="$secondary"
+          fi
+          hyprctl eval "hl.workspace_rule({ workspace = \"$n\", monitor = \"$target\" })" >/dev/null
         done
       '';
     };
