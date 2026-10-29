@@ -115,16 +115,10 @@
   ];
   boot.kernelModules = [ "ddcci" "ddcci-backlight" ];
 
-  # ddcci: delay entre transacciones de bus, default 60 ms. Medido en este pc
-  # (2026-10-28): cada `brightnessctl set` tarda 66 ms = 60 de delay + 6 de
-  # trabajo real, y el driver las serializa, asi que un slider que emite ~60
-  # eventos/s encola segundos. Bajarlo a 20 ms hace cada write ~26 ms: el mismo
-  # camino, igual que un panel interno. Es el unico costo configurable de la
-  # cadena (el resto es el i2c AUX y el monitor).
-  # ponytail: si el panel empieza a perder writes (valor del kernel y `ddcutil
-  # getvcp 10` discrepan), este numero es demasiado bajo: subir a 30-40. El techo
-  # a subir es un backlight por software (gamma) si se quiere latencia cero real.
-  boot.extraModprobeConfig = "options ddcci delay=20";
+  # OJO: aca vivia "options ddcci delay=20". Se saco el 2026-10-29:
+  # bajar el delay del driver produjo escrituras poco confiables y el panel
+  # terminaba volviendo a su valor por defecto (100%). El default de 60 ms es
+  # el que andaba antes de esta sesion; no se toca mas.
 
   # OJO: aca vivia una regla udev que relanzaba ddcci-instantiate en cada
   # ACTION=="change" de DRM. Mala idea: Hyprland emite cambios de conector al
