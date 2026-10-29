@@ -46,6 +46,7 @@ Flake-driven NixOS config (`nixos-unstable`, pinned in `flake.lock`) for 4 hosts
 - `modules/apps/` is split: home-side files imported by `home/default.nix` (shell, kitty, neovim, fastfetch, git, mpd, firefox, serena) vs system-side files imported by host configs (common-packages, gaming).
 - New feature = new file under `modules/`, imported by the hosts that want it (or `home/default.nix` for home-side apps), NOT added to `flake.nix`. Match the category's existing pattern (enable-option vs plain import).
 - `hosts/*/hardware-configuration.nix` is GENERATED (`nixos-generate-config`, disk-by-label on pc/laptop/server). Never hand-edit; regenerate. `./bootstrap.sh <host>` regenerates, rebuilds, and commits it.
+- **pc y laptop son espejo uno del otro.** Lo que aplique a los dos va en `modules/` (o `home/default.nix`); en `hosts/<name>/configuration.nix` solo queda lo que es físicamente de ese equipo (hardware, GPU, fingerprint, discos, hostName). Un fix escrito en un host y que sirve para los dos es un bug diferido: el otro se queda sin él en silencio. Ya pasó con Miracast — `dnsmasq` y los puertos del firewall vivían solo en `hosts/laptop` mientras la app la importa `home/default.nix` en los 4 hosts, así que el `pc` tenía GND instalado y roto. Antes de tocar `hosts/*`, preguntarse si no corresponde a un módulo compartido.
 
 ## Commands
 
