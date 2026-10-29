@@ -27,7 +27,11 @@ in
       hl.monitor({ output = "Virtual-1", mode = "1920x1080@60", position = "0x0", scale = "1" })
       -- Catch-all: máxima frecuencia soportada (highrr). Reproductible en
       -- cualquier host sin hardcodear nombres (pc 100 Hz, laptop, vm).
-      hl.monitor({ output = "", mode = "highrr", position = "auto", scale = "1" })
+      -- vrr = 1: pedir Adaptive-Sync en TODAS las salidas. Solo se activa de
+      -- verdad si el panel lo tiene encendido en su OSD (Adaptive-Sync / FreeSync);
+      -- si esta apagado ahi, `hyprctl monitors` sigue mostrando vrr=false aunque
+      -- el host lo pida. Se verifica con: hyprctl monitors | grep vrr
+      hl.monitor({ output = "", mode = "highrr", position = "auto", scale = "1", vrr = 1 })
 
       ------------------
       ---- AUTOSTART ----
@@ -156,10 +160,9 @@ in
           -- VRR (FreeSync): el panel refresca cuando la GPU entrega el frame, en
           -- vez de a un reloj fijo. No da mas FPS: saca el tearing y el judder
           -- cuando el juego no clava justo los Hz del monitor.
-          -- 2 = solo con una ventana en fullscreen (juegos); el escritorio y las
-          -- ventanas normales quedan al refresco fijo de siempre, que es donde
-          -- VRR molesta (flicker con fps bajos). Si el panel parpadea, volver a 0.
-          vrr = 2,
+          -- 1 = siempre activo (pedido explicito). Ojo: si el panel parpadea con
+          -- fps bajos, 2 lo limita a fullscreen y suele alcanzar.
+          vrr = 1,
         },
       })
 
