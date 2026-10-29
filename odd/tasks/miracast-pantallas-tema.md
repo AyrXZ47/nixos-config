@@ -120,3 +120,16 @@
   - Palanca real: `options ddcci delay=20` → ~26 ms por write. Si el panel empieza a perder writes
     (discrepancia entre el kernel y `ddcutil --bus 8 getvcp 10`), subir a 30-40. Latencia cero real
     solo con backlight por software (gamma), no con DDC/CI.
+
+- **L6** — causa raíz del brillo (2026-10-29, la encontró el humano): **AI Vision**
+  del OSD del MSI MAG 255XF. Con AI Vision activo el escalador del panel sube el
+  brillo a máximo por su cuenta, sin que el host escriba nada; por eso ningún log
+  ni `getvcp 10` lo explicaba y parecía que "el brillo se reseteaba solo al
+  cambiar de workspace". Solución: OSD -> AI Vision -> cambiarlo a "Night Vision =
+  AI". **Lección**: antes de pelear con el camino DDC/CI, descartar los modos
+  automáticos del panel (AI Vision, HDCR, ECO, sensor de luz). El host no puede
+  verlos ni sobrescribirlos.
+  Revertidos ese mismo día por precaución y por no aportar nada: `options ddcci
+  delay=20` (b80f `bf82431`) y `misc.vrr = 1` + `vrr` por monitor; quedan en los
+  valores previos a la sesión (delay de fábrica 60 ms, `vrr = 2`).
+
