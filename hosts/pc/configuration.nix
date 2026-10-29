@@ -196,8 +196,6 @@
         fi
         echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device" 2>/dev/null || true
         for i in $(seq 1 25); do [ -L "$dev/driver" ] && break; sleep 0.2; done
-          sleep 0.5
-        done
       done
     '';
   };
