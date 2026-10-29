@@ -33,6 +33,11 @@ in
       ---- AUTOSTART ----
       ------------------
       hl.on("hyprland.start", function()
+        -- Escritorios numerados SOLO en el monitor principal; el secundario se
+        -- queda con uno vacio esperando que le arrastren una ventana (estilo
+        -- GNOME). Va antes que el shell para que los workspaces ya existan
+        -- cuando Caelestia dibuja la barra.
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-bind.sh")
         -- Caelestia (Quickshell) reemplaza a Wayle como shell. El CLI vive en el
         -- wrapper de caelestia-shell; `-d` lo desacopla de la terminal.
         hl.exec_cmd("caelestia shell -d")
@@ -255,12 +260,11 @@ in
       -----------------------
       hl.bind("SUPER + Backspace", hl.dsp.exec_cmd("kitty"))
       hl.bind("SUPER + F2", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/touchpad-toggle.sh"))
-      -- Espejo/expander pantallas (presentaciones): SUPER+D alterna (toggle con
-      -- deteccion de hosts); SUPER+SHIFT+D se mantiene como alias.
-      hl.bind("SUPER + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
-      -- SUPER+SHIFT+D fuerza espejo (no alterna): es el plan B documentado
-      -- cuando Miracast falla.
-      hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh mirror"))
+      -- Mirror/Extended: bindings DETERMINISTAS, sin toggle. SUPER+D es
+      -- siempre Mirror, SUPER+SHIFT+D es siempre Extended. Antes alternaban y
+      -- no habia forma de saber cual te tocaba.
+      hl.bind("SUPER + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh mirror"))
+      hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh extended"))
       -- rofi retirado: TODO pasa por el launcher de Caelestia (SUPER+CTRL+Space
       -- para apps, y `>ack` dentro del launcher para las acciones).
       -- Caelestia: launcher, dashboard, menu de sesion y utilities. Reemplazan
@@ -357,12 +361,22 @@ in
       hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true, repeating = true })
       -- Brillo por los global shortcuts de Caelestia (panel interno + DDC/CI):
       -- su servicio Brightness es quien pinta el OSD; brightness.sh se retiró.
-      hl.bind("XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"), { locked = true, repeating = true })
-      hl.bind("XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"), { locked = true, repeating = true })
+      hl.bind("XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"))
+      hl.bind("XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"))
       hl.bind("SUPER + F12", hl.dsp.global("caelestia:brightnessUp"))
       hl.bind("SUPER + F11", hl.dsp.global("caelestia:brightnessDown"))
       hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.global("caelestia:brightnessUp"))
       hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.global("caelestia:brightnessDown"))
+      -- ponytail: sin panel interno, el unico backlight es ddcci8 y CADA cambio
+      -- es una transaccion DDC/CI por i2c AUX: medidos 66 ms por write el
+      -- 2026-10-28 (10 writes encadenados = 653 ms, el driver los serializa;
+      -- la lectura en cambio es 1 ms porque el kernel la cachea). Con
+      -- `repeating = true` mantener la tecla encolaba ~15 writes por segundo y
+      -- el panel quedaba segundos atras: ESE era el "el brillo no responde al
+      -- toque". Sin repeat, un toque = un write = 66 ms.
+      -- Techo a subir si vuelve a molestar: coalescer (guardar el valor
+      -- objetivo y aplicar solo el ultimo cada ~80 ms) via shim de brightnessctl
+      -- o servicio propio, en vez de encolar un write por evento.
 
       -- Control de reproducción: Caelestia expone shortcuts globales de Hyprland
       -- (caelestia:media*) que van por MPRIS, así que SUPER+F7 pausa lo que sea
@@ -534,10 +548,11 @@ in
       '';
     };
 
-    # Toggle de disposicion de monitores: espejo <-> extender. SUPER+D alterna;
-    # SUPER+SHIFT+D fuerza espejo (el plan B cuando Miracast falla). No hay
-    # auto-espejo al conectar un monitor: causaba las "pantallas locas" al
-    # arrancar. Con menos de 2 salidas activas el script no hace nada.
+    # Toggle de disposicion de monitores: Mirror <-> Extended (nombres en
+    # ingles por pedido explicito). SUPER+D = Mirror, SUPER+SHIFT+D = Extended;
+    # los dos son deterministas, ya no alternan. No hay auto-espejo al conectar
+    # un monitor: causaba las "pantallas locas" al arrancar. Con menos de 2
+    # salidas activas el script no hace nada.
     # hyprctl keyword esta bloqueado en Hyprland 0.56 ("non-legacy parsers"):
     # el runtime va via hyprctl eval de la API hl.monitor(..., mirror = "X").
     # Dos invariantes que este script NO rompe:
@@ -590,22 +605,59 @@ in
 
         mirrored=$(echo "$active" | jq -c '[.[] | select(.mirrorOf != "none")]')
 
-        if [ "''${1:-}" = "mirror" ] || { [ -z "''${1:-}" ] && [ "$(echo "$mirrored" | jq 'length')" -eq 0 ]; }; then
+        # Mirror (SUPER+D): idempotente, reaplicarlo no rompe nada.
+        if [ "''${1:-mirror}" != "extended" ]; then
           for name in $(echo "$active" | jq -r --arg p "$primary" '.[] | select(.name != $p) | .name'); do
             mon=$(echo "$active" | jq -c --arg n "$name" '.[] | select(.name == $n)')
             apply "$name" "$(best_mode "$mon")" "auto" "$(echo "$mon" | jq -r '.scale')" "$primary"
           done
-          notify-send "Modo espejo"
+          notify-send "Mirror"
           exit 0
         fi
 
-        # Extender: se restauran SOLO las salidas espejadas, cada una con la
-        # geometria que ella misma reporta. El primario queda intacto.
+        # Extended (SUPER+SHIFT+D): se restauran SOLO las salidas espejadas, cada
+        # una con la geometria que ella misma reporta. El primario queda intacto.
+        # Despues se reafirman los escritorios numerados en el principal para que
+        # el secundario quede vacio y no se robe uno (estilo GNOME).
         for name in $(echo "$mirrored" | jq -r '.[].name'); do
           mon=$(echo "$mirrored" | jq -c --arg n "$name" '.[] | select(.name == $n)')
           apply "$name" "$(echo "$mon" | jq -r '"\(.width)x\(.height)@\(.refreshRate)"')" "auto" "$(echo "$mon" | jq -r '.scale')" "none"
         done
-        notify-send "Modo extender"
+        "${config.xdg.configHome}/hypr/scripts/workspace-bind.sh" || true
+        notify-send "Extended"
+      '';
+    };
+
+    # Escritorios numerados SOLO en el monitor principal; cada secundario recibe
+    # un escritorio propio y vacio esperando que le arrastren una ventana (asi se
+    # comporta GNOME en extended, que es lo que se pidio). Sin esto Hyprland crea
+    # el workspace en el monitor ENFOCADO, y `time-to-work` (SUPER+W) terminaba
+    # mandando uno de los escritorios 1-4 al secundario.
+    # Se reaplica al arrancar y cada vez que se pasa a Extended
+    # (monitor-mirror.sh); los nombres de salida no se hardcodean nunca.
+    "hypr/scripts/workspace-bind.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        command -v jq >/dev/null || exit 1
+
+        # Argumento opcional: cuantos escritorios numerados atar (default 12).
+        last="''${1:-12}"
+
+        mons=$(hyprctl monitors -j | jq -c '[.[] | select(.disabled == false)]')
+        [ "$(echo "$mons" | jq 'length')" -ge 1 ] || exit 0
+
+        # Principal = el monitor enfocado; si ninguno lo esta, el primero. Para
+        # forzar otro, enfocalo con el mouse y volve a correr el script.
+        main=$(echo "$mons" | jq -r '(map(select(.focused == true))[0] // .[0]) | .name')
+
+        # Con 1..N atados al principal, Hyprland le da al secundario el siguiente
+        # numero libre (N+1) cuando se conecta: queda vacio y no se roba ninguno
+        # de los del principal. Es exactamente el extended de GNOME.
+        for n in $(seq 1 "$last"); do
+          hyprctl eval "hl.workspace_rule({ workspace = \"$n\", monitor = \"$main\" })" >/dev/null
+        done
       '';
     };
 
