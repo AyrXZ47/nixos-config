@@ -652,10 +652,32 @@ in
       text = ''
         #!/usr/bin/env bash
         set -euo pipefail
-        max=$(cat /sys/class/backlight/*/max_brightness 2>/dev/null | head -1)
-        max="''${max:-100}"
-        state="''${XDG_RUNTIME_DIR:-/tmp}/brightness-knob.target"
+        # Monitor enfocado -> conector DRM -> bus aux -> backlight ddcciN.
+        # SUPER+ALT+<> cambia el foco, asi que el knob mueve el monitor que
+        # estas mirando. `brightnessctl set` sin -d agarra el PRIMER device de
+        # la lista, y con dos monitores eso movia el que no estabas mirando.
+        dev=""
+        mon=$(hyprctl monitors -j 2>/dev/null | jq -r '[.[] | select(.focused == true)][0].name // empty' 2>/dev/null || true)
+        if [ -n "$mon" ]; then
+          for c in /sys/class/drm/card*-\"$mon\"; do
+            [ -e "$c/status" ] || continue
+            bus=""
+            for i in "$c"/i2c-*; do
+              [ -e "$i/name" ] && grep -qi aux "$i/name" && bus=$(basename "$i") && break
+            done
+            [ -z "$bus" ] && [ -e "$c/ddc" ] && bus=$(basename "$(readlink -f "$c/ddc")")
+            [ -z "$bus" ] && continue
+            cand="ddcci$(basename "$bus" | sed 's/^i2c-//')"
+            [ -e "/sys/class/backlight/$cand" ] && dev="$cand" && break
+          done
+        fi
+        devarg=""
+        [ -n "$dev" ] && devarg="-d $dev"
+        base="/sys/class/backlight/''${dev}"
+        [ -n "$dev" ] || base="/sys/class/backlight/$(ls /sys/class/backlight 2>/dev/null | head -1)"
+        max=$(cat "$base/max_brightness" 2>/dev/null || echo 100)
         step=$(( max * 5 / 100 )); [ "$step" -ge 1 ] || step=1
+        state="''${XDG_RUNTIME_DIR:-/tmp}/brightness-knob.''${dev:-default}.target"
 
         # La lectura-modificacion-escritura del objetivo va bajo su PROPIO lock
         # corto: sin el, 8 eventos en paralelo leen el mismo valor y se pisan
@@ -663,7 +685,7 @@ in
         # concurrentes quedaban en 15% en vez de 90%.
         exec 8>"$state.rmw"
         flock 8
-        cur=$(cat "$state" 2>/dev/null || cat /sys/class/backlight/*/brightness 2>/dev/null | head -1 || echo "$max")
+        cur=$(cat "$state" 2>/dev/null || cat "$base/brightness" 2>/dev/null || echo "$max")
         case "''${1:-}" in
           up)   cur=$(( cur + step )) ;;
           down) cur=$(( cur - step )) ;;
@@ -685,7 +707,7 @@ in
           v=$(cat "$state")
           p=$(( v * 100 / max ))
           if [ "$p" != "$last" ]; then
-            brightnessctl set "$p%" >/dev/null 2>&1 || true
+            brightnessctl $devarg set "$p%" >/dev/null 2>&1 || true
             last="$p"; idle=0
           else
             idle=$(( idle + 1 ))
