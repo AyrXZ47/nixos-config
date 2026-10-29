@@ -258,7 +258,9 @@ in
       -- Espejo/expander pantallas (presentaciones): SUPER+D alterna (toggle con
       -- deteccion de hosts); SUPER+SHIFT+D se mantiene como alias.
       hl.bind("SUPER + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
-      hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh"))
+      -- SUPER+SHIFT+D fuerza espejo (no alterna): es el plan B documentado
+      -- cuando Miracast falla.
+      hl.bind("SUPER + SHIFT + D", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/monitor-mirror.sh mirror"))
       -- rofi retirado: TODO pasa por el launcher de Caelestia (SUPER+CTRL+Space
       -- para apps, y `>ack` dentro del launcher para las acciones).
       -- Caelestia: launcher, dashboard, menu de sesion y utilities. Reemplazan
@@ -532,12 +534,23 @@ in
       '';
     };
 
-    # Toggle de disposicion de monitores: espejo <-> extend. Sin argumento
-    # alterna; con "mirror" fuerza espejo. El modo manual es SUPER+D (ya no hay
+    # Toggle de disposicion de monitores: espejo <-> extender. SUPER+D alterna;
+    # SUPER+SHIFT+D fuerza espejo (el plan B cuando Miracast falla). No hay
     # auto-espejo al conectar un monitor: causaba las "pantallas locas" al
-    # arrancar). Con menos de 2 salidas fisicas el script no hace nada.
+    # arrancar. Con menos de 2 salidas activas el script no hace nada.
     # hyprctl keyword esta bloqueado en Hyprland 0.56 ("non-legacy parsers"):
-    # el runtime va via hyprctl eval de la API hl.monitor(..., mirror = X).
+    # el runtime va via hyprctl eval de la API hl.monitor(..., mirror = "X").
+    # Dos invariantes que este script NO rompe:
+    #  1) el primario no se toca NUNCA. Reaplicarle mode/position/scale perdia
+    #     la geometria configurada del monitor principal: ese era el "extender
+    #     falla". Solo se tocan las salidas que estan espejadas (o las que se
+    #     van a espejar).
+    #  2) al espejar, el secundario corre el MISMO timing que el primario (se
+    #     elige el modo mas cercano de su propia lista). Con timings distintos
+    #     Hyprland mostraba cuadros viejos/tearing en la salida espejada.
+    # mirror = "none" (string) es lo que des-espeja: verificado 2026-10-28 con
+    # una salida HEADLESS (mirrorOf pasa de "1" a "none"). mirror = false no
+    # parsea ("string type requires a string").
     # notify-send (no "wayle notify", ya retirado: ese subcommand solo controlaba
     # la lista, no enviaba texto).
     "hypr/scripts/monitor-mirror.sh" = {
@@ -546,40 +559,53 @@ in
         #!/usr/bin/env bash
         set -euo pipefail
         command -v jq >/dev/null || { echo "falta jq" >&2; exit 1; }
-        mirror_on() { hyprctl eval "hl.monitor({ output = \"$1\", mode = \"preferred\", position = \"auto\", scale = \"1\", mirror = \"$2\" })" >/dev/null; }
-        # Base SIEMPRE en 'monitors all': al espejar, la salida clonada sale de
-        # la lista activa y el toggle de vuelta la perderia. Se excluyen las
-        # salidas HEADLESS (cast/tablet): tienen area grande y ganarian la
-        # eleccion de primario.
-        all=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false) | select(.name | startswith("HEADLESS") | not)]')
-        if [ "$(echo "$all" | jq 'length')" -lt 2 ]; then
+
+        apply() {
+          hyprctl eval "hl.monitor({ output = \"$1\", mode = \"$2\", position = \"$3\", scale = \"$4\", mirror = \"$5\" })" >/dev/null
+        }
+
+        active=$(hyprctl monitors all -j | jq -c '[.[] | select(.disabled == false)]')
+        if [ "$(echo "$active" | jq 'length')" -lt 2 ]; then
           notify-send "Solo hay un monitor"
           exit 0
         fi
-        if [ "''${1:-}" = "mirror" ]; then
-          # ponytail: primario por monitor enfocado (el que usa el humano), con
-          # fallback al primero; antes era area*Hz y la salida HEADLESS 1920x1200
-          # le ganaba al fisico -> el fisico espejaba la tablet. No por nombre
-          # fijo (DP-1 vs eDP-1 segun host).
-          primary=$(echo "$all" | jq -r '[.[] | select(.mirrorOf == "none")] | (map(select(.focused == true))[0] // .[0]) | .name')
-          for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
-            mirror_on "$name" "$primary"
+
+        # Primario = el enfocado (el que usa el humano), fallback el primero.
+        primary=$(echo "$active" | jq -r '(map(select(.focused == true))[0] // .[0]) | .name')
+        pmon=$(echo "$active" | jq -c --arg p "$primary" '.[] | select(.name == $p)')
+
+        # Modo del primario traducido a la lista del secundario: misma
+        # resolucion, Hz mas cercano. Devuelve una entrada VALIDA de
+        # availableModes (sin el sufijo Hz), no un timing inventado.
+        best_mode() {
+          echo "$1" | jq -r \
+            --argjson w "$(echo "$pmon" | jq '.width')" \
+            --argjson h "$(echo "$pmon" | jq '.height')" \
+            --argjson r "$(echo "$pmon" | jq '.refreshRate')" '
+            [ .availableModes[] | select(startswith("\($w)x\($h)@"))
+              | { s: ., r: (sub(".*@"; "") | sub("Hz$"; "") | tonumber) } ]
+            | sort_by((.r - $r) | if . < 0 then -. else . end)
+            | (.[0].s // "preferred") | sub("Hz$"; "")'
+        }
+
+        mirrored=$(echo "$active" | jq -c '[.[] | select(.mirrorOf != "none")]')
+
+        if [ "''${1:-}" = "mirror" ] || { [ -z "''${1:-}" ] && [ "$(echo "$mirrored" | jq 'length')" -eq 0 ]; }; then
+          for name in $(echo "$active" | jq -r --arg p "$primary" '.[] | select(.name != $p) | .name'); do
+            mon=$(echo "$active" | jq -c --arg n "$name" '.[] | select(.name == $n)')
+            apply "$name" "$(best_mode "$mon")" "auto" "$(echo "$mon" | jq -r '.scale')" "$primary"
           done
           notify-send "Modo espejo"
           exit 0
         fi
-        if echo "$all" | jq -e '[.[] | select(.mirrorOf != "none")] | length > 0' >/dev/null; then
-          for name in $(echo "$all" | jq -r '.[] | .name'); do
-            mirror_on "$name" none
-          done
-          notify-send "Modo extender"
-        else
-          primary=$(echo "$all" | jq -r '[.[] | select(.mirrorOf == "none")] | (map(select(.focused == true))[0] // .[0]) | .name')
-          for name in $(echo "$all" | jq -r '.[] | select(.name != "'"$primary"'") | .name'); do
-            mirror_on "$name" "$primary"
-          done
-          notify-send "Modo espejo"
-        fi
+
+        # Extender: se restauran SOLO las salidas espejadas, cada una con la
+        # geometria que ella misma reporta. El primario queda intacto.
+        for name in $(echo "$mirrored" | jq -r '.[].name'); do
+          mon=$(echo "$mirrored" | jq -c --arg n "$name" '.[] | select(.name == $n)')
+          apply "$name" "$(echo "$mon" | jq -r '"\(.width)x\(.height)@\(.refreshRate)"')" "auto" "$(echo "$mon" | jq -r '.scale')" "none"
+        done
+        notify-send "Modo extender"
       '';
     };
 
