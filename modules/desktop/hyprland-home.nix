@@ -657,7 +657,7 @@ in
         # estas mirando. `brightnessctl set` sin -d agarra el PRIMER device de
         # la lista, y con dos monitores eso movia el que no estabas mirando.
         dev=""
-        mon=$(hyprctl monitors -j 2>/dev/null | jq -r '[.[] | select(.focused == true)][0].name // empty' 2>/dev/null || true)
+        mon=$(hyprctl monitors -j 2>/dev/null | sed -n '/^\[/,$p' | jq -r '[.[] | select(.focused == true)][0].name // empty' 2>/dev/null || true)
         if [ -n "$mon" ]; then
           for c in /sys/class/drm/card*-\"$mon\"; do
             [ -e "$c/status" ] || continue
