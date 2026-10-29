@@ -46,7 +46,7 @@
   modules.hardware.sdr.enable = true;
 
   # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
-  environment.systemPackages = [ pkgs.openrgb pkgs.dnsmasq ];
+  environment.systemPackages = [ pkgs.openrgb ];
 
   # fwupd: servicio para actualizar firmware. El `wantedBy = mkForce []` (no
   # arrancar en boot) vive en nix-optimization.nix.
@@ -61,17 +61,14 @@
   # (sin esto el daemon corre pero no descubre/conecta dispositivos).
   programs.kdeconnect.enable = true;
 
-  # Miracast (gnome-network-displays -> Smart View de TVs Samsung). La fase 2
-  # de la conexion P2P hace que NM monte una red compartida con dnsmasq
-  # (servidor DHCP en la interfaz p2p-dev-wlp3s0) y luego corre RTSP de WFD
-  # en el puerto 7236. Sin dnsmasq en PATH ni estos puertos el link se arma
-  # pero la TV nunca recibe IP / nunca conecta la sesion de video, y GND
-  # aborta con "connection established .. connection lost".
+  # Miracast (gnome-network-displays -> Smart View de TVs Samsung): el paquete
+  # y el dnsmasq del DHCP-P2P viven en modules/apps/miracast.nix (home, los 4
+  # hosts) y los puertos 67/123/7236 en modules/core/networking.nix. No se
+  # duplican aca: tenerlos solo en este host era justamente el bug que dejaba
+  # al pc con GND roto.
   # ponytail: GND 0.99 tiene SIGABRTs conocidos (gitlab #466, flathub #89);
   # si vuelve a tirar, correr con debug y comparar con los issues de upstream:
   #   G_MESSAGES_DEBUG=all gnome-network-displays > gnd.log 2>&1
-  networking.firewall.allowedTCPPorts = [ 7236 ];
-  networking.firewall.allowedUDPPorts = [ 67 123 7236 ];
 
   # Identidad de git: modules/core/common-host.nix (misma en los 4 hosts).
 

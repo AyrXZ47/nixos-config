@@ -9,8 +9,25 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # dconf: lo necesita el color-scheme de abajo. libadwaita (GNOME Network
+    # Displays, Nautilus, cualquier app GTK4 moderna) IGNORA
+    # gtk-application-prefer-dark-theme: pregunta el esquema al portal
+    # (org.freedesktop.appearance color-scheme), que xdg-desktop-portal-gtk
+    # responde leyendo org.gnome.desktop.interface. Sin dconf esa clave queda en
+    # el default del schema ("default" = claro) aunque GTK3/Qt vayan en dark,
+    # que es exactamente el bug: GN Displays blanco en el pc y oscuro en la
+    # laptop, donde el dconf tenia residuos de una sesion GNOME.
+    programs.dconf.enable = true;
+
     home-manager.users.yovick = {
       imports = [ ./hyprland-home.nix ];
+      # Fuente de verdad del dark mode para el portal y libadwaita. GTK3 y Qt
+      # siguen por gtk3/gtk4.extraConfig y qt.platformTheme (abajo).
+      dconf.settings."org/gnome/desktop/interface" = {
+        color-scheme = "prefer-dark";
+        gtk-theme = "Adwaita-dark";
+      };
+
       gtk = {
         enable = true;
         theme = {
