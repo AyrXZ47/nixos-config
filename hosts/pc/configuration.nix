@@ -115,6 +115,17 @@
   ];
   boot.kernelModules = [ "ddcci" "ddcci-backlight" ];
 
+  # ddcci: delay entre transacciones de bus, default 60 ms. Medido en este pc
+  # (2026-10-28): cada `brightnessctl set` tarda 66 ms = 60 de delay + 6 de
+  # trabajo real, y el driver las serializa, asi que un slider que emite ~60
+  # eventos/s encola segundos. Bajarlo a 20 ms hace cada write ~26 ms: el mismo
+  # camino, igual que un panel interno. Es el unico costo configurable de la
+  # cadena (el resto es el i2c AUX y el monitor).
+  # ponytail: si el panel empieza a perder writes (valor del kernel y `ddcutil
+  # getvcp 10` discrepan), este numero es demasiado bajo: subir a 30-40. El techo
+  # a subir es un backlight por software (gamma) si se quiere latencia cero real.
+  boot.extraModprobeConfig = "options ddcci delay=20";
+
   # ddcci: desde kernel 6.8 el auto-probe de displays esta roto (el driver no
   # instancia el dispositivo por si solo), y sin el, /sys/class/backlight queda
   # vacio -> Caelestia no puede leer el brillo (icono/OSD vacios). Fix:
