@@ -540,22 +540,10 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # Sunshine (host de Moonlight): unidad de USUARIO, en la sesion grafica. Un
-  # servicio de sistema no ve la sesion Wayland y la captura por screencopy
-  # falla. Los puertos del firewall viven en modules/apps/sunshine.nix.
-  # Primer arranque: abre http://localhost:47990 para crear usuario/password y
-  # emparejar desde la app Moonlight de la TV (te muestra un PIN de 4 digitos).
-  systemd.user.services.sunshine = {
-    Unit = {
-      Description = "Sunshine game stream host";
-      After = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.sunshine}/bin/sunshine";
-      Restart = "on-failure";
-    };
-    Install = { WantedBy = [ "graphical-session.target" ]; };
-  };
+  # Sunshine (host de Moonlight): se probo y se descarto. Moonlight es una app
+  # aparte que hay que instalar en la TV, con cuenta y PIN: no es transparente
+  # como Cast/Miracast. Ver odd/tasks/miracast-pantallas-tema.md.
+
 
   # cliphist: limite de historial en 20 items. Era 6, pero el humano perdía
   # contexto al elegir; 20 mantiene el historial corto sin crecer sin control
