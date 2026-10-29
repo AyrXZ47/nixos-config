@@ -18,7 +18,6 @@
     ../../modules/hardware/mtp.nix
     ../../modules/hardware/sdr.nix
     ../../modules/apps/common-packages.nix
-    ../../modules/apps/sunshine.nix
     ../../modules/apps/gaming.nix
     ../../modules/apps/rust-dev.nix
     ../../modules/apps/packettracer.nix
@@ -160,6 +159,16 @@
       RemainAfterExit = true;
     };
     script = ''
+      # Limpieza: ddcci se instancia por bus i2c. Si el cable cambia de puerto
+      # (DP-1 -> DP-2), el device viejo queda apuntando a un conector
+      # desconectado: brightnessctl escribe, el kernel dice OK, el OSD se mueve
+      # y el PANEL NO CAMBIA. Se borran todos los 0x37 antes de re-instanciar.
+      for d in /sys/bus/i2c/devices/*-0037; do
+        [ -e "$d" ] || continue
+        b=$(basename "$d")
+        echo 0x37 > "/sys/bus/i2c/devices/i2c-''${b%%-*}/delete_device" 2>/dev/null || true
+      done
+
       for conn in /sys/class/drm/card*-*-*; do
         [ -d "$conn" ] || continue
         [ "$(cat "$conn/status" 2>/dev/null)" = "connected" ] || continue
