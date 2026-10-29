@@ -647,19 +647,24 @@ in
     };
 
     # Coalescer del brillo para el knob (SUPER + perilla de volumen).
+    # Brillo del knob (SUPER + perilla): apunta al monitor ENFOCADO, no al
+    # primer device de la lista (sin -d, brightnessctl agarraba el que no
+    # mirabas). Version simple a proposito: aplica al instante, sin locks ni
+    # cola. El coalescer se probo y se saco porque cualquier fallo suyo dejaba
+    # la tecla MUERTA; primero que funcione, despues la latencia.
+    # Log en /tmp/brightness-knob.log: device elegido + salida de brightnessctl.
     "hypr/scripts/brightness-knob.sh" = {
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        set -euo pipefail
+        set -uo pipefail
+        log=/tmp/brightness-knob.log
+
         # Monitor enfocado -> conector DRM -> bus aux -> backlight ddcciN.
-        # SUPER+ALT+<> cambia el foco, asi que el knob mueve el monitor que
-        # estas mirando. `brightnessctl set` sin -d agarra el PRIMER device de
-        # la lista, y con dos monitores eso movia el que no estabas mirando.
         dev=""
-        mon=$(hyprctl monitors -j 2>/dev/null | sed -n '/^\[/,$p' | jq -r '[.[] | select(.focused == true)][0].name // empty' 2>/dev/null || true)
+        mon=$(hyprctl monitors -j 2>/dev/null | sed -n '/^\[/,$p' | jq -r '[.[]|select(.focused==true)][0].name // empty' 2>/dev/null)
         if [ -n "$mon" ]; then
-          for c in /sys/class/drm/card*-\"$mon\"; do
+          for c in /sys/class/drm/card*-"$mon"; do
             [ -e "$c/status" ] || continue
             bus=""
             for i in "$c"/i2c-*; do
@@ -667,54 +672,21 @@ in
             done
             [ -z "$bus" ] && [ -e "$c/ddc" ] && bus=$(basename "$(readlink -f "$c/ddc")")
             [ -z "$bus" ] && continue
-            cand="ddcci$(basename "$bus" | sed 's/^i2c-//')"
+            cand="ddcci''${bus#i2c-}"
             [ -e "/sys/class/backlight/$cand" ] && dev="$cand" && break
           done
         fi
-        devarg=""
-        [ -n "$dev" ] && devarg="-d $dev"
-        base="/sys/class/backlight/''${dev}"
-        [ -n "$dev" ] || base="/sys/class/backlight/$(ls /sys/class/backlight 2>/dev/null | head -1)"
-        max=$(cat "$base/max_brightness" 2>/dev/null || echo 100)
-        step=$(( max * 5 / 100 )); [ "$step" -ge 1 ] || step=1
-        state="''${XDG_RUNTIME_DIR:-/tmp}/brightness-knob.''${dev:-default}.target"
+        [ -n "$dev" ] || dev=$(ls /sys/class/backlight 2>/dev/null | head -1)
 
-        # La lectura-modificacion-escritura del objetivo va bajo su PROPIO lock
-        # corto: sin el, 8 eventos en paralelo leen el mismo valor y se pisan
-        # (los incrementos se pierden y el brillo salta). Medido: 8 eventos
-        # concurrentes quedaban en 15% en vez de 90%.
-        exec 8>"$state.rmw"
-        flock 8
-        cur=$(cat "$state" 2>/dev/null || cat "$base/brightness" 2>/dev/null || echo "$max")
+        args=()
+        [ -n "$dev" ] && args=(-d "$dev")
+
         case "''${1:-}" in
-          up)   cur=$(( cur + step )) ;;
-          down) cur=$(( cur - step )) ;;
-          *) exit 1 ;;
+          up)   out=$(brightnessctl "''${args[@]}" set +10% 2>&1) ;;
+          down) out=$(brightnessctl "''${args[@]}" set 10%- 2>&1) ;;
+          *)    echo "$(date +%T) bad-arg ''${1:-}" >> "$log"; exit 1 ;;
         esac
-        [ "$cur" -gt "$max" ] && cur="$max"
-        [ "$cur" -lt 1 ] && cur=1
-        echo "$cur" > "$state"
-        exec 8>&-
-
-        # Si ya hay un flusher, este evento solo actualiza el objetivo y sale.
-        exec 9>"$state.lock"
-        flock -n 9 || exit 0
-
-        # Flusher: aplica el ultimo valor, como maximo uno cada 60 ms, y sale
-        # ~300 ms despues del ultimo cambio.
-        last=""; idle=0
-        while :; do
-          v=$(cat "$state")
-          p=$(( v * 100 / max ))
-          if [ "$p" != "$last" ]; then
-            brightnessctl $devarg set "$p%" >/dev/null 2>&1 || true
-            last="$p"; idle=0
-          else
-            idle=$(( idle + 1 ))
-            [ "$idle" -ge 5 ] && break
-          fi
-          sleep 0.06
-        done
+        echo "$(date +%T) mon=$mon dev=$dev arg=$1 out=$out" >> "$log"
       '';
     };
 
@@ -1451,7 +1423,7 @@ EOF
         tmp="$(mktemp)"
         write_seed "$tmp"
         while IFS= read -r line; do
-          mime=''${line%%=*}
+          mime=''${line%=*}
           [ "$mime" = "$line" ] && continue
           grep -q "^$mime=" "$f" || printf '%s\n' "$line" >> "$f"
         done < "$tmp"
