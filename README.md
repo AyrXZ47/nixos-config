@@ -83,14 +83,31 @@ flake.nix              # Entry point — hosts & shared modules
   se había quedado en `hosts/laptop` mientras la app la importa
   `home/default.nix` en los 4 hosts. Diagnóstico: `G_MESSAGES_DEBUG=all
   gnome-network-displays > gnd.log 2>&1`.
-- **Espejo / extender** — `SUPER+D` alterna, `SUPER+SHIFT+D` fuerza espejo.
-  `monitor-mirror.sh` tiene dos invariantes: no toca nunca el monitor principal
-  (reaplicarle geometría era el bug de "extender falla") y, al espejar, le da
-  al secundario el **mismo timing** del principal (el modo más cercano de su
-  propia lista) en vez de `preferred`, porque con timings distintos Hyprland
-  muestra cuadros viejos y tearing en la salida espejada. `mirror="none"` es
-  lo que des-espeja; `mirror=false` no parsea ("string type requires a
-  string").
+- **Mirror / Extended** — `SUPER+D` = **Mirror**, `SUPER+SHIFT+D` = **Extended**.
+  Los dos son deterministas: ya no alternan, así que no hay que adivinar cuál te
+  tocó. `monitor-mirror.sh` tiene tres invariantes: no toca nunca el monitor
+  principal (reaplicarle geometría era el bug de "extended falla"), al espejar
+  le da al secundario el **mismo timing** del principal (el modo más cercano de
+  su propia lista) en vez de `preferred`, porque con timings distintos Hyprland
+  muestra cuadros viejos y tearing, y al pasar a Extended reafirma los
+  escritorios numerados en el principal. `mirror="none"` es lo que des-espeja;
+  `mirror=false` no parsea ("string type requires a string").
+- **Escritorios en Extended, estilo GNOME** — `workspace-bind.sh` ata los
+  escritorios 1..12 al monitor principal al arrancar y al pasar a Extended. El
+  secundario recibe el siguiente número libre (13 en adelante) y queda **vacío**
+  hasta que le arrastrás una ventana: no se roba ninguno de los numerados, así
+  que `time-to-work` (`SUPER+W`) siempre abre sus escritorios 1-4 en el
+  principal. La API Lua **no** mueve un workspace que ya existe en otro monitor
+  (`hl.dsp.move_workspace_to_monitor` es nil), por eso el diseño es por orden:
+  atar antes de que aparezca el secundario. Si el principal elegido no es el que
+  querés (arrancó con el secundario enfocado), enfocá el correcto y volvé a
+  correr el script.
+- **Brillo** — el único backlight del `pc` es `ddcci8` por DDC/CI: **66 ms por
+  write** medidos (10 encadenados = 653 ms, el driver serializa; la lectura es 1
+  ms porque el kernel la cachea). Las teclas de brillo ya **no** llevan
+  `repeating`: con repeat se encolaban ~15 writes por segundo y el panel quedaba
+  segundos atrás. Un toque = un write = 66 ms. Si algún día vuelve a molestar, el
+  techo es coalescer (aplicar solo el último valor cada ~80 ms).
 - **Por qué Windows se porta mejor espejando** — DWM clona en el pipe de
   display de la GPU con timings que negocia el driver; Hyprland re-renderiza
   cada salida con su propio damage tracking, así que si las dos salidas no
@@ -381,7 +398,7 @@ disponibilidad hasta que el sensor reenumere (~30 s).
 | `SUPER CTRL K` | Caelestia show-all (launcher + dashboard + OSD) |
 | `SUPER SHIFT V` / `SUPER Period` | Clipboard history / emoji picker (Caelestia) |
 | `SUPER F6/F7/F8` | Media prev / play-pause / next (Caelestia MPRIS) |
-| `SUPER D` / `SUPER SHIFT D` | Toggle mirror↔extend / force mirror |
+| `SUPER D` / `SUPER SHIFT D` | Mirror / Extended (deterministas, no alternan) |
 | Media keys | Volume (wpctl), mic mute, brightness (brightnessctl) |
 
 ## Custom Commands
