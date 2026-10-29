@@ -371,15 +371,12 @@ in
       hl.bind("XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"))
       hl.bind("SUPER + F12", hl.dsp.global("caelestia:brightnessUp"))
       hl.bind("SUPER + F11", hl.dsp.global("caelestia:brightnessDown"))
-      -- Brillo del knob: SUPER + perilla. NO usa caelestia:brightness* porque ese
-      -- servicio hace un `brightnessctl s N%` por evento (ver Brightness.qml) y
-      -- cada write DDC/CI cuesta 26-66 ms: la perilla emite decenas por segundo,
-      -- la cola crece y el panel queda segundos atras. brightness-knob.sh
-      -- actualiza el objetivo al instante y aplica SOLO el ultimo valor cada
-      -- 60 ms, asi se siente como el volumen (que es software y no tiene cola).
-      -- Las teclas XF86 sueltas siguen por Caelestia (con su OSD).
-      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness-knob.sh up"))
-      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/brightness-knob.sh down"))
+      -- Brillo: vuelve por los globales de Caelestia (pinta el OSD). El knob
+      -- apunta al device que elige brightnessctl; con el DDC del principal
+      -- roto (probe -17, ver hosts/pc/configuration.nix) solo mueve el que
+      -- si responde.
+      hl.bind("SUPER + XF86AudioRaiseVolume", hl.dsp.global("caelestia:brightnessUp"))
+      hl.bind("SUPER + XF86AudioLowerVolume", hl.dsp.global("caelestia:brightnessDown"))
       -- ponytail: sin panel interno, el unico backlight es ddcci8 y CADA cambio
       -- es una transaccion DDC/CI por i2c AUX: medidos 66 ms por write el
       -- 2026-10-28 (10 writes encadenados = 653 ms, el driver los serializa;
@@ -647,48 +644,6 @@ in
     };
 
     # Coalescer del brillo para el knob (SUPER + perilla de volumen).
-    # Brillo del knob (SUPER + perilla): apunta al monitor ENFOCADO, no al
-    # primer device de la lista (sin -d, brightnessctl agarraba el que no
-    # mirabas). Version simple a proposito: aplica al instante, sin locks ni
-    # cola. El coalescer se probo y se saco porque cualquier fallo suyo dejaba
-    # la tecla MUERTA; primero que funcione, despues la latencia.
-    # Log en /tmp/brightness-knob.log: device elegido + salida de brightnessctl.
-    "hypr/scripts/brightness-knob.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        set -uo pipefail
-        log=/tmp/brightness-knob.log
-
-        # Monitor enfocado -> conector DRM -> bus aux -> backlight ddcciN.
-        dev=""
-        mon=$(hyprctl monitors -j 2>/dev/null | sed -n '/^\[/,$p' | jq -r '[.[]|select(.focused==true)][0].name // empty' 2>/dev/null)
-        if [ -n "$mon" ]; then
-          for c in /sys/class/drm/card*-"$mon"; do
-            [ -e "$c/status" ] || continue
-            bus=""
-            for i in "$c"/i2c-*; do
-              [ -e "$i/name" ] && grep -qi aux "$i/name" && bus=$(basename "$i") && break
-            done
-            [ -z "$bus" ] && [ -e "$c/ddc" ] && bus=$(basename "$(readlink -f "$c/ddc")")
-            [ -z "$bus" ] && continue
-            cand="ddcci''${bus#i2c-}"
-            [ -e "/sys/class/backlight/$cand" ] && dev="$cand" && break
-          done
-        fi
-        [ -n "$dev" ] || dev=$(ls /sys/class/backlight 2>/dev/null | head -1)
-
-        args=()
-        [ -n "$dev" ] && args=(-d "$dev")
-
-        case "''${1:-}" in
-          up)   out=$(brightnessctl "''${args[@]}" set +10% 2>&1) ;;
-          down) out=$(brightnessctl "''${args[@]}" set 10%- 2>&1) ;;
-          *)    echo "$(date +%T) bad-arg ''${1:-}" >> "$log"; exit 1 ;;
-        esac
-        echo "$(date +%T) mon=$mon dev=$dev arg=$1 out=$out" >> "$log"
-      '';
-    };
 
     # Escritorios numerados SOLO en el monitor principal; cada secundario recibe
     # un escritorio propio y vacio esperando que le arrastren una ventana (asi se

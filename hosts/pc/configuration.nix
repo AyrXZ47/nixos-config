@@ -186,13 +186,16 @@
         # despues de display-manager, y con granularidad de 2s el servicio se
         # quedaba hasta 7.9s en la cadena de boot. Con 0.5s termina apenas el
         # monitor responde. 40 intentos = 20s de techo, igual que antes.
-        for i in $(seq 1 40); do
-          [ -L "$dev/driver" ] && break
-          # Ojo: el guard y los writes usan la MISMA ruta absoluta. Antes los
-          # writes iban a "$bus/new_device" (relativo al cwd del servicio, /),
-          # fallaban con ENOENT y ddcci nunca se instanciaba.
-          [ -e "$dev" ] && echo 0x37 > "/sys/bus/i2c/devices/$bus/delete_device" 2>/dev/null || true
-          echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device" 2>/dev/null || true
+        # delete y DESPUES esperar a que el kernel lo saque: si se re-crea
+        # antes, el probe choca con el device viejo y queda en -17 (EEXIST)
+        # para siempre -> el monitor nunca obtiene backlight y todo write de
+        # brillo va a un nodo muerto (visto 2026-10-28 en DP-1, el principal).
+        if [ -e "$dev" ]; then
+          echo 0x37 > "/sys/bus/i2c/devices/$bus/delete_device" 2>/dev/null || true
+          for i in $(seq 1 25); do [ -e "$dev" ] || break; sleep 0.2; done
+        fi
+        echo ddcci 0x37 > "/sys/bus/i2c/devices/$bus/new_device" 2>/dev/null || true
+        for i in $(seq 1 25); do [ -L "$dev/driver" ] && break; sleep 0.2; done
           sleep 0.5
         done
       done
