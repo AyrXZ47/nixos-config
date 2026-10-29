@@ -126,15 +126,14 @@
   # a subir es un backlight por software (gamma) si se quiere latencia cero real.
   boot.extraModprobeConfig = "options ddcci delay=20";
 
-  # ddcci-instantiate corre una sola vez en graphical.target, para los conectores
-  # que estaban conectados en ese momento. Si despues se apaga y se prende un
-  # monitor (o se cambia de puerto), ese conector queda SIN backlight DDC/CI y el
-  # brillo no lo afecta: por eso "solo responde uno". Esta regla udev lo relanza
-  # en cada cambio de estado de un conector DRM. --no-block: udev no espera (el
-  # servicio sondea hasta 20 s).
-  services.udev.extraRules = ''
-    SUBSYSTEM=="drm", ACTION=="change", RUN+="${pkgs.systemd}/bin/systemctl --no-block restart ddcci-instantiate.service"
-  '';
+  # OJO: aca vivia una regla udev que relanzaba ddcci-instantiate en cada
+  # ACTION=="change" de DRM. Mala idea: Hyprland emite cambios de conector al
+  # hacer modeset (cambiar de workspace, rearmar layout), el servicio borraba y
+  # re-creaba los dispositivos, y ddcci-backlight aplica el valor INICIAL (=
+  # maximo) al registrar uno nuevo -> el brillo saltaba a 100% solo por
+  # moverse entre workspaces. 13 arranques en un boot, verificado 2026-10-29.
+  # Si se conecta un monitor despues del boot y no aparece su backlight:
+  #   sudo systemctl restart ddcci-instantiate
 
   # ddcci: desde kernel 6.8 el auto-probe de displays esta roto (el driver no
   # instancia el dispositivo por si solo), y sin el, /sys/class/backlight queda
