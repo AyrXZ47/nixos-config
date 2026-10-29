@@ -26,6 +26,25 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
+  # ── Miracast / Wi-Fi Display ───────────────────────────────────────────────
+  # GNOME Network Displays monta una red P2P y necesita estos puertos abiertos
+  # para que la TV reciba su IP (67/udp, dnsmasq), el NTP del handshake
+  # (123/udp) y la sesion RTSP de WFD (7236/tcp+udp). Sin ellos el link P2P se
+  # arma pero la TV nunca conecta el video y GND aborta con "connection
+  # established .. connection lost". dnsmasq en PATH lo aporta
+  # modules/apps/miracast.nix.
+  # Van aca y no por host: el fix vivia SOLO en hosts/laptop, mientras la app
+  # la importa home/default.nix en los 4 hosts, asi que el pc tenia la app
+  # instalada y el camino de red cerrado (sintoma: GND "falla en silencio" a
+  # los minutos). Un fix de conectividad documentado en un host es del modulo
+  # compartido.
+  # ponytail: abren en todas las interfaces, incluidos server/vm. Si algun dia
+  # molesta, el techo a subir es acotarlos a la interfaz P2P
+  # (nftables acepta iifname "p2p-dev-*"); hoy es la misma exposicion que ya
+  # tenia la laptop.
+  networking.firewall.allowedTCPPorts = [ 7236 ];
+  networking.firewall.allowedUDPPorts = [ 67 123 7236 ];
+
   # ── MSS clamping (PPPoE / MTU 1492 del ISP) ────────────────────────────────
   # El ISP (Telmex) usa PPPoE: el camino hacia internet limita a MTU 1492
   # (verificado: el gateway responde "Frag needed and DF set (mtu = 1492)").
