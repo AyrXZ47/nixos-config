@@ -96,6 +96,14 @@ in
   # no a mano en ~/.pi/agent/extensions para que cualquier host lo tenga igual.
   home.file.".pi/agent/extensions/goal.ts".source = ../../assets/pi/extensions/goal.ts;
 
+  # Keybindings: abortar un run NO puede ser escape. En pi `app.interrupt` viene
+  # en escape y un toque por reflejo (o al querer cerrar un dialogo) mata el
+  # turno entero; opencode pide doble escape justamente por eso. Aca se mueve a
+  # dos combinaciones explicitas y escape queda solo para cancelar dialogos
+  # (tui.select.cancel) y cerrar busquedas. `/reload` aplica el cambio en la
+  # sesion viva. Ver assets/pi/keybindings.json.
+  home.file.".pi/agent/keybindings.json".source = ../../assets/pi/keybindings.json;
+
   home.activation.piSeedSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="$HOME/.pi/agent/settings.json"
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent"
