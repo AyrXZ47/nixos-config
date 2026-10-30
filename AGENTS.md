@@ -166,3 +166,15 @@ pi install git:github.com/DietrichGebert/ponytail
 ```
 
 The old planner → executors → integrator → auditor wave workflow (`.workflow/`, briefs, vendored skills) was retired in 2026-10.
+
+## Preguntas al humano (obligatorio)
+
+Una pregunta modal parquea la sesión entera: si no estoy delante, no hay trabajo.
+
+- No se pregunta para arrancar algo ya autorizado, ni para elegir entre opciones
+  reversibles: se elige la reversible, se ejecuta, y la alternativa queda en una línea
+  al final del reporte.
+- Se pregunta solo por: una decisión de producto irreversible, un consentimiento
+  nativo (review, mantenimiento, tokens opacos), o algo que `git` no pueda revertir.
+- Ante la duda entre preguntar y seguir: se sigue. Lo reversible se corrige; lo
+  parqueado no avanza.
