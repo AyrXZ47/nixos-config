@@ -91,6 +91,11 @@ in
   # hot-recarga por nombre (`theme: cyberpunk` en settings.json).
   home.file.".pi/agent/themes/cyberpunk.json".source = ../../assets/pi/cyberpunk.json;
 
+  # /goal: objetivo de sesion con auto-continuacion acotada (ver
+  # assets/pi/extensions/goal.ts y odd/tasks/pi-goal-mode.md). Va por home.file y
+  # no a mano en ~/.pi/agent/extensions para que cualquier host lo tenga igual.
+  home.file.".pi/agent/extensions/goal.ts".source = ../../assets/pi/extensions/goal.ts;
+
   home.activation.piSeedSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="$HOME/.pi/agent/settings.json"
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent"
