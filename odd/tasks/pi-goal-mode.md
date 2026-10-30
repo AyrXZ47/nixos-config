@@ -83,3 +83,8 @@ devolverlo en `entries` del resultado del hook.
 por run (`agent_start` resetea, `turn_end` acumula).
 Evidencia final del test: 5 turnos, estados `active 0 → active 1 → active 2 → blocked 2`,
 2 `custom_message` de continuación con `--budget 2`.
+
+L5. Limite de slice: los commits 3b3e122 y 3d92270 suman 496 lineas autoradas
+(>400) y cierran esta feature completa: el /goal y los keybindings son dos
+capacidades independientes pero chicas, asi que se entregan juntas en la rama
+feat/pi-goal-mode en vez de abrir encadenados por dos commits.
