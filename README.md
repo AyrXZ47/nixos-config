@@ -156,21 +156,27 @@ flake.nix              # Entry point — hosts & shared modules
 - **Modelo único**: `opencode-go/deepseek-v4.1-flash` con variante `max` para
   todas las sesiones. El root `model` acepta `{ providerID, model, variant }`;
   no hace falta tocar cada agente.
-- **Notificaciones**: `cli.json` prende `attention.notifications`, `sound` y
-  `volume: 1`; `common-packages.nix` crea `/usr/bin/pw-play` para que el audio
-  no dependa del PATH.
-- **Skills globales**: `security-audit` (Cloudflare) y `ponytail` se bajan de
-  upstream con `fetchFromGitHub` en `modules/apps/opencode-skills.nix` y se
-  enlazan en `~/.config/opencode/skills/`. Se actualizan cambiando el `rev` y
-  el `hash`; no se clonan en cada repo. También instala los comandos
-  `/ponytail*`.
+- **Notificaciones**: `cli.json` prende `attention.notifications`, `sound`,
+  `sound_pack` y `volume: 1`, con un WAV generado en build para `done` y
+  `subagent_done`; `common-packages.nix` crea `/usr/bin/pw-play` para que el
+  audio no dependa del PATH.
+- **Skills globales**: `security-audit` (Cloudflare), `ponytail` y
+  `frontend-design` (Anthropic) se bajan de upstream con `fetchFromGitHub` en
+  `modules/apps/opencode-skills.nix` y se enlazan en
+  `~/.config/opencode/skills/`. Se actualizan cambiando el `rev` y el `hash`;
+  no se clonan en cada repo. También instala los comandos `/ponytail*`.
 - **MCPs livianos**: `context7` (docs de librerías) y `gh_grep` (búsqueda de
-  código en GitHub) por HTTP, sin proceso local. `websearch` apunta a Tavily:
-  falta exportar `TAVILY_API_KEY` (es un secreto, no va al repo) para que la
-  búsqueda web funcione.
+  código en GitHub) por HTTP, sin proceso local; `duckduckgo` local vía `uvx`
+  para búsqueda web y fetch sin API key ni costo. `websearch` nativo queda
+  apagado para no pedir un proveedor pago.
 - **Pi pelado**: se instala `pkgs.pi-coding-agent` y nada más. `pi.nix` borra
   paquetes, extensions, agentes, chains, MCPs y restos de gentle-ai en cada
   switch; solo conserva `auth.json`, sesiones y el modelo por defecto.
+- **Memoria**: Hindsight en modo daemon local (`hindsight-coding-agents`,
+  runtime pinneado en `modules/apps/opencode.nix`), con extracción de hechos
+  por Ollama (`qwen3.8-uncensored:9b`). El daemon se levanta on-demand en
+  `127.0.0.1:9077`; la primera sesión descarga `hindsight-embed` vía `uv`. No
+  usa el vault de Obsidian ni manda memoria a la nube.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
   `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras
@@ -414,6 +420,9 @@ disponibilidad hasta que el sensor reenumere (~30 s).
 - `hyprdev [repo]` — workspace dev en 4 ventanas kitty independientes
   (OpenCode, nvim, shell libre, pipes-rs); el directorio opcional entra al repo
   antes de abrir todo. Cierre en cadena: si cae una ventana, se cierran las demás.
+- `opencode-pair [puerto]` — bindea el servicio de OpenCode a la IP de Tailscale,
+  lo reinicia y muestra el QR para abrir la sesión desde el navegador del
+  celular. Sin Tailscale, usar `opencode pair --remote --yes`.
 - `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado, cierre en cadena).
 - `SecDesk` / `Mirror` (+ `_WiFi <ip>`) — scrcpy tablet mirroring, 85 fps,
   h265/opus, virtual 1920x1080 display for a secure desk setup.

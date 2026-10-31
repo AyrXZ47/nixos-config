@@ -15,6 +15,13 @@ let
     hash = "sha256-PhPtZbeX2wBp19GtWRy+fV93+fFYZe5S487eXPDl/us=";
   };
 
+  anthropicSkills = pkgs.fetchFromGitHub {
+    owner = "anthropics";
+    repo = "skills";
+    rev = "ca45fc496a3436251f191354091d557da31c15b5";
+    hash = "sha256-MkCOANBAqCc1WmNf7S8PsyAphGJAIzEXGyCm8RrCR9M=";
+  };
+
   ponytailCommands = [
     "ponytail"
     "ponytail-audit"
@@ -66,7 +73,8 @@ let
     - Tarea chica y entendida: Build directo.
     - Tarea grande o ambigua: Plan primero, después Build.
     - Exploración: subagente `explore` para no contaminar el hilo padre.
-    - Review: subagente de solo lectura; devuelve hallazgos, no bloquea.
+    - Review: `/ponytail-review` en la sesión; si querés contexto aislado,
+      pasale el mismo prompt al subagente `general`.
     - Tareas largas: `/goal` con objetivo y verificación explícitos.
     - Trabajo riesgoso o paralelo: worktree.
     - El padre es dueño de decisiones, commits y push.
@@ -78,13 +86,18 @@ let
     - Imágenes: usá `read` nativo.
     - PDF: convertí con `pdf2md` y leé el Markdown; no inventes contenido.
     - CSV/texto: `read` directo.
-    - Web: `websearch`/`webfetch`; citá fuentes.
+    - Web: usá el MCP `duckduckgo` (`search`/`fetch_content`) o `webfetch`;
+      citá fuentes. No hay proveedor pago configurado.
+    - Memoria: Hindsight guarda decisiones y contexto de proyecto. Las
+      decisiones de producto y la verdad durable siguen en el repo o en las
+      notas; no inventes memoria que no esté respaldada.
   '';
 in
 {
   home.file = {
     ".config/opencode/skills/security-audit".source = "${securityAudit}/skills/security-audit";
     ".config/opencode/skills/ponytail".source = "${ponytail}/skills/ponytail";
+    ".config/opencode/skills/frontend-design".source = "${anthropicSkills}/skills/frontend-design";
     ".config/opencode/AGENTS.md".text = globalAgents;
   } // builtins.listToAttrs (map
     (name: {

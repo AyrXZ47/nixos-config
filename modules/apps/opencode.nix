@@ -6,28 +6,13 @@
 let
   opencodeSeed = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
+    plugin = [ "${config.home.homeDirectory}/.hindsight/coding-agents" ];
     model = {
       providerID = "opencode-go";
       model = "deepseek-v4.1-flash";
       variant = "max";
     };
-    websearch = {
-      provider = "tavily";
-    };
-    agents = {
-      review = {
-        description = "Revisa cambios y riesgos sin editar archivos";
-        mode = "subagent";
-        model = "opencode-go/deepseek-v4.1-flash#max";
-        permissions = [
-          {
-            action = "edit";
-            resource = "*";
-            effect = "deny";
-          }
-        ];
-      };
-    };
+    websearch = false;
     experimental = {
       todo = true;
     };
@@ -41,8 +26,63 @@ let
           type = "remote";
           url = "https://mcp.grep.app";
         };
+        duckduckgo = {
+          type = "local";
+          command = [ "${pkgs.uv}/bin/uvx" "duckduckgo-mcp-server" ];
+          timeout = {
+            startup = 120000;
+          };
+        };
       };
     };
+  });
+
+  # Chime corto y deterministico para el evento "done" de OpenCode. No se
+  # commitea un binario: se genera en build con la stdlib de Python. Evita
+  # depender del sound pack built-in, que en algunas versiones no dispara
+  # sonido al terminar la sesion.
+  doneSound = pkgs.runCommand "opencode-done.wav" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+    python3 - "$out" <<'PY'
+import math
+import struct
+import sys
+import wave
+
+path = sys.argv[1]
+rate = 44100
+duration = 0.28
+
+with wave.open(path, "w") as wav:
+    wav.setnchannels(1)
+    wav.setsampwidth(2)
+    wav.setframerate(rate)
+    for i in range(int(rate * duration)):
+        t = i / rate
+        attack = min(1.0, t / 0.02)
+        release = max(0.0, 1.0 - max(0.0, t - 0.18) / 0.10)
+        freq = 880.0 if t < 0.14 else 1320.0
+        sample = 0.28 * attack * release * math.sin(2.0 * math.pi * freq * t)
+        wav.writeframes(struct.pack("<h", int(sample * 32767)))
+PY
+  '';
+
+  # Runtime de Hindsight (memoria persistente) fijado a una version. Se
+  # desempaqueta en el store y se enlaza en ~/.hindsight/coding-agents, que es
+  # el path que espera el plugin de OpenCode. autoUpdate queda apagado para que
+  # no intente escribir en el store.
+  hindsightRuntime = pkgs.runCommand "hindsight-coding-agents-0.8.4" {
+    nativeBuildInputs = [ pkgs.gnutar pkgs.gzip ];
+  } ''
+    mkdir -p "$out"
+    tar -xzf ${pkgs.fetchurl {
+      url = "https://registry.npmjs.org/@vectorize-io/hindsight-coding-agents/-/hindsight-coding-agents-0.8.4.tgz";
+      hash = "sha256-9KFxgKEaatMoOR5LOlmL8yu4gxHzYABZrtd3EGbAPGo=";
+    }} -C "$out" --strip-components=1
+  '';
+
+  hindsightConfig = pkgs.writeText "hindsight-coding-agent.json" (builtins.toJSON {
+    serverMode = "daemon";
+    autoUpdate = false;
   });
 
   cliSeed = pkgs.writeText "opencode-cli.json" (builtins.toJSON {
@@ -79,6 +119,12 @@ let
       notifications = true;
       sound = true;
       volume = 1;
+      sound_pack = "opencode.default";
+      sounds = {
+        default = "${config.home.homeDirectory}/.config/opencode/sounds/done.wav";
+        done = "${config.home.homeDirectory}/.config/opencode/sounds/done.wav";
+        subagent_done = "${config.home.homeDirectory}/.config/opencode/sounds/done.wav";
+      };
     };
     highlights = true;
     terminal = {
@@ -89,7 +135,25 @@ in
 {
   imports = [ ./opencode-skills.nix ];
 
-  home.packages = [ pkgs.opencode ];
+  home.packages = [ pkgs.opencode pkgs.uv ];
+
+  # Hindsight: runtime + config del daemon local. El plugin lo carga OpenCode
+  # desde ~/.hindsight/coding-agents. La extraccion de hechos usa Ollama local,
+  # no una API paga.
+  home.file.".hindsight/coding-agents".source = hindsightRuntime;
+  home.file.".config/opencode/sounds/done.wav".source = doneSound;
+  home.activation.ensureHindsightConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.hindsight"
+    if [ ! -f "$HOME/.hindsight/coding-agent.json" ]; then
+      ${pkgs.coreutils}/bin/install -m 600 ${hindsightConfig} "$HOME/.hindsight/coding-agent.json"
+    fi
+  '';
+  home.sessionVariables = {
+    HINDSIGHT_API_LLM_PROVIDER = "ollama";
+    HINDSIGHT_API_LLM_BASE_URL = "http://127.0.0.1:11434";
+    HINDSIGHT_API_LLM_MODEL = "eriktonon/qwen3.8-uncensored:9b";
+    HINDSIGHT_API_LLM_OLLAMA_NUM_CTX = "16384";
+  };
 
   home.activation.ensureOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/opencode"
