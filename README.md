@@ -172,10 +172,11 @@ flake.nix              # Entry point — hosts & shared modules
 - **Pi pelado**: se instala `pkgs.pi-coding-agent` y nada más. `pi.nix` borra
   paquetes, extensions, agentes, chains, MCPs y restos de gentle-ai en cada
   switch; solo conserva `auth.json`, sesiones y el modelo por defecto.
-- **Memoria**: sin memoria automática. Hindsight se retiró porque requería
-  Ollama para extraer hechos y no servía en laptop ni nix-on-droid. Las
-  decisiones durables van en el `AGENTS.md` del repo o en las notas; si se
-  retoma, tiene que ser una opción sin LLM local.
+- **Memoria**: Basic Memory con proyecto `memoria` apuntando a
+  `~/Sync/Notes/PC & AI/Memory`. Las notas Markdown viajan por Syncthing a la
+  laptop; el índice SQLite queda local en `~/.basic-memory`. Se instala y
+  configura solo en el rebuild, no usa Ollama ni API key. La carpeta es
+  dedicada para no indexar todo el vault ni agregar frontmatter a notas ajenas.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
   `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras

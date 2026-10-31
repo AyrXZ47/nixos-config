@@ -88,9 +88,10 @@ let
     - CSV/texto: `read` directo.
     - Web: usá el MCP `duckduckgo` (`search`/`fetch_content`) o `webfetch`;
       citá fuentes. No hay proveedor pago configurado.
-    - Memoria: no hay memoria automática. Las decisiones durables van al
-      `AGENTS.md` del repo o a las notas; no inventes contexto que no esté
-      respaldado por el código o la documentación.
+    - Memoria: Basic Memory guarda las decisiones y el contexto durable del
+      proyecto en `~/Sync/Notes/PC & AI/Memory`. Usá sus tools (`bm_search`,
+      `bm_write`, `bm_context`) cuando necesites contexto pasado; verificá lo
+      que devuelve contra el código antes de confiar en ello.
   '';
 in
 {
