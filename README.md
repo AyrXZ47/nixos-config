@@ -172,11 +172,10 @@ flake.nix              # Entry point — hosts & shared modules
 - **Pi pelado**: se instala `pkgs.pi-coding-agent` y nada más. `pi.nix` borra
   paquetes, extensions, agentes, chains, MCPs y restos de gentle-ai en cada
   switch; solo conserva `auth.json`, sesiones y el modelo por defecto.
-- **Memoria**: Hindsight en modo daemon local (`hindsight-coding-agents`,
-  runtime pinneado en `modules/apps/opencode.nix`), con extracción de hechos
-  por Ollama (`qwen3.8-uncensored:9b`). El daemon se levanta on-demand en
-  `127.0.0.1:9077`; la primera sesión descarga `hindsight-embed` vía `uv`. No
-  usa el vault de Obsidian ni manda memoria a la nube.
+- **Memoria**: sin memoria automática. Hindsight se retiró porque requería
+  Ollama para extraer hechos y no servía en laptop ni nix-on-droid. Las
+  decisiones durables van en el `AGENTS.md` del repo o en las notas; si se
+  retoma, tiene que ser una opción sin LLM local.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
   `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras

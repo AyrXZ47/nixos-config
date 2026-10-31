@@ -88,9 +88,9 @@ let
     - CSV/texto: `read` directo.
     - Web: usá el MCP `duckduckgo` (`search`/`fetch_content`) o `webfetch`;
       citá fuentes. No hay proveedor pago configurado.
-    - Memoria: Hindsight guarda decisiones y contexto de proyecto. Las
-      decisiones de producto y la verdad durable siguen en el repo o en las
-      notas; no inventes memoria que no esté respaldada.
+    - Memoria: no hay memoria automática. Las decisiones durables van al
+      `AGENTS.md` del repo o a las notas; no inventes contexto que no esté
+      respaldado por el código o la documentación.
   '';
 in
 {

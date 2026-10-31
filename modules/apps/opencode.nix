@@ -6,7 +6,6 @@
 let
   opencodeSeed = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
-    plugin = [ "${config.home.homeDirectory}/.hindsight/coding-agents" ];
     model = {
       providerID = "opencode-go";
       model = "deepseek-v4.1-flash";
@@ -66,25 +65,6 @@ with wave.open(path, "w") as wav:
 PY
   '';
 
-  # Runtime de Hindsight (memoria persistente) fijado a una version. Se
-  # desempaqueta en el store y se enlaza en ~/.hindsight/coding-agents, que es
-  # el path que espera el plugin de OpenCode. autoUpdate queda apagado para que
-  # no intente escribir en el store.
-  hindsightRuntime = pkgs.runCommand "hindsight-coding-agents-0.8.4" {
-    nativeBuildInputs = [ pkgs.gnutar pkgs.gzip ];
-  } ''
-    mkdir -p "$out"
-    tar -xzf ${pkgs.fetchurl {
-      url = "https://registry.npmjs.org/@vectorize-io/hindsight-coding-agents/-/hindsight-coding-agents-0.8.4.tgz";
-      hash = "sha256-9KFxgKEaatMoOR5LOlmL8yu4gxHzYABZrtd3EGbAPGo=";
-    }} -C "$out" --strip-components=1
-  '';
-
-  hindsightConfig = pkgs.writeText "hindsight-coding-agent.json" (builtins.toJSON {
-    serverMode = "daemon";
-    autoUpdate = false;
-  });
-
   cliSeed = pkgs.writeText "opencode-cli.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/v2/cli.json";
     theme = {
@@ -137,23 +117,16 @@ in
 
   home.packages = [ pkgs.opencode pkgs.uv ];
 
-  # Hindsight: runtime + config del daemon local. El plugin lo carga OpenCode
-  # desde ~/.hindsight/coding-agents. La extraccion de hechos usa Ollama local,
-  # no una API paga.
-  home.file.".hindsight/coding-agents".source = hindsightRuntime;
+  # Chime de fin de sesion. El archivo queda en una ruta estable para que la
+  # config de OpenCode no dependa de un store path.
   home.file.".config/opencode/sounds/done.wav".source = doneSound;
-  home.activation.ensureHindsightConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.hindsight"
-    if [ ! -f "$HOME/.hindsight/coding-agent.json" ]; then
-      ${pkgs.coreutils}/bin/install -m 600 ${hindsightConfig} "$HOME/.hindsight/coding-agent.json"
-    fi
+
+  # Hindsight se retiro (2026-10-30): requeria Ollama para extraer hechos y no
+  # sirve en laptop ni nix-on-droid. Se borra el runtime/config local y se
+  # limpian las entradas viejas del opencode.json en ensureOpencodeConfig.
+  home.activation.removeHindsight = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    rm -rf "$HOME/.hindsight"
   '';
-  home.sessionVariables = {
-    HINDSIGHT_API_LLM_PROVIDER = "ollama";
-    HINDSIGHT_API_LLM_BASE_URL = "http://127.0.0.1:11434";
-    HINDSIGHT_API_LLM_MODEL = "eriktonon/qwen3.8-uncensored:9b";
-    HINDSIGHT_API_LLM_OLLAMA_NUM_CTX = "16384";
-  };
 
   home.activation.ensureOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/opencode"
@@ -179,6 +152,27 @@ cur.pop("default_agent", None)
 mcp = cur.get("mcp")
 if isinstance(mcp, dict):
     mcp.pop("serena", None)
+
+# Migracion: Hindsight y el subagente review viejo ya no existen. Se limpian
+# del archivo vivo aunque el merge no los vuelva a sembrar.
+for key in ("plugin", "plugins"):
+    value = cur.get(key)
+    if isinstance(value, list):
+        value = [item for item in value if "hindsight" not in str(item).lower()]
+        if value:
+            cur[key] = value
+        else:
+            cur.pop(key, None)
+    elif isinstance(value, str) and "hindsight" in value.lower():
+        cur.pop(key, None)
+
+agents = cur.get("agents")
+if isinstance(agents, dict):
+    review = agents.get("review")
+    if isinstance(review, dict) and review.get("description") == "Revisa cambios y riesgos sin editar archivos":
+        agents.pop("review", None)
+    if not agents:
+        cur.pop("agents", None)
 
 before = json.dumps(cur, sort_keys=True)
 
