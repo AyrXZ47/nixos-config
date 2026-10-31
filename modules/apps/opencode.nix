@@ -148,6 +148,8 @@ in
   # Basic Memory: las notas viven en el vault (Syncthing las lleva a la
   # laptop), pero el indice SQLite queda local en ~/.basic-memory. La carpeta
   # es dedicada para no indexar todo el vault ni ensuciar notas ajenas.
+  # Basic Memory NO expande `~` dentro de config.json (lo trata como /~/...),
+  # por eso el activation resuelve $HOME en cada host al hacer rebuild.
   home.activation.ensureBasicMemory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/Sync/Notes/PC & AI/Memory" "$HOME/.basic-memory"
     ${pkgs.python3}/bin/python3 - "$HOME/.basic-memory/config.json" "$HOME/Sync/Notes/PC & AI/Memory" <<'PY'

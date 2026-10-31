@@ -177,6 +177,8 @@ flake.nix              # Entry point — hosts & shared modules
   laptop; el índice SQLite queda local en `~/.basic-memory`. Se instala y
   configura solo en el rebuild, no usa Ollama ni API key. La carpeta es
   dedicada para no indexar todo el vault ni agregar frontmatter a notas ajenas.
+  El activation resuelve `$HOME` en cada host porque Basic Memory no expande
+  `~` dentro de `config.json`; no se hardcodea `/home/yovick`.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
   `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras
