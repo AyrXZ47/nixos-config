@@ -4,6 +4,17 @@
 # con merge idempotente (no home.file) porque OpenCode reescribe sus archivos
 # al vuelo. Las claves del flake mandan; el resto del archivo se conserva.
 let
+  # CLI de dotpm: habla con la API local del plugin (Obsidian desktop abierto)
+  # y expone sus tools por stdio para OpenCode. PATH propio porque el server
+  # MCP puede arrancar desde un lanzador sin el perfil de home-manager.
+  # Version pinneada: `dlx latest` choca con minimumReleaseAge=1440.
+  dotpm = pkgs.writeShellScriptBin "dotpm" ''
+    export PATH=${
+      lib.makeBinPath [ pkgs.nodejs pkgs.coreutils pkgs.bash pkgs.findutils ]
+    }:"$PATH"
+    exec ${pkgs.pnpm}/bin/pnpm --reporter=append-only dlx "@dotpm/cli@0.2.0" "$@"
+  '';
+
   opencodeSeed = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     model = {
@@ -30,6 +41,20 @@ let
           command = [ "${pkgs.uv}/bin/uvx" "duckduckgo-mcp-server" ];
           timeout = {
             startup = 120000;
+          };
+        };
+        # Tablero de trabajo (proyectos/tareas del vault). Requiere Obsidian
+        # abierto con el plugin project-manager y su Local API activa.
+        dotpm = {
+          type = "local";
+          command = [
+            "${dotpm}/bin/dotpm"
+            "mcp"
+            "--vault"
+            "${config.home.homeDirectory}/Sync/Notes"
+          ];
+          timeout = {
+            startup = 180000;
           };
         };
         basic-memory = {
@@ -132,7 +157,7 @@ in
 {
   imports = [ ./opencode-skills.nix ];
 
-  home.packages = [ pkgs.opencode pkgs.uv ];
+  home.packages = [ pkgs.opencode pkgs.uv dotpm ];
 
   # Chime de fin de sesion. El archivo queda en una ruta estable para que la
   # config de OpenCode no dependa de un store path.

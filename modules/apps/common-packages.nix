@@ -468,6 +468,10 @@ in
     # Dev toolchains
     rustup
     pnpm
+    # pnpm es un binario standalone: sin node en el PATH, los shims de
+    # `pnpm dlx <pkg>` mueren con `exec: node: not found`. Lo necesita el CLI
+    # de dotpm (MCP del tablero de Obsidian).
+    nodejs
 
     # Fun
     cbonsai

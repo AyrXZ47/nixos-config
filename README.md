@@ -179,6 +179,13 @@ flake.nix              # Entry point — hosts & shared modules
   dedicada para no indexar todo el vault ni agregar frontmatter a notas ajenas.
   El activation resuelve `$HOME` en cada host porque Basic Memory no expande
   `~` dentro de `config.json`; no se hardcodea `/home/yovick`.
+- **Tablero de trabajo (dotpm)**: el plugin `project-manager` de Obsidian
+  guarda proyectos y tareas como Markdown en `~/Sync/Notes/Projects`. El CLI
+  `@dotpm/cli` (wrapper `dotpm` en `opencode.nix`, versión pinneada) habla con
+  la Local API del plugin en `127.0.0.1:27201` y se expone como MCP: el agente
+  lee y actualiza el kanban en vivo. Requiere Obsidian desktop abierto con
+  Settings > Local API activa; el celular no tiene API. La convención de
+  títulos y tags vive en el `AGENTS.md` global y en el del vault.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
   `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras

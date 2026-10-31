@@ -92,6 +92,36 @@ let
       proyecto en `~/Sync/Notes/PC & AI/Memory`. Usá sus tools (`bm_search`,
       `bm_write`, `bm_context`) cuando necesites contexto pasado; verificá lo
       que devuelve contra el código antes de confiar en ello.
+
+    ## Tablero de trabajo (dotpm)
+
+    El backlog vive en UN solo lugar: el vault, `~/Sync/Notes/Projects`.
+    Todo proyecto y toda tarea son notas Markdown con frontmatter `pm-project`
+    / `pm-task`, y el kanban/gantt los lee de ahí. **No hay `TODO.md` en los
+    repos ni listas de pendientes por sesión.**
+
+    - Acceso: MCP `dotpm` (preferido) o el comando `dotpm` en la shell
+      (`projects`, `project <id> --tasks`, `search`, `create`, `update`).
+      Leé el proyecto antes de escribir: `--status`/`--priority` piden los ids
+      que el proyecto define, no las etiquetas.
+    - Proyecto = ámbito cerrable. Todo lo de código va a `💻 Dev`.
+      Materias, clientes y áreas de vida ya tienen su proyecto.
+    - Título de tarea: `Ámbito: Tarea` (un solo separador, `: `). El ámbito es
+      el repo, la materia o el cliente.
+    - Tag = slug del ámbito (`#nixos-config`, `#crescit`, `#antenas`). Para un
+      repo: su nombre sin el prefijo `workspace `, en kebab-case. Sin
+      sub-ámbito no hay tag: el proyecto ya es el ámbito.
+    - Estados válidos: `todo`, `in-progress`, `review`, `done`, `blocked`,
+      `cancelled`. El progreso narrativo va en el cuerpo de la tarea, fechado.
+    - La tarea se cierra (`done`) en el mismo turno que el commit que la
+      cierra, o no se cierra. Si aparece trabajo nuevo, se crea la tarea antes
+      de empezarlo.
+    - Nunca edites a mano `pm-project`/`pm-task`, `id`, `taskIds`, `subtaskIds`
+      ni la sección `## Tasks`: los reescribe el plugin. El título y los tags
+      sí son tuyos.
+    - Si el tablero no responde (Obsidian cerrado), no inventes un backlog
+      paralelo: decilo, seguí con el trabajo y anotá el pendiente cuando el
+      tablero vuelva.
   '';
 in
 {
