@@ -34,8 +34,10 @@ in
       "$HOME/.pi/agent/pi-pretty" \
       "$HOME/.pi/agent/pi-web-access" \
       "$HOME/.pi/agent/web-search-cache" \
+      "$HOME/.pi/agent/git" \
       "$HOME/.pi/agent/mcp.json" \
       "$HOME/.pi/agent/subagents.json" \
+      "$HOME/.pi/gentle-ai" \
       "$HOME/.local/state/gentle-ai"
     rm -f \
       "$HOME/.pi/agent/extensions/goal.ts" \
