@@ -14,6 +14,20 @@ let
     websearch = {
       provider = "tavily";
     };
+    agents = {
+      review = {
+        description = "Revisa cambios y riesgos sin editar archivos";
+        mode = "subagent";
+        model = "opencode-go/deepseek-v4.1-flash#max";
+        permissions = [
+          {
+            action = "edit";
+            resource = "*";
+            effect = "deny";
+          }
+        ];
+      };
+    };
     experimental = {
       todo = true;
     };
