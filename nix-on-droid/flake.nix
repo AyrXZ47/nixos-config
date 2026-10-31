@@ -146,8 +146,8 @@
         postBuild = ''
           wrapProgram $out/bin/node --add-flags "--single-threaded"
           # npm/npx traen shebang ABSOLUTO al node original (varios hilos), que
-          # ignora el wrapper de bin/node: hay que reescribirlos o el `npm
-          # install` del bootstrap de gentle-ai vuelve a morir con double free.
+          # ignora el wrapper de bin/node: hay que reescribirlos o cualquier
+          # `npm install` dentro del proot vuelve a morir con double free.
           for b in npm npx; do
             if [ -e "$out/bin/$b" ]; then
               rm -f "$out/bin/$b"
@@ -159,44 +159,14 @@
       };
 
       # Mismo paquete que `pi.overlays.default`, pero con el stdenv de arriba
-      # (unpack con tar) y el node de un solo hilo (ver arriba). Expone tambien
-      # `singleThreadedNode` para que configuration.nix se lo pase al bootstrap
-      # de gentle-ai (modules/apps/pi.nix) via _module.args.nodePackage.
+      # (unpack con tar) y el node de un solo hilo (ver arriba). El node
+      # single-threaded sigue siendo necesario para que pi corra estable bajo
+      # proot.
       piOverlay = final: prev: {
         pi = prev.callPackage "${pi}/nix/package.nix" {
           source = pi.outPath;
           stdenv = mkTarUnpackStdenv prev.stdenv;
           nodejs_22 = nodejsSingleThreaded prev;
-        };
-        singleThreadedNode = nodejsSingleThreaded prev;
-      };
-
-      # gentle-ai: binario Go del release oficial. El overlay de los hosts de
-      # escritorio descarga el tarball linux_amd64 a fuego, y el pin 25.11 de
-      # este flake no trae el paquete en nixpkgs -> aqui va su propio overlay
-      # con el asset linux_arm64 (el release v4.1.1 SI lo publica; hash
-      # obtenido con `nix store prefetch-file`).
-      # Actualizar version: cambiar `version`, la `url` y el `hash`.
-      gentleAiOverlay = final: prev: {
-        gentle-ai = prev.stdenvNoCC.mkDerivation {
-          pname = "gentle-ai";
-          version = "4.1.1";
-          src = prev.fetchurl {
-            url = "https://github.com/Gentleman-Programming/gentle-ai/releases/download/v4.1.1/gentle-ai_4.1.1_linux_arm64.tar.gz";
-            hash = "sha256-X4+jhXPuoPIRCQLwmWqgsAiqxY3A+aarvfMB3LyT9Os=";
-          };
-          sourceRoot = ".";
-          installPhase = ''
-            install -Dm755 gentle-ai $out/bin/gentle-ai
-            install -Dm644 LICENSE $out/share/licenses/gentle-ai/LICENSE
-          '';
-          meta = {
-            description = "Deterministic engineering environment for AI coding agents";
-            homepage = "https://gentle-ai.gentlemanprogramming.com/";
-            license = final.lib.licenses.mit;
-            platforms = final.lib.platforms.linux;
-            mainProgram = "gentle-ai";
-          };
         };
       };
 
@@ -205,7 +175,6 @@
         overlays = [
           androidUnpackFix
           piOverlay
-          gentleAiOverlay
         ];
       };
     in
@@ -232,7 +201,7 @@
         extraSpecialArgs = {
           opencodeTarball = ./opencode-1.18.16.tar.gz;
           rtkTarball = ./rtk-0.48.0-aarch64.tar.gz;
-          inherit nixpkgs pi piOverlay gentleAiOverlay;
+          inherit nixpkgs pi piOverlay;
         };
         modules = [ ./configuration.nix ];
       };

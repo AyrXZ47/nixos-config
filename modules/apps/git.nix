@@ -49,7 +49,6 @@
           # Memorias y estado local de agentes (NUNCA al repo)
           .serena/
           .engram/
-          .opencode/
           .aider/
           .aider*
           *.aider*
@@ -87,7 +86,7 @@
 
           candidates=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
 
-          blocked_files=$(printf '%s\n' "$candidates" | grep -E '(^|/)(\.env|\.env\.[^.]+)$|\.(pem|key|p12|p8|pfx|keystore)$|(^|/)(auth\.json|credentials|id_rsa|id_ed25519|id_ecdsa|secrets/|\.serena/|\.engram/|\.opencode/|\.aider)' | grep -v '\.env\.example$' || true)
+          blocked_files=$(printf '%s\n' "$candidates" | grep -E '(^|/)(\.env|\.env\.[^.]+)$|\.(pem|key|p12|p8|pfx|keystore)$|(^|/)(auth\.json|credentials|id_rsa|id_ed25519|id_ecdsa|secrets/|\.serena/|\.engram/|\.aider)' | grep -v '\.env\.example$' || true)
 
           blocked_content=$(git diff --cached --diff-filter=ACM -U0 2>/dev/null | grep -E '^\+' | grep -E -- '-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{22,}|sk-live-[A-Za-z0-9]{16,}|sk-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_\-]{35}|xox[baprs]-[A-Za-z0-9\-]+|eyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}|(mongodb(\+srv)?|postgres(ql)?|mysql|redis)://[^:/\s]+:[^@\s]+@' || true)
 

@@ -137,7 +137,8 @@ flake.nix              # Entry point — hosts & shared modules
   (`<leader>mj`/`<leader>mk` añaden cursor abajo/arriba, `<leader>mn` al siguiente
   match, Ctrl+click, `<Esc>` cierra); LSPs: lua-language-server,
   stylua, typescript-language-server, pyright, gcc.
-- **Pi + Gentle-AI** — agente por defecto (ver "AI stack" abajo).
+- **OpenCode v2 + DeepSeek V4.1 Flash** — agente por defecto (ver "AI stack" abajo).
+- **Pi pelado** — harness de respaldo, sin gentle-ai ni paquetes.
 - **Ollama** (local AI stack, `OLLAMA_API_BASE` set).
 - **Ollama version pin** (`modules/apps/ollama-bin.nix`, solo pc): instala el
   binario oficial v0.32.12 desde los tarballs de la release (base + addon ROCm)
@@ -146,27 +147,34 @@ flake.nix              # Entry point — hosts & shared modules
   subir de versión: cambiar `version` y los dos `sha256` en el módulo (hashes del
   API de GitHub).
 
-### AI stack (Pi + Gentle-AI)
+### AI stack (OpenCode + Pi pelado)
 
-- **pi** (`pkgs.pi`, flake upstream pineado en `flake.nix`) es el harness de
-  agentes; **gentle-ai** (overlay `gentleAiOverlay`, binario firmado del
-  release) aporta la capa determinista: memoria Engram, workflow ODD y review
-  RDD. Actualizar: cambiar tag en `flake.nix` (pi) / `version`+`hash`
-  (`gentle-ai`), `nix flake update pi`, rebuild.
-- La pila de paquetes de Pi (`gentle-pi`, `gentle-engram`, `pi-web-access`,
-  `pi-btw`) y las skills globales (`security-audit`, `ponytail`) se instalan
-  solas en el **primer rebuild de cada máquina** (`home.activation
-  .gentleAiBootstrap` en `modules/apps/pi.nix`; marcador y log en
-  `~/.local/state/gentle-ai/`). Ese primer rebuild necesita red; si falla,
-  reintenta al siguiente. Actualizaciones: `pi update`. Único paso manual por
-  máquina: `pi` → `/login` (la API key es un secreto, no va al repo).
-- Tema `cyberpunk` y defaults (deepseek flash, thinking `off`: sin reasoning)
-  en `assets/pi/cyberpunk.json` + `modules/apps/pi.nix` (seed solo si
-  `settings.json` no existe; después manda el archivo del usuario).
-- `modules/apps/common-packages.nix` crea los shims FHS que el ecosistema
-  asume: `/bin/tar` (postinstall de `gentle-pi`, gentle-shell#548) y
-  `/usr/bin/pw-play` (la detección de audio de notificaciones de gentle-pi
-  solo mira rutas `/usr/bin`). Borrar cuando upstream deje de asumir FHS.
+- **OpenCode v2** (`pkgs.opencode`) es el harness por defecto. `hyprdev` lo
+  lanza con `--auto`; la config vive en `~/.config/opencode/opencode.json` y
+  `~/.config/opencode/cli.json`, sembrada por `modules/apps/opencode.nix` con
+  merge idempotente (OpenCode reescribe esos archivos).
+- **Modelo único**: `opencode-go/deepseek-v4.1-flash` con variante `max` para
+  todas las sesiones. El root `model` acepta `{ providerID, model, variant }`;
+  no hace falta tocar cada agente.
+- **Notificaciones**: `cli.json` prende `attention.notifications`, `sound` y
+  `volume: 1`; `common-packages.nix` crea `/usr/bin/pw-play` para que el audio
+  no dependa del PATH.
+- **Skills globales**: `security-audit` (Cloudflare) y `ponytail` se bajan de
+  upstream con `fetchFromGitHub` en `modules/apps/opencode-skills.nix` y se
+  enlazan en `~/.config/opencode/skills/`. Se actualizan cambiando el `rev` y
+  el `hash`; no se clonan en cada repo. También instala los comandos
+  `/ponytail*`.
+- **MCPs livianos**: `context7` (docs de librerías) y `gh_grep` (búsqueda de
+  código en GitHub) por HTTP, sin proceso local. `websearch` apunta a Tavily:
+  falta exportar `TAVILY_API_KEY` (es un secreto, no va al repo) para que la
+  búsqueda web funcione.
+- **Pi pelado**: se instala `pkgs.pi-coding-agent` y nada más. `pi.nix` borra
+  paquetes, extensions, agentes, chains, MCPs y restos de gentle-ai en cada
+  switch; solo conserva `auth.json`, sesiones y el modelo por defecto.
+- **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
+  `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
+- **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras
+  tres siguen siendo nvim, shell libre y pipes-rs.
 
 ### Gaming
 - **Steam** (gamescope session, Remote Play + dedicated server + LAN transfers
@@ -403,9 +411,9 @@ disponibilidad hasta que el sensor reenumere (~30 s).
 
 ## Custom Commands
 
-- `hyprdev [repo]` — workspace dev en 4 ventanas kitty independientes (pi,
-  nvim, shell libre, pipes-rs); el directorio opcional entra al repo antes de
-  abrir todo. Cierre en cadena: si cae una ventana, se cierran las demás.
+- `hyprdev [repo]` — workspace dev en 4 ventanas kitty independientes
+  (OpenCode, nvim, shell libre, pipes-rs); el directorio opcional entra al repo
+  antes de abrir todo. Cierre en cadena: si cae una ventana, se cierran las demás.
 - `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado, cierre en cadena).
 - `SecDesk` / `Mirror` (+ `_WiFi <ip>`) — scrcpy tablet mirroring, 85 fps,
   h265/opus, virtual 1920x1080 display for a secure desk setup.

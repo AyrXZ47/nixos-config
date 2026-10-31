@@ -87,32 +87,8 @@
         };
       };
 
-      # Gentle-AI: binario oficial del release linux_amd64 (Go). No esta en
-      # nixpkgs ni tiene flake upstream; se instala el binario firmado del
-      # release (minisign en checksums.txt). Actualizar version: cambiar
-      # `version` y `hash` (nix store prefetch-file <url>).
-      gentleAiOverlay = final: prev: {
-        gentle-ai = prev.stdenvNoCC.mkDerivation {
-          pname = "gentle-ai";
-          version = "4.2.0";
-          src = prev.fetchurl {
-            url = "https://github.com/Gentleman-Programming/gentle-ai/releases/download/v4.2.0/gentle-ai_4.2.0_linux_amd64.tar.gz";
-            hash = "sha256-VSwWQv0Q9dls/puxzDtmsw60fTB0zHygVZtZjrCG3vw=";
-          };
-          sourceRoot = ".";
-          installPhase = ''
-            install -Dm755 gentle-ai $out/bin/gentle-ai
-            install -Dm644 LICENSE $out/share/licenses/gentle-ai/LICENSE
-          '';
-          meta = {
-            description = "Deterministic engineering environment for AI coding agents";
-            homepage = "https://gentle-ai.gentlemanprogramming.com/";
-            license = final.lib.licenses.mit;
-            platforms = final.lib.platforms.linux;
-            mainProgram = "gentle-ai";
-          };
-        };
-      };
+      # Gentle-AI: retirado (2026-10-30). OpenCode es el harness por defecto y
+      # Pi queda pelado; no se mantiene overlay ni binario de gentle.
 
       # nixpkgs congela openrocket en 23.09 (formato de fichero viejo, 3D roto
       # en NixOS: JOGL sin libGL en LD_LIBRARY_PATH) mientras upstream distribuye
@@ -842,7 +818,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay gentleAiOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay ]; }
           # Kernel de CachyOS (pkgs.linuxPackages_cachyos): el overlay que lo
           # expone + el substituter nyx-cache.chaotic.cx, donde vive ya
           # compilado. Sin el segundo, los hosts compilan el kernel.
@@ -879,9 +855,6 @@ PYEOF
       # Pi suelto: `nix build .#pi` verifica la misma derivacion que usan los
       # hosts (pkgs.pi-coding-agent del canal, con binario en cache).
       packages.x86_64-linux.pi = (import nixpkgs { inherit system; }).pi-coding-agent;
-
-      # Gentle-AI suelto: `nix build .#gentle-ai`.
-      packages.x86_64-linux.gentle-ai = (import nixpkgs { inherit system; overlays = [ gentleAiOverlay ]; }).gentle-ai;
 
       # Check del sembrado del editor de Vivado (ver modules/apps/vivado-nvim-seed.nix):
       # crea preferencias si faltan, parchea las existentes y es idempotente.

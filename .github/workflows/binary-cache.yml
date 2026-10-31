@@ -52,7 +52,6 @@ jobs:
       - name: Construir y subir los paquetes no cacheados upstream
         run: |
           cachix watch-exec ayrxz47-nixos-config -- nix build -L --no-link \
-            .#packages.x86_64-linux.gentle-ai \
             .#packages.x86_64-linux.openrocket \
             .#nixosConfigurations.pc.pkgs.hypr-kdeconnect-fix \
             .#nixosConfigurations.pc.pkgs.caelestia-shell \

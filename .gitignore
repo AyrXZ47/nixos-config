@@ -12,7 +12,6 @@ neovide_r*.log
 # --- Agentes IA: memorias y estado local (NUNCA al repo) ---
 .serena/
 .engram/
-.opencode/
 .aider/
 .aider*
 

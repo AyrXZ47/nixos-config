@@ -83,7 +83,6 @@ in
     ffmpeg
     fd
     fzf
-    gentle-ai
     gh
     libnotify
     # electron 43 (el que resuelve nixpkgs para obsidian) rompe el renderer de

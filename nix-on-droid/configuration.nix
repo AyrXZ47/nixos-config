@@ -1,4 +1,4 @@
-{ pkgs, opencodeTarball, rtkTarball, piOverlay, nixpkgs, gentleAiOverlay, ... }:
+{ pkgs, opencodeTarball, rtkTarball, piOverlay, nixpkgs, ... }:
 
 {
   # No tocar sin leer el changelog de nix-on-droid antes de subir de version.
@@ -8,15 +8,15 @@
   # home-manager.config se evalua como submódulo y NO hereda esos args — se
   # re-expone con la opcion home-manager.extraSpecialArgs (ver abajo).
   # El pkgs del modulo nix-on-droid NO lleva los overlays del flake, asi que
-  # el home no puede resolver pkgs.pi / pkgs.gentle-ai (falla con "attribute
-  # 'pi' missing"). Se pasan las derivaciones ya construidas por
-  # extraSpecialArgs, que es la misma via que ya usan opencodeTarball/rtk.
+  # el home no puede resolver pkgs.pi (falla con "attribute 'pi' missing"). Se
+  # pasa la derivacion ya construida por extraSpecialArgs, que es la misma via
+  # que ya usan opencodeTarball/rtk.
   # hostName: en los hosts de escritorio lo inyecta mkHost (flake.nix) y
   # fastfetch.nix lo exige para calcular el ancho de la caja con el largo de
   # {host-name}. Bajo proot el kernel reporta "localhost" (sin opcion
   # networking.hostName en nix-on-droid), asi que ese es el valor a inyectar.
   home-manager.extraSpecialArgs = {
-    inherit opencodeTarball rtkTarball piOverlay nixpkgs gentleAiOverlay;
+    inherit opencodeTarball rtkTarball piOverlay nixpkgs;
     hostName = "localhost";
   };
 
@@ -25,23 +25,6 @@
   # modulo home de programs.zsh SOLO genera los rc; el shell de login lo fija
   # esto (en NixOS lo haria users.users.<name>.shell, aqui no existe).
   user.shell = "${pkgs.zsh}/bin/zsh";
-
-  # Compat FHS para el postinstall de gentle-pi (npm:gentle-pi ->
-  # scripts/install-gentle-ai.mjs): exige un extractor tar "de sistema" en ruta
-  # absoluta — /usr/bin/tar o /bin/tar (gentle-shell#548) — y sin el, el
-  # bootstrap de gentle-ai muere con "could not install its package-local
-  # Gentle AI v4.1.1 binary: requires a trusted system tar extractor" (pi sin
-  # gentle-shell/gentle-pi). En los hosts de escritorio lo crea
-  # modules/apps/common-packages.nix (system.activationScripts.fhsShims), que
-  # aqui NO se importa. /usr/bin es escribible en el proot y este hook corre
-  # ANTES de la activacion de home-manager (donde vive gentleAiBootstrap), asi
-  # que el shim ya existe cuando gentle-ai instala. Mismo patron que
-  # linkBinSh/linkUsrBinEnv del propio nix-on-droid.
-  build.activationBefore.fhsTar = ''
-    $DRY_RUN_CMD mkdir $VERBOSE_ARG --parents /usr/bin
-    $DRY_RUN_CMD ln $VERBOSE_ARG --symbolic --force ${pkgs.gnutar}/bin/tar /usr/bin/.tar.tmp
-    $DRY_RUN_CMD mv $VERBOSE_ARG /usr/bin/.tar.tmp /usr/bin/tar
-  '';
 
   # Zona horaria, misma que el resto de los hosts.
   time.timeZone = "America/Mexico_City";
@@ -117,18 +100,15 @@
   # kitty y la app de Termux no lo soporta. Con asciiLogo el modulo no instala
   # el wrapper de GIFs (sus --logo pisaban el config y fastfetch caia a Tux):
   # va el binario pelado y manda el logo ascii de nixos del config.jsonc.
-  home-manager.config = { config, lib, opencodeTarball, rtkTarball, piOverlay, nixpkgs, gentleAiOverlay, ... }:
+  home-manager.config = { config, lib, opencodeTarball, rtkTarball, piOverlay, nixpkgs, ... }:
     let
-      # Los paquetes de pi/gentle-ai CON los overlays del flake aplicados. El
-      # `pkgs` que nix-on-droid pasa a home-manager.config viene pelado (sin
-      # overlays: por eso `pkgs.pi` fallaba con "attribute 'pi' missing"), y
-      # `nixpkgs.pkgs` no se puede definir aqui: esa opcion pertenece al modulo
-      # nixpkgs de NixOS, que nix-on-droid no importa (definirla falla con
-      # "does not exist"). Se re-importa nixpkgs con los mismos overlays del
-      # flake, sobre el pin 25.11 de este flake (el que soporta el proot).
+      # Pi CON el overlay del flake aplicado. El `pkgs` que nix-on-droid pasa
+      # a home-manager.config viene pelado (sin overlays), y `nixpkgs.pkgs` no
+      # se puede definir aqui. Se re-importa nixpkgs con el overlay de pi sobre
+      # el pin 25.11 de este flake (el que soporta el proot).
       pkgsForHome = import nixpkgs {
         system = "aarch64-linux";
-        overlays = [ piOverlay gentleAiOverlay ];
+        overlays = [ piOverlay ];
       };
     in
   {
@@ -138,27 +118,22 @@
       ../modules/apps/git.nix
       ../modules/apps/neovim.nix
       ../modules/apps/fastfetch.nix
-      # Pi + gentle-ai: el modulo compartido siembra settings.json,
-      # persona.json y el tema cyberpunk, y corre el bootstrap de gentle-ai
-      # (paquetes de Pi + skills globales). Recibe las derivaciones por
-      # _module.args (ver abajo), no por pkgs.pi.
+      # Pi pelado: solo settings minimos. El modulo compartido tambien limpia
+      # cualquier resto de gentle-ai de una instalacion anterior.
       ../modules/apps/pi.nix
+      # Skills globales de OpenCode (security-audit + ponytail) y AGENTS.md.
+      # En Android OpenCode sigue en v1; los archivos quedan listos para
+      # cuando se actualice el tarball.
+      ../modules/apps/opencode-skills.nix
     ];
 
-    # Derivaciones ya construidas con los overlays, inyectadas al modulo
-    # pi.nix. Es el unico punto donde el home recibe pi/gentle-ai en
-    # nix-on-droid: el pkgs disponible no los tiene. nodePackage es el node
-    # envuelto con --single-threaded para el bootstrap de gentle-ai (ver el
-    # comentario en modules/apps/pi.nix).
+    # Derivacion ya construida con el overlay, inyectada al modulo pi.nix.
     _module.args.piPackage = pkgsForHome.pi;
-    _module.args.gentleAiPackage = pkgsForHome.gentle-ai;
-    _module.args.nodePackage = pkgsForHome.singleThreadedNode;
 
-    # Pi y el binario de gentle-ai en el perfil del home. Van aqui (y no en
-    # environment.packages) porque el buildEnv de nix-on-droid junta TODO y
-    # duplicar binarios ahi da "two given paths contain a conflicting subpath"
-    # (mismo motivo por el que git/neovim/fzf salieron de esa lista).
-    home.packages = [ pkgsForHome.pi pkgsForHome.gentle-ai ];
+    # Pi en el perfil del home. Van aqui (y no en environment.packages) porque
+    # el buildEnv de nix-on-droid junta TODO y duplicar binarios ahi da "two
+    # given paths contain a conflicting subpath".
+    home.packages = [ pkgsForHome.pi ];
 
     # fastfetch con la MISMA config que la pc (separador, titulo, modulos),
     # pero con logo ascii de nixos: el PNG va por protocolo kitty, que la app

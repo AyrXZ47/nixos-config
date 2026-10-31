@@ -1,40 +1,128 @@
 { config, pkgs, lib, ... }:
 
-# opencode queda instalado como herramienta suelta (sin el flujo de olas
-# retirado ni los agentes planner/executor/integrator/auditor). La auth del
-# provider es estado del usuario (~/.local/share/opencode/auth.json).
-#
-# La config en ~/.config/opencode/opencode.json la reescribe opencode, asi que
-# NO se gestiona con home.file: se siembra si falta, y si existe se limpian
-# solo las claves muertas del flujo viejo (`default_agent: planner` y el MCP de
-# serena, retirado) conservando el resto con jq.
+# OpenCode es el harness por defecto de todos los hosts. La config se siembra
+# con merge idempotente (no home.file) porque OpenCode reescribe sus archivos
+# al vuelo. Las claves del flake mandan; el resto del archivo se conserva.
 let
   opencodeSeed = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
-    model = "opencode-go/deepseek-v4.1-flash";
+    model = {
+      providerID = "opencode-go";
+      model = "deepseek-v4.1-flash";
+      variant = "max";
+    };
+    websearch = {
+      provider = "tavily";
+    };
+    experimental = {
+      todo = true;
+    };
+    mcp = {
+      servers = {
+        context7 = {
+          type = "remote";
+          url = "https://mcp.context7.com/mcp";
+        };
+        gh_grep = {
+          type = "remote";
+          url = "https://mcp.grep.app";
+        };
+      };
+    };
+  });
+
+  cliSeed = pkgs.writeText "opencode-cli.json" (builtins.toJSON {
+    "$schema" = "https://opencode.ai/v2/cli.json";
+    theme = {
+      name = "system";
+      mode = "system";
+    };
+    diffs = {
+      wrap = "word";
+    };
+    session = {
+      sidebar = "auto";
+      scrollbar = true;
+      thinking = "show";
+      markdown = "rendered";
+      image_preview = true;
+      permissions = "autoaccept";
+    };
+    animations = true;
+    tabs = {
+      mode = "on";
+      layout = "horizontal";
+      indicators = "status";
+    };
+    scroll = {
+      acceleration = true;
+    };
+    prompt = {
+      paste = "compact";
+      image_preview = true;
+    };
+    attention = {
+      notifications = true;
+      sound = true;
+      volume = 1;
+    };
+    highlights = true;
+    terminal = {
+      copy = "select";
+    };
   });
 in
 {
+  imports = [ ./opencode-skills.nix ];
+
   home.packages = [ pkgs.opencode ];
 
   home.activation.ensureOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${pkgs.coreutils}/bin/mkdir -p "$HOME/.config/opencode"
-    f="$HOME/.config/opencode/opencode.json"
-    if [ ! -f "$f" ]; then
-      # install -m 600 (no cp): cp copiaria el modo 444 del store.
-      ${pkgs.coreutils}/bin/install -m 600 ${opencodeSeed} "$f"
-    else
-      tmp="$(mktemp)"
-      if ${pkgs.jq}/bin/jq 'del(.default_agent) | del(.mcp.serena)' "$f" > "$tmp" 2>/dev/null; then
-        if ! ${pkgs.diffutils}/bin/cmp -s "$f" "$tmp"; then
-          ${pkgs.coreutils}/bin/chmod 600 "$tmp"
-          ${pkgs.coreutils}/bin/mv "$tmp" "$f"
-        else
-          ${pkgs.coreutils}/bin/rm -f "$tmp"
-        fi
-      else
-        ${pkgs.coreutils}/bin/rm -f "$tmp"
+
+    merge_json() {
+      file="$1"
+      seed="$2"
+      if [ ! -f "$file" ]; then
+        ${pkgs.coreutils}/bin/install -m 600 "$seed" "$file"
+        return
       fi
-    fi
+      ${pkgs.python3}/bin/python3 - "$file" "$seed" <<'PY'
+import json, sys
+
+path, seedf = sys.argv[1], sys.argv[2]
+seed = json.load(open(seedf))
+try:
+    cur = json.load(open(path))
+except (OSError, ValueError):
+    cur = {}
+
+cur.pop("default_agent", None)
+mcp = cur.get("mcp")
+if isinstance(mcp, dict):
+    mcp.pop("serena", None)
+
+before = json.dumps(cur, sort_keys=True)
+
+def merge(dst, src):
+    for key, value in src.items():
+        if isinstance(value, dict) and isinstance(dst.get(key), dict):
+            merge(dst[key], value)
+        else:
+            dst[key] = value
+
+merge(cur, seed)
+if json.dumps(cur, sort_keys=True) != before:
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(cur, f, indent=2)
+        f.write("\n")
+    import os
+    os.replace(tmp, path)
+PY
+    }
+
+    merge_json "$HOME/.config/opencode/opencode.json" ${opencodeSeed}
+    merge_json "$HOME/.config/opencode/cli.json" ${cliSeed}
   '';
 }
