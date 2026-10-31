@@ -128,6 +128,24 @@
         exec btop
       }
 
+      # `opencode-pair [puerto]` — el `/pair` normal bindea el servicio a
+      # localhost, así que el QR no abre desde el celular. Este helper fija el
+      # hostname del servicio a la IP de Tailscale, lo reinicia y recién ahí
+      # muestra el QR. Requiere que el teléfono esté en la misma tailnet.
+      opencode-pair() {
+        local ip port
+        ip="$(tailscale ip -4 2>/dev/null | head -1)"
+        if [[ -z "$ip" ]]; then
+          echo "Error: Tailscale no está arriba."
+          return 1
+        fi
+        port="''${1:-4096}"
+        opencode service set hostname "$ip"
+        opencode service set port "$port"
+        opencode service restart
+        opencode pair
+      }
+
       # `hyprdev [directorio-repo]` — geometría de trabajo en 4 ventanas kitty
       # INDEPENDIENTES que Hyprland tilea (los gaps dejan ver el wallpaper):
       # esta terminal se REUTILIZA como OpenCode (`exec`) y solo se abren 3
