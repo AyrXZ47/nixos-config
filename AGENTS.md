@@ -24,10 +24,9 @@ nix flake check                              # evaluate all hosts — closest th
 nix flake update                             # bump inputs (home-manager follows nixpkgs)
 ```
 
-`@dotpm/cli` **no es input del flake**: vive pinneado en
-`modules/apps/opencode.nix`. En cada `nix flake update`, comparar el pin contra
-`pnpm view @dotpm/cli version` y subirlo a mano si hay release (el MCP no avisa
-y `pnpm dlx` no actualiza solo).
+En el ritual también se actualizan Obsidian y todos sus plugins (ver
+`~/Sync/Notes/PC & AI/Nix.md`): la app por `nix flake update`, los plugins desde
+Settings > Community plugins, con Obsidian cerrado.
 
 No tests, no CI, no formatter/linter config. `nix flake check` is the only verification; run it after any change.
 

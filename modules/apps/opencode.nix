@@ -7,12 +7,13 @@ let
   # CLI de dotpm: habla con la API local del plugin (Obsidian desktop abierto)
   # y expone sus tools por stdio para OpenCode. PATH propio porque el server
   # MCP puede arrancar desde un lanzador sin el perfil de home-manager.
-  # Version pinneada: `dlx latest` choca con minimumReleaseAge=1440.
+  # Sin pin: `dlx` resuelve la ultima release (con el retraso de 24 h de
+  # minimumReleaseAge) para no arrastrar versiones viejas.
   dotpm = pkgs.writeShellScriptBin "dotpm" ''
     export PATH=${
       lib.makeBinPath [ pkgs.nodejs pkgs.coreutils pkgs.bash pkgs.findutils ]
     }:"$PATH"
-    exec ${pkgs.pnpm}/bin/pnpm --reporter=append-only dlx "@dotpm/cli@0.2.0" "$@"
+    exec ${pkgs.pnpm}/bin/pnpm --reporter=append-only dlx "@dotpm/cli" "$@"
   '';
 
   opencodeSeed = pkgs.writeText "opencode.json" (builtins.toJSON {

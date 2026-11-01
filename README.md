@@ -181,7 +181,7 @@ flake.nix              # Entry point — hosts & shared modules
   `~` dentro de `config.json`; no se hardcodea `/home/yovick`.
 - **Tablero de trabajo (dotpm)**: el plugin `project-manager` de Obsidian
   guarda proyectos y tareas como Markdown en `~/Sync/Notes/Projects`. El CLI
-  `@dotpm/cli` (wrapper `dotpm` en `opencode.nix`, versión pinneada) habla con
+  `@dotpm/cli` (wrapper `dotpm` en `opencode.nix`, última release vía `dlx`) habla con
   la Local API del plugin en `127.0.0.1:27201` y se expone como MCP: el agente
   lee y actualiza el kanban en vivo. Requiere Obsidian desktop abierto con
   Settings > Local API activa; el celular no tiene API. La convención de
