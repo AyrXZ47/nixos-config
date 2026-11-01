@@ -100,28 +100,58 @@ let
     / `pm-task`, y el kanban/gantt los lee de ahí. **No hay `TODO.md` en los
     repos ni listas de pendientes por sesión.**
 
-    - Acceso: MCP `dotpm` (preferido) o el comando `dotpm` en la shell
-      (`projects`, `project <id> --tasks`, `search`, `create`, `update`).
-      Leé el proyecto antes de escribir: `--status`/`--priority` piden los ids
-      que el proyecto define, no las etiquetas.
-    - Proyecto = ámbito cerrable. Todo lo de código va a `💻 Dev`.
-      Materias, clientes y áreas de vida ya tienen su proyecto.
-    - Título de tarea: `Ámbito: Tarea` (un solo separador, `: `). El ámbito es
-      el repo, la materia o el cliente.
-    - Tag = slug del ámbito (`#nixos-config`, `#crescit`, `#antenas`). Para un
-      repo: su nombre sin el prefijo `workspace `, en kebab-case. Sin
-      sub-ámbito no hay tag: el proyecto ya es el ámbito.
-    - Estados válidos: `todo`, `in-progress`, `review`, `done`, `blocked`,
-      `cancelled`. El progreso narrativo va en el cuerpo de la tarea, fechado.
-    - La tarea se cierra (`done`) en el mismo turno que el commit que la
-      cierra, o no se cierra. Si aparece trabajo nuevo, se crea la tarea antes
-      de empezarlo.
-    - Nunca edites a mano `pm-project`/`pm-task`, `id`, `taskIds`, `subtaskIds`
-      ni la sección `## Tasks`: los reescribe el plugin. El título y los tags
-      sí son tuyos.
-    - Si el tablero no responde (Obsidian cerrado), no inventes un backlog
-      paralelo: decilo, seguí con el trabajo y anotá el pendiente cuando el
-      tablero vuelva.
+    ### Regla de oro
+
+    El tablero es la fuente de **intención y prioridad**; el repo y los commits
+    son la fuente del **estado real**. Antes de escribir una tarea, leé el repo;
+    antes de cerrarla, verificá el commit o el archivo que la cierra. Los
+    `odd/tasks/*.md`, `docs/ROADMAP.md` y documentos de diseño son contexto, no
+    el backlog: el estado vivo va en dotpm.
+
+    ### Flujo obligatorio de cada sesión
+
+    1. **Al arrancar**: leé el proyecto en dotpm (`get_project`) y sus tareas
+       (`list_tasks`); buscá si la tarea que te pidieron ya existe. No crees
+       duplicados.
+    2. **Antes de empezar trabajo nuevo**: si no existe la tarea, creala con
+       `create_task` antes de tocar código.
+    3. **Mientras trabajás**: si cambia el alcance, actualizá la tarea
+       (`update_task`) o creá una nueva. El progreso narrativo va en el cuerpo,
+       fechado.
+    4. **Al cerrar**: la tarea pasa a `done` en el mismo turno que el commit que
+       la cierra, y la descripción apunta al commit/archivo/endpoint de
+       evidencia. Si el commit no existe, la tarea no se cierra.
+    5. **Si el tablero no responde**: no inventes un backlog paralelo; decilo,
+       seguí con el trabajo y anotá el pendiente cuando vuelva.
+
+    ### Contrato de una tarea
+
+    - Título: `Ámbito: Tarea` (un solo `: `). El ámbito es el repo, la materia
+      o el cliente. Ejemplos: `PIGNUS: ...`, `Crescit: ...`, `DST: ...`.
+    - Tag: slug del ámbito en kebab-case (`pignus`, `crescit`,
+      `dst-ignition-system`). Sin sub-ámbito no hay tag.
+    - Proyecto: todo lo de código va a `💻 Dev`, salvo que exista un proyecto
+      dedicado (ej. `🚀 DST` para la tesis). Materias, clientes y áreas de vida
+      ya tienen su proyecto.
+    - Estados: `todo`, `in-progress`, `review`, `done`, `blocked`, `cancelled`.
+    - Prioridades: `critical`, `high`, `medium`, `low`.
+    - Descripción mínima: contexto, evidencia (archivo/línea/commit) y criterio
+      de cierre. Si no se puede verificar, no es una tarea, es una idea.
+    - `in-progress` es un compromiso: máximo 1–2 por proyecto. El resto es
+      `todo`.
+    - No edites a mano `pm-project`/`pm-task`, `id`, `taskIds`, `subtaskIds` ni
+      la sección `## Tasks`: los reescribe el plugin. Título y tags sí son tuyos.
+
+    ### Repo nuevo en el flujo
+
+    Para incorporar un repo: leé `AGENTS.md`, `README.md`, docs y `git log`;
+    corré los tests/checks que no necesiten secretos; creá las tareas `done`
+    con evidencia, las `in-progress` reales y el backlog pendiente; actualizá
+    el `AGENTS.md` del repo para que diga que el backlog vive en dotpm. Después
+    de la primera pasada, el repo no necesita un `TODO.md`.
+
+    Para el procedimiento completo, plantillas y revisión semanal, cargá la
+    skill `dotpm` (`~/.config/opencode/skills/dotpm/SKILL.md`).
   '';
 in
 {
@@ -129,6 +159,7 @@ in
     ".config/opencode/skills/security-audit".source = "${securityAudit}/skills/security-audit";
     ".config/opencode/skills/ponytail".source = "${ponytail}/skills/ponytail";
     ".config/opencode/skills/frontend-design".source = "${anthropicSkills}/skills/frontend-design";
+    ".config/opencode/skills/dotpm".source = ./opencode-skills/dotpm;
     ".config/opencode/AGENTS.md".text = globalAgents;
   } // builtins.listToAttrs (map
     (name: {

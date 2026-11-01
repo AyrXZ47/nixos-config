@@ -185,7 +185,10 @@ flake.nix              # Entry point — hosts & shared modules
   la Local API del plugin en `127.0.0.1:27201` y se expone como MCP: el agente
   lee y actualiza el kanban en vivo. Requiere Obsidian desktop abierto con
   Settings > Local API activa; el celular no tiene API. La convención de
-  títulos y tags vive en el `AGENTS.md` global y en el del vault.
+  títulos y tags vive en el `AGENTS.md` global y en el del vault. La skill
+  local `dotpm` (`modules/apps/opencode-skills/dotpm/SKILL.md`) tiene el
+  procedimiento completo: arranque/cierre de sesión, alta de repos, plantilla
+  de tarea y revisión semanal.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
   `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras
