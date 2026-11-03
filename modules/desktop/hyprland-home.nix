@@ -1040,7 +1040,10 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       text = ''
         #!/usr/bin/env bash
         hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()' >/dev/null 2>&1 || exit 0
-        pgrep -f 'quickshell.*caelestia-shell' >/dev/null && exit 0
+        # El shell puede seguir vivo pero con el contexto EGL trabado: el
+        # compositor deja de pintar (hasta `grim` se cuelga) y la pantalla
+        # queda negra. Mirar el PID no alcanza; tras un lock muerto hay que
+        # relanzar el shell siempre.
         exec "$HOME/.config/hypr/scripts/caelestia-restart.sh"
       '';
     };
