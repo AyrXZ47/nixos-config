@@ -333,12 +333,10 @@ in
       hl.bind("SUPER + N", hl.dsp.exec_cmd("kitty zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/lock.sh"))
-      -- Recuperacion de un lock muerto: si el cliente del lock (el shell de
-      -- Caelestia) se cae, Hyprland deja la pantalla "lockdead" y la sesion
-      -- bloqueada. `hl.clear_crashed_lockscreen` se NIEGA si hay un cliente
-      -- vivo, asi que este bind no puede saltarse un lock real. El script
-      -- ademas relanza el shell si murio.
-      hl.bind("SUPER + ALT + U", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/unlock-crashed.sh"), { locked = true })
+      -- Sin atajo para limpiar un lock muerto: el desbloqueo exige pasar por
+      -- una tty autenticada (ver unlock-crashed.sh y README). Un bind con
+      -- `locked = true` dejaria la sesion accesible a cualquiera que este
+      -- frente al teclado si el cliente del lock se cae.
       -- Esmerilado on/off (blur + transparencia) con notificación.
       hl.bind("SUPER + B", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/toggle-frost.sh"))
 
@@ -1029,12 +1027,13 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       '';
     };
 
-    # Recuperacion de un lock muerto (pantalla "lockdead" de Hyprland). El
-    # lock vive en el mismo proceso que el shell de Caelestia: si el shell
-    # muere con la sesion bloqueada no hay UI para desbloquear, y al volver
-    # tampoco hay barra. `hl.clear_crashed_lockscreen` solo actua cuando NO
-    # hay cliente vivo (si el lock esta sano, Hyprland lo rechaza): no es un
-    # bypass del lock.
+    # Recuperacion de un lock muerto (pantalla "lockdead" de Hyprland). Se
+    # corre A MANO desde una tty ya autenticada: no hay atajo de teclado a
+    # proposito. El lock vive en el mismo proceso que el shell de Caelestia:
+    # si el shell muere con la sesion bloqueada no hay UI para desbloquear, y
+    # al volver tampoco hay barra. `hl.clear_crashed_lockscreen` solo actua
+    # cuando NO hay cliente vivo (si el lock esta sano, Hyprland lo rechaza),
+    # pero ejecutarlo exige probar que sos el usuario: loguearte en la tty.
     "hypr/scripts/unlock-crashed.sh" = {
       executable = true;
       text = ''
