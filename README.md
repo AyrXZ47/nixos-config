@@ -395,6 +395,13 @@ quedaba sin huella hasta el siguiente bloqueo. El flake parchea
 `modules/lock/Pam.qml` para que `onResumed` reinicie el fprint y sondee la
 disponibilidad hasta que el sensor reenumere (~30 s).
 
+Si el cliente del lock muere (por ejemplo, el monitor se apaga o se desconecta
+mientras el shell está bloqueando), Hyprland muestra la pantalla **lockdead** y
+la sesión sigue bloqueada. Para recuperarla: `SUPER ALT U`, o desde otra tty
+`hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()'` y después
+`~/.config/hypr/scripts/caelestia-restart.sh`. El comando se niega si hay un
+cliente de lock vivo, así que no saltea un bloqueo real.
+
 ### Boot
 - **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (`ironman`
   theme from `adi1090x-plymouth-themes`); quiet boot.
@@ -417,6 +424,7 @@ disponibilidad hasta que el sensor reenumere (~30 s).
 | `SUPER N` | *netrunner*: btop + nvtop (2 ventanas kitty) |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |
+| `SUPER ALT U` | Recuperar un lock muerto (solo si el cliente del lock ya no existe) |
 | `SUPER P` variants | Screenshot region (`SUPER SHIFT P`) / window (`SUPER ALT P`) / screen (`SUPER P`) |
 | `SUPER CTRL SPACE` | Caelestia launcher |
 | `SUPER CTRL D` / `SUPER CTRL Q` | Caelestia dashboard / session menu |

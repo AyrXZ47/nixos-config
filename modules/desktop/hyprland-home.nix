@@ -333,6 +333,12 @@ in
       hl.bind("SUPER + N", hl.dsp.exec_cmd("kitty zsh -ic netrunner"))
       hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/switch-layout.sh"))
       hl.bind("SUPER + L", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/lock.sh"))
+      -- Recuperacion de un lock muerto: si el cliente del lock (el shell de
+      -- Caelestia) se cae, Hyprland deja la pantalla "lockdead" y la sesion
+      -- bloqueada. `hl.clear_crashed_lockscreen` se NIEGA si hay un cliente
+      -- vivo, asi que este bind no puede saltarse un lock real. El script
+      -- ademas relanza el shell si murio.
+      hl.bind("SUPER + ALT + U", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/unlock-crashed.sh"), { locked = true })
       -- Esmerilado on/off (blur + transparencia) con notificación.
       hl.bind("SUPER + B", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/toggle-frost.sh"))
 
@@ -1020,6 +1026,22 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
           done
           [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
         ) >/dev/null 2>&1 &
+      '';
+    };
+
+    # Recuperacion de un lock muerto (pantalla "lockdead" de Hyprland). El
+    # lock vive en el mismo proceso que el shell de Caelestia: si el shell
+    # muere con la sesion bloqueada no hay UI para desbloquear, y al volver
+    # tampoco hay barra. `hl.clear_crashed_lockscreen` solo actua cuando NO
+    # hay cliente vivo (si el lock esta sano, Hyprland lo rechaza): no es un
+    # bypass del lock.
+    "hypr/scripts/unlock-crashed.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()' >/dev/null 2>&1 || exit 0
+        pgrep -f 'quickshell.*caelestia-shell' >/dev/null && exit 0
+        exec "$HOME/.config/hypr/scripts/caelestia-restart.sh"
       '';
     };
 
