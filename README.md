@@ -395,6 +395,10 @@ quedaba sin huella hasta el siguiente bloqueo. El flake parchea
 `modules/lock/Pam.qml` para que `onResumed` reinicie el fprint y sondee la
 disponibilidad hasta que el sensor reenumere (~30 s).
 
+El fondo del lock usa el wallpaper cacheado (`lock.useWallpaper = true`), no un
+screencopy en vivo: capturar una pantalla que se está apagando era lo que mataba
+el shell y dejaba la sesión en “lockdead”.
+
 Si el cliente del lock muere (por ejemplo, el monitor se apaga o se desconecta
 mientras el shell está bloqueando), Hyprland muestra la pantalla **lockdead** y
 la sesión sigue bloqueada. Para recuperarla hay que ir a otra tty y loguearse

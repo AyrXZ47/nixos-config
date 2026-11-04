@@ -477,7 +477,12 @@ let
     # modules/hardware/fingerprint.nix). Howdy NO está instalado.
     lock = {
       enabled = true;
-      useWallpaper = false;
+      # El fondo por screencopy en vivo mataba el shell con el lock puesto
+      # cuando el monitor se apagaba o desconectaba: ScreencopyView capturaba
+      # una pantalla fantasma y QT fallaba con "Could not create EGL surface",
+      # dejando la sesion en "lockdead". Con el wallpaper cacheado el lock no
+      # depende de capturar la pantalla (issue caelestia-dots/shell#1814).
+      useWallpaper = true;
       recolourLogo = true;
       enableFprint = true;
       maxFprintTries = 5;

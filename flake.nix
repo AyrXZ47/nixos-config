@@ -686,13 +686,13 @@ PYEOF
             # EGL surface"; Hyprland queda en la pantalla "lockdead" con la
             # sesion bloqueada. `live: false` (PR #1238) convierte el fondo en
             # una foto: no retiene el output cuando el monitor se apaga.
+            # El nombre vacio es la senal del QScreen placeholder; el chequeo
+            # contra Quickshell.screens no alcanza porque el placeholder esta
+            # en esa lista (verificado 2026-11-04).
             substituteInPlace modules/lock/LockSurface.qml \
               --replace-fail \
-            'import Quickshell.Wayland' \
-            "import Quickshell${"\n"}import Quickshell.Wayland" \
-              --replace-fail \
             'captureSource: root.screen' \
-            "captureSource: Quickshell.screens.includes(root.screen) ? root.screen : null${"\n"}            live: false"
+            "captureSource: root.screen?.name ? root.screen : null${"\n"}            live: false"
 
             # PAM con confdir propio (assets/pam.d): al no haber un `other` ahi,
             # libpam loguea "_pam_init_handlers: no default config other" en cada
