@@ -76,6 +76,10 @@ let
     diffs = {
       wrap = "word";
     };
+    # Timeline de la sesion: marca la hora de cada prompt/salida y los spans.
+    keybinds = {
+      "session.timeline" = "ctrl+t";
+    };
     session = {
       sidebar = "auto";
       scrollbar = true;

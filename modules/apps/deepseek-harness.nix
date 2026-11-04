@@ -109,7 +109,11 @@ let
   # que hay que repetir lo que pone el bundle (provider/fullscreen/effort) o se
   # pierde. Efecto: /settings ya no puede pisar estas claves (el patch de home
   # gana al del perfil); para cambiarlas se edita aca.
-  #   launchpad true    la landing con la ballena en cada arranque
+  #   launchpad false   entra directo al chat: la ballena del header se ve al
+  #                     instante. El launchpad la descarta en terminales bajos
+  #                     (la escalera de degradacion le saca las 13 filas del
+  #                     arte) y por eso pedia un Enter para verla.
+  #   turnUsageRow      ledger al cerrar cada turno: tokens, cache y span
   #   scrollGutter      barra de scroll a la derecha
   #   sidePanel         sin tocar: defaults del plugin (cerrado, todos los
   #                     paneles). Abrirlo achica el chat y esconde la ballena.
@@ -121,7 +125,8 @@ let
         fullscreen = true;
         terminalImages = true;
         effort = "max";
-        launchpad = true;
+        launchpad = false;
+        turnUsageRow = true;
         whale = true;
         whaleIdle = true;
         scrollGutter = "scrollbar";

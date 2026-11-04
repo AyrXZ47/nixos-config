@@ -93,14 +93,16 @@ Por eso:
 
 ## Gestor de paquetes JS (obligatorio)
 
-- Todo lo JS de este repo usa **pnpm**, nunca `npm`: pnpm ≥10 no ejecuta los
-  lifecycle scripts de las dependencias por defecto (el vector principal de
-  supply-chain en npm). `npm install` solo como excepcion explicita del brief,
-  documentada; herramientas globales van con `pnpm add -g`.
-- El gestor de extensiones de Pi usa `npm` por defecto. Por eso
-  `~/.pi/agent/settings.json` lleva `"npmCommand": ["pnpm"]`: `pi install`,
-  `pi update --extensions` y todo lo que toque `~/.pi/agent/npm` pasa por pnpm.
-  Si ese campo desaparece, Pi vuelve a npm en silencio.
+- **pnpm por defecto, npm cuando la herramienta lo exige.** pnpm ≥10 no
+  ejecuta los lifecycle scripts de las dependencias (el vector principal de
+  supply-chain en npm), asi que es la opcion preferida; pero si un instalador
+  de terceros solo funciona con npm, se usa npm y se sigue: no se bloquea el
+  trabajo por el gestor. Herramientas globales: `pnpm add -g` (o `npm i -g` si
+  la herramienta no acepta pnpm), documentado en el commit.
+- Pi trae su propio gestor de extensiones y hoy usa `npm` (no hay
+  `"npmCommand"` en `~/.pi/agent/settings.json`). Es aceptable: solo toca
+  `~/.pi/agent/npm`. Si se quiere volver a forzar pnpm, agregar
+  `"npmCommand": ["pnpm"]` ahi.
 - pnpm corre con `minimumReleaseAge=1440` (global, `~/.config/pnpm/config.yaml`):
   una version recien publicada espera 24 h antes de poder instalarse. Eso corta
   el patron de los incidentes de octubre 2026 (LiteLLM 1.107.0, tensorlake,
