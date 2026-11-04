@@ -32,7 +32,7 @@ let
   ];
 
   globalAgents = ''
-    # Reglas globales de OpenCode
+    # Reglas globales de agentes (OpenCode y dsh)
 
     ## Ponytail: lazy senior dev
 
@@ -67,14 +67,14 @@ let
     minúsculas, una línea, <72 caracteres. Sin atribución de IA ni trailers. Un
     cambio lógico por commit.
 
-    ## Flujo en OpenCode
+    ## Flujo de trabajo
 
     - Una sola sesión. No hay planner/executor/integrator/auditor manuales.
     - Tarea chica y entendida: Build directo.
     - Tarea grande o ambigua: Plan primero, después Build.
-    - Exploración: subagente `explore` para no contaminar el hilo padre.
-    - Review: `/ponytail-review` en la sesión; si querés contexto aislado,
-      pasale el mismo prompt al subagente `general`.
+    - Exploración: subagente de exploración para no contaminar el hilo padre.
+    - Review: la skill `ponytail` (en OpenCode, `/ponytail-review`); si querés
+      contexto aislado, pasale el mismo prompt a un subagente.
     - Tareas largas: `/goal` con objetivo y verificación explícitos.
     - Trabajo riesgoso o paralelo: worktree.
     - El padre es dueño de decisiones, commits y push.
@@ -86,8 +86,8 @@ let
     - Imágenes: usá `read` nativo.
     - PDF: convertí con `pdf2md` y leé el Markdown; no inventes contenido.
     - CSV/texto: `read` directo.
-    - Web: usá el MCP `duckduckgo` (`search`/`fetch_content`) o `webfetch`;
-      citá fuentes. No hay proveedor pago configurado.
+    - Web: usá la búsqueda y el fetch nativos (`web_search`/`web_fetch`); en
+      OpenCode es el MCP `duckduckgo`. Citá fuentes.
     - Memoria: Basic Memory guarda las decisiones y el contexto durable del
       proyecto en `~/Sync/Notes/PC & AI/Memory`. Usá sus tools (`bm_search`,
       `bm_write`, `bm_context`) cuando necesites contexto pasado; verificá lo
@@ -151,7 +151,7 @@ let
     de la primera pasada, el repo no necesita un `TODO.md`.
 
     Para el procedimiento completo, plantillas y revisión semanal, cargá la
-    skill `dotpm` (`~/.config/opencode/skills/dotpm/SKILL.md`).
+    skill `dotpm`.
   '';
 in
 {
