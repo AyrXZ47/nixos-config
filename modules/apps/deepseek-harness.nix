@@ -79,11 +79,12 @@ let
     }
   ];
 
-  # Bundles oficiales que vienen apagados. Se montan por nombre: resuelven
+  # Plugins del perfil. Los bundles oficiales se montan por nombre: resuelven
   # desde la instalacion, sin `dsh plugin add` ni red (el paquete de npm esta
   # en 0.2.1-alpha.2 y el runtime en 0.2.1-rc.3, asi que el CLI los rechaza).
   #   worktree        create_worktree: rama + checkout nuevos, y la sesion se
   #                   mueve ahi. Deja el checkout original intacto.
+  #   dsh-chime       plugin local: sonido al terminar el turno.
   #   session-search no entra: no resuelve sus deps desde el perfil.
   bundlePatch = [
     {
@@ -97,14 +98,8 @@ let
           name = "@deepseek-ai/dsh-experimental-tool-worktree";
         }
         {
-          id = "hooks-claude-code";
-          # Por ruta absoluta: el paquete no esta en el grafo de runtime del
-          # perfil, asi que un `name: '@deepseek-ai/...'` no resuelve. Node
-          # exige el entrypoint, no el directorio del paquete.
-          name = "${pkgs.deepseek-harness}/libexec/dsh/packages/experimental/hooks-claude-code/lib/index.js";
-          config = {
-            configPath = "${config.home.homeDirectory}/.dsh/hooks.json";
-          };
+          id = "dsh-chime";
+          name = chimePlugin;
         }
       ];
     }
@@ -114,10 +109,10 @@ let
   # que hay que repetir lo que pone el bundle (provider/fullscreen/effort) o se
   # pierde. Efecto: /settings ya no puede pisar estas claves (el patch de home
   # gana al del perfil); para cambiarlas se edita aca.
-  #   sidePanel.open + panels "btw,info"  el panel lateral arranca abierto en btw
-  #   scrollGutter scrollbar              barra de scroll a la derecha
-  #   launchpad false                     entra directo al chat (con el panel);
-  #                                       true muestra la landing grande primero
+  #   launchpad true    la landing con la ballena en cada arranque
+  #   scrollGutter      barra de scroll a la derecha
+  #   sidePanel         sin tocar: defaults del plugin (cerrado, todos los
+  #                     paneles). Abrirlo achica el chat y esconde la ballena.
   tuiPatch = [
     {
       id = "dsh-tui";
@@ -126,17 +121,12 @@ let
         fullscreen = true;
         terminalImages = true;
         effort = "max";
-        launchpad = false;
+        launchpad = true;
         whale = true;
         whaleIdle = true;
         scrollGutter = "scrollbar";
         notificationMethod = "auto";
-        sidePanel = {
-          splitEnabled = true;
-          open = true;
-          ratio = 0.68;
-          panels = "btw,info";
-        };
+        thinkingFold = "preview";
       };
     }
     {
@@ -161,20 +151,37 @@ let
     }
   ];
 
-  # Sonido al terminar el turno, por el hook Stop (formato Claude Code). Usa el
-  # mismo wav que ya genera opencode.nix; no se duplica el asset.
-  hooksJson = {
-    hooks.Stop = [
-      {
-        hooks = [
-          {
-            type = "command";
-            command = "${pkgs.pipewire}/bin/pw-play ${config.home.homeDirectory}/.config/opencode/sounds/done.wav";
-          }
-        ];
-      }
-    ];
-  };
+  # Chime propio (descendente, distinto del de OpenCode) envuelto en un script:
+  # el hook corre con el entorno limpiado y pw-play sin XDG_RUNTIME_DIR no
+  # encuentra el socket de PipeWire ("Host is down"), asi que el wrapper lo
+  # resuelve por uid.
+  dshChime = pkgs.writeShellScriptBin "dsh-chime" ''
+    export XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
+    exec ${pkgs.pipewire}/bin/pw-play ${(import ./chimes.nix { inherit pkgs; }).dsh}
+  '';
+
+  # Sonido al terminar el turno. Va como plugin propio y no con
+  # hooks-claude-code: los hooks corren con un sandbox workspace-write fijo y
+  # este host no tiene backend de sandbox, asi que el comando nunca ejecuta.
+  # El plugin corre en proceso (sin sandbox) y spawnea el wrapper.
+  chimePlugin = pkgs.writeText "dsh-chime.mjs" ''
+    import { spawn } from 'node:child_process'
+
+    // Un sonido por turno: los subagentes tambien emiten turn-stopping.
+    const CHIME = '${dshChime}/bin/dsh-chime'
+    let last = 0
+
+    export const name = 'dsh-chime'
+
+    export function apply(ctx) {
+      ctx.on('agent/turn-stopping', () => {
+        const now = Date.now()
+        if (now - last < 3000) return
+        last = now
+        spawn(CHIME, [], { detached: true, stdio: 'ignore' }).unref()
+      })
+    }
+  '';
 in
 {
   home.packages = [ pkgs.deepseek-harness dshTui ];
@@ -187,7 +194,6 @@ in
     skillNames) // {
     ".dsh/AGENTS.md".text = config.home.file.".config/opencode/AGENTS.md".text;
     ".dsh/cordis.patch.yml".text = builtins.toJSON (mcpPatch ++ bundlePatch ++ tuiPatch);
-    ".dsh/hooks.json".text = builtins.toJSON hooksJson;
   };
 
   # El perfil no viaja en Nix (es un node_modules de pnpm). Se crea una vez por

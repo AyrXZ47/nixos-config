@@ -62,34 +62,10 @@ let
     };
   });
 
-  # Chime corto y deterministico para el evento "done" de OpenCode. No se
-  # commitea un binario: se genera en build con la stdlib de Python. Evita
-  # depender del sound pack built-in, que en algunas versiones no dispara
-  # sonido al terminar la sesion.
-  doneSound = pkgs.runCommand "opencode-done.wav" { nativeBuildInputs = [ pkgs.python3 ]; } ''
-    python3 - "$out" <<'PY'
-import math
-import struct
-import sys
-import wave
-
-path = sys.argv[1]
-rate = 44100
-duration = 0.28
-
-with wave.open(path, "w") as wav:
-    wav.setnchannels(1)
-    wav.setsampwidth(2)
-    wav.setframerate(rate)
-    for i in range(int(rate * duration)):
-        t = i / rate
-        attack = min(1.0, t / 0.02)
-        release = max(0.0, 1.0 - max(0.0, t - 0.18) / 0.10)
-        freq = 880.0 if t < 0.14 else 1320.0
-        sample = 0.28 * attack * release * math.sin(2.0 * math.pi * freq * t)
-        wav.writeframes(struct.pack("<h", int(sample * 32767)))
-PY
-  '';
+  # Chime del evento "done". Ambos harnesses comparten el generador
+  # (chimes.nix); el de OpenCode es ascendente y el de dsh descendente, para
+  # saber de cual viene la notificacion sin mirar la pantalla.
+  chimes = import ./chimes.nix { inherit pkgs; };
 
   cliSeed = pkgs.writeText "opencode-cli.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/v2/cli.json";
@@ -103,7 +79,7 @@ PY
     session = {
       sidebar = "auto";
       scrollbar = true;
-      thinking = "show";
+      thinking = "hide";
       markdown = "rendered";
       image_preview = true;
       permissions = "autoaccept";
@@ -145,7 +121,7 @@ in
 
   # Chime de fin de sesion. El archivo queda en una ruta estable para que la
   # config de OpenCode no dependa de un store path.
-  home.file.".config/opencode/sounds/done.wav".source = doneSound;
+  home.file.".config/opencode/sounds/done.wav".source = chimes.opencode;
 
   # Hindsight se retiro (2026-10-30): requeria Ollama para extraer hechos y no
   # sirve en laptop ni nix-on-droid. Se borra el runtime/config local y se
