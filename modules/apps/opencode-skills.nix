@@ -88,10 +88,12 @@ let
     - CSV/texto: `read` directo.
     - Web: usá la búsqueda y el fetch nativos (`web_search`/`web_fetch`); en
       OpenCode es el MCP `duckduckgo`. Citá fuentes.
-    - Memoria: Basic Memory guarda las decisiones y el contexto durable del
-      proyecto en `~/Sync/Notes/PC & AI/Memory`. Usá sus tools (`bm_search`,
-      `bm_write`, `bm_context`) cuando necesites contexto pasado; verificá lo
-      que devuelve contra el código antes de confiar en ello.
+    - Memoria: el vault `~/Sync/Notes` ES la memoria; no hay índice ni MCP
+      que mantener. Mapa: `Projects/` (tablero dotpm), `PC & AI/` (infra y
+      agentes), `Topics/<Categoría>/` (conocimiento), el resto por área de
+      vida. Para contexto pasado: `rg -l -i 'tema' ~/Sync/Notes --glob
+      '*.md'` y leé solo lo que matchea. Procedimiento completo: skill
+      `vault`. Verificá la nota contra el código antes de confiar en ella.
 
     ## Tablero de trabajo (dotpm)
 
@@ -160,6 +162,7 @@ in
     ".config/opencode/skills/ponytail".source = "${ponytail}/skills/ponytail";
     ".config/opencode/skills/frontend-design".source = "${anthropicSkills}/skills/frontend-design";
     ".config/opencode/skills/dotpm".source = ./opencode-skills/dotpm;
+    ".config/opencode/skills/vault".source = ./opencode-skills/vault;
     ".config/opencode/AGENTS.md".text = globalAgents;
   } // builtins.listToAttrs (map
     (name: {

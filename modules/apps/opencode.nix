@@ -58,23 +58,6 @@ let
             startup = 180000;
           };
         };
-        basic-memory = {
-          type = "local";
-          command = [
-            "${pkgs.uv}/bin/uvx"
-            "--prerelease=allow"
-            "basic-memory"
-            "mcp"
-            "--project"
-            "memoria"
-          ];
-          environment = {
-            BASIC_MEMORY_NO_PROMOS = "1";
-          };
-          timeout = {
-            startup = 180000;
-          };
-        };
       };
     };
   });
@@ -171,44 +154,12 @@ in
     rm -rf "$HOME/.hindsight"
   '';
 
-  # Basic Memory: las notas viven en el vault (Syncthing las lleva a la
-  # laptop), pero el indice SQLite queda local en ~/.basic-memory. La carpeta
-  # es dedicada para no indexar todo el vault ni ensuciar notas ajenas.
-  # Basic Memory NO expande `~` dentro de config.json (lo trata como /~/...),
-  # por eso el activation resuelve $HOME en cada host al hacer rebuild.
-  home.activation.ensureBasicMemory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${pkgs.coreutils}/bin/mkdir -p "$HOME/Sync/Notes/PC & AI/Memory" "$HOME/.basic-memory"
-    ${pkgs.python3}/bin/python3 - "$HOME/.basic-memory/config.json" "$HOME/Sync/Notes/PC & AI/Memory" <<'PY'
-import json, os, sys
-
-path, project_path = sys.argv[1], sys.argv[2]
-try:
-    with open(path) as f:
-        cur = json.load(f)
-except (OSError, ValueError):
-    cur = {}
-
-before = json.dumps(cur, sort_keys=True)
-projects = cur.get("projects")
-if not isinstance(projects, dict):
-    projects = {}
-    cur["projects"] = projects
-project = projects.get("memoria")
-if not isinstance(project, dict):
-    project = {}
-    projects["memoria"] = project
-project["path"] = project_path
-project["mode"] = "local"
-cur["default_project"] = "memoria"
-
-if json.dumps(cur, sort_keys=True) != before:
-    tmp = path + ".tmp"
-    with open(tmp, "w") as f:
-        json.dump(cur, f, indent=2)
-        f.write("\n")
-    os.chmod(tmp, 0o600)
-    os.replace(tmp, path)
-PY
+  # Basic Memory se retiro (2026-11-04): rompia en cada release (0.18.5 cambio
+  # el schema de config y greenlet necesita libstdc++) y nunca llego a guardar
+  # nada. La memoria durable vive en el vault, que el agente lee con grep.
+  home.activation.removeBasicMemory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    rm -rf "$HOME/.basic-memory"
+    rmdir "$HOME/Sync/Notes/PC & AI/Memory" 2>/dev/null || true
   '';
 
   home.activation.ensureOpencodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -235,6 +186,7 @@ cur.pop("default_agent", None)
 mcp = cur.get("mcp")
 if isinstance(mcp, dict):
     mcp.pop("serena", None)
+    mcp.pop("basic-memory", None)
 
 # Migracion: Hindsight y el subagente review viejo ya no existen. Se limpian
 # del archivo vivo aunque el merge no los vuelva a sembrar.

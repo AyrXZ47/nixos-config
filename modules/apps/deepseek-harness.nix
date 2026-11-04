@@ -28,7 +28,7 @@ let
 
   # Mismas skills que OpenCode: se reusa el source que ya declara
   # opencode-skills.nix en vez de duplicar los fetchFromGitHub.
-  skillNames = [ "dotpm" "frontend-design" "ponytail" "security-audit" ];
+  skillNames = [ "dotpm" "frontend-design" "ponytail" "security-audit" "vault" ];
 
   # MCPs migrados desde ~/.config/opencode/opencode.json. duckduckgo va aunque
   # dsh tenga web_fetch nativo: la busqueda nativa pide DEEPSEEK_API_KEY y con
