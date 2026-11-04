@@ -172,8 +172,9 @@ let
   chimePlugin = pkgs.writeText "dsh-chime.mjs" ''
     import { spawn } from 'node:child_process'
 
-    // Un sonido por turno: los subagentes tambien emiten turn-stopping.
+    // Un aviso por turno: los subagentes tambien emiten turn-stopping.
     const CHIME = '${dshChime}/bin/dsh-chime'
+    const NOTIFY = '${pkgs.libnotify}/bin/notify-send'
     let last = 0
 
     export const name = 'dsh-chime'
@@ -184,6 +185,14 @@ let
         if (now - last < 3000) return
         last = now
         spawn(CHIME, [], { detached: true, stdio: 'ignore' }).unref()
+        // Notificacion de escritorio de verdad (D-Bus): es lo que KDE Connect
+        // replica a los demas dispositivos. El OSC de la TUI no sale del
+        // terminal y nunca llega al telefono.
+        spawn(
+          NOTIFY,
+          ['-a', 'dsh', '-i', 'utilities-terminal', 'dsh', 'Turno listo en ' + process.cwd()],
+          { detached: true, stdio: 'ignore' },
+        ).unref()
       })
     }
   '';

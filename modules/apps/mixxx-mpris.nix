@@ -415,14 +415,21 @@ let
 
     def poll(player):
         states = mixxx_states()
-        if not states:
+        title = mixxx_window_title()
+        # Sin pista cargada Mixxx deja el stream abierto y el nodo sigue
+        # "running": publicar Playing ahi hace que KDE Connect replique ese
+        # player a todos los dispositivos y las teclas de volumen de Android
+        # terminen moviendo el volumen del host en vez del local. Con el titulo
+        # en "Mixxx" (o vacio) no hay nada sonando.
+        bare = not title or title.strip().lower() == "mixxx"
+        if not states or bare:
             status = "Stopped"
         elif any(state == "running" for state in states):
             status = "Playing"
         else:
             status = "Paused"
         player.set_status(status)
-        player.update_track(mixxx_window_title())
+        player.update_track(title)
         return True
 
 
