@@ -1002,7 +1002,40 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         #!/usr/bin/env bash
         cliphist wipe
         [ -x "$HOME/.config/hypr/scripts/openrgb-lock-before" ] && "$HOME/.config/hypr/scripts/openrgb-lock-before"
-        caelestia shell lock lock >/dev/null 2>&1 || exit 0
+
+        lock_request() {
+          caelestia shell lock lock >/dev/null 2>&1
+        }
+
+        if ! lock_request; then
+          # El shell vivo puede ser de una generacion anterior (switch sin
+          # reiniciar el shell): el CLI nuevo no encuentra su socket IPC por
+          # path y el lock fallaba en SILENCIO. La pantalla se apagaba por
+          # DPMS pero la sesion quedaba abierta. Relanzar el shell y
+          # reintentar.
+          logger -t hypr-lock "IPC del lock fallo; relanzando el shell de Caelestia"
+          "$HOME/.config/hypr/scripts/caelestia-restart.sh"
+          for _ in $(seq 1 20); do
+            sleep 0.5
+            lock_request && break
+          done
+        fi
+
+        # Verificar que el lock quedo activo. Si no, avisar en pantalla en
+        # vez de fingir que la sesion quedo bloqueada.
+        locked=""
+        for _ in $(seq 1 10); do
+          locked=$(${pkgs.caelestia-shell}/bin/caelestia-shell ipc call lock isLocked 2>/dev/null || true)
+          [ "$locked" = "true" ] && break
+          sleep 0.2
+        done
+        if [ "$locked" != "true" ]; then
+          logger -t hypr-lock "no se pudo bloquear la sesion"
+          hyprctl notify 3 10000 0 "No se pudo bloquear: reinicia el shell (caelestia-restart.sh)" >/dev/null 2>&1 || true
+          [ -x "$HOME/.config/hypr/scripts/openrgb-lock-after" ] && "$HOME/.config/hypr/scripts/openrgb-lock-after"
+          exit 1
+        fi
+
         # Restaura cuando el lock se libere. SIN tope de iteraciones: el lock
         # puede durar horas (antes 60x2s=120s; al agotarse pintaba RGBRules1
         # estando aun bloqueada y dejaba de correr, asi que al desbloquear de

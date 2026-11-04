@@ -399,6 +399,12 @@ El fondo del lock usa el wallpaper cacheado (`lock.useWallpaper = true`), no un
 screencopy en vivo: capturar una pantalla que se está apagando era lo que mataba
 el shell y dejaba la sesión en “lockdead”.
 
+Después de un `nixos-rebuild switch` el shell que sigue corriendo es el de la
+generación anterior y su IPC no se encuentra (`caelestia shell ...` falla). El
+`lock.sh` lo detecta, relanza el shell y reintenta; si aun así no puede, avisa en
+pantalla en vez de fingir que la sesión quedó bloqueada. Para dejar el shell
+nuevo activo sin esperar al lock: `~/.config/hypr/scripts/caelestia-restart.sh`.
+
 Si el cliente del lock muere (por ejemplo, el monitor se apaga o se desconecta
 mientras el shell está bloqueando), Hyprland muestra la pantalla **lockdead** y
 la sesión sigue bloqueada. Para recuperarla hay que ir a otra tty y loguearse
