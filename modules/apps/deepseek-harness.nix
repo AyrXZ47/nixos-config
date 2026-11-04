@@ -78,6 +78,31 @@ let
       ];
     }
   ];
+
+  # Bundles oficiales que vienen apagados. Se montan por nombre: resuelven
+  # desde la instalacion, sin `dsh plugin add` ni red (el paquete de npm esta
+  # en 0.2.1-alpha.2 y el runtime en 0.2.1-rc.3, asi que el CLI los rechaza).
+  #   worktree        create_worktree: rama + checkout nuevos, y la sesion se
+  #                   mueve ahi. Deja el checkout original intacto.
+  #   session-search  buscar en sesiones pasadas (memoria sin Python).
+  bundlePatch = [
+    {
+      insert = [
+        {
+          id = "worktree";
+          name = "@deepseek-ai/dsh-experimental-worktree";
+        }
+        {
+          id = "tool-worktree";
+          name = "@deepseek-ai/dsh-experimental-tool-worktree";
+        }
+        {
+          id = "session-search";
+          name = "@deepseek-ai/dsh-experimental-session-search";
+        }
+      ];
+    }
+  ];
 in
 {
   home.packages = [ pkgs.deepseek-harness dshTui ];
@@ -89,7 +114,7 @@ in
     })
     skillNames) // {
     ".dsh/AGENTS.md".text = config.home.file.".config/opencode/AGENTS.md".text;
-    ".dsh/cordis.patch.yml".text = builtins.toJSON mcpPatch;
+    ".dsh/cordis.patch.yml".text = builtins.toJSON (mcpPatch ++ bundlePatch);
   };
 
   # El perfil no viaja en Nix (es un node_modules de pnpm). Se crea una vez por
