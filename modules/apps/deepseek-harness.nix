@@ -84,7 +84,7 @@ let
   # en 0.2.1-alpha.2 y el runtime en 0.2.1-rc.3, asi que el CLI los rechaza).
   #   worktree        create_worktree: rama + checkout nuevos, y la sesion se
   #                   mueve ahi. Deja el checkout original intacto.
-  #   session-search  buscar en sesiones pasadas (memoria sin Python).
+  #   session-search no entra: no resuelve sus deps desde el perfil.
   bundlePatch = [
     {
       insert = [
@@ -97,12 +97,84 @@ let
           name = "@deepseek-ai/dsh-experimental-tool-worktree";
         }
         {
-          id = "session-search";
-          name = "@deepseek-ai/dsh-experimental-session-search";
+          id = "hooks-claude-code";
+          # Por ruta absoluta: el paquete no esta en el grafo de runtime del
+          # perfil, asi que un `name: '@deepseek-ai/...'` no resuelve. Node
+          # exige el entrypoint, no el directorio del paquete.
+          name = "${pkgs.deepseek-harness}/libexec/dsh/packages/experimental/hooks-claude-code/lib/index.js";
+          config = {
+            configPath = "${config.home.homeDirectory}/.dsh/hooks.json";
+          };
         }
       ];
     }
   ];
+
+  # Arranque de la TUI. Un patch reemplaza la config ENTERA de la fila, asi
+  # que hay que repetir lo que pone el bundle (provider/fullscreen/effort) o se
+  # pierde. Efecto: /settings ya no puede pisar estas claves (el patch de home
+  # gana al del perfil); para cambiarlas se edita aca.
+  #   sidePanel.open + panels "btw,info"  el panel lateral arranca abierto en btw
+  #   scrollGutter scrollbar              barra de scroll a la derecha
+  #   launchpad false                     entra directo al chat (con el panel);
+  #                                       true muestra la landing grande primero
+  tuiPatch = [
+    {
+      id = "dsh-tui";
+      config = {
+        provider = "opencode-go";
+        fullscreen = true;
+        terminalImages = true;
+        effort = "max";
+        launchpad = false;
+        whale = true;
+        whaleIdle = true;
+        scrollGutter = "scrollbar";
+        notificationMethod = "auto";
+        sidePanel = {
+          splitEnabled = true;
+          open = true;
+          ratio = 0.68;
+          panels = "btw,info";
+        };
+      };
+    }
+    {
+      id = "permission";
+      config = {
+        presets = {
+          read-only = {
+            sandbox = "read-only";
+            approval = "ask";
+          };
+          workspace-write = {
+            sandbox = "workspace-write";
+            approval = "ask";
+          };
+          danger-full-access = {
+            sandbox = "danger-full-access";
+            approval = "never";
+          };
+        };
+        defaultPreset = "danger-full-access";
+      };
+    }
+  ];
+
+  # Sonido al terminar el turno, por el hook Stop (formato Claude Code). Usa el
+  # mismo wav que ya genera opencode.nix; no se duplica el asset.
+  hooksJson = {
+    hooks.Stop = [
+      {
+        hooks = [
+          {
+            type = "command";
+            command = "${pkgs.pipewire}/bin/pw-play ${config.home.homeDirectory}/.config/opencode/sounds/done.wav";
+          }
+        ];
+      }
+    ];
+  };
 in
 {
   home.packages = [ pkgs.deepseek-harness dshTui ];
@@ -114,7 +186,8 @@ in
     })
     skillNames) // {
     ".dsh/AGENTS.md".text = config.home.file.".config/opencode/AGENTS.md".text;
-    ".dsh/cordis.patch.yml".text = builtins.toJSON (mcpPatch ++ bundlePatch);
+    ".dsh/cordis.patch.yml".text = builtins.toJSON (mcpPatch ++ bundlePatch ++ tuiPatch);
+    ".dsh/hooks.json".text = builtins.toJSON hooksJson;
   };
 
   # El perfil no viaja en Nix (es un node_modules de pnpm). Se crea una vez por
