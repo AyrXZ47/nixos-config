@@ -134,6 +134,9 @@ in
 
     programs.hyprland = {
       enable = true;
+      # XWayland sigue por Steam (CEF sin backend Wayland) y Packet Tracer
+      # (el AppImage solo trae libqxcb/libqlinuxfb). Obsidian y OMNeT++ ya
+      # corren nativos; quitarlo cuando esos dos salgan de la lista.
       xwayland.enable = true;
     };
 

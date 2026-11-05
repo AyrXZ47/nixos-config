@@ -261,10 +261,9 @@ EOF
 
     # Wrapper del launcher del IDE: sin estos envs el GTK del Eclipse no
     # encuentra schemas/modulos gio y el login al IDE se ve generico o falla
-    # el TLS de glib-networking.
-    # GDK_BACKEND=x11: SWT GTK3 no mapea ventana bajo Wayland nativo
-    # (el proceso queda vivo pero no aparece nada); XWayland es el camino
-    # estandar de Eclipse.
+    # el TLS de glib-networking. SWT ya mapea el launcher y el IDE completo
+    # bajo Wayland nativo (probado en Hyprland, OMNeT++ 6.4.0): no forzar
+    # GDK_BACKEND=x11.
     postFixup = ''
       # El workspace default del make apunta a samples/ (store, read-only):
       # el IDE fallaba al crear el workspace ahi. Se reescribe a un dir
@@ -275,7 +274,6 @@ EOF
       # sin parchear (JRE, natives dentro de jars). Sin LD_LIBRARY_PATH:
       # rompe gtk_init_check.
       wrapProgram $out/bin/omnetpp \
-        --set GDK_BACKEND x11 \
         --set NIX_LD "$(cat ${pkgs.stdenv.cc}/nix-support/dynamic-linker)" \
         --set NIX_LD_LIBRARY_PATH "${pkgs.lib.makeLibraryPath ideDeps}" \
         --prefix GIO_EXTRA_MODULES : "${pkgs.glib-networking}/lib/gio/modules" \
