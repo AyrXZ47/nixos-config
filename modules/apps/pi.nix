@@ -63,10 +63,11 @@ try:
     cur = json.load(open(path))
 except (OSError, ValueError):
     cur = {}
+orig = dict(cur)
 for key in ("packages", "extensions", "modelThinkingLevels", "npmCommand"):
     cur.pop(key, None)
 merged = {**cur, **seed}
-if merged != cur:
+if merged != orig:
     tmp = path + ".tmp"
     with open(tmp, "w") as f:
         json.dump(merged, f, indent=2)
