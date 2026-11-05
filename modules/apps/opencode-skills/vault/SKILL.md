@@ -26,7 +26,9 @@ vault entero no.
 
 ## Buscar: el "RAG" es rg
 
-1. **Por tag** (frontmatter en lista): `rg -l '^\s+- nixos-config$' ~/Sync/Notes --glob '*.md'`
+1. **Por tag**: conviven dos formatos de frontmatter — lista YAML en notas
+   normales y array inline en las notas del plugin dotpm. Cubrí ambos:
+   `rg -l -e '^\s+- nixos-config\s*$' -e 'tags:.*"nixos-config"' ~/Sync/Notes --glob '*.md'`
 2. **Por tema**: `rg -l -i 'pipewire|audio' ~/Sync/Notes --glob '*.md'`
 3. **Por wikilink**: `rg -l '\[\[Nix\]\]' ~/Sync/Notes`
 4. **Por título de nota**: `fd -t f -i 'nix' ~/Sync/Notes`
