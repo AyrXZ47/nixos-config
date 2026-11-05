@@ -53,8 +53,10 @@ jobs:
         run: |
           cachix watch-exec ayrxz47-nixos-config -- nix build -L --no-link \
             .#packages.x86_64-linux.openrocket \
+            .#packages.x86_64-linux.pi \
             .#nixosConfigurations.pc.pkgs.hypr-kdeconnect-fix \
             .#nixosConfigurations.pc.pkgs.caelestia-shell \
+            .#nixosConfigurations.pc.pkgs.caelestia-cli \
             .#nixosConfigurations.pc.pkgs.bibata-material-deep-blue \
             .#nixosConfigurations.pc.pkgs.kicad-spice-library
 

@@ -14,6 +14,16 @@ let
     else null;
 in {
   nixpkgs.config.allowUnfree = true;
+  # El update completo (nixpkgs 2026-11-03) marca EOL a estos paquetes que el
+  # repo sigue usando a proposito: electron_42 por el override de Obsidian
+  # (electron 43 rompe el renderer, ver home/default.nix), pybars3 por una
+  # dependencia y gtk2 por gtkwave. Se permiten hasta migrar; sin esto el
+  # sistema ni siquiera evalua.
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-42.11.18"
+    "python3.14-pybars3-0.9.7"
+  ];
+  nixpkgs.config.problems.handlers = { "gtk+".broken = "warn"; };
 
   users.users.yovick = {
     isNormalUser = true;
