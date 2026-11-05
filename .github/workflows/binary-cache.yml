@@ -57,6 +57,7 @@ jobs:
             .#nixosConfigurations.pc.pkgs.hypr-kdeconnect-fix \
             .#nixosConfigurations.pc.pkgs.caelestia-shell \
             .#nixosConfigurations.pc.pkgs.caelestia-cli \
+            .#nixosConfigurations.pc.pkgs.opencode \
             .#nixosConfigurations.pc.pkgs.bibata-material-deep-blue \
             .#nixosConfigurations.pc.pkgs.kicad-spice-library
 

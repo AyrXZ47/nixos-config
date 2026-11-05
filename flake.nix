@@ -829,11 +829,22 @@ PYEOF
         });
       };
 
+      # opencode 2.2.5 en nixpkgs 2026-11-03: el outputHash de node_modules
+      # quedo viejo (bun resuelve distinto). El build real dio prx9...; se
+      # fija ese hash hasta que nixpkgs lo actualice.
+      opencodeNodeModulesOverlay = final: prev: {
+        opencode = prev.opencode.overrideAttrs (old: {
+          node_modules = old.node_modules.overrideAttrs (_: {
+            outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
+          });
+        });
+      };
+
       mkHost = hostName: hostModules: nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay opencodeNodeModulesOverlay ]; }
           # Kernel de CachyOS (pkgs.linuxPackages_cachyos): el overlay que lo
           # expone + el substituter nyx-cache.chaotic.cx, donde vive ya
           # compilado. Sin el segundo, los hosts compilan el kernel.
