@@ -495,6 +495,9 @@ in
     cmatrix
     nvtopPackages.amd
     amdgpu_top
+    # Ventoy: USB multiboot (se copian las ISOs, no se reescribe la memoria).
+    # Marcado insecure en nixpkgs por los blobs de upstream: ver user.nix.
+    ventoy
     popsicle
   # Dolphin standalone (sin Plasma) necesita el stack KIO completo para
   # desbloquear/montar discos (kded, kio-extras: prompts de passphrase, kioslaves).

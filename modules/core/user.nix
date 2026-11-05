@@ -22,6 +22,13 @@ in {
   nixpkgs.config.permittedInsecurePackages = [
     "electron-42.11.18"
     "python3.14-pybars3-0.9.7"
+    # ventoy: nixpkgs lo marca insecure porque el release trae binarios
+    # precompilados (busybox, shim, grub) que no se reconstruyen desde fuente ni
+    # se pueden auditar (NixOS/nixpkgs#404663). Se permite a proposito: es la
+    # unica herramienta que arma una USB multiboot copiando ISOs, sin reescribir
+    # la memoria en cada instalacion. Va con version fija: si `nix flake update`
+    # sube ventoy, hay que actualizar esta linea.
+    "ventoy-1.1.18"
   ];
   nixpkgs.config.problems.handlers = { "gtk+".broken = "warn"; };
 
