@@ -14,16 +14,6 @@ let
     else null;
 in {
   nixpkgs.config.allowUnfree = true;
-  # Obsidian se queda en electron_42 a proposito (electron 43 rompe el
-  # renderer, ver home/default.nix). nixpkgs lo marca EOL/inseguro; se
-  # permite mientras el override siga siendo necesario.
-  nixpkgs.config.permittedInsecurePackages = [
-    "electron-42.11.18"
-    "python3.14-pybars3-0.9.7"
-  ];
-  # gtk2 esta marcado broken/EOL en nixpkgs; alguna app (gtkwave) aun lo usa.
-  # Se permite con warning mientras se migra o se quita la app.
-  nixpkgs.config.problems.handlers = { "gtk+".broken = "warn"; };
 
   users.users.yovick = {
     isNormalUser = true;
