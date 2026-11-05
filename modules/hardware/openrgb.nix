@@ -10,6 +10,11 @@ in
   options.modules.hardware.openrgb.enable = lib.mkEnableOption "OpenRGB: control RGB con perfiles por evento";
 
   config = lib.mkIf cfg.enable {
+    # El servicio solo arranca el servidor; sin esto el binario no queda en
+    # PATH ni aparece el .desktop en el launcher. La laptop ya lo agregaba a
+    # mano; la PC se quedaba sin cliente/GUI.
+    environment.systemPackages = [ pkgs.openrgb ];
+
     # 60-openrgb.rules (las trae el paquete): permisos para tocar los dispositivos RGB.
     services.udev.packages = [ pkgs.openrgb ];
 
