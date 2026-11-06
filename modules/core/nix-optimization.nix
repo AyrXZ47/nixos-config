@@ -79,7 +79,13 @@ let
         repo=/home/yovick/workspaces/nixos-config
         host="''${HOSTNAME#nixos-}"   # nixos-pc -> pc, nixos-laptop -> laptop
         echo "== upgrade: $repo#$host =="
-        nixos-rebuild --impure switch --flake "$repo#$host"
+        # nyx-cache: el kernel de CachyOS ya compilado. El primer switch tras un
+        # cambio de kernel usa el nix.conf de la generacion VIEJA, que puede no
+        # conocer esa cache; sin estas flags nixos-rebuild compilaria el kernel.
+        # Idempotentes: cuando el nix.conf nuevo ya la tiene, no cambian nada.
+        nixos-rebuild --impure switch --flake "$repo#$host" \
+          --option extra-substituters https://nyx-cache.chaotic.cx/ \
+          --option extra-trusted-public-keys nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk=
         ;;
       # Ritual completo de Nix.md: actualizar y despues limpiar. Requiere que el
       # repo ya este actualizado (nix flake update + commit + push).
