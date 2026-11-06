@@ -83,6 +83,11 @@ jobs:
         run: |
           ddcci=$(nix eval --impure --raw --expr 'let f = builtins.getFlake (toString ./.); in (builtins.head f.nixosConfigurations.pc.config.boot.extraModulePackages).drvPath')
           ollama=$(nix eval --impure --raw --expr 'let f = builtins.getFlake (toString ./.); in f.nixosConfigurations.pc.config.services.ollama.package.drvPath')
+          # El --option explicito es obligatorio: cachix-action pisa el
+          # NIX_CONFIG y el kernel CachyOS terminaria compilando en el runner.
           for drv in "$ddcci" "$ollama"; do
-            cachix watch-exec ayrxz47-nixos-config -- nix-store --realise "$drv"
+            cachix watch-exec ayrxz47-nixos-config -- nix build --no-link -L \
+              --option extra-substituters https://nyx-cache.chaotic.cx/ \
+              --option extra-trusted-public-keys nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk= \
+              "$drv"
           done
