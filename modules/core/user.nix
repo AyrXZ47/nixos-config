@@ -42,6 +42,9 @@ in {
     # reconstruido acepta a la laptop sin editar ~/.ssh/authorized_keys a mano.
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGQCn6Vxhsc7fmojHce1DvqYiweZ9fs/kwWcq0c0yLlL yovick@nixos-laptop"
+      # Ya estaba en ~/.ssh/authorized_keys de la laptop sin comentario; se
+      # etiqueta como la del pc para que ambos lados queden declarados.
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIFfYnctaaFb4U6oKOBF/XwXA2pOclCV1H7PVq43j046 yovick@nixos-pc"
     ];
     # Solo se aplica si el usuario aun no existe (primer boot); cambiala despues con `passwd`
     initialPassword = lib.mkIf (initialPassword != null) initialPassword;
