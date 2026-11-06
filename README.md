@@ -172,13 +172,12 @@ flake.nix              # Entry point — hosts & shared modules
 - **Pi pelado**: se instala `pkgs.pi-coding-agent` y nada más. `pi.nix` borra
   paquetes, extensions, agentes, chains, MCPs y restos de gentle-ai en cada
   switch; solo conserva `auth.json`, sesiones y el modelo por defecto.
-- **Memoria**: Basic Memory con proyecto `memoria` apuntando a
-  `~/Sync/Notes/PC & AI/Memory`. Las notas Markdown viajan por Syncthing a la
-  laptop; el índice SQLite queda local en `~/.basic-memory`. Se instala y
-  configura solo en el rebuild, no usa Ollama ni API key. La carpeta es
-  dedicada para no indexar todo el vault ni agregar frontmatter a notas ajenas.
-  El activation resuelve `$HOME` en cada host porque Basic Memory no expande
-  `~` dentro de `config.json`; no se hardcodea `/home/yovick`.
+- **Memoria**: el vault `~/Sync/Notes` ES la memoria; no hay MCP ni índice que
+  mantener. El agente busca con `rg` (tags, temas, wikilinks) y lee solo lo que
+  matchea; la skill global `vault` tiene el mapa de carpetas y las recetas.
+  Basic Memory se retiró el 2026-11-04: rompía en cada release y nunca llegó a
+  guardar nada. Si aparece `basic-memory` en `opencode.json`, la activación lo
+  borra de `mcp.servers`.
 - **Tablero de trabajo (dotpm)**: el plugin `project-manager` de Obsidian
   guarda proyectos y tareas como Markdown en `~/Sync/Notes/Projects`. El CLI
   `@dotpm/cli` (wrapper `dotpm` en `opencode.nix`, última release vía `dlx`) habla con
