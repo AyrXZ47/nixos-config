@@ -115,6 +115,7 @@ Por eso:
 ## Gotchas
 
 - `yovick` is hardcoded in `flake.nix`, `home/default.nix`, and `modules/core/user.nix` — the latter holds `initialPassword` (applies only at first boot). Renaming the user touches all three.
+- Las claves SSH públicas de laptop y pc viven en `modules/core/user.nix` (`openssh.authorizedKeys.keys`). No editar `~/.ssh/authorized_keys` a mano: el rebuild escribe `/etc/ssh/authorized_keys.d/yovick` y sshd confía en ese archivo además del home. Si una máquina no puede entrar a la otra, se reconstruye y listo.
 - Fingerprint PAM trap: with `services.fprintd.enable`, `security.pam.services.<name>.fprintAuth` **defaults to true** for every PAM service. It's deliberately off for `login`/`sddm` (SDDM has no fingerprint UI and it blocked login waiting for a finger); fingerprint works only in `sudo` + `hyprlock`. See `modules/hardware/fingerprint.nix` + README.
 - Nothing secret is ever committed; `result*`, `.direnv`, `*.iso`, `*.qcow2`, `.aider*` are gitignored — never commit build results.
 - Comments and commit messages are written in Spanish, conventional-commit style (`feat(hyprland):`, `fix(deploy):`, `chore(host):`). Match that for commits.
