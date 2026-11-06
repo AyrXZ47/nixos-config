@@ -86,10 +86,9 @@ in
     fzf
     gh
     libnotify
-    # electron 43 (el que resuelve nixpkgs para obsidian) rompe el renderer de
-    # obsidian 1.14.5: la ventana queda gris. Volver a `obsidian` sin override
-    # cuando nixpkgs pinee de nuevo.
-    (obsidian.override { electron = electron_42; })
+    # Obsidian con el electron del canal (43.8.3): verificado 2026-11-05, la
+    # ventana renderiza bien. Sin override para no arrastrar electron_42 (EOL).
+    obsidian
     pi-coding-agent
     pipes-rs
     ripgrep
