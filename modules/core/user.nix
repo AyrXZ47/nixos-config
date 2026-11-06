@@ -37,6 +37,12 @@ in {
     extraGroups = [ "wheel" "networkmanager" "video" "audio" "i2c" "input" "wireshark" ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
+    # Clave de la laptop declarada en el repo: el pc tenia solo una clave
+    # vieja y `deploy pc` fallaba con Permission denied. Asi cualquier host
+    # reconstruido acepta a la laptop sin editar ~/.ssh/authorized_keys a mano.
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGQCn6Vxhsc7fmojHce1DvqYiweZ9fs/kwWcq0c0yLlL yovick@nixos-laptop"
+    ];
     # Solo se aplica si el usuario aun no existe (primer boot); cambiala despues con `passwd`
     initialPassword = lib.mkIf (initialPassword != null) initialPassword;
   };
