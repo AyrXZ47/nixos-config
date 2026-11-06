@@ -165,8 +165,14 @@ except (OSError, ValueError):
 cur.pop("default_agent", None)
 mcp = cur.get("mcp")
 if isinstance(mcp, dict):
+    # La config real vive en mcp.servers.<nombre>; el nivel mcp.* directo
+    # (formato viejo) se limpia igual por si quedo de una migracion.
     mcp.pop("serena", None)
     mcp.pop("basic-memory", None)
+    servers = mcp.get("servers")
+    if isinstance(servers, dict):
+        servers.pop("serena", None)
+        servers.pop("basic-memory", None)
 
 # Migracion: Hindsight y el subagente review viejo ya no existen. Se limpian
 # del archivo vivo aunque el merge no los vuelva a sembrar.
