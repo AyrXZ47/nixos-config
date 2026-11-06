@@ -75,16 +75,13 @@ jobs:
           drv=$(nix eval --impure --raw --expr 'let f = builtins.getFlake (toString ./.); ps = f.nixosConfigurations.pc.config.environment.systemPackages; in (builtins.head (builtins.filter (p: builtins.match "omnetpp.*" (p.name or "") != null) ps)).drvPath')
           cachix watch-exec ayrxz47-nixos-config -- nix-store --realise "$drv"
 
-      # Paquetes del pc que no estan en nixpkgs ni en Hydra: ddcci (modulo
-      # fuera del arbol, depende del kernel CachyOS) y ollama (binario oficial
-      # 0.32.12 con ROCm, que nixpkgs no trae). Sin esto el pc compila el
-      # modulo y baja los tarballs en cada rebuild.
-      - name: Construir y subir ddcci y ollama del pc
+      # ddcci es el unico paquete del pc que no esta en nixpkgs ni en Hydra:
+      # es un modulo fuera del arbol que depende del kernel CachyOS. Sin esto
+      # el pc lo compila (y arrastra kmodigest) en cada rebuild.
+      - name: Construir y subir ddcci del pc
         run: |
           # El --option explicito es obligatorio: cachix-action pisa el
           # NIX_CONFIG y el kernel CachyOS terminaria compilando en el runner.
           nyx='--option extra-substituters https://nyx-cache.chaotic.cx/ --option extra-trusted-public-keys nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk='
           cachix watch-exec ayrxz47-nixos-config -- nix build --no-link -L --impure $nyx \
             --expr 'let f = builtins.getFlake (toString ./.); in (builtins.head f.nixosConfigurations.pc.config.boot.extraModulePackages)'
-          cachix watch-exec ayrxz47-nixos-config -- nix build --no-link -L --impure $nyx \
-            --expr 'let f = builtins.getFlake (toString ./.); in f.nixosConfigurations.pc.config.services.ollama.package'

@@ -3,8 +3,12 @@
 {
   imports = [
     ./amd-common.nix
-    ../../modules/apps/ollama-bin.nix
   ];
+
+  # Ollama con ROCm para la RX 7600: paquete de nixpkgs (0.40.13), cacheado en
+  # Hydra. Antes venia de modules/apps/ollama-bin.nix (binario oficial 0.32.12)
+  # porque el canal iba en 0.32.7; ya no hace falta ese workaround.
+  services.ollama.package = pkgs.ollama-rocm;
 
   # RX 7600: el driver (amdgpu + modesetting) lo declara amd-common.nix.
 
