@@ -48,7 +48,7 @@ let
         fwupd)
           echo 'sudo -n /run/current-system/sw/bin/mantenimiento fwupd' ;;
         full)
-          echo 'set -e; cd "$HOME/workspaces/nixos-config"; git pull --ff-only; sudo -n /run/current-system/sw/bin/mantenimiento upgrade; sudo -n /run/current-system/sw/bin/mantenimiento all; sudo -n /run/current-system/sw/bin/mantenimiento fwupd || true; find /tmp -maxdepth 1 -user "$USER" -mtime +1 -exec rm -rf {} + 2>/dev/null || true' ;;
+          echo 'set -e; cd "$HOME/workspaces/nixos-config"; git pull --ff-only; sudo -n /run/current-system/sw/bin/mantenimiento upgrade; sudo -n /run/current-system/sw/bin/mantenimiento all; sudo -n /run/current-system/sw/bin/mantenimiento fwupd || true; find /tmp -maxdepth 1 -user "$(id -un)" -mtime +1 -exec rm -rf {} + 2>/dev/null || true' ;;
       esac
     }
 
@@ -69,7 +69,7 @@ let
           sudo -n /run/current-system/sw/bin/mantenimiento upgrade
           sudo -n /run/current-system/sw/bin/mantenimiento all
           sudo -n /run/current-system/sw/bin/mantenimiento fwupd || true
-          find /tmp -maxdepth 1 -user "$USER" -mtime +1 -exec rm -rf {} + 2>/dev/null || true ;;
+          find /tmp -maxdepth 1 -user "$(id -un)" -mtime +1 -exec rm -rf {} + 2>/dev/null || true ;;
       esac
     }
 
