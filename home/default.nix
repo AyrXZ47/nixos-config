@@ -21,6 +21,7 @@ in
     ../modules/apps/gtkwave.nix
     ../modules/apps/miracast.nix
     ../modules/apps/deploy.nix
+    ../modules/apps/fleet.nix
     ../modules/apps/mixxx-mpris.nix
   ];
 
