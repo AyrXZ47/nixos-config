@@ -119,11 +119,18 @@
     enable = true;
     nssmdns4 = true;
     # API nueva de nixpkgs: `publish.*` quedó obsoleto y emite un warning en
-    # cada rebuild. Equivalencia exacta: disable-publishing = !enable,
-    # publish-addresses = addresses.
+    # cada rebuild. Equivalencias: disable-publishing = !enable,
+    # publish-addresses = addresses, disable-user-service-publishing = !userServices.
+    # El tercero es el que importa para KDE Connect: en `settings.*` su default
+    # es `true` (en la API vieja `publish.userServices` era `true`), así que al
+    # migrar sin ponerlo el daemon arranca con "disable-user-service-publishing=yes"
+    # y kdeconnectd no puede registrar su _kdeconnect._udp ("Avahi: NotPermitted").
+    # Resultado: el celular ve la laptop como desconectada en la LAN, aunque el
+    # par esté hecho y los puertos 1716 abiertos.
     settings.publish = {
       "disable-publishing" = false;
       "publish-addresses" = true;
+      "disable-user-service-publishing" = false;
     };
   };
 
