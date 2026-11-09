@@ -132,6 +132,16 @@
       "publish-addresses" = true;
       "disable-user-service-publishing" = false;
     };
+    # Avahi publica el A record del hostname con TODAS las direcciones de las
+    # interfaces que sirve. Con docker0 (172.17.0.1) y virbr0 (192.168.122.1)
+    # arriba, `avahi-resolve -n nixos-laptop.local` devolvía 192.168.122.1;
+    # Android resuelve el _kdeconnect._udp a esa IP, intenta conectar y falla
+    # (la tablet nunca veía la laptop, y el celular solo funcionaba con la IP
+    # de Tailscale puesta a mano). Se excluyen las bridges virtuales y loopback:
+    # queda solo la dirección real de la LAN.
+    settings.server = {
+      "deny-interfaces" = [ "docker0" "virbr0" "lo" ];
+    };
   };
 
   # El bucle de muerte del pid file stale — por esto avahi "se rompía y rompía"
