@@ -202,8 +202,8 @@
     options = [ "nofail" ];
   };
 
-  # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
-  programs.kdeconnect.enable = true;
+  # kdeconnect: los puertos 1714-1764 viven en modules/core/networking.nix
+  # (compartido por los 4 hosts).
 
   # Identidad de git: modules/core/common-host.nix (misma en los 4 hosts).
 

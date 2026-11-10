@@ -26,6 +26,43 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
+  # KDE Connect: los puertos 1714-1764 TCP/UDP tienen que estar abiertos en
+  # TODOS los hosts. Antes vivía en hosts/pc y hosts/laptop, pero la app y el
+  # daemon (kdeconnect-kde) se instalan desde modules/apps/common-packages.nix
+  # en los 4 hosts: server/vm tenían KDE Connect con el firewall cerrado.
+  programs.kdeconnect.enable = true;
+
+  # Wi-Fi (MT7921 del laptop): con powersave el firmware duerme la radio entre
+  # paquetes y mete latencia y desconexiones (se medían hasta 200 ms a la
+  # tablet en la misma LAN). Se desactiva; el costo es batería en el laptop.
+  # NM: 2 = disable, 3 = enable (NMSettingWirelessPowersave); el booleano
+  # `false` de nixpkgs mapea a 2.
+  networking.networkmanager.wifi.powersave = false;
+
+  # ── TCP: BBR + fq ──────────────────────────────────────────────────────────
+  # cubic (default) baja el throughput ante cualquier pérdida; BBR modela el
+  # ancho de banda y la latencia, así que en PPPoE (Telmex) y en redes con
+  # pérdida (Wi-Fi de hotel/UAZ) mantiene la velocidad. `fq` es el qdisc para
+  # el que BBR fue diseñado. En este kernel ambos son módulos (=m).
+  boot.kernelModules = [ "tcp_bbr" "sch_fq" ];
+  boot.kernel.sysctl = {
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
+    # Cliente y servidor: ahorra un RTT en la mayoría de conexiones.
+    "net.ipv4.tcp_fastopen" = 3;
+    # PMTUD: si un salto intermedio se come los ICMP "frag needed", el kernel
+    # prueba MTUs menores en vez de dejar la conexión trabada.
+    "net.ipv4.tcp_mtu_probing" = 1;
+    # No reiniciar la ventana de congestión tras un idle corto: con BBR no
+    # hace falta y evita el "primer segundo lento" en descargas.
+    "net.ipv4.tcp_slow_start_after_idle" = 0;
+    # Buffers grandes para BBR en enlaces de 100+ Mbps con RTT alto.
+    "net.core.rmem_max" = 16777216;
+    "net.core.wmem_max" = 16777216;
+    "net.ipv4.tcp_rmem" = "4096 87380 16777216";
+    "net.ipv4.tcp_wmem" = "4096 65536 16777216";
+  };
+
   # ── Miracast / Wi-Fi Display ───────────────────────────────────────────────
   # GNOME Network Displays monta una red P2P y necesita estos puertos abiertos
   # para que la TV reciba su IP (67/udp, dnsmasq), el NTP del handshake
@@ -58,19 +95,34 @@
   # da 1460 — que sigue excediendo los 1492 reales. Los SYNs salientes a
   # internet anuncian 1452, los datos del servidor llegan de 1492 exactos y
   # caben, sin depender del PMTUD (bug clásico del RTL8168 que no lo absorbe).
-  # El tráfico LAN local se excluye: las máquinas de casa sí usan 1500 completo.
+  # El tráfico LAN local se excluye (RFC1918 + link-local, IPv4 e IPv6): las
+  # máquinas de la red usan 1500 completo, sea 192.168.x, 10.x o 172.16.x.
   # ponytail: si algún día el ISP migra a fibra simétrica sin PPPoE (MTU 1500),
   # subir el --set-mss a 1460 o borrar el bloque — el techo es el camino, no
   # esta regla.
   networking.firewall.extraCommands = ''
-    iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN ! -d 192.168.1.0/24 -j TCPMSS --set-mss 1452
+    # Antes solo se excluía 192.168.1.0/24, así que en una red 10.x (UAZ) o
+    # 172.16.x el tráfico LAN también se clampeaba. RETURN antes del clamp.
+    iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 192.168.0.0/16 -j RETURN
+    iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 10.0.0.0/8 -j RETURN
+    iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 172.16.0.0/12 -j RETURN
+    iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 169.254.0.0/16 -j RETURN
+    iptables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452
+    ip6tables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d fc00::/7 -j RETURN
+    ip6tables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d fe80::/10 -j RETURN
     ip6tables -t mangle -A POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452
   '';
   networking.firewall.extraStopCommands = ''
     # || true: el reload del firewall corre los -D aunque la regla no exista
     # aun (primer reload tras el switch) y un iptables -D con regla ausente
     # aborta TODO el reload con "Bad rule".
-    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN ! -d 192.168.1.0/24 -j TCPMSS --set-mss 1452 || true
+    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 192.168.0.0/16 -j RETURN || true
+    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 10.0.0.0/8 -j RETURN || true
+    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 172.16.0.0/12 -j RETURN || true
+    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d 169.254.0.0/16 -j RETURN || true
+    iptables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452 || true
+    ip6tables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d fc00::/7 -j RETURN || true
+    ip6tables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -d fe80::/10 -j RETURN || true
     ip6tables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452 || true
   '';
 
@@ -98,7 +150,10 @@
       # opportunistic se cifra cuando se puede y se degrada cuando no: la
       # privacidad sigue, la conectividad también.
       DNSOverTLS = "opportunistic";
-      DNSSEC = "true";
+      # allow-downgrade, NO "true": en una red cuyo DNS no valida DNSSEC
+      # (hotel, UAZ), "true" deja la resolución muerta. Con allow-downgrade se
+      # valida cuando el resolvedor lo soporta y se sigue cuando no.
+      DNSSEC = "allow-downgrade";
       Domains = "~.";
       FallbackDNS = "200.33.146.1 200.33.148.1"; # Telmex (solo si DoT muere)
       # mDNS lo hace avahi, NO resolved. Con los dos respondiendo habia DOS

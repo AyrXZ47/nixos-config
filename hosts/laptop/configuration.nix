@@ -57,9 +57,8 @@
 
   networking.hostName = "nixos-laptop";
 
-  # kdeconnect: abre puertos 1714-1764 TCP/UDP que el firewall bloqueaba
-  # (sin esto el daemon corre pero no descubre/conecta dispositivos).
-  programs.kdeconnect.enable = true;
+  # kdeconnect: los puertos 1714-1764 viven en modules/core/networking.nix
+  # (compartido por los 4 hosts).
 
   # Miracast (gnome-network-displays -> Smart View de TVs Samsung): el paquete
   # y el dnsmasq del DHCP-P2P viven en modules/apps/miracast.nix (home, los 4
