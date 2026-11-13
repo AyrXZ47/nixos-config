@@ -32,6 +32,7 @@ let
     import sqlite3
     import subprocess
     import threading
+    import time
     import urllib.parse
     import urllib.request
 
@@ -120,7 +121,6 @@ let
         Rate = 1.0
         Shuffle = False
         Volume = 1.0
-        Position = 0
         MinimumRate = 1.0
         MaximumRate = 1.0
         CanGoNext = False
@@ -138,10 +138,26 @@ let
             self._length = UNKNOWN_LENGTH_US
             self._art = FALLBACK_ART_URL
             self._raw = None
+            self._position_us = 0
+            self._position_started = None
 
         @property
         def PlaybackStatus(self):
             return self._status
+
+        @property
+        def Position(self):
+            # Mixxx no tiene API remota, así que la posición se estima con un
+            # reloj monótono desde que el nodo pasó a Playing. Sin esto Position
+            # queda en 0 y Caelestia no puede avanzar la letra sincronizada.
+            # ponytail: techo conocido = no ve seeks ni cambios de tempo; en
+            # pausa se congela y al reanudar sigue desde donde iba.
+            pos = self._position_us
+            if self._status == "Playing" and self._position_started is not None:
+                pos += int((time.monotonic() - self._position_started) * 1_000_000)
+            if 0 < self._length < UNKNOWN_LENGTH_US:
+                pos = min(pos, self._length)
+            return max(0, int(pos))
 
         @property
         def Metadata(self):
@@ -189,18 +205,34 @@ let
             pass
 
         def set_status(self, status):
-            if status != self._status:
-                self._status = status
-                self.PropertiesChanged(
-                    "org.mpris.MediaPlayer2.Player",
-                    {"PlaybackStatus": status},
-                    [],
+            if status == self._status:
+                return
+            # Congela el reloj al pausar y lo reanuda al volver a Playing.
+            if self._status == "Playing" and self._position_started is not None:
+                self._position_us += int(
+                    (time.monotonic() - self._position_started) * 1_000_000
                 )
+            self._position_started = (
+                time.monotonic() if status == "Playing" else None
+            )
+            self._status = status
+            self.PropertiesChanged(
+                "org.mpris.MediaPlayer2.Player",
+                {"PlaybackStatus": status},
+                [],
+            )
 
         def set_metadata(
             self, title, artist, album="", length=UNKNOWN_LENGTH_US,
             art=FALLBACK_ART_URL,
         ):
+            if (title, artist) != (self._title, self._artist):
+                # Pista nueva: la posición vuelve a cero y el reloj arranca
+                # ahora (el poll puede llegar hasta 1 s tarde).
+                self._position_us = 0
+                self._position_started = (
+                    time.monotonic() if self._status == "Playing" else None
+                )
             if (title, artist, album, length, art) != (
                 self._title,
                 self._artist,
@@ -275,7 +307,15 @@ let
             if obj.get("type") != "PipeWire:Interface:Node":
                 continue
             props = (obj.get("info") or {}).get("props") or {}
-            if "Output/Audio" not in str(props.get("media.class", "")):
+            media_class = str(props.get("media.class", ""))
+            # JACK (pipewire-jack) expone a Mixxx como nodo DSP "Duplex", sin
+            # media.class de stream. Sin este caso el panel lo ve Stopped.
+            is_output = "Output/Audio" in media_class
+            is_jack = (
+                props.get("media.category") == "Duplex"
+                and props.get("node.name") == "Mixxx"
+            )
+            if not (is_output or is_jack):
                 continue
             names = (
                 props.get("application.name"),
