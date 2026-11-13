@@ -16,6 +16,48 @@ let
     exec ${pkgs.pnpm}/bin/pnpm --reporter=append-only dlx "@dotpm/cli" "$@"
   '';
 
+  # OpenCode Browse: MCP server + extensión de Chromium. Upstream publica un
+  # standalone de Bun por plataforma en npm; se parchea el intérprete para
+  # NixOS y se apaga el auto-update (el store es de solo lectura). La extensión
+  # se instala por política de Brave en common-packages.nix; el pairing sigue
+  # siendo manual (`browse pair`) porque es un consentimiento del navegador.
+  browseUnwrapped = pkgs.stdenvNoCC.mkDerivation rec {
+    pname = "opencode-browse";
+    version = "0.0.16";
+
+    src = pkgs.fetchurl {
+      url = "https://registry.npmjs.org/@opencode/browse-linux-x64/-/browse-linux-x64-${version}.tgz";
+      hash = "sha256-SloA6xXp2LEmvtUPBJnKtR6cUBvJZThms9AC01IxBRw=";
+    };
+
+    sourceRoot = "package";
+    nativeBuildInputs = [ pkgs.patchelf ];
+
+    dontStrip = true;
+    dontPatchELF = true;
+
+    installPhase = ''
+      runHook preInstall
+      install -Dm755 bin/browse $out/bin/browse
+      patchelf --set-interpreter ${pkgs.glibc}/lib/ld-linux-x86-64.so.2 $out/bin/browse
+      runHook postInstall
+    '';
+
+    meta = with pkgs.lib; {
+      description = "MCP server and CLI for OpenCode Browse";
+      homepage = "https://opencode.ai/product/browse";
+      license = licenses.mit;
+      platforms = [ "x86_64-linux" ];
+      sourceProvenance = [ sourceTypes.binaryNativeCode ];
+    };
+  };
+
+  browse = pkgs.writeShellScriptBin "browse" ''
+    export OPENCODE_BROWSER_AUTO_UPDATE=off
+    export OPENCODE_BROWSER_UPDATE_CHECK=0
+    exec ${browseUnwrapped}/bin/browse "$@"
+  '';
+
   opencodeSeed = pkgs.writeText "opencode.json" (builtins.toJSON {
     "$schema" = "https://opencode.ai/config.json";
     model = {
@@ -40,6 +82,16 @@ let
         duckduckgo = {
           type = "local";
           command = [ "${pkgs.uv}/bin/uvx" "duckduckgo-mcp-server" ];
+          timeout = {
+            startup = 120000;
+          };
+        };
+        # Navegador real (Brave) con las sesiones del usuario. La extensión
+        # se instala por política en common-packages.nix; el pairing es
+        # manual la primera vez (`browse pair`).
+        browse = {
+          type = "local";
+          command = [ "${browse}/bin/browse" "mcp" ];
           timeout = {
             startup = 120000;
           };
@@ -121,7 +173,7 @@ in
 {
   imports = [ ./opencode-skills.nix ];
 
-  home.packages = [ pkgs.opencode pkgs.uv dotpm ];
+  home.packages = [ pkgs.opencode pkgs.uv dotpm browse ];
 
   # Chime de fin de sesion. El archivo queda en una ruta estable para que la
   # config de OpenCode no dependa de un store path.

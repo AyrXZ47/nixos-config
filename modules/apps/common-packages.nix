@@ -338,6 +338,20 @@ in
     '';
   };
 
+  # OpenCode Browse: instala la extensión de Chromium en Brave sin click
+  # manual. `normal_installed` la instala sola pero deja desactivarla; el
+  # pairing (`browse pair`) sigue siendo un consentimiento del navegador.
+  # El CLI/MCP vive en modules/apps/opencode.nix.
+  environment.etc."brave/policies/managed/opencode-browse.json".text =
+    builtins.toJSON {
+      ExtensionSettings = {
+        "mfnicocicmmlkpjnaffgihfjhdgjkdjg" = {
+          installation_mode = "normal_installed";
+          update_url = "https://clients2.google.com/service/update2/crx";
+        };
+      };
+    };
+
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser

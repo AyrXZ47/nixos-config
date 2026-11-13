@@ -169,6 +169,11 @@ flake.nix              # Entry point — hosts & shared modules
   código en GitHub) por HTTP, sin proceso local; `duckduckgo` local vía `uvx`
   para búsqueda web y fetch sin API key ni costo. `websearch` nativo queda
   apagado para no pedir un proveedor pago.
+- **Browse (navegador real)**: `browse` es un MCP local que maneja Brave con
+  las sesiones del usuario. La extensión se instala por política de Brave en
+  `common-packages.nix`; el pairing es una vez por host con `browse pair`.
+  DDG sigue siendo el camino barato para buscar; Browse queda para sitios con
+  login, JS pesado o interacción real.
 - **Pi pelado**: se instala `pkgs.pi-coding-agent` y nada más. `pi.nix` borra
   paquetes, extensions, agentes, chains, MCPs y restos de gentle-ai en cada
   switch; solo conserva `auth.json`, sesiones y el modelo por defecto.
