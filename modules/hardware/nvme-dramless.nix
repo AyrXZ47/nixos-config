@@ -18,7 +18,15 @@
   #   PS4 = 54000 + 45000 us = 99 ms -> entra (100000 us)
   # Si vuelven los cuelgues bajo escritura sostenida: bajar a 25000 (solo PS3,
   # sin PS4, ~45 ms menos de latencia) o volver a 0 (APST apagado).
-  boot.kernelParams = [ "nvme_core.default_ps_max_latency_us=100000" ];
+  #
+  # VOLVIERON (2026-11-15 14:44-14:48): 143 s sin que el sistema loguee nada,
+  # journald soltando 9 mensajes encolados de golpe con `lastseen` avanzando 3
+  # minutos, load 15-22 con solo 3 tareas runnable e io.pressure full ~53%
+  # (kernel, no journald). Sin OOM, sin errores de nvme/btrfs, sin suspend. Es
+  # el mismo sintoma del 2026-08 y el disparador fue escritura sostenida
+  # (`nix flake check` + `nix build` sobre el store). Se aplica el primer paso
+  # documentado: PS4 fuera (99 ms -> 15 ms), PS3 se conserva por bateria.
+  boot.kernelParams = [ "nvme_core.default_ps_max_latency_us=25000" ];
 
   # Writeback pronto y en tandas pequeñas: el kernel vacía la page cache de forma
   # continua en vez de acumular ~12G sucios (dirty_ratio 20) y volcarlos de golpe,
