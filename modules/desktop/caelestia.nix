@@ -29,6 +29,13 @@ let
     cliphist
   ];
 
+  # Drag "imposible" (> ancho de cualquier monitor): los paneles que lo usan
+  # solo se abren por su atajo. Interactions.qml (upstream 2.5.0) solo compara
+  # el delta del puntero contra dragThreshold para revelar por arrastre, asi
+  # que con este valor ese camino nunca dispara.
+  # ponytail: se apaga por config en vez de parchear Interactions.qml.
+  noDrag = 100000;
+
   # --- shell.json ---------------------------------------------------------
   # Generado como VALUE nativo de Nix y serializado con builtins.toJSON: así el
   # JSON siempre es válido y se puede editar sin miedo a comas colgantes
@@ -315,7 +322,10 @@ let
 
     dashboard = {
       enabled = true;
-      showOnHover = true;
+      # Solo SUPER+CTRL+D: el borde superior del monitor es zona del navegador
+      # (pestañas) y de las barras de titulo, y el dashboard salia al pasar el
+      # mouse por ahi (banda de 10 px + drag desde arriba).
+      showOnHover = false;
       showDashboard = true;
       showMedia = true;
       showPerformance = true;
@@ -324,7 +334,7 @@ let
       showWeather = false;
       mediaUpdateInterval = 500;
       resourceUpdateInterval = 1000;
-      dragThreshold = 50;
+      dragThreshold = noDrag;
       performance = {
         showBattery = true;
         showGpu = true;
@@ -575,9 +585,13 @@ let
 
     sidebar = {
       enabled = true;
+      # Solo SUPER+CTRL+N: con showOnHover en false el hover ya no la abre,
+      # pero seguia abriendose al arrastrar desde el borde derecho (zona donde
+      # las apps redimensionan ventanas). minHoverThreshold queda igual por si
+      # algun dia se vuelve a habilitar el hover.
       showOnHover = false;
       minHoverThreshold = 200;
-      dragThreshold = 80;
+      dragThreshold = noDrag;
     };
 
     utilities = {
