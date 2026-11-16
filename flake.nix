@@ -489,6 +489,17 @@ PYEOF
             'return Colours.palette.m3surface;' \
             'return Colours.tPalette.m3surfaceContainer;'
 
+            # Utilidades (SUPER+CTRL+U): el panel de la esquina inferior
+            # derecha NO tiene flag `showOnHover` (caelestia-config solo expone
+            # enabled/maxToasts/cards/toasts), asi que salia solo con pasar el
+            # mouse por la esquina. Se corta el revelado por hover aca; el atajo
+            # sigue funcionando porque al abrirlo `utilitiesShortcutActive`
+            # queda en true y el panel se mantiene hasta cerrarlo o tocar fuera.
+            substituteInPlace modules/drawers/Interactions.qml \
+              --replace-fail \
+            'const showUtilities = inBottomPanel(panels.utilities, x, y, true);' \
+            'const showUtilities = false; // ponytail: utilidades solo por atajo'
+
             # Iconos reales de apps: reemplazar el MaterialIcon de categoria por
             # el Image del icono declarado en el .desktop de la ventana.
             # (indentacion via $ind: el multilinea literal se dedenta en Nix y no
