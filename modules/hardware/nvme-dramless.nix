@@ -29,10 +29,16 @@
   boot.kernelParams = [ "nvme_core.default_ps_max_latency_us=25000" ];
 
   # Writeback pronto y en tandas pequeñas: el kernel vacía la page cache de forma
-  # continua en vez de acumular ~12G sucios (dirty_ratio 20) y volcarlos de golpe,
-  # lo que satura el controlador del NVMe sin DRAM durante copias/extracciones
-  # grandes. 5/10 mantiene las escrituras en ráfagas cortas y controlables.
+  # continua en vez de acumular sucio y volcarlo de golpe, lo que satura el
+  # controlador del NVMe sin DRAM durante copias/extracciones grandes.
+  # 2026-11-15: en BYTES absolutos. Con las proporciones viejas (5/10 sobre
+  # 14 GiB) cada rafaga podia ser 700 MB / 1.4 GB, y volcar eso congela la
+  # sesion 30-90 s (medido: io.pressure full ~50%, sin OOM ni errores de
+  # nvme/btrfs). 64/256 MB acota cada tanda a lo que este controlador aguanta;
+  # el ratio queda de fallback por si alguien vuelve a 0 los bytes.
   boot.kernel.sysctl = {
+    "vm.dirty_background_bytes" = 67108864;
+    "vm.dirty_bytes" = 268435456;
     "vm.dirty_background_ratio" = 5;
     "vm.dirty_ratio" = 10;
   };
