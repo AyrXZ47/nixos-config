@@ -502,6 +502,12 @@ in
     mongosh
     qalculate-gtk
     usbutils
+    # dmidecode/nvme-cli: auditoria de hardware (slots de RAM, SMART y
+    # firmware del NVMe sin depender de `nvme` a mano). Ver la tarea del
+    # S20G en dotpm: `sudo mantenimiento smart-log` usa smartctl, esto suma
+    # `dmidecode -t 17` y `nvme smart-log`.
+    dmidecode
+    nvme-cli
     scrcpy
     syncthing
     smartmontools
