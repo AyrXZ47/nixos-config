@@ -86,6 +86,10 @@ in
     fd
     fzf
     gh
+    # `gio` (glib) es el comando que usa Electron para mandar a la papelera en
+    # Linux fuera de KDE/GNOME. Sin él, Obsidian falla con "Failed to move to
+    # the system trash". gvfs no hace falta para el trash local de /home.
+    glib
     libnotify
     # Obsidian con el electron del canal (43.8.3): verificado 2026-11-05, la
     # ventana renderiza bien. Sin override para no arrastrar electron_42 (EOL).
