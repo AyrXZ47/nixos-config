@@ -120,6 +120,15 @@ flake.nix              # Entry point — hosts & shared modules
   Por eso `modules/desktop/hyprland.nix` habilita `programs.dconf` y siembra
   `color-scheme = prefer-dark` en dconf: sin eso la app sale en blanco aunque
   el resto del escritorio esté en oscuro.
+- **Laptop como monitor del `pc`** — sin monitor físico,
+  `headless-fallback.sh` crea una salida `HEADLESS` si Hyprland arranca con cero
+  salidas, y `services.sunshine` (en `hosts/pc/configuration.nix`) la captura
+  por wlr-screencopy y la codifica con VAAPI (RX 7600); Moonlight en la laptop
+  la decodifica. El pc necesita `autoLogin` + `defaultSession = "hyprland"`
+  (sin pantalla no hay forma de pasar el login de SDDM). Se empareja una vez con
+  usuario/PIN en `https://<pc>:47990` y la config queda en `~/.config/sunshine`:
+  no definir `services.sunshine.settings` o esa web queda de solo lectura.
+  Teclado y ratón de la laptop entran por uinput.
 
 ### Shell & Terminal
 - **Zsh** + Oh My Zsh (`git`, `sudo`) + **powerlevel10k** (instant prompt) +

@@ -43,6 +43,31 @@
   # common-packages.nix; esto habilita el daemon que el cliente necesita).
   modules.desktop.virtualisation.enable = true;
 
+  # ── Laptop como monitor (el panel del G2412 murio) ────────────────────────
+  # Sunshine captura la salida HEADLESS que crea hyprland-home.nix cuando no
+  # hay ningun monitor conectado (wlr-screencopy, sin CAP_SYS_ADMIN) y la
+  # codifica por VAAPI en la RX 7600; Moonlight en la laptop la decodifica.
+  # El modulo abre 47984-48010, habilita uinput (teclado/mouse de la laptop) y
+  # avahi (la laptop descubre el host solo). El usuario y el PIN de la app
+  # viven en ~/.config/sunshine: NO definir `settings` o el web UI queda de
+  # solo lectura y no se puede crear la cuenta.
+  services.sunshine = {
+    enable = true;
+    openFirewall = true;
+  };
+
+  # Sin monitor, SDDM se queda en el login a ciegas y sin sesion no hay
+  # Sunshine ni salida headless. Autologin SOLO en el pc: el root va por LUKS
+  # (el disco sigue pidiendo passphrase al arrancar) y la laptop sigue
+  # pidiendo password. Cuando vuelva a haber monitor fisico, borrar el bloque.
+  services.displayManager.autoLogin = {
+    enable = true;
+    user = "yovick";
+  };
+  # SDDM elige la ultima sesion usada; al no haber ninguna, sin esto puede
+  # caer en otra .desktop y el autologin no arrancaria Hyprland.
+  services.displayManager.defaultSession = "hyprland";
+
   modules.hardware.openrgb.enable = true;
   modules.hardware.mtp.enable = true;
   modules.hardware.fingerprint.enable = true;

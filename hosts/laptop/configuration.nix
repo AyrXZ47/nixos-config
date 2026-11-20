@@ -45,8 +45,13 @@
   # grupo plugdev y CLI rtl_*; pyrtlsdr va en el python global.
   modules.hardware.sdr.enable = true;
 
-  # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
-  environment.systemPackages = [ pkgs.openrgb ];
+  environment.systemPackages = [
+    # openrgb: por si esta laptop llega a tener luces que controlar (perfiles a mano).
+    pkgs.openrgb
+    # Cliente de la pc sin monitor: Sunshine corre alla (hosts/pc) y esta
+    # laptop decodifica por VAAPI. Solo el cliente; el host no va en la laptop.
+    pkgs.moonlight-qt
+  ];
 
   # fwupd: servicio para actualizar firmware. El `wantedBy = mkForce []` (no
   # arrancar en boot) vive en nix-optimization.nix.

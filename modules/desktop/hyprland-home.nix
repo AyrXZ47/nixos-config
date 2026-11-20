@@ -33,6 +33,10 @@ in
       ---- AUTOSTART ----
       ------------------
       hl.on("hyprland.start", function()
+        -- Sin salidas (pc sin monitor fisico) no hay sesion usable: espera 8s
+        -- y crea una HEADLESS. Va antes que workspace-bind porque ese script
+        -- necesita un monitor; si creo la salida, vuelve a llamarlo.
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/headless-fallback.sh")
         -- Escritorios numerados SOLO en el monitor principal; el secundario se
         -- queda con uno vacio esperando que le arrastren una ventana (estilo
         -- GNOME). Va antes que el shell para que los workspaces ya existan
@@ -541,9 +545,9 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # Sunshine (host de Moonlight): se probo y se descarto. Moonlight es una app
-  # aparte que hay que instalar en la TV, con cuenta y PIN: no es transparente
-  # como Cast/Miracast. Ver odd/tasks/miracast-pantallas-tema.md.
+  # Sunshine: descartado para la TV (Moonlight es una app aparte, con cuenta y
+  # PIN: no es transparente como Cast/Miracast). SI se usa en el pc para que la
+  # laptop haga de monitor, ver hosts/pc/configuration.nix.
 
 
   # cliphist: limite de historial en 20 items. Era 6, pero el humano perdía
@@ -644,6 +648,28 @@ in
         done
         "${config.xdg.configHome}/hypr/scripts/workspace-bind.sh" || true
         notify-send "Extended"
+      '';
+    };
+
+    # Sin monitor fisico (el panel del G2412 murio) Hyprland arranca con CERO
+    # salidas: no hay escritorio que ver ni que capturar y workspace-bind.sh no
+    # tiene a quien atar los escritorios. Se esperan 8s a que aparezca una
+    # salida real (un monitor tarda <1s en registrarse) y, si no aparecio
+    # ninguna, se crea una HEADLESS que Sunshine captura. Con monitor conectado
+    # no hace nada: pc y laptop se comportan igual que antes.
+    "hypr/scripts/headless-fallback.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        for _ in $(seq 1 16); do
+          [ "$(hyprctl monitors -j | jq length)" -eq 0 ] || exit 0
+          sleep 0.5
+        done
+        hyprctl output create headless >/dev/null
+        # workspace-bind.sh ya corrio al inicio con 0 monitores; se rehace ahora
+        # que hay una salida a la que atar los escritorios numerados.
+        "${config.xdg.configHome}/hypr/scripts/workspace-bind.sh" >/dev/null 2>&1 || true
       '';
     };
 
