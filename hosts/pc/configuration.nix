@@ -56,16 +56,13 @@
     openFirewall = true;
   };
 
-  # Sunshine es una app Qt y en la sesion hereda QT_QPA_PLATFORMTHEME=gtk3 +
-  # QT_STYLE_OVERRIDE=adwaita-dark (home.sessionVariables). Ese plugin GTK se
-  # queda esperando D-Bus (wchan unix_wait_for_peer) y Sunshine nunca llega a
-  # abrir 47984-47990: el servicio queda "active" y nadie puede parearlo.
-  # Vacio = Qt usa el tema por defecto, que no toca D-Bus. Verificado: con
-  # env limpio abre los puertos; con estas dos variables se cuelga.
-  systemd.user.services.sunshine.environment = {
-    QT_QPA_PLATFORMTHEME = "";
-    QT_STYLE_OVERRIDE = "";
-  };
+  # Sunshine hereda DISPLAY=:0 de la sesion (Hyprland exporta el display de
+  # XWayland) y su backend X11 llama XOpenDisplay(":0"): se queda bloqueado en
+  # unix_wait_for_peer ANTES de abrir 47984-47990, o sea servicio "active" sin
+  # puertos, imposible de parear. Vacio = no intenta X11 y usa Wayland.
+  # Verificado: con DISPLAY=:0 no abre puertos; con DISPLAY= abre 3.
+  # (El tema Qt, QT_QPA_PLATFORMTHEME=gtk3, NO es el problema: se probo solo.)
+  systemd.user.services.sunshine.environment.DISPLAY = "";
 
   # Sin monitor, SDDM se queda en el login a ciegas y sin sesion no hay
   # Sunshine ni salida headless. Autologin SOLO en el pc: el root va por LUKS
