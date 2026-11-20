@@ -33,7 +33,7 @@ in
       ---- AUTOSTART ----
       ------------------
       hl.on("hyprland.start", function()
-        -- Sin salidas (pc sin monitor fisico) no hay sesion usable: espera 8s
+        -- Sin salidas (pc sin monitor fisico) no hay sesion usable: espera 3s
         -- y crea una HEADLESS. Va antes que workspace-bind porque ese script
         -- necesita un monitor; si creo la salida, vuelve a llamarlo.
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/headless-fallback.sh")
@@ -653,7 +653,7 @@ in
 
     # Sin monitor fisico (el panel del G2412 murio) Hyprland arranca con CERO
     # salidas: no hay escritorio que ver ni que capturar y workspace-bind.sh no
-    # tiene a quien atar los escritorios. Se esperan 8s a que aparezca una
+    # tiene a quien atar los escritorios. Se esperan 3s a que aparezca una
     # salida real (un monitor tarda <1s en registrarse) y, si no aparecio
     # ninguna, se crea una HEADLESS que Sunshine captura. Con monitor conectado
     # no hace nada: pc y laptop se comportan igual que antes.
@@ -662,7 +662,7 @@ in
       text = ''
         #!/usr/bin/env bash
         set -euo pipefail
-        for _ in $(seq 1 16); do
+        for _ in $(seq 1 6); do
           [ "$(hyprctl monitors -j | jq length)" -eq 0 ] || exit 0
           sleep 0.5
         done
