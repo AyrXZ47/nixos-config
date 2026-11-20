@@ -352,6 +352,23 @@ in
       };
     };
 
+  # Defaults de Brave por política: se aplican a nivel máquina, así que valen
+  # para cualquier perfil y sobreviven a una instalación limpia. No cubre tema
+  # ni layout: eso vive en el perfil y no es policy-able.
+  environment.etc."brave/policies/managed/defaults.json".text =
+    builtins.toJSON {
+      BookmarkBarEnabled = false;
+      PasswordManagerEnabled = false;
+      AutofillAddressEnabled = false;
+      AutofillCreditCardEnabled = false;
+      MetricsReportingEnabled = false;
+      HardwareAccelerationModeEnabled = true;
+      DefaultSearchProviderEnabled = true;
+      DefaultSearchProviderName = "DuckDuckGo";
+      DefaultSearchProviderSearchURL = "https://duckduckgo.com/?q={searchTerms}";
+      DefaultSearchProviderSuggestURL = "https://duckduckgo.com/ac/?q={searchTerms}&type=list";
+    };
+
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
