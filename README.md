@@ -128,7 +128,11 @@ flake.nix              # Entry point — hosts & shared modules
   (sin pantalla no hay forma de pasar el login de SDDM). Se empareja una vez con
   usuario/PIN en `https://<pc>:47990` y la config queda en `~/.config/sunshine`:
   no definir `services.sunshine.settings` o esa web queda de solo lectura.
-  Teclado y ratón de la laptop entran por uinput.
+  Teclado y ratón de la laptop entran por uinput. Dos claves viven en ese
+  archivo y no en Nix porque la web las reescribe al crear la cuenta:
+  `capture = wlr` (en auto usa el portal y el diálogo "Select what to share"
+  bloquea sin nadie que haga clic) y `csrf_allowed_origins` con la URL exacta
+  con la que entrás (sin ella la web responde "CSRF Protection Error").
 
 ### Shell & Terminal
 - **Zsh** + Oh My Zsh (`git`, `sudo`) + **powerlevel10k** (instant prompt) +
