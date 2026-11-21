@@ -74,7 +74,7 @@ flake.nix              # Entry point — hosts & shared modules
 
 Los 8 videos siguen el mismo contrato para que mpvpaper gaste lo mínimo y nada se
 vea disparejo: **1920x1080, 24 fps, HEVC 8-bit `yuv420p` bt709, sin audio,
-CRF 20, 7.5-16 s por loop y ≤ 10 MB**. La resolución se iguala al panel de 1080p;
+CRF 20, 7.5-16 s por loop y ≤ 12 MB**. La resolución se iguala al panel de 1080p;
 bajar a 720p obligaría a la iGPU a escalar en cada frame (peor imagen y más
 costo).
 
