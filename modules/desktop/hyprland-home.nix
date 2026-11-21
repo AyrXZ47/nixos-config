@@ -224,6 +224,9 @@ in
       hl.window_rule({ name = "mpv-solid", match = { class = "mpv" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "celluloid-solid", match = { class = "io.github.celluloid_player.Celluloid" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "vlc-solid", match = { class = "vlc" }, no_blur = true, opacity = "1 override" })
+      -- Moonlight (stream de Sunshine): solido. Con active_opacity 0.8 el video
+      -- se mezclaba con el wallpaper y el escritorio remoto se veia opaco.
+      hl.window_rule({ name = "moonlight-solid", match = { class = "com\\.moonlight_stream\\.Moonlight" }, no_blur = true, opacity = "1 override" })
       -- kdeconnect presenter ("Presentation remote" del celular): overlay fullscreen
       -- transparente que dibuja el puntero. Tres trampas de Hyprland descubiertas:
       -- 1) clase real = org.kde.kdeconnect.daemon (applicationName de Qt; anclada ^$:
