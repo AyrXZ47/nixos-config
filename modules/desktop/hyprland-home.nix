@@ -670,6 +670,14 @@ in
           sleep 0.5
         done
         hyprctl output create headless >/dev/null
+        # Sleep 1: Hyprland tiene que terminar de registrar la salida antes de
+        # que Sunshine la enumere.
+        sleep 1
+        # Sunshine arranca en graphical-session.target, ANTES de que exista esta
+        # salida: se queda sin display ni encoder ("Fatal: Unable to find display
+        # or encoder", web UI en 503) y no se recupera solo. El restart lo hace
+        # enumerar la HEADLESS recien creada. Con monitor real no se llega aca.
+        systemctl --user restart sunshine >/dev/null 2>&1 || true
         # Los autostart corrieron con 0 salidas: workspace-bind.sh no ato nada y
         # caelestia-wallpaper.sh (mpvpaper ALL) murio al no encontrar monitor.
         # Se rehacen ahora que hay una salida.
