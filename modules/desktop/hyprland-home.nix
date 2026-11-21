@@ -673,6 +673,16 @@ in
         # Sleep 1: Hyprland tiene que terminar de registrar la salida antes de
         # que Sunshine la enumere.
         sleep 1
+        # Xwayland: en arranque headless Hyprland deja los sockets X0/X0_ y el
+        # lock creados pero nunca lanza Xwayland (lo programa al iniciar y en
+        # ese momento no hay salida). Resultado: cualquier cliente X11 queda
+        # colgado en connect() para siempre (Mixxx en
+        # initializeKeyboard -> XkbOpenDisplay). Con salida ya creada se
+        # arranca a mano; con monitor real no se llega aca y lo hace Hyprland.
+        if ! pgrep -x Xwayland >/dev/null; then
+          rm -f /tmp/.X0-lock /tmp/.X11-unix/X0 /tmp/.X11-unix/X0_
+          setsid Xwayland :0 -rootless >/dev/null 2>&1 &
+        fi
         # Sunshine arranca en graphical-session.target, ANTES de que exista esta
         # salida: se queda sin display ni encoder ("Fatal: Unable to find display
         # or encoder", web UI en 503) y no se recupera solo. El restart lo hace
