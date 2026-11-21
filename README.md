@@ -70,6 +70,25 @@ flake.nix              # Entry point — hosts & shared modules
   `wallpaper.postHook` (the shell computes the Material You scheme from the
   video's first frame; mpvpaper keeps painting the real background).
 
+#### Wallpapers animados (`assets/wallpapers`)
+
+Los 8 videos siguen el mismo contrato para que mpvpaper gaste lo mínimo y nada se
+vea disparejo: **1920x1080, 24 fps, HEVC 8-bit `yuv420p` bt709, sin audio,
+CRF 20, 7.5-16 s por loop y ≤ 10 MB**. La resolución se iguala al panel de 1080p;
+bajar a 720p obligaría a la iGPU a escalar en cada frame (peor imagen y más
+costo).
+
+Ninguno de los originales era 4K real, así que no se buscan fuentes: el pipeline
+es **IA x2 + downscale**. `scripts/wallpapers/normalize.sh <entrada> <salida>`
+elige la ventana con el corte más parecido, hace un crossfade de 0.5 s en el
+empalme, pasa los frames por Real-ESRGAN (`realesr-animevideov3`, 1080p→2160p) y
+vuelve a 1080p con Lanczos: el archivo queda barato de decodificar (1080p) con el
+detalle y la limpieza de un 4K. Correr en el PC (RX 7600, ~0.5 s/frame); en la
+Vega 7 de la laptop son ~20 s/frame. `realesrgan-x4plus` queda descartado: con
+`-s 2` este build arma un mosaico de tiles.
+
+Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
+
 ### Pantalla inalámbrica (Miracast) y disposición de monitores
 - **Miracast** (`modules/apps/miracast.nix`) — GNOME Network Displays, lo mismo
   que "Windows+K" en Windows: la app pide el screencast al portal y lo manda a
