@@ -667,9 +667,11 @@ in
           sleep 0.5
         done
         hyprctl output create headless >/dev/null
-        # workspace-bind.sh ya corrio al inicio con 0 monitores; se rehace ahora
-        # que hay una salida a la que atar los escritorios numerados.
+        # Los autostart corrieron con 0 salidas: workspace-bind.sh no ato nada y
+        # caelestia-wallpaper.sh (mpvpaper ALL) murio al no encontrar monitor.
+        # Se rehacen ahora que hay una salida.
         "${config.xdg.configHome}/hypr/scripts/workspace-bind.sh" >/dev/null 2>&1 || true
+        "${config.xdg.configHome}/hypr/scripts/caelestia-wallpaper.sh" >/dev/null 2>&1 || true
       '';
     };
 
