@@ -891,6 +891,10 @@ in
         # hwdec=vaapi: descodifica el video en la GPU (VCN/Radeon), no en la CPU.
         # Sin esto el fondo animado costaba ~274% de CPU en la laptop. -p pausa el
         # video cuando lo tapa una ventana (ahorra CPU/batería).
+        # deband: los walls son HEVC 8-bit; el gradiente de cielo/humo hacia bandas
+        # sin esto. Lanczos en scale/dscale/cscale: mpv estira con bilinear por
+        # defecto y en un monitor externo (1440p/4K) se nota. En el panel 1080p no
+        # hay escalado, así que no cuesta nada.
         # pause=yes + input-ipc-server: el wallpaper nace SIEMPRE congelado
         # (foto del primer frame) y el reproductor queda a la escucha del IPC;
         # mpvpaper-pause.sh lo reanuda si no estamos en bateria. Asi en bateria
@@ -901,6 +905,10 @@ in
 loop-file=inf
 hwdec=vaapi
 pause=yes
+deband=yes
+scale=lanczos
+dscale=lanczos
+cscale=lanczos
 input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         # Bateria = un supply de SISTEMA (scope=System, excluye ratones/teclados
         # inalambricos) descargandose. Un desktop sin bateria (o tras UPS) no la
