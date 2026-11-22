@@ -224,9 +224,13 @@ in
       hl.window_rule({ name = "mpv-solid", match = { class = "mpv" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "celluloid-solid", match = { class = "io.github.celluloid_player.Celluloid" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "vlc-solid", match = { class = "vlc" }, no_blur = true, opacity = "1 override" })
-      -- Moonlight (stream de Sunshine): solido. Con active_opacity 0.8 el video
-      -- se mezclaba con el wallpaper y el escritorio remoto se veia opaco.
-      hl.window_rule({ name = "moonlight-solid", match = { class = "com\\.moonlight_stream\\.Moonlight" }, no_blur = true, opacity = "1 override" })
+      -- Moonlight (stream de Sunshine): solido y SIEMPRE fullscreen. Con
+      -- active_opacity 0.8 el video se mezclaba con el wallpaper y el escritorio
+      -- remoto se veia opaco. El fullscreen va por regla del compositor y no por
+      -- Moonlight: el cliente abre la ventana del stream aparte, y mientras
+      -- transmite se queda con el teclado (F11 termina en el pc, no en el
+      -- cliente). Con la regla no hace falta ninguna tecla.
+      hl.window_rule({ name = "moonlight-solid", match = { class = "com\\.moonlight_stream\\.Moonlight" }, no_blur = true, opacity = "1 override", fullscreen = true })
       -- kdeconnect presenter ("Presentation remote" del celular): overlay fullscreen
       -- transparente que dibuja el puntero. Tres trampas de Hyprland descubiertas:
       -- 1) clase real = org.kde.kdeconnect.daemon (applicationName de Qt; anclada ^$:
