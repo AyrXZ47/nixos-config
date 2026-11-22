@@ -717,29 +717,37 @@ in
       text = ''
         #!/usr/bin/env bash
         # Si Hyprland deja de responder al IPC, la sesion esta colgada aunque el
-        # proceso siga vivo (visto 2026-11-21: un flood de "btnscroll" del mouse
-        # 2.4G dejo el loop de eventos girando para siempre; SSH y el kernel
-        # seguian perfectos). Se mata el compositor y SDDM autologuea de nuevo
-        # (autoLogin.relogin = true), asi la sesion vuelve sola.
+        # proceso siga vivo (visto 2026-11-22: la GPU no despertaba del suspend
+        # de runtime y el compositor quedaba esperando para siempre). Se mata el
+        # compositor y el lanzador de la sesion, y SDDM autologuea de nuevo
+        # (autoLogin.relogin = true).
         # Dos fallos seguidos de 3s, cada 10s: ~20-30s de margen para no matar
         # una sesion que solo esta ocupada.
         set -uo pipefail
         hyprctl=/run/current-system/sw/bin/hyprctl
+        runtime="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
         fails=0
         while sleep 10; do
-          # Sin proceso no hay nada que rescatar (logout normal): que muera el
-          # watchdog junto con la sesion.
-          pgrep -x Hyprland >/dev/null || exit 0
-          if timeout 3 "$hyprctl" monitors -j >/dev/null 2>&1; then
+          # La instancia se descubre por el directorio del socket: el proceso se
+          # llama ".Hyprland-wrapp" (no "Hyprland") y el servicio puede arrancar
+          # antes del import-environment de la sesion.
+          sig=$(ls -t "$runtime/hypr" 2>/dev/null | head -1)
+          [ -n "$sig" ] || exit 0
+          if HYPRLAND_INSTANCE_SIGNATURE="$sig" timeout 3 "$hyprctl" monitors -j >/dev/null 2>&1; then
             fails=0
             continue
           fi
           fails=$((fails + 1))
           [ "$fails" -ge 2 ] || continue
-          logger -t hypr-watchdog "hyprctl sin responder 2 veces: reinicio la sesion"
-          pkill -x Hyprland
-          sleep 5
-          pkill -9 -x Hyprland
+          logger -t hypr-watchdog "IPC de Hyprland sin responder 2 veces: reinicio la sesion"
+          # Con el compositor colgado no alcanza con el: sin cerrar el lanzador
+          # de la sesion, SDDM se queda esperando para siempre.
+          pkill -f "^Hyprland --watchdog" 2>/dev/null
+          sleep 2
+          pkill -f "bin/start-hyprland" 2>/dev/null
+          sleep 3
+          pkill -9 -f "^Hyprland --watchdog" 2>/dev/null
+          pkill -9 -f "bin/start-hyprland" 2>/dev/null
           exit 0
         done
       '';

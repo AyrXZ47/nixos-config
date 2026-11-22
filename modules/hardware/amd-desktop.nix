@@ -95,4 +95,34 @@
       [ "$ok" = 1 ]
     '';
   };
+
+  # ── Sin suspend de runtime en la GPU ─────────────────────────────────────
+  # 2026-11-22: con la salida HEADLESS (pc sin monitor) la GPU se queda ociosa
+  # entre frames, el PCI la manda a D3 y al despertar falla el autoload del
+  # firmware:
+  #   rlc autoload: gc ucode autoload timeout
+  #   resume of IP block <gfx_v11_0> failed -110
+  # Resultado: la imagen se congela y la sesion queda muerta esperando una GPU
+  # que nunca vuelve (el unico arreglo era reiniciar). Con power/control=on el
+  # runtime PM no la suspende nunca; el suspend del sistema (S3) no se toca.
+  systemd.services.amdgpu-nosuspend = {
+    description = "Desactiva el suspend de runtime de las GPUs AMD";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "display-manager.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      ok=0
+      for d in /sys/bus/pci/devices/*; do
+        [ -r "$d/power/control" ] || continue
+        [ "$(cat "$d/vendor" 2>/dev/null)" = "0x1002" ] || continue
+        case "$(cat "$d/class" 2>/dev/null)" in
+          0x03*) echo on > "$d/power/control" && ok=1 ;;
+        esac
+      done
+      [ "$ok" = 1 ]
+    '';
+  };
 }
