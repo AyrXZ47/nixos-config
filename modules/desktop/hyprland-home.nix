@@ -703,6 +703,14 @@ in
           rm -f /tmp/.X0-lock /tmp/.X11-unix/X0 /tmp/.X11-unix/X0_
           setsid Xwayland :0 -rootless >/dev/null 2>&1 &
         fi
+        # El unit toma el env del user manager, no el de la sesion: despues de
+        # un reinicio de sesion puede no tener WAYLAND_DISPLAY y Sunshine queda
+        # sin display ni encoder ("Fatal: Unable to find display or encoder",
+        # y en Moonlight: RTSP handshake Error 110). Aca SI tenemos el valor:
+        # corremos dentro de la sesion.
+        systemctl --user set-environment \
+          WAYLAND_DISPLAY="''${WAYLAND_DISPLAY:-wayland-1}" \
+          XDG_CURRENT_DESKTOP=Hyprland
         # Sunshine arranca en graphical-session.target, ANTES de que exista esta
         # salida: se queda sin display ni encoder ("Fatal: Unable to find display
         # or encoder", web UI en 503) y no se recupera solo. El restart lo hace
