@@ -5,6 +5,12 @@ let
   # Trigger: QT_QPA_PLATFORMTHEME=gtk3 global. Desactivamos el platform theme solo para
   # mixxx; su theming no depende de él (qt.style/kdeglobals lo cubren).
   #
+  # Mixxx es Wayland puro (Qt Wayland). El único uso de X11 es
+  # getCurrentXkbLayoutName() -> XkbOpenDisplay, para adivinar el layout del
+  # teclado. Si DISPLAY existe (la sesión exporta :0) y Xwayland está roto,
+  # ese connect se cuelga para siempre y Mixxx nunca abre. Sin DISPLAY el
+  # probe devuelve vacío y cae a QLocale: Mixxx no necesita Xwayland.
+  #
   # Mixxx 2.5.x tiene una fuga de memoria durante el análisis de librería (aquí
   # llegó a ~53 GB de RSS → OOM global y 30s de congelamiento por el thrash de
   # swap; en análisis normal con 6k canciones no pasa de unos GB). Se lanza
@@ -29,6 +35,7 @@ let
       mv $out/bin/mixxx $out/bin/.mixxx-wrapped
       makeWrapper ${pkgs.systemd}/bin/systemd-run $out/bin/mixxx \
         --unset QT_QPA_PLATFORMTHEME \
+        --unset DISPLAY \
         --add-flags "--user --scope --quiet -p MemoryMax=8G" \
         --add-flags "$out/bin/.mixxx-wrapped"
     '';
