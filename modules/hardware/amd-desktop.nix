@@ -42,6 +42,13 @@
     # lo hereda: ASPM off le costaria bateria sin beneficio (la S20G la cubre el
     # default_ps_max_latency_us=0 de nvme-dramless.nix).
     "pcie_aspm=off"
+    # runpm=0: el suspend de runtime de la GPU se apaga desde el driver, antes
+    # que cualquier servicio. 2026-11-22, con la salida HEADLESS (pc sin
+    # monitor), la GPU quedaba ociosa entre frames, el PCI la mandaba a D3 y el
+    # resume fallaba (rlc autoload timeout, gfx_v11_0 -110): imagen congelada y
+    # sesion muerta hasta reiniciar. `power_dpm_force_performance_level=high`
+    # clava los CLOCKS, no impide el D3; son dos perillas distintas.
+    "amdgpu.runpm=0"
   ];
 
   # Boot: NetworkManager-wait-online se comia 8.079s de la cadena critica
