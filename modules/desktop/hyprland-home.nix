@@ -716,13 +716,13 @@ in
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Si Hyprland deja de responder al IPC, la sesion esta colgada aunque el
-        # proceso siga vivo (visto 2026-11-22: la GPU no despertaba del suspend
-        # de runtime y el compositor quedaba esperando para siempre). Se mata el
-        # compositor y el lanzador de la sesion, y SDDM autologuea de nuevo
-        # (autoLogin.relogin = true).
-        # Dos fallos seguidos de 3s, cada 10s: ~20-30s de margen para no matar
-        # una sesion que solo esta ocupada.
+        # Vigila el IPC de Hyprland y SOLO LO REGISTRA: no mata nada. Un kill
+        # automatico tira la sesion con todo lo abierto (2026-11-22: se llevo el
+        # trabajo del humano), y el costo de un falso positivo es mucho mayor que
+        # el de una sesion colgada que se recupera a mano.
+        # Recuperacion manual (cierra la sesion y SDDM autologuea):
+        #   pkill -f "^Hyprland --watchdog"; pkill -f "bin/start-hyprland"
+        # Dos fallos seguidos de 3s, cada 10s.
         set -uo pipefail
         hyprctl=/run/current-system/sw/bin/hyprctl
         runtime="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
@@ -739,16 +739,10 @@ in
           fi
           fails=$((fails + 1))
           [ "$fails" -ge 2 ] || continue
-          logger -t hypr-watchdog "IPC de Hyprland sin responder 2 veces: reinicio la sesion"
-          # Con el compositor colgado no alcanza con el: sin cerrar el lanzador
-          # de la sesion, SDDM se queda esperando para siempre.
-          pkill -f "^Hyprland --watchdog" 2>/dev/null
-          sleep 2
-          pkill -f "bin/start-hyprland" 2>/dev/null
-          sleep 3
-          pkill -9 -f "^Hyprland --watchdog" 2>/dev/null
-          pkill -9 -f "bin/start-hyprland" 2>/dev/null
-          exit 0
+          logger -t hypr-watchdog "IPC sin responder 2 veces: la sesion parece congelada (no la toco)"
+          fails=0
+          # Cada 2 min como maximo: el log no se llena de ruido.
+          sleep 120
         done
       '';
     };
