@@ -67,6 +67,15 @@
   zramSwap.enable = true;
   zramSwap.memoryPercent = 50;
 
+  # earlyoom: sin esto el OOM global del kernel elige victimas por oom_score y
+  # mato `systemd --user` (score 100) antes que al proceso que llenaba la RAM;
+  # al morir el user manager se cerro la sesion entera (laptop, 2026-11-21:
+  # Vivado con 11 synth en paralelo + Firefox llenaron 14G de RAM y 7.2G de
+  # zram, y se llevaron puesta la sesion aunque los synth terminaron bien).
+  # earlyoom pesa oom_score x RSS, asi que mata al cerdo (Vivado) y no al
+  # gerente de sesion. Umbrales por defecto: 10% de RAM y 10% de swap libres.
+  services.earlyoom.enable = true;
+
   # TRIM: la politica vive en modules/core/nix-optimization.nix (manual, sin
   # timer). No re-activar services.fstrim aca: era un `enable = true` redundante
   # con el default y ahora choca con la definicion de ese modulo.
