@@ -1,0 +1,409 @@
+/*
+
+AMD Vivado v2026.1 (64-bit) [Major: 2026, Minor: 1]
+SW Build: 6511674 on Tue Jun 16 11:01:26 MDT 2026
+IP Build: 6504888 on Tue Jun 09 09:05:25 MDT 2026
+IP Build: 6504888 on Tue Jun 09 09:05:25 MDT 2026
+
+Process ID (PID): 217666
+License: Customer
+Mode: GUI Mode
+
+Current time: 	Sun Nov 22 00:32:54 GMT 2026
+Time zone: 	Greenwich Mean Time (GMT)
+
+OS: ANSI_COLOR="0;38;2;126;186;228"
+OS Version: 7.3.1-cachyos
+OS Architecture: amd64
+Available processors (cores): 12
+LSB Release Description: ANSI_COLOR=0;38;2;126;186;228
+
+Display: 0
+Screen size: 1920x1080
+Local screen bounds: x = 0, y = 0, width = 1920, height = 1080
+Screen resolution (DPI): 100
+Available screens: 1
+Default font: family=Open Sans,name=Open Sans,style=plain,size=16
+Scale size: 20
+OS font scaling: 100%
+Anti-Alias Enabled: true
+
+Java version: 	24.0.2 64-bit
+
+Java home: 	/home/yovick/opt/Xilinx/2026.1/tps/lnx64/jre24.0.2_12
+Java executable: 	/home/yovick/opt/Xilinx/2026.1/tps/lnx64/jre24.0.2_12/bin/java
+Java arguments: 	[-Xbootclasspath/a:/nix/store/7li0vf65hvawcsrrvd5ipdf10000vdj0-vivado-cyberpunk-lnf, -Dsun.java2d.pmoffscreen=false, -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2, -Dsun.java2d.xrender=false, -Dsun.java2d.uiScale.enabled=false, -Dswing.aatext=true, -XX:-UsePerfData, -Djdk.map.althashing.threshold=512, -XX:StringTableSize=4072, -XX:+UseStringDeduplication, -XX:MaxGCPauseMillis=200, -XX:ParallelGCThreads=4, -XX:+ParallelRefProcEnabled, --add-opens=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-opens=java.base/java.nio=ALL-UNNAMED, --add-opens=java.desktop/sun.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-opens=java.desktop/javax.swing=ALL-UNNAMED, --add-opens=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-opens=java.desktop/java.awt.event=ALL-UNNAMED, --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED, --sun-misc-unsafe-memory-access=allow, --enable-native-access=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.plaf.synth=ALL-UNNAMED, --add-exports=java.base/java.nio=ALL-UNNAMED, --add-exports=java.desktop/sun.swing=ALL-UNNAMED, --add-exports=java.desktop/javax.swing=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.tree=ALL-UNNAMED, --add-exports=java.desktop/javax.swing.plaf.basic=ALL-UNNAMED, --add-exports=java.desktop/sun.swing=ALL-UNNAMED, --add-exports=java.desktop/sun.swing.table=ALL-UNNAMED, --add-exports=java.desktop/sun.swing.plaf.synth=ALL-UNNAMED, --add-exports=java.desktop/sun.awt.shell=ALL-UNNAMED, --add-exports=java.desktop/sun.font=ALL-UNNAMED, --add-opens=java.desktop/sun.awt.X11=ALL-UNNAMED, -XX:NewSize=80m, -XX:MaxNewSize=80m, -Xms812m, -Xmx6144m, -Xss10m, -Xrs]
+Java initial memory (-Xms): 	812 MB
+Java maximum memory (-Xmx):	 6 GB
+
+User name: 	yovick
+User home directory: /home/yovick
+User working directory: /home/yovick/workspaces/nixos-config
+User country: 	US
+User language: 	en
+User locale: 	en_US
+
+RDI_BASEROOT: /home/yovick/opt/Xilinx/2026.1
+HDI_APPROOT: /home/yovick/opt/Xilinx/2026.1/Vivado
+RDI_DATADIR: /home/yovick/workspaces/nixos-config/:/home/yovick/opt/Xilinx/2026.1/data
+RDI_BINDIR: /home/yovick/opt/Xilinx/2026.1/Vivado/bin
+
+Vivado preferences file: /home/yovick/.Xilinx/Vivado/2026.1/newvivado.xml
+Vivado preferences directory: /home/yovick/.Xilinx/Vivado/2026.1/
+Vivado layouts directory: /home/yovick/.Xilinx/Vivado/2026.1/data/layouts
+PlanAhead jar file: 	/home/yovick/opt/Xilinx/2026.1/Vivado/lib/classes/planAhead.jar
+Vivado log file: 	/home/yovick/workspaces/nixos-config/vivado.log
+Vivado journal file: 	/home/yovick/workspaces/nixos-config/vivado.jou
+Engine tmp dir: 	./.Xil/Vivado-217666-nixos-laptop
+Non-Default Parameters:	[]
+
+Xilinx & AMD Environment Variables
+--------------------------------------------------------------------------------------------
+JAVA_TOOL_OPTIONS: -Xbootclasspath/a:/nix/store/7li0vf65hvawcsrrvd5ipdf10000vdj0-vivado-cyberpunk-lnf
+RDI_APPROOT: /home/yovick/opt/Xilinx/2026.1/Vivado
+RDI_BASEROOT: /home/yovick/opt/Xilinx/2026.1
+RDI_BINROOT: /home/yovick/opt/Xilinx/2026.1/Vivado/bin
+RDI_BUILD: yes
+RDI_DATADIR: :/home/yovick/opt/Xilinx/2026.1/data
+RDI_INSTALLROOT: /home/yovick/opt/Xilinx
+RDI_INSTALLVER: Vivado
+RDI_JAVA_PLATFORM: 
+RDI_JAVA_VERSION: 24.0.2_12
+RDI_LIBDIR: /home/yovick/opt/Xilinx/2026.1/Vivado/lib/lnx64.o/Default:/home/yovick/opt/Xilinx/2026.1/Vivado/lib/lnx64.o
+RDI_OPT_EXT: .o
+RDI_PATCHROOT: 
+RDI_PLATFORM: lnx64
+RDI_PREPEND_PATH: /home/yovick/opt/Xilinx/2026.1/Vitis/bin:/home/yovick/opt/Xilinx/2026.1/Vivado/ids_lite/ISE/bin/lin64
+RDI_PROG: /home/yovick/opt/Xilinx/2026.1/Vivado/bin/unwrapped/lnx64.o/vivado
+RDI_SESSION_INFO: /home/yovick/workspaces/nixos-config:nixos-laptop_1795307524_217553
+RDI_SHARED_DATA: 
+RDI_TPS_ROOT: /home/yovick/opt/Xilinx/2026.1/Vivado/tps/lnx64
+RDI_USE_JDK24: True
+SHELL: /run/current-system/sw/bin/zsh
+XILINX: /home/yovick/opt/Xilinx/2026.1/Vivado/ids_lite/ISE
+XILINX_DSP: /home/yovick/opt/Xilinx/2026.1/Vivado/ids_lite/ISE
+XILINX_HLS: /home/yovick/opt/Xilinx/2026.1/Vitis
+XILINX_PLANAHEAD: /home/yovick/opt/Xilinx/2026.1/Vivado
+XILINX_SDK: /home/yovick/opt/Xilinx/2026.1/Vitis
+XILINX_VITIS: /home/yovick/opt/Xilinx/2026.1/Vitis
+XILINX_VIVADO: /home/yovick/opt/Xilinx/2026.1/Vivado
+_JAVA_AWT_WM_NONREPARENTING: 1
+
+
+GUI allocated memory:	812 MB
+GUI max memory:		6,144 MB
+Engine allocated memory: 1,957 MB
+
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+
+*/
+
+// TclEventType: START_GUI
+// Tcl Message: INFO: [Common 17-3922] A valid Vivado Design Suite BASIC license has been detected. Your current license is active and will expire on 30-aug-2027. 
+// Tcl Message: start_gui 
+// HMemoryUtils.trashcanNow. Engine heap size: 1,967 MB. GUI used memory: 64 MB. Current time: 11/22/26, 12:32:55 AM GMT
+selectList(PAResourceTtoZ.UpgradedSyntheticaGettingStartedView_RECENT_PROJECTS, "/home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.xpr$Artix-7, xc7a12ticsg325-1L", 0); // b.c (PAResourceTtoZ.UpgradedSyntheticaGettingStartedView_RECENT_PROJECTS)
+// Opening Vivado Project: /home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.xpr. Version: Vivado v2026.1 
+// TclEventType: DEBUG_PROBE_SET_CHANGE
+// TclEventType: FLOW_ADDED
+// TclEventType: MSGMGR_MOVEMSG
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: FILE_SET_NEW
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_COMPLETED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_FAILED
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_CURRENT
+// TclEventType: MSGMGR_REFRESH_MSG
+// TclEventType: PROJECT_DASHBOARD_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: PROJECT_DASHBOARD_GADGET_NEW
+// TclEventType: PROJECT_DASHBOARD_GADGET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: PROJECT_NEW
+// [GUI Memory]: 135 MB (+139486kb) [00:00:26]
+// [Engine Memory]: 2,047 MB (+1995053kb) [00:00:26]
+// [Engine Memory]: 2,247 MB (+102403kb) [00:00:27]
+// WARNING: HEventQueue.dispatchEvent() is taking  2635 ms.
+// Tcl Message: open_project {/home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.xpr} 
+// Tcl Message: Scanning sources... Finished scanning sources 
+// Tcl Message: INFO: [IP_Flow 19-234] Refreshing IP repositories INFO: [IP_Flow 19-1704] No user IP repositories specified INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/home/yovick/opt/Xilinx/2026.1/data/ip'. 
+// Project name: Harvard; location: /home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/Harvard/Harvard; part: xc7a12ticsg325-1L
+dismissDialog("Open Project"); // bk (Open Project Progress)
+// [GUI Memory]: 143 MB (+385kb) [00:00:30]
+// TclEventType: DG_GRAPH_GENERATED
+// TclEventType: DG_GRAPH_STALE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: FILE_SET_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: DG_GRAPH_GENERATED
+// TclEventType: DG_GRAPH_STALE
+// [Engine Memory]: 2,432 MB (+75707kb) [00:00:36]
+// TclEventType: DG_GRAPH_GENERATED
+// TclEventType: DG_GRAPH_GENERATED
+// Tcl Message: update_compile_order -fileset sources_1 
+// HMemoryUtils.trashcanNow. Engine heap size: 2,297 MB. GUI used memory: 76 MB. Current time: 11/22/26, 12:33:19 AM GMT
+// Elapsed time: 16 seconds
+selectButton(PAResourceQtoS.StaleMoreAction_OUT_OF_DATE_DETAILS, "details"); // d (PAResourceQtoS.StaleMoreAction_OUT_OF_DATE_DETAILS)
+selectButton(PAResourceQtoS.StaleMoreAction_FORCE_UP_TO_DATE, "Force up-to-date"); // h (PAResourceQtoS.StaleMoreAction_FORCE_UP_TO_DATE)
+// Tcl Message: set_property needs_refresh false [get_runs synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs impl_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_pres_500hz_0_0_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_mux_datos_0_0_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_dec_an_0_1_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_contador_0_1_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_boton_0_1_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_UAL_0_0_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_PC_0_0_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_M_ROM_0_0_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_M_RAM_0_0_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_Dec_bcd_7seg_0_1_synth_1] 
+// Tcl Message: set_property needs_refresh false [get_runs harvard_design_UC_0_0_synth_1] 
+// [GUI Memory]: 152 MB (+2263kb) [00:00:59]
+// Elapsed time: 11 seconds
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Program and Debug, Generate Bitstream]", 21, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+// Run Command: PAResourceCommand.PACommandNames_RUN_BITGEN
+selectButton(RDIResource.BaseDialog_OK, "OK", "Launch Runs"); // f (RDIResource.BaseDialog_OK)
+// 'cU' command handler elapsed time: 4 seconds
+// TclEventType: PAUSE_COMPOSITE_FILE_CHANGE_GUI
+dismissDialog("Launch Runs"); // cX (dialog0)
+// TclEventType: RUN_MODIFY
+// TclEventType: RUN_RESET
+// TclEventType: RUN_STATUS_CHANGE
+// TclEventType: RUN_RESET
+// TclEventType: RUN_MODIFY
+// TclEventType: PAUSE_COMPOSITE_FILE_CHANGE_GUI
+// Tcl Message: reset_run impl_1 -prev_step  
+// HMemoryUtils.trashcanNow. Engine heap size: 2,320 MB. GUI used memory: 84 MB. Current time: 11/22/26, 12:33:38 AM GMT
+// TclEventType: PAUSE_COMPOSITE_FILE_CHANGE_GUI
+// TclEventType: RUN_LAUNCH
+// TclEventType: RUN_MODIFY
+// TclEventType: PAUSE_COMPOSITE_FILE_CHANGE_GUI
+// Tcl Message: launch_runs impl_1 -to_step write_bitstream -jobs 12 
+// Tcl Message: [Sat Nov 21 18:33:38 2026] Launched impl_1... Run output will be captured here: /home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/runme.log 
+dismissDialog("Generate Bitstream"); // bk (Generate Bitstream Progress)
+// TclEventType: RUN_FAILED
+// TclEventType: RUN_STATUS_CHANGE
+// Elapsed time: 16 seconds
+collapseTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Program and Debug, Open Hardware Manager]", 22); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+expandTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Program and Debug, Open Hardware Manager]", 22); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+// HMemoryUtils.trashcanNow. Engine heap size: 2,685 MB. GUI used memory: 89 MB. Current time: 11/22/26, 12:33:55 AM GMT
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Program and Debug, Open Hardware Manager, Open Target]", 23, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+// Run Command: PAResourceCommand.PACommandNames_OPEN_HW_TARGET
+// HMemoryUtils.trashcanNow. Engine heap size: 2,592 MB. GUI used memory: 97 MB. Current time: 11/22/26, 12:33:59 AM GMT
+selectMenuItem(PAResourceCommand.PACommandNames_AUTO_CONNECT_TARGET, "Auto Connect"); // ap (PAResourceCommand.PACommandNames_AUTO_CONNECT_TARGET, auto_connect_target_menu)
+// Run Command: PAResourceCommand.PACommandNames_OPEN_HARDWARE_MANAGER
+// Tcl (Dont Echo) Command: 'rdi::info_commands get_hw_probes'
+// Tcl (Dont Echo) Command: 'load_features labtools'
+// TclEventType: LOAD_FEATURE
+// TclEventType: HW_SESSION_OPEN
+// WARNING: HEventQueue.dispatchEvent() is taking  1012 ms.
+// Tcl Message: open_hw_manager 
+closeView(PAResourceOtoP.PAViews_PROJECT_SUMMARY, "Project Summary"); // x (PAResourceOtoP.PAViews_PROJECT_SUMMARY, PlanAheadTabProject Summary)
+// [Engine Memory]: 2,758 MB (+214760kb) [00:01:28]
+// Run Command: PAResourceCommand.PACommandNames_AUTO_CONNECT_TARGET
+dismissDialog("Open Hardware Manager"); // bk (Open Hardware Manager Progress)
+// TclEventType: HW_SERVER_UPDATE
+// Tcl Message: connect_hw_server -allow_non_jtag 
+// Tcl Message: INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121 INFO: [Labtools 27-2222] Launching hw_server... INFO: [Labtools 27-2221] Launch Output:  ****** Xilinx hw_server v2026.1   **** Build date : May 29 2026 at 20:56:35     ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.   INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:0 INFO: [Labtools 27-3417] Launching cs_server... 
+// TclEventType: HW_SERVER_UPDATE
+// Tcl Message: INFO: [Labtools 27-2221] Launch Output:  ****** Xilinx cs_server v2026.1   **** Build Info : #60 | 2026-06-15 19:15 UTC | a9691a9     ** Copyright 2017-2022 Xilinx, Inc. All Rights Reserved.     ** Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.    
+// TclEventType: HW_TARGET_CHANGE
+// TclEventType: HW_TARGET_CLOSE
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_ADD
+// TclEventType: HW_TARGET_UPDATE
+// Tcl Message: open_hw_target 
+// Tcl Message: INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210183711632A 
+// Tcl Message: current_hw_device [get_hw_devices xc7a35t_0] 
+// TclEventType: HW_DEVICE_CHANGE
+// TclEventType: HW_SYSMON_CHANGE
+// TclEventType: HW_DEVICE_UPDATE
+// TclEventType: HW_DEVICE_CHANGE
+// Tcl Message: refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0] 
+// Tcl Message: INFO: [Labtools 27-1435] Device xc7a35t (JTAG device index = 0) is not programmed (DONE status = 0). 
+dismissDialog("Auto Connect"); // bk (Auto Connect Progress)
+selectButton(PAResourceOtoP.ProgramDebugTab_PROGRAM_DEVICE, "Program device"); // h (PAResourceOtoP.ProgramDebugTab_PROGRAM_DEVICE)
+// Run Command: PAResourceCommand.PACommandNames_PROGRAM_FPGA
+// Elapsed time: 10 seconds
+setText(PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE, "harvard"); // ac (PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE)
+selectButton(PAResourceOtoP.ProgramFpgaDialog_PROGRAM, "Program", "Program Device"); // f (PAResourceOtoP.ProgramFpgaDialog_PROGRAM, RDIResource.BaseDialog_OK)
+// HOptionPane Error: 'The file '/home/yovick/workspaces/nixos-config/harvard.bit' does not exist. Please specify a valid file name. (Invalid File Name)'
+selectButton("OK", "OK", "Invalid File Name"); // JButton (OK)
+selectMoreButton(PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE, (String) null, "Program Device"); // s (PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE)
+// HMemoryUtils.trashcanNow. Engine heap size: 2,795 MB. GUI used memory: 99 MB. Current time: 11/22/26, 12:34:30 AM GMT
+dismissFileChooser();
+setText(PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE, (String) null); // ac (PAResourceOtoP.ProgramFpgaDialog_SPECIFY_BITSTREAM_FILE)
+selectButton(RDIResource.BaseDialog_CANCEL, "Cancel", "Program Device"); // f (RDIResource.BaseDialog_CANCEL)
+// 'D' command handler elapsed time: 27 seconds
+dismissDialog("Program Device"); // aT (dialog1)
+// HMemoryUtils.trashcanNow. Engine heap size: 2,389 MB. GUI used memory: 94 MB. Current time: 11/22/26, 12:34:40 AM GMT
+// HMemoryUtils.trashcanNow. Engine heap size: 2,389 MB. GUI used memory: 93 MB. Current time: 11/22/26, 12:35:20 AM GMT
+// HMemoryUtils.trashcanNow. Engine heap size: 2,389 MB. GUI used memory: 93 MB. Current time: 11/22/26, 12:36:00 AM GMT
+// Elapsed time: 105 seconds
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "XADC ; ", 3, "XADC", 0, false); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+selectButton(PAResourceOtoP.ProgramDebugTab_PROGRAM_DEVICE, "Program device"); // h (PAResourceOtoP.ProgramDebugTab_PROGRAM_DEVICE)
+// Run Command: PAResourceCommand.PACommandNames_PROGRAM_FPGA
+selectButton(RDIResource.BaseDialog_CANCEL, "Cancel", "Program Device"); // f (RDIResource.BaseDialog_CANCEL)
+// 'D' command handler elapsed time: 3 seconds
+dismissDialog("Program Device"); // aT (dialog2)
+// [GUI Memory]: 169 MB (+9969kb) [00:04:06]
+// HMemoryUtils.trashcanNow. Engine heap size: 2,569 MB. GUI used memory: 101 MB. Current time: 11/22/26, 12:36:40 AM GMT
+// [Engine Memory]: 3,988 MB (+1145178kb) [00:04:07]
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, IP Integrator, Create Block Design]", 6, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, IP Integrator, Create Block Design]", 6, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, IP Integrator, Create Block Design]", 6, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, IP Integrator, Create Block Design]", 6, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Program and Debug, Generate Bitstream]", 21, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+// Run Command: PAResourceCommand.PACommandNames_RUN_BITGEN
+selectButton(RDIResource.BaseDialog_CANCEL, "Cancel", "Launch Runs"); // f (RDIResource.BaseDialog_CANCEL)
+// 'cU' command handler elapsed time: 6 seconds
+dismissDialog("Launch Runs"); // cX (dialog3)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xc7a35t_0 (1) ; Not programmed", 2, "xc7a35t_0 (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xc7a35t_0 (1) ; Not programmed", 2, "xc7a35t_0 (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+collapseTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true, false, false, false, false, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Double Click - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+expandTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE)
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true, false, false, false, false, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Double Click - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+selectTreeTable(PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE, "xilinx_tcf/Digilent/210183711632A (1) ; Open", 1, "xilinx_tcf/Digilent/210183711632A (1)", 0, true); // m (PAResourceEtoH.HardwareTreePanel_HARDWARE_TREE_TABLE) - Node
+// HMemoryUtils.trashcanNow. Engine heap size: 3,988 MB. GUI used memory: 109 MB. Current time: 11/22/26, 12:37:20 AM GMT
+// HMemoryUtils.trashcanNow. Engine heap size: 2,402 MB. GUI used memory: 110 MB. Current time: 11/22/26, 12:38:00 AM GMT
+// Elapsed time: 58 seconds
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, Project Manager, Settings]", 1, false); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree)
+// Run Command: RDIResourceCommand.RDICommands_SETTINGS
+// Tcl (Dont Echo) Command: 'rdi::info_commands {device::*}'
+// Tcl (Dont Echo) Command: 'rdi::info_commands {debug::*}'
+// Tcl (Dont Echo) Command: 'rdi::info_commands {*}'
+// WARNING: HEventQueue.dispatchEvent() is taking  1322 ms.
+// Elapsed time: 17 seconds
+selectMoreButton(PAResourceQtoS.SettingsProjectGeneralPage_CHOOSE_DEVICE_FOR_YOUR_PROJECT, (String) null, "Settings"); // s (PAResourceQtoS.SettingsProjectGeneralPage_CHOOSE_DEVICE_FOR_YOUR_PROJECT)
+selectTable(PAResourceEtoH.FPGAChooser_FPGA_TABLE, "xc7a15tcpg236-1 ; 236 ; 106 ; 10400 ; 20800 ; 25 ; 0 ; 45 ; 32 ; 2 ; 2 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 1 ; 5 ;  ;  ;  ;  ; 0 ;  ;  ;  ;  ;  ;  ; 0.95 ; 0.95 ; 1.05", 66, "xc7a15tcpg236-1", 0); // e (PAResourceEtoH.FPGAChooser_FPGA_TABLE)
+// [GUI Memory]: 193 MB (+16443kb) [00:06:02]
+// HMemoryUtils.trashcanNow. Engine heap size: 2,637 MB. GUI used memory: 142 MB. Current time: 11/22/26, 12:38:40 AM GMT
+// Elapsed time: 12 seconds
+setText("PAResourceEtoH.FPGAChooser_FPGA_TABLE_SEARCH_FIELD", "xc7a35tcpg236-1"); // OverlayTextField (PAResourceEtoH.FPGAChooser_FPGA_TABLE_SEARCH_FIELD)
+selectTable(PAResourceEtoH.FPGAChooser_FPGA_TABLE, "xc7a35tcpg236-1 ; 236 ; 106 ; 20800 ; 41600 ; 50 ; 0 ; 90 ; 32 ; 2 ; 2 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 1 ; 5 ;  ;  ;  ;  ; 0 ;  ;  ;  ;  ;  ;  ; 0.95 ; 0.95 ; 1.05", 0, "xc7a35tcpg236-1", 0); // e (PAResourceEtoH.FPGAChooser_FPGA_TABLE)
+selectTable(PAResourceEtoH.FPGAChooser_FPGA_TABLE, "xc7a35tcpg236-1 ; 236 ; 106 ; 20800 ; 41600 ; 50 ; 0 ; 90 ; 32 ; 2 ; 2 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 0 ; 1 ; 5 ;  ;  ;  ;  ; 0 ;  ;  ;  ;  ;  ;  ; 0.95 ; 0.95 ; 1.05", 0, "xc7a35tcpg236-1", 0); // e (PAResourceEtoH.FPGAChooser_FPGA_TABLE)
+selectButton(RDIResource.BaseDialog_OK, "OK", "Select Device"); // f (RDIResource.BaseDialog_OK)
+dismissDialog("Select Device"); // c (dialog4)
+// HMemoryUtils.trashcanNow. Engine heap size: 2,438 MB. GUI used memory: 144 MB. Current time: 11/22/26, 12:39:20 AM GMT
+// Elapsed time: 38 seconds
+selectButton(RDIResource.BaseDialog_OK, "OK", "Settings"); // f (RDIResource.BaseDialog_OK)
+// [GUI Memory]: 220 MB (+18207kb) [00:06:52]
+selectButton(RDIResource.BaseDialog_YES, "Yes", "Create New Run"); // f (RDIResource.BaseDialog_YES)
+dismissDialog("Create New Run"); // x (dialog5)
+selectButton(RDIResource.BaseDialog_OK, "OK", "Create Run"); // f (RDIResource.BaseDialog_OK)
+// Tcl Command: 'copy_run -name synth_1_copy_1 [get_runs synth_1] '
+// TclEventType: RUN_ADD
+// TclEventType: RUN_MODIFY
+// TclEventType: RUN_OPTIONS_MODIFIED
+// TclEventType: RUN_MODIFY
+// TclEventType: REPORT_CREATED
+// TclEventType: REPORT_MODIFY
+// Tcl Message: copy_run -name synth_1_copy_1 [get_runs synth_1]  
+// Tcl Message: synth_1_copy_1 
+dismissDialog("Copy Run"); // bk (Copy Run Progress)
+// TclEventType: RUN_MODIFY
+// Tcl Message: set_property part xc7a35tcpg236-1 [current_project] 
+// TclEventType: RUN_MODIFY
+// TclEventType: CREATE_IP_CATALOG
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: BDCELL_LOCK_CHANGE
+// TclEventType: IP_LOCK_CHANGE
+// TclEventType: PART_MODIFIED
+// TclEventType: PROJECT_CHANGE
+// Tcl Message: set_property target_language VHDL [current_project] 
+dismissDialog("Change Settings"); // bk (Change Settings Progress)
+dismissDialog("Settings"); // e (dialog6)
+// Elapsed Time for: 'PAResourceItoN.MsgLongTask_MESSAGE_LONG_TASK/O.f': 06m:34s
+// HMemoryUtils.trashcanNow. Engine heap size: 2,940 MB. GUI used memory: 131 MB. Current time: 11/22/26, 12:40:00 AM GMT
+// Elapsed time: 52 seconds
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, RTL Analysis, Open Elaborated Design]", 13, true); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree) - Node
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, RTL Analysis, Open Elaborated Design]", 13, true); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree) - Node
+selectTree(PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, "[, RTL Analysis, Open Elaborated Design]", 13, true); // g (PAResourceEtoH.FlowNavigatorTreePanel_FLOW_NAVIGATOR_TREE, Flow Navigator Tree) - Node
+// HMemoryUtils.trashcanNow. Engine heap size: 2,467 MB. GUI used memory: 131 MB. Current time: 11/22/26, 12:40:40 AM GMT

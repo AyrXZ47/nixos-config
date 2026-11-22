@@ -88,6 +88,11 @@ in
       extraPackages = with pkgs; [
         (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       ];
+      # Con autologin activo (el pc sin monitor), un logout o la muerte del
+      # compositor dejan la maquina en el greeter invisible: nadie puede
+      # volver a entrar. Con relogin SDDM autologuea otra vez. Solo aplica
+      # donde autoLogin.enable esta prendido; la laptop no lo usa.
+      autoLogin.relogin = true;
     };
 
     # udisks2: Dolphin lista/monta los discos extra (sda/sdb) sin fstab

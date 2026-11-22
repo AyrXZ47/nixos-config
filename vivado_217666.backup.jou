@@ -1,0 +1,50 @@
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Sat Nov 21 18:32:08 2026
+# Process ID         : 217666
+# Current directory  : /home/yovick/workspaces/nixos-config
+# Command line       : vivado
+# Log file           : /home/yovick/workspaces/nixos-config/vivado.log
+# Journal file       : /home/yovick/workspaces/nixos-config/vivado.jou
+# Running On         : nixos-laptop
+# Platform           : unknown
+# Operating System   : unknown
+# Processor Detail   : AMD Ryzen 5 PRO 5650U with Radeon Graphics
+# CPU Frequency      : 2395.123 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 15515 MB
+# Swap memory        : 7757 MB
+# Total Virtual      : 23272 MB
+# Available Virtual  : 18925 MB
+#-----------------------------------------------------------
+start_gui
+open_project {/home/yovick/repos/UAZ-IEI/5to Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.xpr}
+update_compile_order -fileset sources_1
+set_property needs_refresh false [get_runs synth_1]
+set_property needs_refresh false [get_runs impl_1]
+set_property needs_refresh false [get_runs harvard_design_pres_500hz_0_0_synth_1]
+set_property needs_refresh false [get_runs harvard_design_mux_datos_0_0_synth_1]
+set_property needs_refresh false [get_runs harvard_design_dec_an_0_1_synth_1]
+set_property needs_refresh false [get_runs harvard_design_contador_0_1_synth_1]
+set_property needs_refresh false [get_runs harvard_design_boton_0_1_synth_1]
+set_property needs_refresh false [get_runs harvard_design_UAL_0_0_synth_1]
+set_property needs_refresh false [get_runs harvard_design_PC_0_0_synth_1]
+set_property needs_refresh false [get_runs harvard_design_M_ROM_0_0_synth_1]
+set_property needs_refresh false [get_runs harvard_design_M_RAM_0_0_synth_1]
+set_property needs_refresh false [get_runs harvard_design_Dec_bcd_7seg_0_1_synth_1]
+set_property needs_refresh false [get_runs harvard_design_UC_0_0_synth_1]
+reset_run impl_1 -prev_step 
+launch_runs impl_1 -to_step write_bitstream -jobs 12
+wait_on_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+current_hw_device [get_hw_devices xc7a35t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
+copy_run -name synth_1_copy_1 [get_runs synth_1] 
+set_property part xc7a35tcpg236-1 [current_project]
+set_property target_language VHDL [current_project]

@@ -1,0 +1,45 @@
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Sat Nov 21 18:50:05 2026
+# Process ID         : 229729
+# Current directory  : /home/yovick/workspaces/nixos-config
+# Command line       : vivado
+# Log file           : /home/yovick/workspaces/nixos-config/vivado.log
+# Journal file       : /home/yovick/workspaces/nixos-config/vivado.jou
+# Running On         : nixos-laptop
+# Platform           : unknown
+# Operating System   : unknown
+# Processor Detail   : AMD Ryzen 5 PRO 5650U with Radeon Graphics
+# CPU Frequency      : 3969.165 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 15515 MB
+# Swap memory        : 7757 MB
+# Total Virtual      : 23272 MB
+# Available Virtual  : 18081 MB
+#-----------------------------------------------------------
+start_gui
+open_project /home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.xpr
+update_compile_order -fileset sources_1
+launch_runs impl_1 -to_step write_bitstream -jobs 12
+wait_on_run impl_1
+open_run impl_1
+open_hw_manager
+connect_hw_server -allow_non_jtag
+open_hw_target
+set_property PROGRAM.FILE {/home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/harvard_design_wrapper.bit} [get_hw_devices xc7a35t_0]
+current_hw_device [get_hw_devices xc7a35t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {/home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/harvard_design_wrapper.bit} [get_hw_devices xc7a35t_0]
+program_hw_devices [get_hw_devices xc7a35t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
+set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {/home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/harvard_design_wrapper.bit} [get_hw_devices xc7a35t_0]
+program_hw_devices [get_hw_devices xc7a35t_0]
+refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]

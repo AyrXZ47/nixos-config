@@ -548,6 +548,22 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
+  # Watchdog de la sesion (ver session-watchdog.sh): si el compositor se cuelga,
+  # muere con la sesion cuando SDDM la reinicia.
+  systemd.user.services.hyprland-watchdog = {
+    Unit = {
+      Description = "Watchdog de Hyprland (reinicia la sesion si el IPC no responde)";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${config.xdg.configHome}/hypr/scripts/session-watchdog.sh";
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+    Install = { WantedBy = [ "graphical-session.target" ]; };
+  };
+
   # Sunshine: descartado para la TV (Moonlight es una app aparte, con cuenta y
   # PIN: no es transparente como Cast/Miracast). SI se usa en el pc para que la
   # laptop haga de monitor, ver hosts/pc/configuration.nix.
@@ -693,6 +709,39 @@ in
         # Se rehacen ahora que hay una salida.
         "${config.xdg.configHome}/hypr/scripts/workspace-bind.sh" >/dev/null 2>&1 || true
         "${config.xdg.configHome}/hypr/scripts/caelestia-wallpaper.sh" >/dev/null 2>&1 || true
+      '';
+    };
+
+    "hypr/scripts/session-watchdog.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Si Hyprland deja de responder al IPC, la sesion esta colgada aunque el
+        # proceso siga vivo (visto 2026-11-21: un flood de "btnscroll" del mouse
+        # 2.4G dejo el loop de eventos girando para siempre; SSH y el kernel
+        # seguian perfectos). Se mata el compositor y SDDM autologuea de nuevo
+        # (autoLogin.relogin = true), asi la sesion vuelve sola.
+        # Dos fallos seguidos de 3s, cada 10s: ~20-30s de margen para no matar
+        # una sesion que solo esta ocupada.
+        set -uo pipefail
+        hyprctl=/run/current-system/sw/bin/hyprctl
+        fails=0
+        while sleep 10; do
+          # Sin proceso no hay nada que rescatar (logout normal): que muera el
+          # watchdog junto con la sesion.
+          pgrep -x Hyprland >/dev/null || exit 0
+          if timeout 3 "$hyprctl" monitors -j >/dev/null 2>&1; then
+            fails=0
+            continue
+          fi
+          fails=$((fails + 1))
+          [ "$fails" -ge 2 ] || continue
+          logger -t hypr-watchdog "hyprctl sin responder 2 veces: reinicio la sesion"
+          pkill -x Hyprland
+          sleep 5
+          pkill -9 -x Hyprland
+          exit 0
+        done
       '';
     };
 

@@ -1,0 +1,111 @@
+INFO: [Common 17-3922] A valid Vivado Design Suite BASIC license has been detected. Your current license is active and will expire on 30-aug-2027.
+#-----------------------------------------------------------
+# Vivado v2026.1 (64-bit)
+# SW Build 6511674 on Tue Jun 16 11:01:26 MDT 2026
+# IP Build 6504888 on Tue Jun 09 09:05:25 MDT 2026
+# SharedData Build 6501428 on Mon Jun 08 17:34:18 MDT 2026
+# Start of session at: Sat Nov 21 18:50:05 2026
+# Process ID         : 229729
+# Current directory  : /home/yovick/workspaces/nixos-config
+# Command line       : vivado
+# Log file           : /home/yovick/workspaces/nixos-config/vivado.log
+# Journal file       : /home/yovick/workspaces/nixos-config/vivado.jou
+# Running On         : nixos-laptop
+# Platform           : unknown
+# Operating System   : unknown
+# Processor Detail   : AMD Ryzen 5 PRO 5650U with Radeon Graphics
+# CPU Frequency      : 3969.165 MHz
+# CPU Physical cores : 6
+# CPU Logical cores  : 12
+# Host memory        : 15515 MB
+# Swap memory        : 7757 MB
+# Total Virtual      : 23272 MB
+# Available Virtual  : 18081 MB
+#-----------------------------------------------------------
+start_gui
+open_project /home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.xpr
+Scanning sources...
+Finished scanning sources
+WARNING: [Project 1-5713] Board part '' set for the project  is not found. BoardPart property will be unset. Please select board from latest repo build 
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/home/yovick/opt/Xilinx/2026.1/data/ip'.
+update_compile_order -fileset sources_1
+launch_runs impl_1 -to_step write_bitstream -jobs 12
+[Sat Nov 21 18:52:38 2026] Launched impl_1...
+Run output will be captured here: /home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/runme.log
+open_run impl_1
+INFO: [Device 21-403] Loading part xc7a35tcpg236-1
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 10610.320 ; gain = 0.000 ; free physical = 4098 ; free virtual = 16546
+INFO: [Netlist 29-17] Analyzing 9 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2026.1
+INFO: [Project 1-570] Preparing netlist for logic optimization
+Read ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 10610.320 ; gain = 0.000 ; free physical = 4016 ; free virtual = 16464
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+INFO: [Designutils 20-5722] Start Reading Physical Databases.
+Reading placement.
+Read Netlist Cache: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 11137.871 ; gain = 0.000 ; free physical = 3460 ; free virtual = 15908
+Reading placer database...
+Read Device Cache: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00 . Memory (MB): peak = 11137.871 ; gain = 0.000 ; free physical = 3460 ; free virtual = 15908
+Read PlaceDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 11137.871 ; gain = 0.000 ; free physical = 3460 ; free virtual = 15908
+Read placeStorage: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 11156.949 ; gain = 19.078 ; free physical = 3460 ; free virtual = 15908
+Read PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 11156.949 ; gain = 0.000 ; free physical = 3460 ; free virtual = 15908
+Reading routing.
+Read RouteStorage: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00 . Memory (MB): peak = 11156.949 ; gain = 0.000 ; free physical = 3460 ; free virtual = 15908
+Read Physdb Files: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.01 . Memory (MB): peak = 11156.949 ; gain = 19.078 ; free physical = 3460 ; free virtual = 15908
+Restored from archive | CPU: 0.030000 secs | Memory: 0.155380 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.01 . Memory (MB): peak = 11156.949 ; gain = 19.078 ; free physical = 3460 ; free virtual = 15908
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 11156.949 ; gain = 0.000 ; free physical = 3460 ; free virtual = 15908
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 1 instances were transformed.
+  RAM32M => RAM32M (RAMD32(x6), RAMS32(x2)): 1 instance 
+
+open_run: Time (s): cpu = 00:00:18 ; elapsed = 00:00:11 . Memory (MB): peak = 11537.867 ; gain = 927.547 ; free physical = 3442 ; free virtual = 15522
+open_hw_manager
+connect_hw_server -allow_non_jtag
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+INFO: [Labtools 27-2222] Launching hw_server...
+INFO: [Labtools 27-2221] Launch Output:
+
+****** Xilinx hw_server v2026.1
+  **** Build date : May 29 2026 at 20:56:35
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:0
+INFO: [Labtools 27-3417] Launching cs_server...
+INFO: [Labtools 27-2221] Launch Output:
+
+****** Xilinx cs_server v2026.1
+  **** Build Info : #60 | 2026-06-15 19:15 UTC | a9691a9
+    ** Copyright 2017-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+
+
+
+open_hw_target
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210183711632A
+set_property PROGRAM.FILE {/home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/harvard_design_wrapper.bit} [get_hw_devices xc7a35t_0]
+current_hw_device [get_hw_devices xc7a35t_0]
+refresh_hw_device -update_hw_probes false [lindex [get_hw_devices xc7a35t_0] 0]
+INFO: [Labtools 27-1435] Device xc7a35t (JTAG device index = 0) is not programmed (DONE status = 0).
+set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {/home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/harvard_design_wrapper.bit} [get_hw_devices xc7a35t_0]
+program_hw_devices [get_hw_devices xc7a35t_0]
+INFO: [Labtools 27-3164] End of startup status: HIGH
+refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
+INFO: [Labtools 27-1434] Device xc7a35t (JTAG device index = 0) is programmed with a design that has no supported soft debug core(s) in it.
+set_property PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property FULL_PROBES.FILE {} [get_hw_devices xc7a35t_0]
+set_property PROGRAM.FILE {/home/yovick/repos/UAZ-IEI/5to_Semestre/arquitecturaDeComputadoras/Harvard/Harvard/Harvard.runs/impl_1/harvard_design_wrapper.bit} [get_hw_devices xc7a35t_0]
+program_hw_devices [get_hw_devices xc7a35t_0]
+INFO: [Labtools 27-3164] End of startup status: HIGH
+refresh_hw_device [lindex [get_hw_devices xc7a35t_0] 0]
+INFO: [Labtools 27-1434] Device xc7a35t (JTAG device index = 0) is programmed with a design that has no supported soft debug core(s) in it.
+exit
+INFO: [Common 17-206] Exiting Vivado at Sat Nov 21 18:58:01 2026...
