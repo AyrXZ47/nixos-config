@@ -328,10 +328,45 @@ let
         return states
 
 
+    def hyprland_signature():
+        # El unit arranca en graphical-session.target; tras un relogin de SDDM
+        # puede hacerlo antes de que el user manager importe
+        # HYPRLAND_INSTANCE_SIGNATURE (visto 2026-11-22). Mismo fallback que
+        # session-watchdog.sh: buscar el dir vivo bajo $XDG_RUNTIME_DIR/hypr.
+        sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+        if sig:
+            return sig
+        runtime = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
+        root = os.path.join(runtime, "hypr")
+        try:
+            names = sorted(
+                os.listdir(root),
+                key=lambda n: os.path.getmtime(os.path.join(root, n)),
+                reverse=True,
+            )
+        except OSError:
+            return None
+        for name in names:
+            try:
+                with open(
+                    os.path.join(root, name, "hyprland.lock"), encoding="utf-8"
+                ) as lock:
+                    pid = int(lock.readline().strip())
+                os.kill(pid, 0)
+            except (OSError, ValueError):
+                continue
+            return name
+        return None
+
+
     def mixxx_window_title():
         # Título de la ventana de Mixxx ("Artist - Title | Mixxx"), el mismo
         # dato que pinta la barra de Caelestia. Se busca por clase y no por
         # ventana activa: funciona aunque Mixxx no tenga el foco.
+        env = os.environ.copy()
+        sig = hyprland_signature()
+        if sig:
+            env["HYPRLAND_INSTANCE_SIGNATURE"] = sig
         try:
             raw = subprocess.run(
                 ["hyprctl", "-j", "clients"],
@@ -339,6 +374,7 @@ let
                 text=True,
                 timeout=5,
                 check=True,
+                env=env,
             ).stdout
             clients = json.loads(raw)
         except Exception:
@@ -469,7 +505,10 @@ let
         else:
             status = "Paused"
         player.set_status(status)
-        player.update_track(title)
+        # Sin pista cargada no consultar lrclib: buscar el literal "Mixxx"
+        # devuelve cualquier cosa (visto: "1 Pound Fish Mixxx" de tokold) y el
+        # panel mostraba una canción que no existe.
+        player.update_track(None if bare else title)
         return True
 
 
