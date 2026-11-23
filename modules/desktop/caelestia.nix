@@ -704,6 +704,12 @@ in
     # tanto al arrancar con Hyprland como al relanzarlo con caelestia-restart.sh.
     environment.sessionVariables.CAELESTIA_XKB_RULES_PATH = "${pkgs.xkeyboard-config}/share/X11/xkb/rules/base.lst";
 
+    # Quickshell 0.3.2 conecta a PipeWire una sola vez al arrancar; si el daemon
+    # no está todavía, sin este env NO reintenta nunca. El script de arranque ya
+    # espera al socket (hyprland-home.nix); esto cubre además un PipeWire que
+    # tarde o se reinicie, y cualquier lanzamiento manual de `caelestia shell`.
+    environment.sessionVariables.QS_PIPEWIRE_IMMEDIATE_RECONNECT = "1";
+
     modules.desktop.caelestia.shellJsonPath = pkgs.writeText "caelestia-shell.json" shellJson;
 
     fonts.packages = fonts;

@@ -42,9 +42,11 @@ in
         -- GNOME). Va antes que el shell para que los workspaces ya existan
         -- cuando Caelestia dibuja la barra.
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-bind.sh")
-        -- Caelestia (Quickshell) reemplaza a Wayle como shell. El CLI vive en el
-        -- wrapper de caelestia-shell; `-d` lo desacopla de la terminal.
-        hl.exec_cmd("caelestia shell -d")
+        -- Caelestia (Quickshell) reemplaza a Wayle como shell. El script espera
+        -- a que el bus de sesión y PipeWire existan antes de lanzarlo: tras un
+        -- relogin de SDDM, Hyprland arranca antes que user@1000.service y
+        -- Quickshell solo conecta a D-Bus/PipeWire al iniciar (ver el script).
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/caelestia-start.sh")
         -- qpwgraph demonio: minimizado en el tray y aplicando el patchbay
         -- guardado. Ambas cosas son ajustes nativos de qpwgraph: "Start minimized
         -- to system tray" (Options) y guardar el patchbay activado una sola vez
@@ -903,6 +905,29 @@ in
         exec ~/.config/hypr/scripts/wallpaper-set.sh
       '';
     };
+    # Arranque de Caelestia. Espera al bus de sesión y al socket de PipeWire:
+    # tras un relogin de SDDM, Hyprland arranca antes que user@1000.service y
+    # Quickshell 0.3.2 conecta a D-Bus/PipeWire UNA sola vez (no reintenta). Sin
+    # esta espera el shell nacía sin volumen, sin MPRIS, sin notificaciones y
+    # sin bandeja (visto 2026-11-22 17:03:57, 8 s antes del user manager).
+    "hypr/scripts/caelestia-start.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Tope de 30 s: si el user manager no arranca, mejor un shell sin audio
+        # que una sesión sin shell.
+        for _ in $(seq 1 150); do
+          [ -S "$XDG_RUNTIME_DIR/bus" ] && [ -S "$XDG_RUNTIME_DIR/pipewire-0" ] && break
+          sleep 0.2
+        done
+        # Quickshell 0.3.2 no reintenta el primer pw_context_connect(); con esto
+        # vigila el runtime dir y se reconecta si PipeWire tarda o se reinicia.
+        export QS_PIPEWIRE_IMMEDIATE_RECONNECT=1
+        # La sesión viva no hereda sessionVariables hasta el próximo login.
+        export CAELESTIA_XKB_RULES_PATH="${pkgs.xkeyboard-config}/share/X11/xkb/rules/base.lst"
+        exec caelestia shell -d
+      '';
+    };
     "hypr/scripts/caelestia-restart.sh" = {
       executable = true;
       text = ''
@@ -922,11 +947,8 @@ in
         fi
         pkill -f 'quickshell.*caelestia-shell' 2>/dev/null
         sleep 0.5
-        # El indicador de layout lee estas reglas xkb. Se exporta aqui ademas de
-        # sessionVariables (caelestia.nix) para que valga sin relogin: la sesion
-        # viva no hereda todavia la variable nueva tras un rebuild.
-        export CAELESTIA_XKB_RULES_PATH="${pkgs.xkeyboard-config}/share/X11/xkb/rules/base.lst"
-        caelestia shell -d
+        # El arranque (espera de bus/PipeWire + exports) vive en un solo script.
+        exec ~/.config/hypr/scripts/caelestia-start.sh
       '';
     };
     # postHook de Caelestia: el CLI (caelestia-cli) lo invoca al cambiar de
