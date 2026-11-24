@@ -79,7 +79,7 @@ Por eso:
 - **Antes de crear un overlay se PREGUNTA.** La opcion se propone (que se
   parchea, por que, que cuesta) y el dueno decide. Nunca se crea por iniciativa
   propia.
-- Un paquete que **no existe** en nixpkgs (omnetpp) no es un overlay: es una
+- Un paquete que **no existe** en nixpkgs no es un overlay: es una
   derivacion propia, y va a la cache de Cachix desde el workflow.
 - Un paquete de nixpkgs que se parchea con `overrideAttrs` es deuda doble: se
   compila siempre y nadie lo va a cachear salvo vos. Es el ultimo recurso

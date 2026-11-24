@@ -263,8 +263,8 @@ Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
 Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
 `spice-find` y `spice-get`, ver "KiCad + SPICE" abajo), ngspice, FreeCAD,
-OpenRocket, OpenMotor, Qucs-S, SimulIDE, Logisim-Evolution, Octave.
-Utilities: 1Password CLI, `gh`, btop, cava, pipes-rs, scrcpy, virt-manager,
+OpenRocket, OpenMotor.
+Utilities: 1Password CLI, `gh`, btop, cava, pipes-rs, virt-manager,
 proton-vpn, openrgb, qpwgraph, dolphin, kdeconnect, tor-browser, yt-dlp.
 Fun: `cbonsai`.
 
@@ -496,8 +496,6 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
   lo reinicia y muestra el QR para abrir la sesión desde el navegador del
   celular. Sin Tailscale, usar `opencode pair --remote --yes`.
 - `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado, cierre en cadena).
-- `SecDesk` / `Mirror` (+ `_WiFi <ip>`) — scrcpy tablet mirroring, 85 fps,
-  h265/opus, virtual 1920x1080 display for a secure desk setup.
 - `ytsong` / `ytlist` — download audio from clipboard (yt-dlp, cookies from Firefox).
 - `estabilizar_clips` / `estabilizar_clips_gpu` — re-encode clips to CFR 30
   (CPU x264, or h264_vaapi encode on GPU) for stable editing. `_gpu` accepts

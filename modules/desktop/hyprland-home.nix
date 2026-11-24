@@ -243,8 +243,8 @@ in
       --    pierden su fullscreen. Solucion: flotante a tamaño de monitor
       --    (size/move con expresiones monitor_w/h), sin foco, sin animacion.
       hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, float = true, size = { "(monitor_w)", "(monitor_h)" }, move = { 0, 0 }, no_initial_focus = true, no_blur = true, no_anim = true })
-      -- GUIs de simulacion/HDL lanzadas desde la terminal (gtkwave, matplotlib,
-      -- logisim): nacen FLOTANTES y MAXIMIZADAS (fullscreen modo 1, el estilo
+      -- GUIs de simulacion/HDL lanzadas desde la terminal (gtkwave, matplotlib):
+      -- nacen FLOTANTES y MAXIMIZADAS (fullscreen modo 1, el estilo
       -- LibreOffice: cubre todo el mosaico respetando los gaps y la zona
       -- reservada de la barra de Caelestia (izquierda), verificado en vivo:
       -- margen uniforme, borde a unos px de la barra) encima de las terminales. Flotante = el layout en
@@ -256,7 +256,7 @@ in
       -- toma el foco (el fullscreen/maximize ademas no funciona con esa
       -- regla, bug documentado en kdeconnect-presenter).
       -- ponytail: el match es de cadena COMPLETA; app nueva = anadir su class.
-      hl.window_rule({ name = "sims-guis", match = { class = "^(gtkwave|python3|python|Tk|matplotlib|logisim-evolution)$" }, float = true, maximize = true })
+      hl.window_rule({ name = "sims-guis", match = { class = "^(gtkwave|python3|python|Tk|matplotlib)$" }, float = true, maximize = true })
 
       -----------------------
       ---- LAYER RULES ------

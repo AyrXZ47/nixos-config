@@ -78,6 +78,10 @@ in
 
   programs.home-manager.enable = true;
 
+  # Thunderbird: cliente de correo (todas las cuentas se configuran a mano en
+  # el perfil). El wrapper de home-manager trae MIME y los .desktop.
+  programs.thunderbird.enable = true;
+
   home.packages = with pkgs; [
     _1password-cli
     btop
@@ -97,7 +101,6 @@ in
     pi-coding-agent
     pipes-rs
     ripgrep
-    scrcpy
     unzip
     wget
     yt-dlp

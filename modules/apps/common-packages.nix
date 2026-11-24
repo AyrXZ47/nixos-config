@@ -58,86 +58,6 @@ let
   # pdf2md: PDF -> markdown con pymupdf (CPU). El modulo vive aparte porque el
   # check de `nix flake check` importa la misma derivacion que los hosts.
   pdf2md = import ./pdf2md.nix { inherit pkgs; };
-  # Logisim-Evolution: dark mode forzado de forma declarativa. La Look and Feel
-  # vive en java.util.prefs (Preferences.userNodeForPackage(Main) = nodo
-  # /com/cburch/logisim -> ~/.java/.userPrefs/com/cburch/logisim/prefs.xml), no
-  # en el config de NixOS, y los temas oscuros de 4.1.0 vienen a medio arreglar.
-  # El wrapper siembra la preferencia (FlatLaf Dark + canvas/grid oscuros) en
-  # cada lanzamiento y luego exec al binario real: así el dark mode es inmune a
-  # que el humano o un flush del propio Logisim lo revierta.
-  # ponytail: si una versión futura arregla los temas oscuros y el usuario se
-  # cansa del dark forzado, borrar este wrapper y usar Preferences -> Window ->
-  # Look and Feel del GUI.
-  logisimDarkSeed = pkgs.writeTextFile {
-    name = "logisim-dark-seed.py";
-    text = ''
-import os
-import xml.etree.ElementTree as ET
-
-d = os.path.expanduser("~/.java/.userPrefs/com/cburch/logisim")
-os.makedirs(d, exist_ok=True)
-f = os.path.join(d, "prefs.xml")
-# OJO: java.util.prefs (JDK moderno) guarda <map MAP_XML_VERSION="1.0"> con
-# doctype EXACTO y colores como int ARGB con signo (0xFF000000|rgb en signed
-# 32-bit), NO hex — Preferences.getInt hace Integer.parseInt (base 10) y un
-# "0x..." lanzaria y caeria al default. ElementTree no puede emitir el doctype,
-# asi que se serializa a mano en el formato byte-a-byte que escribe el JVM.
-prefs = {
-    "LookAndFeel": "com.formdev.flatlaf.FlatDarkLaf",
-    "canvasBgColor": "-13948117",  # 0xFF2B2B2B
-    "gridBgColor": "-13948117",
-    "gridDotColor": "-9539986",  # 0xFF6E6E6E
-    "gridZoomedDotColor": "-9539986",
-    "componentColor": "-1",  # 0xFFFFFFFF
-    "componentSecondaryColor": "-1",
-    "componentGhostColor": "-7697782",  # 0xFF8A8A8A
-    "componentIconColor": "-1",
-    # verde claro: el SimFalseColor default (0x006400) es invisible sobre canvas oscuro
-    "SimFalseColor": "-16733696",  # 0xFF00AA00
-}
-
-
-def esc(s):
-    return s.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;")
-
-
-entries = {}
-if os.path.exists(f):
-    try:
-        for e in ET.parse(f).getroot():
-            if e.tag == "entry":
-                entries[e.get("key")] = e.get("value")
-    except Exception:
-        entries = {}
-entries.update(prefs)
-lines = [
-    '<?xml version="1.0" encoding="UTF-8" standalone="no"?>',
-    '<!DOCTYPE map SYSTEM "http://java.sun.com/dtd/preferences.dtd">',
-    '<map MAP_XML_VERSION="1.0">',
-]
-for k in sorted(entries):
-    lines.append('  <entry key="{}" value="{}"/>'.format(esc(k), esc(entries[k])))
-lines.append("</map>")
-with open(f, "w") as out:
-    out.write("\n".join(lines) + "\n")
-    '';
-  };
-  logisimDark = pkgs.symlinkJoin {
-    name = "logisim-evolution";
-    paths = [ pkgs.logisim-evolution ];
-    postBuild = ''
-      # El .desktop e iconos del paquete original siguen en share/ (rofi los
-      # encuentra porque Exec=logisim-evolution resuelve a este wrapper).
-      mv $out/bin/logisim-evolution $out/bin/.logisim-evolution-real
-      cat > $out/bin/logisim-evolution <<EOF
-#!/bin/sh
-${pkgs.python3}/bin/python3 ${logisimDarkSeed}
-exec $out/bin/.logisim-evolution-real "\$@"
-EOF
-      chmod +x $out/bin/logisim-evolution
-    '';
-  };
-
   # Par de CLI que reemplaza el wizard/boton de Active-HDL en el flujo ghdl:
   #   vhdlnew <entidad>  -> crea <entidad>.vhd + tb_<entidad>.vhd (skeletons,
   #                         lo mismo que genera el "New VHDL File Wizard" del
@@ -257,10 +177,7 @@ PYEOF
   '';
 in
 {
-  imports = [ ./actual.nix ./omnetpp.nix ./python.nix ];
-
-  # Actual Budget desktop app (todos los hosts; firefox sigue siendo el browser default)
-  modules.apps.actual.enable = true;
+  imports = [ ./python.nix ];
 
   # Wireshark: el modulo de NixOS instala el wrapper setuid de dumpcap; el
   # usuario va en el grupo "wireshark" (ver modules/core/user.nix) para poder
@@ -417,9 +334,6 @@ in
     freecad
     openrocket
     openmotor
-    qucs-s
-    simulide
-    logisimDark
 
     # HDL / FPGA simulation (universidad, arquitectura de computadoras):
     # alternativa 100% Linux al Active-HDL (Windows-only) del profe. Cubre
@@ -439,13 +353,6 @@ in
     vhdlrun
 
     # Telecomunicaciones (universidad)
-    # 4nec2 es Windows-only; xnec2c es su equivalente libre en Linux (mismo
-    # motor NEC2, GUI con diagramas de radiacion y Smith). openems existe en
-    # nixpkgs pero es FDTD por consola (sin GUI): exagerado para el curso.
-    # geogebra6 ELIMINADO (2026-08-16): upstream borró la URL del tarball
-    # 6-0-794 (404) y el humano no lo usa — YAGNI. Si vuelve a necesitarse,
-    # verificar version actual en download.geogebra.org/installers/6.0/.
-    xnec2c
     wireshark
     # GNU Radio + GRC (gnuradio-companion): radio definida por software/SDR.
     # Se inyecta gr-osmosdr (bloque "osmocom Source") via extraPackages: el
@@ -467,8 +374,6 @@ in
     ffmpeg-full
 
     # AI & Development
-    # octaveFull trae la GUI Qt; el octave base viene sin GUI (solo CLI).
-    octaveFull
     ollama
     # pdf2md: PDF -> markdown para dar contexto (ver modules/apps/pdf2md.nix).
     pdf2md
@@ -524,7 +429,6 @@ in
     # nocturno es la única red). mongosh viene aparte, más abajo.
     mongodb-tools
     mongosh
-    qalculate-gtk
     usbutils
     # dmidecode/nvme-cli: auditoria de hardware (slots de RAM, SMART y
     # firmware del NVMe sin depender de `nvme` a mano). Ver la tarea del
@@ -532,7 +436,6 @@ in
     # `dmidecode -t 17` y `nvme smart-log`.
     dmidecode
     nvme-cli
-    scrcpy
     syncthing
     smartmontools
     ncdu

@@ -1,7 +1,7 @@
 # Python científico global (reemplazo de MATLAB) + mplcyberpunk.
 #
-# El rumor «no hay python3» era cierto: hasta ahora solo existía el pythonEnv
-# aislado de omnetpp (importado desde ese módulo, no visible globalmente).
+# El rumor «no hay python3» era cierto: hasta ahora no había un python global
+# (solo un env aislado dentro de otro módulo, no visible desde el PATH).
 # Este módulo expone un `python3` con pip + el stack que sustituye a MATLAB:
 #   numpy (+ scipy) = el cómputo vectorial/álgebra lineal de MATLAB
 #   matplotlib     = las gráficas (el `plot`/`surf` de MATLAB)

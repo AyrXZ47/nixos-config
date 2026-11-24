@@ -210,64 +210,6 @@
         exec opencode --auto
       }
 
-      SecDesk() {
-        adb disconnect
-        adb -d shell am kill-all
-        adb -d shell settings put system screen_brightness_mode 0
-        adb -d shell settings put system screen_brightness 0
-        (
-          env SDL_VIDEODRIVER=wayland SDL_RENDER_DRIVER=vulkan scrcpy \
-            -d --stay-awake --new-display=1920x1080 \
-            --video-codec=h265 --video-bit-rate 50M --max-fps 85 \
-            --audio-codec=opus --audio-bit-rate 128K --audio-buffer=50 \
-            --fullscreen > /dev/null 2>&1
-          adb -d shell settings put system screen_brightness_mode 1
-        ) &!
-      }
-
-      Mirror() {
-        adb disconnect
-        (
-          env SDL_VIDEODRIVER=wayland SDL_RENDER_DRIVER=vulkan scrcpy \
-            -d --stay-awake --video-codec=h265 --video-bit-rate 50M --max-fps 85 \
-            --fullscreen > /dev/null 2>&1
-        ) &!
-      }
-
-      SecDesk_WiFi() {
-        if [[ -z "$1" ]]; then
-          echo "Uso: SecDesk_WiFi <IP_DE_LA_TABLET>"
-          return 1
-        fi
-        adb connect "$1:5555"
-        sleep 1
-        adb -s "$1:5555" shell am kill-all
-        adb -s "$1:5555" shell settings put system screen_brightness_mode 0
-        adb -s "$1:5555" shell settings put system screen_brightness 0
-        (
-          env SDL_VIDEODRIVER=wayland SDL_RENDER_DRIVER=vulkan scrcpy \
-            -s "$1:5555" --stay-awake --new-display=1920x1080 \
-            --video-codec=h265 --video-bit-rate 16M --max-fps 85 \
-            --audio-codec=opus --audio-bit-rate 128K --audio-buffer=50 \
-            --fullscreen > /dev/null 2>&1
-          adb -s "$1:5555" shell settings put system screen_brightness_mode 1
-        ) &!
-      }
-
-      Mirror_WiFi() {
-        if [[ -z "$1" ]]; then
-          echo "Uso: Mirror_WiFi <IP_DE_LA_TABLET>"
-          return 1
-        fi
-        adb connect "$1:5555"
-        sleep 1
-        (
-          env SDL_VIDEODRIVER=wayland SDL_RENDER_DRIVER=vulkan scrcpy \
-            -s "$1:5555" --stay-awake --video-codec=h265 --video-bit-rate 16M --max-fps 85 \
-            --fullscreen > /dev/null 2>&1
-        ) &!
-      }
-
       # YouTube exige PO Token a los clientes web logueados (403 al descargar);
       # tv_downgraded/tv/visionos siguen entregando URLs que funcionan con cookies.
       yt_url() {
