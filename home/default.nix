@@ -14,6 +14,7 @@ in
     ../modules/apps/git.nix
     ../modules/apps/mpd.nix
     ../modules/apps/firefox.nix
+    ../modules/apps/thunderbird.nix
     ../modules/apps/pi.nix
     ../modules/apps/opencode.nix
     ../modules/apps/deepseek-harness.nix
@@ -77,10 +78,6 @@ in
   '';
 
   programs.home-manager.enable = true;
-
-  # Thunderbird: cliente de correo (todas las cuentas se configuran a mano en
-  # el perfil). El wrapper de home-manager trae MIME y los .desktop.
-  programs.thunderbird.enable = true;
 
   home.packages = with pkgs; [
     _1password-cli

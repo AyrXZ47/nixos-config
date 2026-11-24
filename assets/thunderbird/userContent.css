@@ -1,0 +1,74 @@
+/* Cyberpunk Neon para el panel de 3 columnas de Thunderbird.
+ *
+ * userChrome.css no cruza al documento about:3pane (carpetas, lista de
+ * mensajes y cabecera). Esto completa el tema sin tocar el cuerpo HTML de
+ * los correos, que se sigue renderizando como lo escribió el remitente.
+ */
+
+@-moz-document url("about:3pane") {
+  :root {
+    color-scheme: dark !important;
+
+    --cp-frame: #000b1e;
+    --cp-toolbar: #091833;
+    --cp-field: #0b2956;
+    --cp-active: #321959;
+    --cp-cyan: #0abdc6;
+    --cp-magenta: #ea00d9;
+    --cp-teal: #057583;
+
+    --layout-background-0: var(--cp-frame) !important;
+    --layout-background-1: var(--cp-toolbar) !important;
+    --layout-background-2: var(--cp-field) !important;
+    --layout-background-3: var(--cp-field) !important;
+    --layout-background-4: var(--cp-active) !important;
+
+    --layout-color-0: #e6feff !important;
+    --layout-color-1: var(--cp-cyan) !important;
+    --layout-color-2: #6fe3ea !important;
+    --layout-color-3: #3fa7af !important;
+
+    --layout-border-0: var(--cp-teal) !important;
+    --layout-border-1: var(--cp-teal) !important;
+    --layout-border-2: var(--cp-teal) !important;
+
+    --sidebar-background-color: var(--cp-toolbar) !important;
+    --sidebar-text-color: var(--cp-cyan) !important;
+    --sidebar-border-color: var(--cp-teal) !important;
+    --sidebar-highlight-background-color: var(--cp-active) !important;
+    --sidebar-highlight-text-color: var(--cp-magenta) !important;
+
+    --selected-item-color: var(--cp-active) !important;
+    --selected-item-text-color: var(--cp-magenta) !important;
+    --listbox-focused-selected-bg: var(--cp-active) !important;
+    --listbox-selected-color: var(--cp-magenta) !important;
+    --listbox-selected-bg: color-mix(in srgb, var(--cp-active) 65%, var(--cp-frame)) !important;
+
+    --button-primary-background-color: var(--cp-magenta) !important;
+    --button-primary-text-color: var(--cp-frame) !important;
+    --button-primary-border-color: var(--cp-magenta) !important;
+    --button-primary-hover-background-color: color-mix(in srgb, var(--cp-magenta) 80%, black) !important;
+    --button-primary-active-background-color: color-mix(in srgb, var(--cp-magenta) 70%, black) !important;
+    --focus-outline-color: var(--cp-magenta) !important;
+  }
+
+  #folderPane,
+  #threadPane,
+  #messagePane {
+    background-color: var(--cp-frame) !important;
+    color: var(--cp-cyan) !important;
+  }
+
+  #folderPaneHeaderBar,
+  #threadPaneHeaderBar {
+    background-color: var(--cp-toolbar) !important;
+    color: var(--cp-cyan) !important;
+    border-color: var(--cp-teal) !important;
+  }
+
+  #folderPaneWriteMessage {
+    background-color: var(--cp-magenta) !important;
+    color: var(--cp-frame) !important;
+    border-color: var(--cp-magenta) !important;
+  }
+}
