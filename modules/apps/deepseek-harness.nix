@@ -62,7 +62,13 @@ let
             serverName = "duckduckgo";
             transport = "stdio";
             command = "${pkgs.uv}/bin/uvx";
-            args = [ "duckduckgo-mcp-server" ];
+            # --python de nixpkgs: uv baja un CPython foraneo si no se lo clava
+            # (ver el comentario en opencode.nix).
+            args = [
+              "--python"
+              "${pkgs.python3}/bin/python3"
+              "duckduckgo-mcp-server"
+            ];
           };
         }
         {

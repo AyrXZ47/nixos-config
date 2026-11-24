@@ -81,7 +81,16 @@ let
         };
         duckduckgo = {
           type = "local";
-          command = [ "${pkgs.uv}/bin/uvx" "duckduckgo-mcp-server" ];
+          # --python: sin esto uv baja un CPython "managed" a ~/.local/share/uv
+          # que en NixOS solo corre con nix-ld. Si nix-ld no esta, /lib64 apunta
+          # a stub-ld y el MCP muere con exit 127. El paquete sigue viniendo de
+          # PyPI (uvx), pero el interprete es el de nixpkgs.
+          command = [
+            "${pkgs.uv}/bin/uvx"
+            "--python"
+            "${pkgs.python3}/bin/python3"
+            "duckduckgo-mcp-server"
+          ];
           timeout = {
             startup = 120000;
           };
