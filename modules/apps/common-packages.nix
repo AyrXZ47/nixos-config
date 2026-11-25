@@ -179,14 +179,6 @@ in
 {
   imports = [ ./python.nix ];
 
-  # Wireshark: el modulo de NixOS instala el wrapper setuid de dumpcap; el
-  # usuario va en el grupo "wireshark" (ver modules/core/user.nix) para poder
-  # capturar sin ser root.
-  programs.wireshark = {
-    enable = true;
-    package = pkgs.wireshark;
-  };
-
   services.ollama.enable = true;
 
   # Contexto 16k por defecto (el default de ollama es 4096): sesiones largas
@@ -356,7 +348,6 @@ in
     vhdlrun
 
     # Telecomunicaciones (universidad)
-    wireshark
     # GNU Radio + GRC (gnuradio-companion): radio definida por software/SDR.
     # Se inyecta gr-osmosdr (bloque "osmocom Source") via extraPackages: el
     # wrapper lo agrega a GRC_BLOCKS_PATH y al python del env. El bloque

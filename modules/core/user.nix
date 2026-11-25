@@ -38,7 +38,7 @@ in {
   users.users.yovick = {
     isNormalUser = true;
     description = "Yovick RZ";
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" "i2c" "input" "wireshark" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" "i2c" "input" ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     # Clave de la laptop declarada en el repo: el pc tenia solo una clave
