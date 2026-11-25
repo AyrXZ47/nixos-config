@@ -223,7 +223,7 @@
         yt-dlp --no-warnings --no-playlist --extract-audio --audio-format opus --audio-quality 0 \
           -f "bestaudio/best" \
           --embed-metadata --embed-thumbnail --js-runtimes node \
-          --cookies-from-browser firefox \
+          --cookies-from-browser brave \
           --extractor-args "youtube:player_client=tv_downgraded,tv,visionos" \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"
       }
@@ -233,7 +233,7 @@
         yt-dlp --no-warnings --ignore-errors --extract-audio --audio-format opus --audio-quality 0 \
           -f "bestaudio/best" \
           --embed-metadata --embed-thumbnail --js-runtimes node \
-          --cookies-from-browser firefox --no-overwrites \
+          --cookies-from-browser brave --no-overwrites \
           --sleep-requests 1 --sleep-interval 3 --max-sleep-interval 8 \
           --extractor-args "youtube:player_client=tv_downgraded,tv,visionos" \
           -o "%(uploader)s - %(title)s.%(ext)s" "$url"

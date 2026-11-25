@@ -13,8 +13,6 @@ in
     ../modules/apps/fastfetch.nix
     ../modules/apps/git.nix
     ../modules/apps/mpd.nix
-    ../modules/apps/firefox.nix
-    ../modules/apps/thunderbird.nix
     ../modules/apps/pi.nix
     ../modules/apps/opencode.nix
     ../modules/apps/deepseek-harness.nix
@@ -29,6 +27,9 @@ in
   home.username = "yovick";
   home.homeDirectory = "/home/yovick";
   home.stateVersion = "26.05";
+
+  # Brave es el único navegador del sistema; lo usan las TUIs y xdg-open.
+  home.sessionVariables.BROWSER = "brave";
 
   xdg.userDirs = {
     enable = true;

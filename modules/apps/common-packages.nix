@@ -296,13 +296,16 @@ in
   environment.systemPackages = with pkgs; [
       # Browsers
     tor-browser
-    brave-origin
+    brave
 
     # Office & Productivity
     # libreoffice-stable: upstream cambio su esquema de versiones y nixpkgs
     # deprecó el attr viejo (libreoffice-fresh emite evaluation warning).
     libreoffice-stable
     keepassxc
+    # Ferdium: agregador de mensajería. Arranca desde SUPER+W (time-to-work),
+    # oculto en el workspace especial "communication"; no al encender el host.
+    ferdium
 
     # LaTeX completo (scheme-full: todas las colecciones, fuentes y utilidades)
     (texlive.withPackages (ps: [ ps.scheme-full ]))

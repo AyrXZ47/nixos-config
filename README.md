@@ -257,9 +257,9 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 - **Rust**: `rustup` (toolchains on demand). **JS**: `pnpm`.
 
 ### Applications
-Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Firefox (autohide
-toolbox via userChrome.css), Thunderbird (perfil declarativo, sin tema propio);
-arranca oculto en el workspace `communication` y se muestra con `SUPER SHIFT M`.
+Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Brave (navegador
+default), Ferdium (mensajería, arranca con `SUPER W` en el workspace
+`communication`); se muestra con `SUPER CTRL C`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
 Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
@@ -474,8 +474,8 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 | `SUPER arrows` / `SUPER SHIFT arrows` | Focus / move window |
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
 | `SUPER ALT SHIFT 1-9` | Move ALL windows of active ws to N and follow (GNOME-style) |
-| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox → kitty on ws 1-4 |
-| `SUPER CTRL M` | Mostrar/ocultar Thunderbird (workspace especial `communication`, arranca en segundo plano) |
+| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Brave → kitty on ws 1-4, y Ferdium en `communication` |
+| `SUPER CTRL C` | Mostrar/ocultar el workspace especial `communication` (Ferdium) |
 | `SUPER N` | *netrunner*: btop + nvtop (2 ventanas kitty) |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |
@@ -498,7 +498,7 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
   lo reinicia y muestra el QR para abrir la sesión desde el navegador del
   celular. Sin Tailscale, usar `opencode pair --remote --yes`.
 - `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado, cierre en cadena).
-- `ytsong` / `ytlist` — download audio from clipboard (yt-dlp, cookies from Firefox).
+- `ytsong` / `ytlist` — download audio from clipboard (yt-dlp, cookies from Brave).
 - `estabilizar_clips` / `estabilizar_clips_gpu` — re-encode clips to CFR 30
   (CPU x264, or h264_vaapi encode on GPU) for stable editing. `_gpu` accepts
   mp4/mov/mkv, applies the clip's own rotation, and re-encodes non-AAC audio to

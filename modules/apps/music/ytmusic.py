@@ -242,7 +242,7 @@ def ydl_json(url, cookies=False, playlist=False):
     else:
         cmd += ["--skip-download", "--no-playlist"]
     if cookies:
-        cmd += ["--cookies-from-browser", "firefox"]
+        cmd += ["--cookies-from-browser", "brave"]
     r = subprocess.run(cmd + [url], capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError((r.stderr or "").strip().splitlines()[-1:] or ["yt-dlp fallo"])
@@ -260,7 +260,7 @@ def _dest_name(url, cookies=False):
     cmd = YDL + CLIENTS + ["--skip-download", "--no-playlist",
                            "--print", "%(uploader)s - %(title)s"]
     if cookies:
-        cmd += ["--cookies-from-browser", "firefox"]
+        cmd += ["--cookies-from-browser", "brave"]
     r = subprocess.run(cmd + [url], capture_output=True, text=True)
     return (r.stdout or "").strip().splitlines()[-1] if r.stdout.strip() else ""
 
@@ -303,7 +303,7 @@ def download(urls, cookies=False):
         "--newline",
     ]
     if cookies:
-        args += ["--cookies-from-browser", "firefox"]
+        args += ["--cookies-from-browser", "brave"]
     done = 0
     for i, u in enumerate(urls, 1):
         print(f"[{i}/{len(urls)}] {u}", flush=True)
@@ -1102,7 +1102,7 @@ def main():
     p.add_argument("urls", nargs="+")
     p.add_argument("--download", action="store_true", help="bajar las que faltan")
     p.add_argument("--json", action="store_true")
-    p.add_argument("--cookies", action="store_true", help="usar cookies de Firefox")
+    p.add_argument("--cookies", action="store_true", help="usar cookies de Brave")
     p.add_argument("--force", action="store_true",
                    help="bajar tambien lo que se parece a algo que ya tenes")
     f = sub.add_parser("fix", help="repara tags + portada por PURL")

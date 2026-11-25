@@ -93,7 +93,7 @@
 
   # Reutiliza los módulos home del repo (shell con powerlevel10k, nvim con
   # plugins, git). Requiere el home-manager nuevo (ver flake.nix).
-  # No se importan kitty (Android usa la terminal de Termux), mpd ni firefox
+  # No se importan kitty (Android usa la terminal de Termux), mpd ni el navegador de escritorio
   # (dependen de systemd).
   # fastfetch SI se importa (mas abajo): mismo config que la pc, pero con
   # modules.apps.fastfetch.asciiLogo, porque el logo grafico va por protocolo

@@ -53,11 +53,6 @@ in
         -- (File > Save Patchbay As); al arrancar restaura el último archivo. Para
         -- editar rutas se lanza qpwgraph de nuevo (instancia unica -> muestra la UI).
         hl.exec_cmd("qpwgraph")
-        -- Thunderbird en segundo plano: arranca oculto en el workspace
-        -- especial "communication" (Caelestia ya le dibuja el icono) y se
-        -- muestra/oculta con SUPER+SHIFT+M. El proceso sigue chequeando
-        -- correo y notificando aunque la ventana no esté visible.
-        hl.exec_cmd("thunderbird", { workspace = "special:communication" })
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-set.sh")
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
@@ -345,10 +340,9 @@ in
         hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
       end
 
-      -- Correo: atajo propio (no es default de Hyprland ni de Caelestia).
-      -- Muestra/oculta el workspace especial "communication", donde
-      -- Thunderbird vive en segundo plano (autostart arriba).
-      hl.bind("SUPER + CTRL + M", hl.dsp.workspace.toggle_special("communication"))
+      -- Comunicación: muestra/oculta el workspace especial "communication".
+      -- Ferdium se lanza ahí desde SUPER+W (time-to-work), no al encender.
+      hl.bind("SUPER + CTRL + C", hl.dsp.workspace.toggle_special("communication"))
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       -- netrunner abre sus propias ventanas kitty independientes (clase
       -- `kitty` por defecto): el dedupe de Caelestia las colapsa a un icono.
@@ -416,7 +410,7 @@ in
 
       -- Control de reproducción: Caelestia expone shortcuts globales de Hyprland
       -- (caelestia:media*) que van por MPRIS, así que SUPER+F7 pausa lo que sea
-      -- que esté sonando (YouTube/Firefox, VLC, mpv...). El `|| mpc` como
+      -- que esté sonando (YouTube/Brave, VLC, mpv...). El `|| mpc` como
       -- fallback para MPD ya no aplica: el global shortcut no devuelve estado,
       -- y Caelestia cubre MPRIS que es el caso real.
       hl.bind("SUPER + F7", hl.dsp.global("caelestia:mediaToggle"))
@@ -600,8 +594,13 @@ in
         # ese escritorio aunque la app tarde en mapear su ventana.
         hyprctl dispatch 'hl.dsp.exec_cmd("mixxx", { workspace = 1 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("obsidian", { workspace = 2 })'
-        hyprctl dispatch 'hl.dsp.exec_cmd("firefox", { workspace = 3 })'
+        hyprctl dispatch 'hl.dsp.exec_cmd("brave", { workspace = 3 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("kitty", { workspace = 4 })'
+        # Ferdium recién acá, oculto en el workspace especial. Si ya está
+        # corriendo, no se duplica.
+        if ! pgrep -f '[f]erdium' >/dev/null 2>&1; then
+          hyprctl dispatch 'hl.dsp.exec_cmd("ferdium", { workspace = "special:communication" })'
+        fi
       '';
     };
 
@@ -1408,9 +1407,9 @@ except Exception:
       cat > "$1" <<EOF
 [Default Applications]
 application/pdf=org.kde.okular.desktop
-text/html=firefox.desktop
-x-scheme-handler/http=firefox.desktop
-x-scheme-handler/https=firefox.desktop
+text/html=brave-browser.desktop
+x-scheme-handler/http=brave-browser.desktop
+x-scheme-handler/https=brave-browser.desktop
 image/avif=org.kde.gwenview.desktop
 image/bmp=org.kde.gwenview.desktop
 image/gif=org.kde.gwenview.desktop
@@ -1567,7 +1566,7 @@ EOF
     # El diálogo "Open with" de KDE, al elegir un binario por "browse", genera
     # .desktop NoDisplay en ~/.local/share/applications (con sufijo -N); KDE los
     # descarta al resolver el default y re-pregunta siempre. Se limpian TODOS
-    # los stubs -N (gwenview-2, firefox-2, ...) y se usa el id real. Tambien
+    # los stubs -N (gwenview-2, brave-browser-2, ...) y se usa el id real. Tambien
     # los atajos que el make de omnetpp registraba ahi (ide/shell apuntando a
     # "setenv", rotos en NixOS): el paquete nuevo ya no los genera.
     rm -f "$HOME/.local/share/applications/"*-[0-9].desktop
