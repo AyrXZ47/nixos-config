@@ -475,7 +475,7 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
 | `SUPER ALT SHIFT 1-9` | Move ALL windows of active ws to N and follow (GNOME-style) |
 | `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox → kitty on ws 1-4 |
-| `SUPER SHIFT M` | Mostrar/ocultar Thunderbird (workspace especial `communication`, arranca en segundo plano) |
+| `SUPER CTRL M` | Mostrar/ocultar Thunderbird (workspace especial `communication`, arranca en segundo plano) |
 | `SUPER N` | *netrunner*: btop + nvtop (2 ventanas kitty) |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |

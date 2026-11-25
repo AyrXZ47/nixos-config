@@ -345,9 +345,10 @@ in
         hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
       end
 
-      -- Correo: muestra/oculta el workspace especial "communication", donde
+      -- Correo: atajo propio (no es default de Hyprland ni de Caelestia).
+      -- Muestra/oculta el workspace especial "communication", donde
       -- Thunderbird vive en segundo plano (autostart arriba).
-      hl.bind("SUPER + SHIFT + M", hl.dsp.workspace.toggle_special("communication"))
+      hl.bind("SUPER + CTRL + M", hl.dsp.workspace.toggle_special("communication"))
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       -- netrunner abre sus propias ventanas kitty independientes (clase
       -- `kitty` por defecto): el dedupe de Caelestia las colapsa a un icono.
