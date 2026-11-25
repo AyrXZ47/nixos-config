@@ -210,6 +210,12 @@ in
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
+      -- Brave vive en el workspace 3 (el que era de Firefox) y Ferdium en el
+      -- especial "communication". Son window rules, no `exec` con workspace:
+      -- así funcionan también cuando la app ya está corriendo y no cambian de
+      -- escritorio (Ferdium queda oculto hasta SUPER+CTRL+C).
+      hl.window_rule({ name = "brave-ws3", match = { class = "brave-browser" }, workspace = 3 })
+      hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication" })
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
       -- vidrio esmerilado — blur del compositor detrás de la transparencia
       -- propia (background_opacity). opacity "1 override" fuerza 1.0 absoluto
@@ -590,16 +596,16 @@ in
         #!/usr/bin/env bash
         # Con config Lua, "hyprctl dispatch exec [workspace N]" ya no se parsea
         # (error: ']' expected); la regla de workspace se pasa como 2º argumento
-        # del dispatcher hl.dsp.exec_cmd. La regla sigue forzando la apertura en
-        # ese escritorio aunque la app tarde en mapear su ventana.
+        # del dispatcher hl.dsp.exec_cmd. Brave y Ferdium van por window_rule
+        # (arriba): Brave al 3 y Ferdium al especial, sin cambiar de escritorio.
         hyprctl dispatch 'hl.dsp.exec_cmd("mixxx", { workspace = 1 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("obsidian", { workspace = 2 })'
-        hyprctl dispatch 'hl.dsp.exec_cmd("brave", { workspace = 3 })'
+        hyprctl dispatch 'hl.dsp.exec_cmd("brave")'
         hyprctl dispatch 'hl.dsp.exec_cmd("kitty", { workspace = 4 })'
         # Ferdium recién acá, oculto en el workspace especial. Si ya está
         # corriendo, no se duplica.
         if ! pgrep -f '[f]erdium' >/dev/null 2>&1; then
-          hyprctl dispatch 'hl.dsp.exec_cmd("ferdium", { workspace = "special:communication" })'
+          hyprctl dispatch 'hl.dsp.exec_cmd("ferdium")'
         fi
       '';
     };
