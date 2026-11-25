@@ -259,7 +259,7 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 ### Applications
 Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Brave (navegador
 default, incluye ventana privada con Tor), Ferdium (mensajería, arranca con
-`SUPER W` en el workspace `communication`); se muestra con `SUPER CTRL C`.
+`SUPER W` en el workspace 9); se alterna con `SUPER CTRL C`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
 Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
@@ -474,8 +474,8 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 | `SUPER arrows` / `SUPER SHIFT arrows` | Focus / move window |
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
 | `SUPER ALT SHIFT 1-9` | Move ALL windows of active ws to N and follow (GNOME-style) |
-| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Brave → kitty on ws 1-4, y Ferdium en `communication` |
-| `SUPER CTRL C` | Mostrar/ocultar el workspace especial `communication` (Ferdium) |
+| `SUPER W` | *time-to-work*: Mixxx → Obsidian → Brave → kitty on ws 1-4, y Ferdium en el workspace 9 |
+| `SUPER CTRL C` | Alternar Ferdium (workspace 9) / Obsidian (workspace 2) |
 | `SUPER N` | *netrunner*: btop + nvtop (2 ventanas kitty) |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |
