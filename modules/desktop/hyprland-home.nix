@@ -210,12 +210,11 @@ in
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
-      -- Brave vive en el workspace 3 (el que era de Firefox). Ferdium va a un
-      -- workspace regular (9), no al especial: Hyprland activa el especial al
-      -- mover una ventana ahí y tapaba Obsidian. `no_initial_focus` evita que
-      -- Ferdium robe el foco al abrirse.
+      -- Brave vive en el workspace 3 (el que era de Firefox). Ferdium va al
+      -- especial "communication": time-to-work lo abre primero y lo vuelve a
+      -- ocultar enseguida, antes de levantar los workspaces principales.
       hl.window_rule({ name = "brave-ws3", match = { class = "brave-browser" }, workspace = 3 })
-      hl.window_rule({ name = "ferdium-ws9", match = { class = "ferdium" }, workspace = 9, no_initial_focus = true })
+      hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication", no_initial_focus = true })
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
       -- vidrio esmerilado — blur del compositor detrás de la transparencia
       -- propia (background_opacity). opacity "1 override" fuerza 1.0 absoluto
@@ -346,9 +345,9 @@ in
         hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
       end
 
-      -- Comunicación: alterna Ferdium (workspace 9) y Obsidian (workspace 2).
-      -- Ferdium se lanza desde SUPER+W (time-to-work), no al encender.
-      hl.bind("SUPER + CTRL + C", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/communication-toggle.sh"))
+      -- Comunicación: muestra/oculta el workspace especial "communication".
+      -- Ferdium se lanza ahí desde SUPER+W (time-to-work), no al encender.
+      hl.bind("SUPER + CTRL + C", hl.dsp.workspace.toggle_special("communication"))
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       -- netrunner abre sus propias ventanas kitty independientes (clase
       -- `kitty` por defecto): el dedupe de Caelestia las colapsa a un icono.
@@ -596,34 +595,32 @@ in
         #!/usr/bin/env bash
         # Con config Lua, "hyprctl dispatch exec [workspace N]" ya no se parsea
         # (error: ']' expected); la regla de workspace se pasa como 2º argumento
-        # del dispatcher hl.dsp.exec_cmd. Brave y Ferdium van por window_rule
-        # (arriba): Brave al 3 y Ferdium al 9, sin cambiar de escritorio.
+        # del dispatcher hl.dsp.exec_cmd. Brave va por window_rule (al 3).
+        # Ferdium arranca PRIMERO en el especial: después se oculta solo y se
+        # levantan los workspaces principales. Si ya estaba corriendo, no se
+        # duplica y no se toca el estado del especial.
+        special_before=$(hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '[.[] | .specialWorkspace.name // ""] | join(",")')
+        launched=0
+        if ! pgrep -f '[f]erdium' >/dev/null 2>&1; then
+          hyprctl dispatch 'hl.dsp.exec_cmd("ferdium")'
+          launched=1
+        fi
+        if [ "$launched" = "1" ] && ! printf '%s' "$special_before" | grep -q 'communication'; then
+          # El launch abrió el especial; esperar a que esté visible y cerrarlo.
+          for _ in $(seq 1 50); do
+            if hyprctl monitors -j | ${pkgs.jq}/bin/jq -r '[.[] | .specialWorkspace.name // ""] | join(",")' | grep -q 'communication'; then
+              hyprctl dispatch 'hl.dsp.workspace.toggle_special("communication")'
+              break
+            fi
+            sleep 0.1
+          done
+        fi
         hyprctl dispatch 'hl.dsp.exec_cmd("mixxx", { workspace = 1 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("obsidian", { workspace = 2 })'
         hyprctl dispatch 'hl.dsp.exec_cmd("brave")'
         hyprctl dispatch 'hl.dsp.exec_cmd("kitty", { workspace = 4 })'
-        # Ferdium recién acá, oculto en el workspace 9. Si ya está
-        # corriendo, no se duplica.
-        if ! pgrep -f '[f]erdium' >/dev/null 2>&1; then
-          hyprctl dispatch 'hl.dsp.exec_cmd("ferdium")'
-        fi
-        # Ferdium tarda en mapear; después Obsidian queda a la vista.
-        sleep 1
+        # Obsidian queda a la vista.
         hyprctl dispatch 'hl.dsp.focus({ workspace = 2 })'
-      '';
-    };
-
-    "hypr/scripts/communication-toggle.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        # SUPER+CTRL+C: alterna Ferdium (ws 9) y Obsidian (ws 2).
-        cur=$(hyprctl activeworkspace -j | ${pkgs.jq}/bin/jq -r '.id')
-        if [ "$cur" = "9" ]; then
-          hyprctl dispatch 'hl.dsp.focus({ workspace = 2 })'
-        else
-          hyprctl dispatch 'hl.dsp.focus({ workspace = 9 })'
-        fi
       '';
     };
 
