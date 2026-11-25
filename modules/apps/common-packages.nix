@@ -294,8 +294,8 @@ in
     };
 
   environment.systemPackages = with pkgs; [
-      # Browsers
-    tor-browser
+    # Navegador único. Brave incluye "Private Window with Tor" (no es el Tor
+    # Browser endurecido, pero cubre onion y circunvención).
     brave
 
     # Office & Productivity

@@ -258,15 +258,15 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 
 ### Applications
 Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Brave (navegador
-default), Ferdium (mensajería, arranca con `SUPER W` en el workspace
-`communication`); se muestra con `SUPER CTRL C`.
+default, incluye ventana privada con Tor), Ferdium (mensajería, arranca con
+`SUPER W` en el workspace `communication`); se muestra con `SUPER CTRL C`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
 Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
 `spice-find` y `spice-get`, ver "KiCad + SPICE" abajo), ngspice, FreeCAD,
 OpenRocket, OpenMotor.
 Utilities: 1Password CLI, `gh`, btop, cava, pipes-rs, virt-manager,
-proton-vpn, openrgb, qpwgraph, dolphin, kdeconnect, tor-browser, yt-dlp.
+proton-vpn, openrgb, qpwgraph, dolphin, kdeconnect, yt-dlp.
 Fun: `cbonsai`.
 
 ### KiCad + SPICE (circuitos — universidad)
