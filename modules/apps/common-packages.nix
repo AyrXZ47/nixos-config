@@ -268,19 +268,10 @@ in
       };
     };
 
-  # Defaults de Brave por política: se aplican a nivel máquina, así que valen
-  # para cualquier perfil y sobreviven a una instalación limpia. No cubre tema
-  # ni layout: eso vive en el perfil y no es policy-able.
-  environment.etc."brave/policies/managed/defaults.json".text =
-    builtins.toJSON {
-      BookmarkBarEnabled = false;
-      PasswordManagerEnabled = false;
-      AutofillAddressEnabled = false;
-      AutofillCreditCardEnabled = false;
-      MetricsReportingEnabled = false;
-      HardwareAccelerationModeEnabled = true;
-      # Sin DefaultSearchProvider*: el buscador queda a elección en la UI.
-    };
+  # Defaults de Brave: sin política a propósito. El navegador arranca con lo
+  # que tenga el perfil y el usuario elige todo desde la UI. La única policy
+  # que queda es la de opencode-browse (instala la extensión de browse, no
+  # cambia preferencias del navegador).
 
   environment.systemPackages = with pkgs; [
     # Navegador único. Brave incluye "Private Window with Tor" (no es el Tor
