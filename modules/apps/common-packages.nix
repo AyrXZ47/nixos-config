@@ -279,10 +279,7 @@ in
       AutofillCreditCardEnabled = false;
       MetricsReportingEnabled = false;
       HardwareAccelerationModeEnabled = true;
-      DefaultSearchProviderEnabled = true;
-      DefaultSearchProviderName = "DuckDuckGo";
-      DefaultSearchProviderSearchURL = "https://duckduckgo.com/?q={searchTerms}";
-      DefaultSearchProviderSuggestURL = "https://duckduckgo.com/ac/?q={searchTerms}&type=list";
+      # Sin DefaultSearchProvider*: el buscador queda a elección en la UI.
     };
 
   environment.systemPackages = with pkgs; [
