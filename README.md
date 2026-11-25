@@ -259,7 +259,8 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 ### Applications
 Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Firefox (autohide
 toolbox via userChrome.css), Thunderbird (perfil declarativo y tema Cyberpunk
-Neon vía userChrome.css).
+Neon vía userChrome.css); arranca oculto en el workspace `communication` y se
+muestra con `SUPER SHIFT M`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
 Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
@@ -475,6 +476,7 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 | `SUPER 1-9` / `SUPER SHIFT 1-9` | Switch / move to workspace |
 | `SUPER ALT SHIFT 1-9` | Move ALL windows of active ws to N and follow (GNOME-style) |
 | `SUPER W` | *time-to-work*: Mixxx → Obsidian → Firefox → kitty on ws 1-4 |
+| `SUPER SHIFT M` | Mostrar/ocultar Thunderbird (workspace especial `communication`, arranca en segundo plano) |
 | `SUPER N` | *netrunner*: btop + nvtop (2 ventanas kitty) |
 | `SUPER SPACE` | Switch keyboard layout (latam/us) |
 | `SUPER L` | Lock session (Caelestia lock + hooks OpenRGB/cliphist) |

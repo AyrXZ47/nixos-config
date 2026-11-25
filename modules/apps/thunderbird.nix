@@ -9,8 +9,16 @@
     profiles.yovick = {
       isDefault = true;
 
-      # Sin este pref Thunderbird ignora chrome/userChrome.css.
-      settings."toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+      settings = {
+        # Sin este pref Thunderbird ignora chrome/userChrome.css.
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+
+        # Mantiene el icono en la bandeja (Linux) y usa las notificaciones
+        # nativas: TB sigue avisando aunque la ventana esté oculta.
+        "mail.biff.show_tray_icon_always" = true;
+        "mail.biff.show_alert" = true;
+        "mail.biff.use_system_alert" = true;
+      };
 
       # Paleta Cyberpunk Neon, la misma que usa Firefox.
       userChrome = builtins.readFile ../../assets/thunderbird/userChrome.css;

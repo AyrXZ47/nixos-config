@@ -53,6 +53,11 @@ in
         -- (File > Save Patchbay As); al arrancar restaura el último archivo. Para
         -- editar rutas se lanza qpwgraph de nuevo (instancia unica -> muestra la UI).
         hl.exec_cmd("qpwgraph")
+        -- Thunderbird en segundo plano: arranca oculto en el workspace
+        -- especial "communication" (Caelestia ya le dibuja el icono) y se
+        -- muestra/oculta con SUPER+SHIFT+M. El proceso sigue chequeando
+        -- correo y notificando aunque la ventana no esté visible.
+        hl.exec_cmd("thunderbird", { workspace = "special:communication" })
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-set.sh")
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
@@ -340,6 +345,9 @@ in
         hl.bind("SUPER + ALT + SHIFT + " .. i, hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/workspace-move-all.sh " .. i))
       end
 
+      -- Correo: muestra/oculta el workspace especial "communication", donde
+      -- Thunderbird vive en segundo plano (autostart arriba).
+      hl.bind("SUPER + SHIFT + M", hl.dsp.workspace.toggle_special("communication"))
       hl.bind("SUPER + W", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/time-to-work.sh"))
       -- netrunner abre sus propias ventanas kitty independientes (clase
       -- `kitty` por defecto): el dedupe de Caelestia las colapsa a un icono.
