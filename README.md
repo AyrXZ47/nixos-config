@@ -258,9 +258,8 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 
 ### Applications
 Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Firefox (autohide
-toolbox via userChrome.css), Thunderbird (perfil declarativo y tema Cyberpunk
-Neon vía userChrome.css); arranca oculto en el workspace `communication` y se
-muestra con `SUPER SHIFT M`.
+toolbox via userChrome.css), Thunderbird (perfil declarativo, sin tema propio);
+arranca oculto en el workspace `communication` y se muestra con `SUPER SHIFT M`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
 Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
