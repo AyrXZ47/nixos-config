@@ -55,12 +55,13 @@ let
         workspaces = "Rubik";
       };
       anim.durations.scale = 1;
-      # Sólido por defecto: la barra/drawers ya no son vidrio. La única
-      # transparencia que queda es la nativa de kitty (background_opacity).
+      # Vidrio solo en el shell: las apps quedan sólidas. base/layers más
+      # opacos que el 0.34/0.5 viejo para que el nuevo color #6594a8 se lea
+      # con el blur suave de Hyprland (8/2).
       transparency = {
-        enabled = false;
-        base = 0.34;
-        layers = 0.5;
+        enabled = true;
+        base = 0.55;
+        layers = 0.65;
       };
     };
 

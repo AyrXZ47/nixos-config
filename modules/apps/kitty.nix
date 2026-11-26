@@ -24,8 +24,12 @@
       # maximizada encima de todo. Hyprland tilea toda kitty, así que recordar
       # tamaño/estado no aporta: se desactiva.
       remember_window_size = "no";
-      # Vidrio (0.66 como el resto de Caelestia; el blur lo da Hyprland)
-      background_opacity = "0.66";
+      # Menos transparencia que antes (0.66 -> 0.8). `background_blur` de kitty
+      # solo existe en KDE/macOS: en Hyprland el blur real lo hace el
+      # compositor (decoration.blur + ignore_opacity) y este valor queda como
+      # no-op para cuando kitty corra en KDE.
+      background_opacity = "0.8";
+      background_blur = "32";
       dynamic_background_opacity = "yes";
       # Smear cursor (nativo de kitty)
       cursor_trail = "1";

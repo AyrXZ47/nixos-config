@@ -90,17 +90,17 @@ in
 
         decoration = {
           rounding = 12,
-          -- Sólido por defecto: sin blur ni transparencia del compositor en
-          -- ninguna app. El vidrio quedó como modo manual en SUPER+B
-          -- (toggle-frost.sh); kitty conserva SOLO su transparencia nativa
-          -- (background_opacity) y las reglas de abajo fuerzan opacity 1.0
-          -- donde importa el texto.
+          -- Apps sólidas (opacity 1.0) y con no_blur; el blur queda solo para
+          -- kitty (transparencia nativa) y las capas de Caelestia. 8/2 en vez
+          -- del 12/3 anterior: con Obsidian repintando, el blur 12/3 costaba
+          -- ~4 W en la Vega 7 (medido 2026-11-26). SUPER+B sigue siendo el
+          -- modo vidrio manual.
           active_opacity = 1.0,
           inactive_opacity = 1.0,
           blur = {
-            enabled = false,
-            size = 12,
-            passes = 3,
+            enabled = true,
+            size = 8,
+            passes = 2,
             ignore_opacity = true,
           },
           -- Neón: la sombra coloreada es el "destello" — glow difuminado (blur)
@@ -209,13 +209,18 @@ in
       -----------------------
       ---- WINDOW RULES -----
       -----------------------
-      hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true })
+      hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
-      -- Brave vive en el workspace 3 (el que era de Firefox). Ferdium va al
-      -- especial "communication": time-to-work lo abre primero y lo vuelve a
-      -- ocultar enseguida, antes de levantar los workspaces principales.
-      hl.window_rule({ name = "brave-ws3", match = { class = "brave-browser" }, workspace = 3 })
+      -- Apps de escritorio que también repintan: sólidas y sin blur (el blur
+      -- queda reservado a kitty y a las capas de Caelestia).
+      hl.window_rule({ name = "dolphin-solid", match = { class = "org\\.kde\\.dolphin" }, no_blur = true, opacity = "1 override" })
+      hl.window_rule({ name = "keepassxc-solid", match = { class = "org\\.keepassxc\\.KeePassXC" }, no_blur = true, opacity = "1 override" })
+      -- Brave vive en el workspace 3 (el que era de Firefox) y queda sólido
+      -- y sin blur: es Chromium y repinta como Obsidian/Ferdium. Ferdium va
+      -- al especial "communication": time-to-work lo abre primero y lo vuelve
+      -- a ocultar enseguida, antes de levantar los workspaces principales.
+      hl.window_rule({ name = "brave-ws3", match = { class = "brave-browser" }, workspace = 3, no_blur = true, opacity = "1 override" })
       -- Obsidian/Ferdium se quedan sólidas incluso si se activa el vidrio
       -- manual (SUPER+B): son las apps Electron que más repintan y el blur
       -- por repintado costaba ~4 W en la Vega 7 (medido 2026-11-26). Las
@@ -223,10 +228,9 @@ in
       hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication", no_initial_focus = true, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "obsidian-solid", match = { class = "md\\.obsidian\\.Obsidian" }, no_blur = true, opacity = "1 override" })
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
-      -- conserva SOLO su transparencia nativa (background_opacity); la regla
-      -- fuerza opacity 1.0 para que Hyprland no apile la suya encima (y para
-      -- que siga legible si se activa el modo vidrio manual con SUPER+B).
-      -- El match de clase es de cadena COMPLETA (regex_match): `kitty` basta.
+      -- transparencia nativa (background_opacity 0.8) + blur del compositor
+      -- (ignore_opacity=true). opacity 1.0 evita que Hyprland apile la suya
+      -- encima y mantiene el texto nítido. El match es de cadena COMPLETA.
       hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, opacity = "1 override" })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
@@ -278,6 +282,10 @@ in
       -- SIN blur. 0.3 queda por debajo del base para que el blur se aplique.
       hl.layer_rule({ name = "caelestia-drawers-blur", match = { namespace = "caelestia-drawers" }, blur = true, ignore_alpha = 0.3 })
       hl.layer_rule({ name = "caelestia-area-picker", match = { namespace = "caelestia-area-picker" }, blur = true })
+      -- La barra de Caelestia vive en la capa `quickshell` (no en drawers):
+      -- blur propio para que su transparencia no se vea cruda. El umbral 0.3
+      -- queda por debajo de transparency.layers (0.65), así que aplica.
+      hl.layer_rule({ name = "caelestia-bar-blur", match = { namespace = "quickshell" }, blur = true, ignore_alpha = 0.3 })
 
       -----------------------
       ---- KEYBINDINGS ------

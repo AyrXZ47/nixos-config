@@ -719,23 +719,23 @@ PYEOF
             tertiary_paletteKeyColor 00ff88
             neutral_paletteKeyColor 141428
             neutral_variant_paletteKeyColor 1e1e3a
-            background 0a0a12
-            onBackground d4d4f0
-            surface 0a0a12
-            surfaceDim 0a0a12
-            surfaceBright 2a2a44
-            surfaceContainerLowest 0a0a12
-            surfaceContainerLow 141428
-            surfaceContainer 141428
-            surfaceContainerHigh 1e1e3a
-            surfaceContainerHighest 2a2a44
-            onSurface d4d4f0
-            surfaceVariant 1e1e3a
-            onSurfaceVariant 8888aa
+            background 6594a8
+            onBackground 0a0a12
+            surface 6594a8
+            surfaceDim 54798a
+            surfaceBright 8fb9c9
+            surfaceContainerLowest 3f5e6b
+            surfaceContainerLow 4f7484
+            surfaceContainer 6594a8
+            surfaceContainerHigh 7aa9bc
+            surfaceContainerHighest 8fb9c9
+            onSurface 0a0a12
+            surfaceVariant 4f7484
+            onSurfaceVariant 1e1e3a
             inverseSurface d4d4f0
             inverseOnSurface 141428
-            outline 8888aa
-            outlineVariant 1e1e3a
+            outline 3f5e6b
+            outlineVariant 4f7484
             shadow 000000
             scrim 000000
             surfaceTint ed1044
