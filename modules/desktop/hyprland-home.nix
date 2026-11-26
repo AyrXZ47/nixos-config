@@ -214,7 +214,13 @@ in
       -- especial "communication": time-to-work lo abre primero y lo vuelve a
       -- ocultar enseguida, antes de levantar los workspaces principales.
       hl.window_rule({ name = "brave-ws3", match = { class = "brave-browser" }, workspace = 3 })
-      hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication", no_initial_focus = true })
+      -- Ferdium/Obsidian: apps Electron que repintan mucho (WhatsApp, texto,
+      -- scroll, plugins). Con 0.8/0.6 de opacidad + blur 12/3 pasadas cada
+      -- repintado se paga en GPU (Vega 7) y bateria: medido 2026-11-25, con
+      -- Obsidian visible el laptop subia de ~11W a 17-19W. Solidas y sin blur,
+      -- como ya se hace con steam/mpv/vlc. El vidrio se reserva a kitty.
+      hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication", no_initial_focus = true, no_blur = true, opacity = "1 override" })
+      hl.window_rule({ name = "obsidian-solid", match = { class = "md\\.obsidian\\.Obsidian" }, no_blur = true, opacity = "1 override" })
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
       -- vidrio esmerilado — blur del compositor detrás de la transparencia
       -- propia (background_opacity). opacity "1 override" fuerza 1.0 absoluto

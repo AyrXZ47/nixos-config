@@ -180,9 +180,18 @@
           setsid zsh -c 'pidf=$1; dir=$2; title=$3; shift 3; print -r -- $$ >> "$pidf"; exec kitty -d "$dir" -T "$title" "$@"' \
             hyprdev-spawn "$pidfile" "$repo" "hyprdev-$runid-$role" "$@" >/dev/null 2>&1 &
         }
+        # pipes-rs es adorno: 20 fps en AC, ~7 fps en bateria. Medido
+        # 2026-11-25: el pipes a -d 50 costaba ~1 W de GPU/compositor.
+        local pipes_delay=50 sc
+        for s in /sys/class/power_supply/*/status; do
+          [ -f "$s" ] || continue
+          sc="''${s%/status}/scope"
+          { [ ! -f "$sc" ] || [ "$(cat "$sc" 2>/dev/null)" = System ]; } || continue
+          [ "$(cat "$s" 2>/dev/null)" = Discharging ] && pipes_delay=150
+        done
         spawn nvim zsh -ic nvim
         spawn free zsh
-        spawn pipes zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d 50 -r 0"
+        spawn pipes zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d $pipes_delay -r 0"
         # Watcher en sesión propia ANTES del exec: sobrevive a esta shell. Se
         # arma con las 4 arriba y, al bajar de 4, cierra las que sigan.
         # `hyprctl dispatch closewindow address:<a>` (legacy) ya no se parsea
