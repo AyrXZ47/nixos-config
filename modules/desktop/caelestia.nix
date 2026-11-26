@@ -55,13 +55,13 @@ let
         workspaces = "Rubik";
       };
       anim.durations.scale = 1;
-      # Vidrio solo en el shell: las apps quedan sólidas. base/layers más
-      # opacos que el 0.34/0.5 viejo para que el nuevo color #6594a8 se lea
-      # con el blur suave de Hyprland (8/2).
+      # Solo el marco (#6594a8) es vidrio: `base` deja la barra translúcida
+      # para el blur. `layers = 1.0` hace opacos los paneles/pills, que vuelven
+      # al negro original y no se tiñen de azul por detrás.
       transparency = {
         enabled = true;
         base = 0.55;
-        layers = 0.65;
+        layers = 1.0;
       };
     };
 

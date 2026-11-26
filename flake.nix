@@ -694,6 +694,34 @@ PYEOF
             'captureSource: root.screen' \
             "captureSource: root.screen?.name ? root.screen : null${"\n"}            live: false"
 
+            # Paneles de Caelestia: el blob usa `surface` (el marco #6594a8),
+            # pero launcher y sidebar no tenían fondo propio y quedaban azules.
+            # Fondo surfaceContainer opaco (negro) para que el azul quede SOLO
+            # en el marco/barra.
+            cind='    '
+            substituteInPlace modules/launcher/Content.qml \
+              --replace-fail \
+            "''${cind}implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin" \
+            "''${cind}implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
+
+''${cind}StyledRect {
+''${cind}    anchors.fill: parent
+''${cind}    z: -1
+''${cind}    radius: root.rounding
+''${cind}    color: Colours.palette.m3surfaceContainer
+''${cind}}"
+            substituteInPlace modules/sidebar/Content.qml \
+              --replace-fail \
+            "''${cind}ColumnLayout {" \
+            "''${cind}StyledRect {
+''${cind}    anchors.fill: parent
+''${cind}    z: -1
+''${cind}    radius: Tokens.rounding.large
+''${cind}    color: Colours.palette.m3surfaceContainer
+''${cind}}
+
+''${cind}ColumnLayout {"
+
             # PAM con confdir propio (assets/pam.d): al no haber un `other` ahi,
             # libpam loguea "_pam_init_handlers: no default config other" en cada
             # contexto (ruido en el journal). Se agrega un fallback que deniega;
@@ -719,23 +747,23 @@ PYEOF
             tertiary_paletteKeyColor 00ff88
             neutral_paletteKeyColor 141428
             neutral_variant_paletteKeyColor 1e1e3a
-            background 6594a8
-            onBackground 0a0a12
+            background 0a0a12
+            onBackground d4d4f0
             surface 6594a8
-            surfaceDim 54798a
-            surfaceBright 8fb9c9
-            surfaceContainerLowest 3f5e6b
-            surfaceContainerLow 4f7484
-            surfaceContainer 6594a8
-            surfaceContainerHigh 7aa9bc
-            surfaceContainerHighest 8fb9c9
-            onSurface 0a0a12
-            surfaceVariant 4f7484
-            onSurfaceVariant 1e1e3a
+            surfaceDim 0a0a12
+            surfaceBright 2a2a44
+            surfaceContainerLowest 0a0a12
+            surfaceContainerLow 141428
+            surfaceContainer 141428
+            surfaceContainerHigh 1e1e3a
+            surfaceContainerHighest 2a2a44
+            onSurface d4d4f0
+            surfaceVariant 1e1e3a
+            onSurfaceVariant 8888aa
             inverseSurface d4d4f0
             inverseOnSurface 141428
-            outline 3f5e6b
-            outlineVariant 4f7484
+            outline 8888aa
+            outlineVariant 1e1e3a
             shadow 000000
             scrim 000000
             surfaceTint ed1044
