@@ -546,7 +546,9 @@ let
       audioIncrement = 0.1;
       brightnessIncrement = 0.1;
       maxVolume = 1.0;
-      smartScheme = true;
+      # Esquema FIJO cyberpunk (#6594a8): smartScheme lo regeneraría desde el
+      # wallpaper y pisaría el color en cada cambio de fondo.
+      smartScheme = false;
       # Mixxx no expone MPRIS real (ver hallazgo #9); el servicio falso de
       # modules/apps/mixxx-mpris.nix publica org.mpris.MediaPlayer2.mixxx y este
       # default lo hace el player activo del panel de media (logo + bongocat).
@@ -808,7 +810,12 @@ in
         after = [ "writeBoundary" ];
         before = [ ];
         data = ''
+          # `caelestia scheme set` hace early-return si el nombre ya es
+          # cyberpunk (no reescribe el contenido). Borrar el estado fuerza a
+          # regenerar la paleta cuando cambia el esquema en el overlay.
           if command -v caelestia >/dev/null 2>&1; then
+            state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
+            rm -f "$state"
             caelestia scheme set -n cyberpunk >/dev/null 2>&1 || true
           fi
         '';
