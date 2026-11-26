@@ -90,13 +90,15 @@ in
 
         decoration = {
           rounding = 12,
-          -- Vidrio biselado: translúcido pero legible (0.8 activa / 0.6
-          -- inactiva). Steam y reproductores quedan exentos via reglas
-          -- (opacity "N override" fuerza opacidad absoluta).
-          active_opacity = 0.8,
-          inactive_opacity = 0.6,
+          -- Sólido por defecto: sin blur ni transparencia del compositor en
+          -- ninguna app. El vidrio quedó como modo manual en SUPER+B
+          -- (toggle-frost.sh); kitty conserva SOLO su transparencia nativa
+          -- (background_opacity) y las reglas de abajo fuerzan opacity 1.0
+          -- donde importa el texto.
+          active_opacity = 1.0,
+          inactive_opacity = 1.0,
           blur = {
-            enabled = true,
+            enabled = false,
             size = 12,
             passes = 3,
             ignore_opacity = true,
@@ -214,19 +216,17 @@ in
       -- especial "communication": time-to-work lo abre primero y lo vuelve a
       -- ocultar enseguida, antes de levantar los workspaces principales.
       hl.window_rule({ name = "brave-ws3", match = { class = "brave-browser" }, workspace = 3 })
-      -- Ferdium/Obsidian: apps Electron que repintan mucho (WhatsApp, texto,
-      -- scroll, plugins). Con 0.8/0.6 de opacidad + blur 12/3 pasadas cada
-      -- repintado se paga en GPU (Vega 7) y bateria: medido 2026-11-25, con
-      -- Obsidian visible el laptop subia de ~11W a 17-19W. Solidas y sin blur,
-      -- como ya se hace con steam/mpv/vlc. El vidrio se reserva a kitty.
+      -- Obsidian/Ferdium se quedan sólidas incluso si se activa el vidrio
+      -- manual (SUPER+B): son las apps Electron que más repintan y el blur
+      -- por repintado costaba ~4 W en la Vega 7 (medido 2026-11-26). Las
+      -- reglas de steam/mpv/vlc hacen lo mismo por el mismo motivo.
       hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication", no_initial_focus = true, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "obsidian-solid", match = { class = "md\\.obsidian\\.Obsidian" }, no_blur = true, opacity = "1 override" })
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
-      -- vidrio esmerilado — blur del compositor detrás de la transparencia
-      -- propia (background_opacity). opacity "1 override" fuerza 1.0 absoluto
-      -- para que el texto se mantenga opaco y no se apile la opacidad de
-      -- Hyprland con la de kitty. El match de clase es de cadena COMPLETA
-      -- (regex_match), por eso `kitty` a secas basta.
+      -- conserva SOLO su transparencia nativa (background_opacity); la regla
+      -- fuerza opacity 1.0 para que Hyprland no apile la suya encima (y para
+      -- que siga legible si se activa el modo vidrio manual con SUPER+B).
+      -- El match de clase es de cadena COMPLETA (regex_match): `kitty` basta.
       hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, opacity = "1 override" })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
@@ -364,7 +364,8 @@ in
       -- una tty autenticada (ver unlock-crashed.sh y README). Un bind con
       -- `locked = true` dejaria la sesion accesible a cualquiera que este
       -- frente al teclado si el cliente del lock se cae.
-      -- Esmerilado on/off (blur + transparencia) con notificación.
+      -- Modo vidrio manual (blur + transparencia + neón) con notificación.
+      -- El default del config es sólido; esto lo activa/desactiva en vivo.
       hl.bind("SUPER + B", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/toggle-frost.sh"))
 
       -- Screenshots (región / ventana / pantalla)

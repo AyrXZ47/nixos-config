@@ -55,9 +55,10 @@ let
         workspaces = "Rubik";
       };
       anim.durations.scale = 1;
-      # Transparencia/glass ~66% (antes 0.85, casi opaco).
+      # Sólido por defecto: la barra/drawers ya no son vidrio. La única
+      # transparencia que queda es la nativa de kitty (background_opacity).
       transparency = {
-        enabled = true;
+        enabled = false;
         base = 0.34;
         layers = 0.5;
       };
