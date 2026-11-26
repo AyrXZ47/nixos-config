@@ -33,14 +33,12 @@ let
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       mv $out/bin/mixxx $out/bin/.mixxx-wrapped
-      # pw-jack: JACK por-app (el wrapper de pipewire.jack) en vez del
-      # services.pipewire.jack.enable global que nixpkgs depreco por el
-      # LD_LIBRARY_PATH impuro. Mixxx es el unico que lo necesita.
+      # Sin JACK: Mixxx usa ALSA/PipeWire. services.pipewire.jack se quito por
+      # el warning de LD_LIBRARY_PATH global y no hace falta pw-jack.
       makeWrapper ${pkgs.systemd}/bin/systemd-run $out/bin/mixxx \
         --unset QT_QPA_PLATFORMTHEME \
         --unset DISPLAY \
         --add-flags "--user --scope --quiet -p MemoryMax=8G" \
-        --add-flags "${pkgs.pipewire.jack}/bin/pw-jack" \
         --add-flags "$out/bin/.mixxx-wrapped"
     '';
   };

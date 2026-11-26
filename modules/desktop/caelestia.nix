@@ -157,7 +157,9 @@ let
 
     bar = {
       persistent = true;
-      showOnHover = true;
+      # Sin hover: la barra/popouts no se abren al pasar el mouse. El drag y
+      # el touch siguen funcionando por los umbrales de abajo.
+      showOnHover = false;
       dragThreshold = 20;
       scrollActions = {
         workspaces = true;
@@ -228,7 +230,7 @@ let
       activeWindow = {
         compact = false;
         inverted = false;
-        showOnHover = true;
+        showOnHover = false;
       };
       tray = {
         background = false;
@@ -336,7 +338,9 @@ let
       showWeather = false;
       mediaUpdateInterval = 500;
       resourceUpdateInterval = 1000;
-      dragThreshold = noDrag;
+      # Drag/touch desde el borde superior: noDrag mataba el gesto. El hover
+      # sigue apagado; el dashboard solo se abre por atajo o arrastre.
+      dragThreshold = 50;
       performance = {
         showBattery = true;
         showGpu = true;
@@ -537,8 +541,9 @@ let
       # TODO (clima, CPU, GPU). Las claves viejas `useFahrenheit` /
       # `useFahrenheitPerformance` son de Caelestia 1.x y 2.5.0 ya NO las lee:
       # por eso el shell salia en Fahrenheit aunque estuvieran en false.
-      weatherUnits = 1;
-      sensorUnits = 1;
+      # El esquema espera el nombre del enum TemperatureUnit, no un numero.
+      weatherUnits = "Celsius";
+      sensorUnits = "Celsius";
       gpuType = "Auto";
       # 44 barras + espejo: el visualiser de fondo hereda el look del módulo
       # cava de la barra de Wayle (que en Caelestia no existe como módulo).
@@ -589,13 +594,11 @@ let
 
     sidebar = {
       enabled = true;
-      # Solo SUPER+CTRL+N: con showOnHover en false el hover ya no la abre,
-      # pero seguia abriendose al arrastrar desde el borde derecho (zona donde
-      # las apps redimensionan ventanas). minHoverThreshold queda igual por si
-      # algun dia se vuelve a habilitar el hover.
+      # Sin hover (no se abre al pasar el mouse). El drag/touch desde el borde
+      # derecho vuelve con umbral 50: noDrag (100000) lo habia dejado muerto.
       showOnHover = false;
       minHoverThreshold = 200;
-      dragThreshold = noDrag;
+      dragThreshold = 50;
     };
 
     utilities = {

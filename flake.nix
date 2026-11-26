@@ -487,7 +487,7 @@ PYEOF
             substituteInPlace modules/drawers/Interactions.qml \
               --replace-fail \
             'const showUtilities = inBottomPanel(panels.utilities, x, y, true);' \
-            'const showUtilities = false; // ponytail: utilidades solo por atajo'
+            'const showUtilities = pressed && inBottomPanel(panels.utilities, x, y, true); // sin hover; drag/touch'
 
             # Iconos reales de apps: reemplazar el MaterialIcon de categoria por
             # el Image del icono declarado en el .desktop de la ventana.
@@ -699,17 +699,6 @@ PYEOF
             # Fondo surfaceContainer opaco (negro) para que el azul quede SOLO
             # en el marco/barra.
             cind='    '
-            substituteInPlace modules/launcher/Content.qml \
-              --replace-fail \
-            "''${cind}implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin" \
-            "''${cind}implicitHeight: search.height + listWrapper.height + padding + search.anchors.bottomMargin
-
-''${cind}StyledRect {
-''${cind}    anchors.fill: parent
-''${cind}    z: -1
-''${cind}    radius: root.rounding
-''${cind}    color: Colours.palette.m3surfaceContainer
-''${cind}}"
             substituteInPlace modules/sidebar/Content.qml \
               --replace-fail \
             "''${cind}ColumnLayout {" \
@@ -755,10 +744,10 @@ PYEOF
             surfaceContainerLowest 0a0a12
             surfaceContainerLow 141428
             surfaceContainer 141428
-            surfaceContainerHigh 1e1e3a
-            surfaceContainerHighest 2a2a44
+            surfaceContainerHigh 22123f
+            surfaceContainerHighest 2a174f
             onSurface d4d4f0
-            surfaceVariant 1e1e3a
+            surfaceVariant 22123f
             onSurfaceVariant 8888aa
             inverseSurface d4d4f0
             inverseOnSurface 141428
