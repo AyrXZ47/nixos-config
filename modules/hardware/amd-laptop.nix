@@ -2,11 +2,10 @@
 
 let
   # Script compartido por el servicio de arranque y la regla udev: aplica el EPP
-  # del CPU segun el cargador Y pausa/reanuda el wallpaper por IPC nativo de mpv
-  # (el socket lo abre el propio mpv con input-ipc-server en wallpaper-set.sh).
-  # Puro eventos: se corre al enchufar/desenchufar (udev) y una vez al boot; NADA
-  # escucha en bucle. Medido 2026-08-17: wallpaper pausado = 22W -> 12.6W rate.
-  # Sin senales: los procesos NO se tocan (mpv se pausa por su propia API).
+  # del CPU y platform_profile segun el cargador. El wallpaper ya NO se toca
+  # aqui: lo pausa/reanuda mpvpaper-autopause.sh (usuario) por bateria + ventanas
+  # visibles. Puro eventos: se corre al enchufar/desenchufar (udev) y una vez al
+  # boot; NADA escucha en bucle.
   eppSwitch = pkgs.writeShellScript "epp-switch" ''
     # Bateria = un supply de SISTEMA (scope=System) descargandose. Antes se
     # miraba AC/online, que depende del nombre del supply. El predicado es el
@@ -21,7 +20,7 @@ let
       return 1
     }
     if on_battery; then
-      epp=power; paused=yes
+      epp=power
       # platform_profile: el TECHO de potencia que impone el firmware (ACPI
       # platform profile del ThinkPad). En bateria low-power; en AC performance,
       # o sea boost sin freno. El governor/EPP decide a que frecuencia ir dentro
@@ -29,7 +28,7 @@ let
       # `balanced` en los dos modos: se pagaba bateria de mas y se perdia boost.
       profile=low-power
     else
-      epp=performance; paused=no
+      epp=performance
       profile=performance
     fi
     for d in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/energy_performance_preference; do
@@ -37,19 +36,6 @@ let
     done
     if [ -w /sys/firmware/acpi/platform_profile ]; then
       echo "$profile" > /sys/firmware/acpi/platform_profile 2>/dev/null || true
-    fi
-    sock=/run/user/1000/mpvpaper.sock
-    if [ -S "$sock" ]; then
-      ${pkgs.python3}/bin/python3 - "$paused" "$sock" <<'PY'
-    import json, socket, sys
-    s = socket.socket(socket.AF_UNIX)
-    try:
-        s.connect(sys.argv[2])
-        s.sendall((json.dumps({"command": ["set_property", "pause", sys.argv[1] == "yes"]}) + "\n").encode())
-        s.close()
-    except OSError:
-        pass
-    PY
     fi
   '';
 in

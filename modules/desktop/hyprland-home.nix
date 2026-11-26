@@ -54,6 +54,8 @@ in
         -- editar rutas se lanza qpwgraph de nuevo (instancia unica -> muestra la UI).
         hl.exec_cmd("qpwgraph")
         hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/wallpaper-set.sh")
+        -- Pausa/reanuda el wallpaper segun bateria y ventanas visibles (2s).
+        hl.exec_cmd("${config.xdg.configHome}/hypr/scripts/mpvpaper-autopause.sh")
         hl.exec_cmd("wl-paste --type text --watch cliphist store")
         hl.exec_cmd("wl-paste --type image --watch cliphist store")
         hl.exec_cmd("${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1")
@@ -893,6 +895,68 @@ in
         PY
       '';
     };
+    # Auto-pause del wallpaper: mpvpaper decodifica/pinta aunque una ventana
+    # opaca lo tape. Con las apps ya sólidas no queda nada que ver a través de
+    # ellas, así que se pausa si hay batería o si el workspace activo tiene
+    # alguna ventana mapeada (incluye pinned y el especial visible).
+    # ponytail: poll de 2 s; el listener de socket2 de Hyprland sería más
+    # código para el mismo resultado y el costo del poll es despreciable.
+    "hypr/scripts/mpvpaper-autopause.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.python3}/bin/python3
+        import glob, json, os, socket, subprocess, time
+
+        SOCK = f"/run/user/{os.getuid()}/mpvpaper.sock"
+
+        def on_battery():
+            for status in glob.glob('/sys/class/power_supply/*/status'):
+                scope = status[:-len('/status')] + '/scope'
+                try:
+                    if os.path.exists(scope) and open(scope).read().strip() != 'System':
+                        continue
+                    if open(status).read().strip() == 'Discharging':
+                        return True
+                except OSError:
+                    pass
+            return False
+
+        def covered():
+            try:
+                clients = json.loads(subprocess.check_output(
+                    ['hyprctl', '-j', 'clients'], stderr=subprocess.DEVNULL))
+                monitors = json.loads(subprocess.check_output(
+                    ['hyprctl', '-j', 'monitors'], stderr=subprocess.DEVNULL))
+            except Exception:
+                return False
+            active = set()
+            for m in monitors:
+                active.add((m.get('activeWorkspace') or {}).get('id'))
+                special = (m.get('specialWorkspace') or {}).get('id')
+                if special:
+                    active.add(special)
+            for c in clients:
+                if not c.get('mapped'):
+                    continue
+                if c.get('pinned'):
+                    return True
+                if (c.get('workspace') or {}).get('id') in active:
+                    return True
+            return False
+
+        while True:
+            want = on_battery() or covered()
+            try:
+                s = socket.socket(socket.AF_UNIX)
+                s.connect(SOCK)
+                s.sendall((json.dumps({'command': ['set_property', 'pause', want]}) + '\n').encode())
+                s.recv(4096)
+                s.close()
+            except OSError:
+                pass
+            time.sleep(2)
+      '';
+    };
     "hypr/scripts/touchpad-toggle.sh" = {
       executable = true;
       text = ''
@@ -1041,11 +1105,11 @@ in
         # sin esto. Lanczos en scale/dscale/cscale: mpv estira con bilinear por
         # defecto y en un monitor externo (1440p/4K) se nota. En el panel 1080p no
         # hay escalado, así que no cuesta nada.
-        # pause=yes + input-ipc-server: el wallpaper nace SIEMPRE congelado
-        # (foto del primer frame) y el reproductor queda a la escucha del IPC;
-        # mpvpaper-pause.sh lo reanuda si no estamos en bateria. Asi en bateria
-        # NUNCA descodifica ni un frame desde el boot (era el drenaje de 22W->12.6W
-        # medido; el arranque reproduciendo drenaba la sesion completa).
+        # pause=yes + input-ipc-server: el wallpaper nace congelado (primer
+        # frame) y queda a la escucha del IPC. mpvpaper-autopause.sh lo reanuda
+        # solo si hay AC y el escritorio esta vacio; en bateria NUNCA descodifica
+        # (22W->12.6W medido). El resume de abajo es un fallback para que un
+        # wallpaper nuevo no quede congelado si el watcher tarda.
         rm -f /run/user/$(id -u)/mpvpaper.sock
         mpvpaper -f -p -o "no-audio
 loop-file=inf
