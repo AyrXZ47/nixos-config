@@ -279,9 +279,6 @@ in
     brave
 
     # Office & Productivity
-    # libreoffice-stable: upstream cambio su esquema de versiones y nixpkgs
-    # deprecó el attr viejo (libreoffice-fresh emite evaluation warning).
-    libreoffice-stable
     keepassxc
     # Ferdium: agregador de mensajería. Arranca desde SUPER+W (time-to-work),
     # oculto en el workspace especial "communication"; no al encender el host.
@@ -434,4 +431,8 @@ in
   # de passphrase al hacer click en un disco LUKS (Solid depende de el: llama a
   # org.kde.kded6 /modules/soliduiserver; sin el, el click se cuelga).
   ] ++ (with pkgs.kdePackages; [ dolphin kdeconnect-kde kio kio-extras kio-fuse kded plasma-workspace ark okular ffmpegthumbs partitionmanager filelight ]);
+
+  # OnlyOffice reemplaza a LibreOffice. El módulo (no solo el paquete) pasa
+  # las fuentes del sistema al FHS env; sin él OnlyOffice no usa fontconfig.
+  programs.onlyoffice.enable = true;
 }

@@ -256,7 +256,7 @@ in
       hl.window_rule({ name = "kdeconnect-presenter", match = { class = "^org\\.kde\\.kdeconnect\\.daemon$" }, float = true, size = { "(monitor_w)", "(monitor_h)" }, move = { 0, 0 }, no_initial_focus = true, no_blur = true, no_anim = true })
       -- GUIs de simulacion/HDL lanzadas desde la terminal (gtkwave, matplotlib):
       -- nacen FLOTANTES y MAXIMIZADAS (fullscreen modo 1, el estilo
-      -- LibreOffice: cubre todo el mosaico respetando los gaps y la zona
+      -- Maximizada: cubre todo el mosaico respetando los gaps y la zona
       -- reservada de la barra de Caelestia (izquierda), verificado en vivo:
       -- margen uniforme, borde a unos px de la barra) encima de las terminales. Flotante = el layout en
       -- mosaico no se toca (las terminales nunca se redimensionan, bug
@@ -1478,23 +1478,23 @@ application/gzip=org.kde.ark.desktop
 application/x-tar=org.kde.ark.desktop
 application/x-xz=org.kde.ark.desktop
 application/x-bzip2=org.kde.ark.desktop
-# Office -> LibreOffice
-application/msword=writer.desktop
-application/vnd.ms-word=writer.desktop
-application/vnd.openxmlformats-officedocument.wordprocessingml.document=writer.desktop
-application/vnd.openxmlformats-officedocument.wordprocessingml.template=writer.desktop
-application/vnd.oasis.opendocument.text=writer.desktop
-application/vnd.oasis.opendocument.text-template=writer.desktop
-application/rtf=writer.desktop
-application/vnd.ms-excel=calc.desktop
-application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=calc.desktop
-application/vnd.openxmlformats-officedocument.spreadsheetml.template=calc.desktop
-application/vnd.oasis.opendocument.spreadsheet=calc.desktop
-application/vnd.oasis.opendocument.spreadsheet-template=calc.desktop
-application/vnd.ms-powerpoint=impress.desktop
-application/vnd.openxmlformats-officedocument.presentationml.presentation=impress.desktop
-application/vnd.openxmlformats-officedocument.presentationml.template=impress.desktop
-application/vnd.oasis.opendocument.presentation=impress.desktop
+# Office -> OnlyOffice
+application/msword=onlyoffice-desktopeditors.desktop
+application/vnd.ms-word=onlyoffice-desktopeditors.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.document=onlyoffice-desktopeditors.desktop
+application/vnd.openxmlformats-officedocument.wordprocessingml.template=onlyoffice-desktopeditors.desktop
+application/vnd.oasis.opendocument.text=onlyoffice-desktopeditors.desktop
+application/vnd.oasis.opendocument.text-template=onlyoffice-desktopeditors.desktop
+application/rtf=onlyoffice-desktopeditors.desktop
+application/vnd.ms-excel=onlyoffice-desktopeditors.desktop
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet=onlyoffice-desktopeditors.desktop
+application/vnd.openxmlformats-officedocument.spreadsheetml.template=onlyoffice-desktopeditors.desktop
+application/vnd.oasis.opendocument.spreadsheet=onlyoffice-desktopeditors.desktop
+application/vnd.oasis.opendocument.spreadsheet-template=onlyoffice-desktopeditors.desktop
+application/vnd.ms-powerpoint=onlyoffice-desktopeditors.desktop
+application/vnd.openxmlformats-officedocument.presentationml.presentation=onlyoffice-desktopeditors.desktop
+application/vnd.openxmlformats-officedocument.presentationml.template=onlyoffice-desktopeditors.desktop
+application/vnd.oasis.opendocument.presentation=onlyoffice-desktopeditors.desktop
 # Texto/codigo -> nvim (tipos reales: .md->text/markdown, .sh->application/x-shellscript,
 # .py->text/x-python, .yml->application/yaml, .srt->application/x-subrip, .vtt->text/vtt)
 text/markdown=nvim.desktop

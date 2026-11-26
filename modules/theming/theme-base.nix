@@ -30,7 +30,7 @@
     # Serif/Times, Mono/Courier) — adios Microsoft. Fontconfig aliasa
     # Arial->Liberation Sans; la arial.ttf italic de la coleccion Mikoshi que
     # secuestraba el nombre en fontconfig (todo salia inclinado) fue borrada.
-    # Fijada explicita: antes llegaba transitiva via LibreOffice.
+    # Fijada explicita: ya no llega transitiva (LibreOffice no esta).
     liberation_ttf_v2
     (pkgs.callPackage ../../fonts/custom { })
   ];

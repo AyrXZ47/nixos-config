@@ -257,7 +257,7 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 - **Rust**: `rustup` (toolchains on demand). **JS**: `pnpm`.
 
 ### Applications
-Productivity: LibreOffice, Obsidian, KeePassXC, Syncthing, Brave (navegador
+Productivity: OnlyOffice, Obsidian, KeePassXC, Syncthing, Brave (navegador
 default, incluye ventana privada con Tor), Ferdium (mensajería, arranca con
 `SUPER W` en el workspace especial `communication`); se muestra con `SUPER CTRL C`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
