@@ -9,7 +9,9 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    jack.enable = true;
+    # jack.enable se quito: nixpkgs lo depreco porque exporta LD_LIBRARY_PATH
+    # global (impureza). El unico consumidor era Mixxx, que ahora se envuelve
+    # con el pw-jack de pipewire.jack en modules/apps/common-packages.nix.
   };
 
   # Prioridad realtime para pipewire (necesita RT para latencia baja sin xruns).
