@@ -749,7 +749,7 @@ PYEOF
             neutral_variant_paletteKeyColor 1e1e3a
             background 0a0a12
             onBackground d4d4f0
-            surface 6594a8
+            surface 5a4f6e
             surfaceDim 0a0a12
             surfaceBright 2a2a44
             surfaceContainerLowest 0a0a12

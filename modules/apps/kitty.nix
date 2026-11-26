@@ -24,11 +24,10 @@
       # maximizada encima de todo. Hyprland tilea toda kitty, así que recordar
       # tamaño/estado no aporta: se desactiva.
       remember_window_size = "no";
-      # Menos transparencia que antes (0.66 -> 0.8). `background_blur` de kitty
-      # solo existe en KDE/macOS: en Hyprland el blur real lo hace el
-      # compositor (decoration.blur + ignore_opacity) y este valor queda como
-      # no-op para cuando kitty corra en KDE.
-      background_opacity = "0.8";
+      # 0.8 seguía tiñendo el tema con el wallpaper (el video es azul y se
+      # notaba mucho en la TUI de opencode). 1.0 deja el cyberpunk puro
+      # (#120B10/#FF0055). Si se quiere vidrio, bajar a 0.95 y probar.
+      background_opacity = "1.0";
       background_blur = "32";
       dynamic_background_opacity = "yes";
       # Smear cursor (nativo de kitty)

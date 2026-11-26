@@ -741,6 +741,10 @@ in
       #  - wallpaper.postHook: arranca mpvpaper con el fondo real.
       xdg.configFile."caelestia/cli.json".text = builtins.toJSON {
         theme = {
+          # Caelestia NO toca las terminales: escribía OSC 10/11/4 en los pts
+          # y le cambiaba el tema a kitty cada `scheme set`. Kitty usa su
+          # cyberpunk negro (#000000) sin que nadie se lo pise.
+          enableTerm = false;
           enableHypr = false;
           enableGtk = false;
           enableQt = false;
