@@ -19,8 +19,8 @@
 
   # Sched-ext: scx_lavd decide a quien le toca CPU por criticidad de latencia
   # (Hyprland y juegos por encima de un `nix build`), en userspace sobre el
-  # kernel. Solo necesita CONFIG_SCHED_CLASS_EXT, que trae el kernel de CachyOS
-  # (zen tambien lo trae desde 6.12). Si el kernel no lo soporta, el modulo
+  # kernel. Solo necesita CONFIG_SCHED_CLASS_EXT, que trae el kernel zen
+  # (desde 6.12). Si el kernel no lo soporta, el modulo
   # arranca condicionado a /sys/kernel/sched_ext y no rompe nada.
   # scx-loader reemplaza al viejo services.scx (removido en nixpkgs 26.11).
   services.scx-loader = {

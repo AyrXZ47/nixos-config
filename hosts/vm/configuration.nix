@@ -31,7 +31,7 @@
 
   # Loader, timeout, openssh, zona, locale e identidad de git:
   # modules/core/common-host.nix + modules/core/nix-optimization.nix.
-  # Mismo kernel que los hosts fisicos: modules/core/kernel-cachyos.nix.
+  # Mismo kernel que los hosts fisicos: modules/core/kernel-zen.nix.
   boot.initrd.kernelModules = [ "virtio_gpu" "vmwgfx" ];
 
   system.stateVersion = "26.05";

@@ -42,10 +42,6 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            # Kernel CachyOS cacheado por chaotic: sin esto, construir ddcci
-            # arrastra la compilacion del kernel en el runner.
-            extra-substituters = https://nyx-cache.chaotic.cx/
-            extra-trusted-public-keys = nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk=
 
       - uses: cachix/cachix-action@v15
         with:
@@ -66,12 +62,9 @@ jobs:
             .#nixosConfigurations.pc.pkgs.kicad-spice-library
 
       # ddcci es el unico paquete del pc que no esta en nixpkgs ni en Hydra:
-      # es un modulo fuera del arbol que depende del kernel CachyOS. Sin esto
-      # el pc lo compila (y arrastra kmodigest) en cada rebuild.
+      # es un modulo fuera del arbol (brillo por DDC/CI del monitor externo).
+      # Compila contra el kernel zen del canal; el build es chico.
       - name: Construir y subir ddcci del pc
         run: |
-          # El --option explicito es obligatorio: cachix-action pisa el
-          # NIX_CONFIG y el kernel CachyOS terminaria compilando en el runner.
-          nyx='--option extra-substituters https://nyx-cache.chaotic.cx/ --option extra-trusted-public-keys nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk='
-          cachix watch-exec ayrxz47-nixos-config -- nix build --no-link -L --impure $nyx \
+          cachix watch-exec ayrxz47-nixos-config -- nix build --no-link -L --impure \
             --expr 'let f = builtins.getFlake (toString ./.); in (builtins.head f.nixosConfigurations.pc.config.boot.extraModulePackages)'

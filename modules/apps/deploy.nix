@@ -7,9 +7,8 @@ let
   #   deploy laptop    -> ssh a nixos-laptop, git pull --ff-only y rebuild allá
   #
   # Usa `sudo -n mantenimiento upgrade`, no `nixos-rebuild` directo: es el único
-  # binario con NOPASSWD (regla acotada en nix-optimization.nix) y ya pasa el
-  # nyx-cache del kernel. Así el deploy es no interactivo y un agente puede
-  # correrlo por SSH sin contraseña.
+  # binario con NOPASSWD (regla acotada en nix-optimization.nix). Así el deploy
+  # es no interactivo y un agente puede correrlo por SSH sin contraseña.
   #
   # Convención de nombres: host del flake `laptop` -> hostname/ssh `nixos-laptop`
   # (los cuatro hosts siguen el patrón; si uno no, el ssh falla con su error).

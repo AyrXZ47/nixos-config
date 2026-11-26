@@ -4,7 +4,7 @@
   # AMD CPU microcode
   hardware.cpu.amd.updateMicrocode = true;
 
-  # El kernel vive en modules/core/kernel-cachyos.nix (igual para los 4 hosts).
+  # El kernel vive en modules/core/kernel-zen.nix (igual para los 4 hosts).
   # Common AMD GPU support
   hardware.graphics = {
     enable = true;

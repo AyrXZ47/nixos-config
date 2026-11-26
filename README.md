@@ -21,8 +21,8 @@ and a hand-rolled cyberpunk theme (magenta `#ed1044` / cyan `#00f0ff` on deep na
 | `server` | Headless  | AMD                       | (none)       | `amd-common` only, no desktop             |
 | `vm`     | Virtual   | QEMU/VMware               | virtio/vmwgfx| virtio initrd, LUKS + btrfs subvols      |
 
-Every host is `x86_64-linux`, runs the CachyOS kernel (`linuxPackages_cachyos`,
-7.3.0 with clang thin-LTO and `-O3`, from the `chaotic-nyx` flake), enables the
+Every host is `x86_64-linux`, runs the `zen` kernel from nixpkgs
+(`linuxPackages_zen`, cached by Hydra — see [Kernel](#hardware-moduleshardware)), enables the
 `yovick` user with
 Home Manager, and stores its mounts in `hosts/<name>/hardware-configuration.nix`
 (`disk-by-label` for `pc`/`laptop`/`server`, generated for `vm`).
@@ -364,13 +364,12 @@ Gotchas (vistos en la práctica):
   — see [Day-to-Day](#day-to-day).
 
 ### Hardware (`modules/hardware/`)
-- Kernel: `linuxPackages_cachyos` (flake input `chaotic` → overlay + cache
-  `nyx-cache.chaotic.cx`) in every host. nixpkgs has no CachyOS kernel, and zen
-  is `-O2` without LTO. It ships 7.3.0 as clang thin-LTO `-O3`, `PREEMPT` full,
-  HZ 1000, hugepages `always` and sched_ext. The `chaotic` input deliberately
-  does **not** follow `nixpkgs`: nyx builds the kernel against its own pin, and
-  that pin is what its binary cache holds. `deploy` passes the nyx substituter
-  on the command line so the first switch substitutes instead of compiling.
+- Kernel: `linuxPackages_zen` from nixpkgs in every host. Switched from the
+  CachyOS kernel (chaotic-nyx) on 2026-11-26: the CachyOS `modules` output was
+  on no binary cache and its hash followed the channel toolchain, so every
+  channel bump recompiled the whole kernel per host (1-1.5 h). Zen keeps
+  sched_ext (`scx-loader` unchanged) and is always cached; the trade is losing
+  CachyOS thin-LTO/-O3 (~1-2% in-kernel, measured 2026-10-26).
 - AMD microcode, `hardware.graphics` 32-bit.
 - `zramSwap` at 50% memory.
 - `quiet` is declared once, in `nix-optimization.nix`, for every host;
