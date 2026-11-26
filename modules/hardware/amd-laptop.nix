@@ -84,15 +84,19 @@ in
   # Sched-ext scx_lavd: el mismo reparto por criticidad que en la pc, pensado
   # para latencia + consumo (es el scheduler que usa Steam Deck). Encaja con
   # `powersave` + EPP: el governor fija el techo de frecuencia, scx el turno.
-  services.scx = {
+  # scx-loader reemplaza al viejo services.scx (removido en nixpkgs 26.11).
+  services.scx-loader = {
     enable = true;
-    scheduler = "scx_lavd";
-    # En bateria el modo --powersave del scheduler (empaqueta tareas en menos
-    # nucleos, deja al resto dormir) es justo lo que estira las horas. En AC el
-    # boost lo dan igual el EPP=performance y platform_profile=performance del
-    # script de arriba: aca se cambia DONDE se acomodan las tareas, no la freq.
-    # Para A/B en AC: --balanced o --performance (una palabra).
-    extraArgs = [ "--powersave" ];
+    config = {
+      default_sched = "scx_lavd";
+      # En bateria el modo --powersave del scheduler (empaqueta tareas en menos
+      # nucleos, deja al resto dormir) es justo lo que estira las horas. En AC
+      # el boost lo dan igual el EPP=performance y platform_profile=performance
+      # del script de arriba: aca se cambia DONDE se acomodan las tareas, no la
+      # freq. Para A/B en AC: scxctl set-mode gaming|lowlatency.
+      default_mode = "PowerSave";
+      scheds.scx_lavd.powersave_mode = [ "--powersave" ];
+    };
   };
 
   # Boot: NetworkManager-wait-online bloquea multi-user.target esperando que

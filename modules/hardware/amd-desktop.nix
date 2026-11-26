@@ -22,12 +22,16 @@
   # kernel. Solo necesita CONFIG_SCHED_CLASS_EXT, que trae el kernel de CachyOS
   # (zen tambien lo trae desde 6.12). Si el kernel no lo soporta, el modulo
   # arranca condicionado a /sys/kernel/sched_ext y no rompe nada.
-  services.scx = {
+  # scx-loader reemplaza al viejo services.scx (removido en nixpkgs 26.11).
+  services.scx-loader = {
     enable = true;
-    scheduler = "scx_lavd";
-    # scx_lavd tiene tres modos de energia mutuamente excluyentes
-    # (--performance / --balanced / --powersave). La pc vive enchufada: maximo.
-    extraArgs = [ "--performance" ];
+    config = {
+      default_sched = "scx_lavd";
+      # La pc vive enchufada: modo Gaming = --performance. Se conserva el
+      # flag exacto que usaba services.scx; scxctl permite cambiarlo en vivo.
+      default_mode = "Gaming";
+      scheds.scx_lavd.gaming_mode = [ "--performance" ];
+    };
   };
   boot.kernelParams = [
     # `processor.max_cstate=1` vivia aca y se fue el 2026-10-26: el boost de Zen3
