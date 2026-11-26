@@ -814,13 +814,16 @@ in
         after = [ "writeBoundary" ];
         before = [ ];
         data = ''
-          # `caelestia scheme set` hace early-return si el nombre ya es
-          # cyberpunk (no reescribe el contenido). Borrar el estado fuerza a
-          # regenerar la paleta cuando cambia el esquema en el overlay.
-          if command -v caelestia >/dev/null 2>&1; then
+          # Store path EXACTO del CLI del repo: `caelestia` del PATH puede ser
+          # el stock de nixpkgs (sin el esquema cyberpunk inyectado) y dejaba
+          # el estado viejo/negro. El `scheme set` hace early-return si el
+          # nombre ya coincide, así que se borra el estado para forzar la
+          # reescritura cuando cambia la paleta del overlay.
+          cli=${pkgs.caelestia-cli}/bin/caelestia
+          if [ -x "$cli" ]; then
             state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
             rm -f "$state"
-            caelestia scheme set -n cyberpunk >/dev/null 2>&1 || true
+            "$cli" scheme set -n cyberpunk >/dev/null 2>&1 || true
           fi
         '';
       };
