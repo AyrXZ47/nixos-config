@@ -97,7 +97,6 @@ in
     # ventana renderiza bien. Sin override para no arrastrar electron_42 (EOL).
     obsidian
     pi-coding-agent
-    pipes-rs
     ripgrep
     unzip
     wget

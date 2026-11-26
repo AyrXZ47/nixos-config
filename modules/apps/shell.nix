@@ -146,16 +146,16 @@
         opencode pair
       }
 
-      # `hyprdev [directorio-repo]` — geometría de trabajo en 4 ventanas kitty
+      # `hyprdev [directorio-repo]` — geometría de trabajo en 3 ventanas kitty
       # INDEPENDIENTES que Hyprland tilea (los gaps dejan ver el wallpaper):
-      # esta terminal se REUTILIZA como OpenCode (`exec`) y solo se abren 3
-      # nuevas (nvim, shell libre, pipes-rs). OpenCode va en la ventana
+      # esta terminal se REUTILIZA como OpenCode (`exec`) y solo se abren 2
+      # nuevas (nvim, shell libre). OpenCode va en la ventana
       # INVOCADORA porque al tilear es la que casi no se redimensiona: la TUI
       # necesita ancho para el sidebar y el composer. Clase por defecto
       # `kitty` para que el dedupe de Caelestia las colapse a UN icono. Cierre
-      # en cadena tipo IDE: las 4 se rastrean por título
+      # en cadena tipo IDE: las 3 se rastrean por título
       # `hyprdev-<runid>-<rol>` (-T) más la address de ESTA ventana capturada
-      # antes del exec de OpenCode; armadas las 4, si cae cualquiera se cierran
+      # antes del exec de OpenCode; armadas las 3, si cae cualquiera se cierran
       # las demás.
       hyprdev() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
@@ -180,20 +180,10 @@
           setsid zsh -c 'pidf=$1; dir=$2; title=$3; shift 3; print -r -- $$ >> "$pidf"; exec kitty -d "$dir" -T "$title" "$@"' \
             hyprdev-spawn "$pidfile" "$repo" "hyprdev-$runid-$role" "$@" >/dev/null 2>&1 &
         }
-        # pipes-rs es adorno: 20 fps en AC, ~7 fps en bateria. Medido
-        # 2026-11-25: el pipes a -d 50 costaba ~1 W de GPU/compositor.
-        local pipes_delay=50 sc
-        for s in /sys/class/power_supply/*/status; do
-          [ -f "$s" ] || continue
-          sc="''${s%/status}/scope"
-          { [ ! -f "$sc" ] || [ "$(cat "$sc" 2>/dev/null)" = System ]; } || continue
-          [ "$(cat "$s" 2>/dev/null)" = Discharging ] && pipes_delay=150
-        done
         spawn nvim zsh -ic nvim
         spawn free zsh
-        spawn pipes zsh -ic "pipes-rs -k heavy,dots,sus --rainbow 0 --palette darker -d $pipes_delay -r 0"
         # Watcher en sesión propia ANTES del exec: sobrevive a esta shell. Se
-        # arma con las 4 arriba y, al bajar de 4, cierra las que sigan.
+        # arma con las 3 arriba y, al bajar de 3, cierra las que sigan.
         # `hyprctl dispatch closewindow address:<a>` (legacy) ya no se parsea
         # con la config Lua, y `hl.dsp.window.close` con selector cae a la
         # ventana ACTIVA cuando no matchea (footgun). Por eso se matan los PID
@@ -205,7 +195,7 @@
             out=$(hyprctl -j clients 2>/dev/null)
             a=$(grep -c "\"title\": \"hyprdev-$run-" <<<"$out")
             if grep -q "\"address\": \"$inv\"" <<<"$out"; then a=$((a+1)); fi
-            if (( a == 4 )); then
+            if (( a == 3 )); then
               armed=1
             elif (( armed == 1 )); then
               kill $(cat "$pidfile" 2>/dev/null) $invpid 2>/dev/null
@@ -391,23 +381,6 @@
     enable = true;
     enableZshIntegration = true;
   };
-
-  # pipes-rs (los tubos del layout dev; hyprdev lanza con flags propios que
-  # sobreescriben estilo y reset, ver hyprdev arriba): modo rgb con hue
-  # cíclico (lo más cerca de neón que el programa ofrece; glow real no existe
-  # nativamente), tubos gruesos curvos y reset tardío — el default
-  # (reset_threshold 0.5) reiniciaba a media pantalla.
-  xdg.configFile."pipes-rs/config.toml".text = ''
-    bold = true
-    color_mode = "rgb"
-    rainbow = 4
-    delay_ms = 20
-    inherit_style = false
-    kinds = ["curved", "heavy"]
-    num_pipes = 3
-    reset_threshold = 0.95
-    turn_chance = 0.12
-  '';
 
   home.shellAliases = {
     ls = "ls --color=auto";

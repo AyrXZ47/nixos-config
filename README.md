@@ -228,7 +228,7 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
   `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras
-  tres siguen siendo nvim, shell libre y pipes-rs.
+  dos siguen siendo nvim y shell libre.
 
 ### Gaming
 - **Steam** (gamescope session, Remote Play + dedicated server + LAN transfers
@@ -265,7 +265,7 @@ VLC.
 Engineering: KiCad 10 (simulador SPICE embebido + librería de ~50k modelos:
 `spice-find` y `spice-get`, ver "KiCad + SPICE" abajo), ngspice, FreeCAD,
 OpenRocket, OpenMotor.
-Utilities: 1Password CLI, `gh`, btop, cava, pipes-rs, virt-manager,
+Utilities: 1Password CLI, `gh`, btop, cava, virt-manager,
 proton-vpn, openrgb, qpwgraph, dolphin, kdeconnect, yt-dlp.
 Fun: `cbonsai`.
 
@@ -490,8 +490,8 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 
 ## Custom Commands
 
-- `hyprdev [repo]` — workspace dev en 4 ventanas kitty independientes
-  (OpenCode, nvim, shell libre, pipes-rs); el directorio opcional entra al repo
+- `hyprdev [repo]` — workspace dev en 3 ventanas kitty independientes
+  (OpenCode, nvim, shell libre); el directorio opcional entra al repo
   antes de abrir todo. Cierre en cadena: si cae una ventana, se cierran las demás.
 - `opencode-pair [puerto]` — bindea el servicio de OpenCode a la IP de Tailscale,
   lo reinicia y muestra el QR para abrir la sesión desde el navegador del
