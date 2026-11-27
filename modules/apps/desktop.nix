@@ -5,6 +5,15 @@
 { config, pkgs, lib, ... }:
 
 {
+  # KDE Connect: daemon + puertos 1714-1764. Solo hosts con GUI; server/vm no
+  # lo necesitan (la VM sí, porque conserva escritorio).
+  programs.kdeconnect.enable = true;
+
+  # Miracast / Wi-Fi Display: puertos del DHCP-P2P, NTP y RTSP de WFD. La app
+  # y dnsmasq viven en home vía ./miracast.nix.
+  networking.firewall.allowedTCPPorts = [ 7236 ];
+  networking.firewall.allowedUDPPorts = [ 67 123 7236 ];
+
   # Apps de escritorio que se configuran desde Home Manager.
   home-manager.users.yovick = {
     imports = [
