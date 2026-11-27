@@ -741,13 +741,13 @@ PYEOF
             surface 5a4f6e
             surfaceDim 0a0a12
             surfaceBright 2a2a44
-            surfaceContainerLowest 0a0a12
-            surfaceContainerLow 141428
-            surfaceContainer 141428
-            surfaceContainerHigh 22123f
-            surfaceContainerHighest 2a174f
+            surfaceContainerLowest 14143a
+            surfaceContainerLow 1a1a44
+            surfaceContainer 1a1a44
+            surfaceContainerHigh 202055
+            surfaceContainerHighest 28286a
             onSurface d4d4f0
-            surfaceVariant 22123f
+            surfaceVariant 202055
             onSurfaceVariant 8888aa
             inverseSurface d4d4f0
             inverseOnSurface 141428
@@ -758,7 +758,7 @@ PYEOF
             surfaceTint ed1044
             primary ed1044
             onPrimary ffffff
-            primaryContainer 1e1e3a
+            primaryContainer 202055
             onPrimaryContainer ffb3c9
             inversePrimary ed1044
             secondary 00aaff
