@@ -25,7 +25,6 @@
         pull.rebase = true;
         push.autoSetupRemote = true;
         credential.helper = "!gh auth git-credential";
-        safe.directory = "*";
         core.hooksPath = "/home/yovick/.config/git/hooks";
         alias = {
           st = "status";

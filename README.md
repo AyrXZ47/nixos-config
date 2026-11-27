@@ -190,8 +190,8 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
   no hace falta tocar cada agente.
 - **Notificaciones**: `cli.json` prende `attention.notifications`, `sound`,
   `sound_pack` y `volume: 1`, con un WAV generado en build para `done` y
-  `subagent_done`; `common-packages.nix` crea `/usr/bin/pw-play` para que el
-  audio no dependa del PATH.
+  `subagent_done`; `common-cli.nix` crea `/usr/bin/pw-play` para que el audio
+  no dependa del PATH.
 - **Skills globales**: `security-audit` (Cloudflare), `ponytail` y
   `frontend-design` (Anthropic) se bajan de upstream con `fetchFromGitHub` en
   `modules/apps/opencode-skills.nix` y se enlazan en
@@ -203,7 +203,7 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
   apagado para no pedir un proveedor pago.
 - **Browse (navegador real)**: `browse` es un MCP local que maneja Brave con
   las sesiones del usuario. La extensión se instala por política de Brave en
-  `common-packages.nix`; el pairing es una vez por host con `browse pair`.
+  `desktop.nix`; el pairing es una vez por host con `browse pair`.
   DDG sigue siendo el camino barato para buscar; Browse queda para sitios con
   login, JS pesado o interacción real.
 - **Pi pelado**: se instala `pkgs.pi-coding-agent` y nada más. `pi.nix` borra
@@ -226,7 +226,7 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
   procedimiento completo: arranque/cierre de sesión, alta de repos, plantilla
   de tarea y revisión semanal.
 - **Archivos**: OpenCode lee texto/CSV/imágenes nativo; para PDF se usa
-  `pdf2md` (ya instalado en `common-packages.nix`) y se lee el Markdown.
+  `pdf2md` (ya instalado en `common-cli.nix`) y se lee el Markdown.
 - **`hyprdev`**: la ventana invocadora ejecuta `opencode --auto`; las otras
   dos siguen siendo nvim y shell libre.
 
@@ -273,8 +273,8 @@ Fun: `cbonsai`.
 
 KiCad 10 con simulador SPICE embebido (ngspice via `libngspice`) + la librería
 comunitaria [kicad-spice-library](https://github.com/kicad-spice-library/KiCad-Spice-Library)
-(~50k modelos: transistores, opamps, diodos, digital, manufacturas). Todo se
-instala en los 4 hosts desde `modules/apps/common-packages.nix` (input
+(~50k modelos: transistores, opamps, diodos, digital, manufacturas). Se
+instala en pc/laptop desde `modules/apps/engineering.nix` (input
 `kicad-spice-library` en flake.nix, `flake = false` por ser repo de datos).
 
 - **Ruta fija de la librería** (idéntica en todos los hosts):
@@ -496,7 +496,7 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 - `opencode-pair [puerto]` — bindea el servicio de OpenCode a la IP de Tailscale,
   lo reinicia y muestra el QR para abrir la sesión desde el navegador del
   celular. Sin Tailscale, usar `opencode pair --remote --yes`.
-- `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado, cierre en cadena).
+- `netrunner` — btop + nvtop en 2 ventanas kitty (nvtop al lado; se cierran a mano).
 - `ytsong` / `ytlist` — download audio from clipboard (yt-dlp, cookies from Brave).
 - `estabilizar_clips` / `estabilizar_clips_gpu` — re-encode clips to CFR 30
   (CPU x264, or h264_vaapi encode on GPU) for stable editing. `_gpu` accepts
@@ -504,16 +504,15 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
   AAC. Only the ENCODE runs on the GPU: on radeonsi the VA-API h264 decoder
   only allocates surfaces for aligned widths (720p works, 576/832 do not), so
   decoding stays in RAM and frames are uploaded with `hwupload`. HDR10/HLG
-  clips are tone-mapped on the CPU (`zscale`+`tonemap`): this ffmpeg ships
-  without libplacebo and radeonsi's VPP has no HDR support, so neither
-  `libplacebo` nor `tonemap_vaapi` is usable here.
+  clips are tone-mapped on the CPU (`zscale`+`tonemap`): `ffmpeg-full` has
+  libplacebo, but radeonsi's VPP has no HDR support, so `tonemap_vaapi` is
+  still not usable here.
 - `subtitular <video>` — Whisper (whisper.cpp) Spanish subtitles with VAD.
 - `narravoz <guion.md|txt> [voz]` — text to speech with Microsoft's neural
   voices via `edge-tts` (the Edge/Azure ones), default `es-MX-DaliaNeural`.
   A two-minute script takes about 3 s. The text is sent to Microsoft, so it is
-  not suitable for confidential material; nixpkgs pins 7.2.8, which returns
-  403 because Microsoft rotates its `Sec-MS-GEC` token, so
-  `modules/apps/tts.nix` overrides it to 7.3.1.
+  not suitable for confidential material. nixpkgs already ships 7.3.1 (the
+  version that fixes the `Sec-MS-GEC` 403); no override is needed.
 - `pdf2md <pdf>...` — PDF to Markdown, meant for feeding documents to an LLM
   as context. A PDF cannot be read raw (its content streams are compressed),
   so it extracts the text layer with pymupdf on CPU — no OCR, no models, ~0.5 s
@@ -539,12 +538,12 @@ bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 1. Install NixOS with the official installer (any partitioning).
 2. `git clone https://github.com/<you>/nixos-config && cd nixos-config`
 3. `./bootstrap.sh <host>` — regenerates `hardware-configuration.nix` from the real
-   disks, runs `sudo nixos-rebuild --impure switch --flake .#<host>`, and commits the file.
+   disks, runs `sudo nixos-rebuild switch --flake .#<host>`, sets the initial
+   password with `chpasswd`, and commits the file.
 
 That's it — no manual hardware step, no `gh`/GitHub auth required (the repo is public
-and only the local file is touched). On first boot the `yovick` user is created with a
-password read from `/etc/nixos-secrets/yovick-password` (created by `./bootstrap.sh`,
-never committed; skip it and the user is created without one). Change it after boot
+and only the local file is touched). The flake does not read the password at eval
+time, so rebuilds are pure and do not need `--impure`. Change the password later
 with `passwd`.
 
 ## Adding a New Host
@@ -611,7 +610,7 @@ contra `checksums.txt` del release al reemplazarlo. Una vez en el celular:
 ## Day-to-Day
 
 ```bash
-sudo nixos-rebuild --impure switch --flake .#<host>   # apply system + home changes
+sudo nixos-rebuild switch --flake .#<host>   # apply system + home changes
 home-manager switch --flake .#<host>                  # Home Manager only
 deploy <host>                                         # lo mismo, desde cualquier máquina (local o por ssh -t)
 nix flake update                              # bump inputs
@@ -622,7 +621,7 @@ No cleanup timers run in background any more (see Performance & Tuning). When a
 host needs maintenance, run this by hand:
 
 ```bash
-sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +6  # keep 6
+sudo nix-env -p /nix/var/nix/profiles/system --delete-generations +3  # keep 3
 sudo nix-collect-garbage                                             # free store
 sudo nix-store --optimise                                            # dedup store
 ```
@@ -633,10 +632,10 @@ generation (no rollback left). Use it only when you mean it.
 ## Security Notes
 
 - **Nothing secret is committed**: no SSH keys, no tokens, no credentials, and no
-  default password. The initial password lives in `/etc/nixos-secrets/yovick-password`
-  (root-only, created by `bootstrap.sh`, never in git).
-- The initial password only applies when the `yovick` user is created (first boot) and
-  never overrides an existing password.
+  default password. `bootstrap.sh` sets the first password with `chpasswd`; it is
+  never stored in the repo nor read during evaluation.
+- The first-boot password only applies when `bootstrap.sh` runs; `passwd` changes it
+  afterwards.
 - **For people cloning this repo:** the config builds the `yovick` user (with a password
   only if you set the secret file); rename the user (`flake.nix`, `modules/core/user.nix`),
   hostname, and `git remote` to your own, then change the password after first login. The
@@ -644,7 +643,7 @@ generation (no rollback left). Use it only when you mean it.
   `home-manager.users.<you>.modules.apps.git.name` / `.email` (default `null`, so both are
   omitted unless you set them). Only the repo owner (or granted collaborators) can push;
   anyone can clone and fork.
-- Rebuilds use `--impure` because `user.nix` reads the local password file at eval time.
+- Rebuilds are pure: `user.nix` no longer reads a local password file at eval time.
 
 ### Endurecimiento base (`modules/core/hardening.nix`)
 

@@ -7,7 +7,7 @@ in
   options.modules.desktop.virtualisation.enable = lib.mkEnableOption "virtualizacion KVM/QEMU + libvirt (virt-manager)";
 
   config = lib.mkIf cfg.enable {
-    # El paquete virt-manager ya lo instala modules/apps/common-packages.nix en
+    # El paquete virt-manager ya lo instala modules/apps/desktop.nix en
     # los 4 hosts, pero eso es SOLO el cliente. Esto habilita el backend.
     virtualisation.libvirtd.enable = true;
 

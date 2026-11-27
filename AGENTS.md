@@ -10,7 +10,7 @@ Flake-driven NixOS config (`nixos-unstable`, pinned in `flake.lock`) for 4 hosts
 - Two module flavors under `modules/{core,apps,desktop,hardware,theming}`:
   - `modules/hardware/*` (fingerprint, mtp, openrgb) and `modules/desktop/hyprland.nix` declare `options.modules.<category>.<name>.enable`; hosts flip it (`modules.desktop.hyprland.enable = true`).
   - Everything else (`core/*`, `theming/*`, the apps below) is a plain import with no enable flag.
-- `modules/apps/` is split: home-side files imported by `home/default.nix` (shell, kitty, neovim, fastfetch, git, mpd, serena) vs system-side files imported by host configs (common-packages, gaming).
+- `modules/apps/` se parte por rol: `home/default.nix` importa lo común y lo de escritorio; los hosts importan `common-cli`, `desktop`, `engineering`, `media`, `dev`, `gaming` y `server` según corresponda. pc y laptop son espejo de software; server no tiene GUI; la VM conserva GUI básica.
 - New feature = new file under `modules/`, imported by the hosts that want it (or `home/default.nix` for home-side apps), NOT added to `flake.nix`. Match the category's existing pattern (enable-option vs plain import).
 - `hosts/*/hardware-configuration.nix` is GENERATED (`nixos-generate-config`, disk-by-label on pc/laptop/server). Never hand-edit; regenerate. `./bootstrap.sh <host>` regenerates, rebuilds, and commits it.
 - **pc y laptop son espejo uno del otro.** Lo que aplique a los dos va en `modules/` (o `home/default.nix`); en `hosts/<name>/configuration.nix` solo queda lo que es físicamente de ese equipo (hardware, GPU, fingerprint, discos, hostName). Un fix escrito en un host y que sirve para los dos es un bug diferido: el otro se queda sin él en silencio. Ya pasó con Miracast — `dnsmasq` y los puertos del firewall vivían solo en `hosts/laptop` mientras la app la importa `home/default.nix` en los 4 hosts, así que el `pc` tenía GND instalado y roto. Antes de tocar `hosts/*`, preguntarse si no corresponde a un módulo compartido.
@@ -114,7 +114,7 @@ Por eso:
 
 ## Gotchas
 
-- `yovick` is hardcoded in `flake.nix`, `home/default.nix`, and `modules/core/user.nix` — the latter holds `initialPassword` (applies only at first boot). Renaming the user touches all three.
+- `yovick` is hardcoded in `flake.nix`, `home/default.nix`, and `modules/core/user.nix`. The first password lo pone `bootstrap.sh` con `chpasswd` (no se lee en eval). Renaming the user touches all three.
 - Las claves SSH públicas de laptop y pc viven en `modules/core/user.nix` (`openssh.authorizedKeys.keys`). No editar `~/.ssh/authorized_keys` a mano: el rebuild escribe `/etc/ssh/authorized_keys.d/yovick` y sshd confía en ese archivo además del home. Si una máquina no puede entrar a la otra, se reconstruye y listo.
 - Fingerprint PAM trap: with `services.fprintd.enable`, `security.pam.services.<name>.fprintAuth` **defaults to true** for every PAM service. It's deliberately off for `login`/`sddm` (SDDM has no fingerprint UI and it blocked login waiting for a finger); fingerprint works only in `sudo` + `hyprlock`. See `modules/hardware/fingerprint.nix` + README.
 - Nothing secret is ever committed; `result*`, `.direnv`, `*.iso`, `*.qcow2`, `.aider*` are gitignored — never commit build results.

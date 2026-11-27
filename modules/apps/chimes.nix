@@ -1,9 +1,7 @@
-# Dos chimes distintos para identificar de que harness viene la notificacion.
-# Uno por harness, generados con la stdlib de Python (no se commitean binarios).
-# Timbre de marimba (fundamental + 4o parcial, decay rapido) y pico normalizado
-# al 100%: se escucha parejo aunque el sink del sistema este bajo.
+# Chime de fin de turno para OpenCode, generado con la stdlib de Python (no se
+# commitean binarios). Timbre de marimba (fundamental + 4o parcial, decay
+# rapido) y pico normalizado al 100%: se escucha parejo aunque el sink este bajo.
 #   opencode  C6 -> G6, quinta ascendente brillante
-#   dsh       E5 -> B5, quinta ascendente mas calida y grave
 { pkgs }:
 let
   render = name: notes: pkgs.runCommand "chime-${name}.wav" { nativeBuildInputs = [ pkgs.python3 ]; } ''
@@ -47,5 +45,4 @@ PY
 in
 {
   opencode = render "opencode" [ "1046.5,0,0.16" "1568.0,0.09,0.24" ];
-  dsh = render "dsh" [ "659.25,0,0.20" "987.77,0.11,0.30" ];
 }

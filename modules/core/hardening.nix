@@ -98,7 +98,9 @@
     "-w /etc/group -p wa -k identity"
     "-w /etc/sudoers -p wa -k privilege"
     "-w /etc/sudoers.d -p wa -k privilege"
-    "-w /etc/ssh/sshd_config -p wa -k sshd"
+    # sshd_config es un symlink al store; vigilar el directorio atrapa el
+    # reemplazo del symlink en cada generación.
+    "-w /etc/ssh -p wa -k sshd"
   ];
 
   # sudo solo lo puede ejecutar el grupo wheel (si alguien deja un binario

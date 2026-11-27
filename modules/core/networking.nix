@@ -28,7 +28,7 @@
 
   # KDE Connect: los puertos 1714-1764 TCP/UDP tienen que estar abiertos en
   # TODOS los hosts. Antes vivía en hosts/pc y hosts/laptop, pero la app y el
-  # daemon (kdeconnect-kde) se instalan desde modules/apps/common-packages.nix
+  # daemon (kdeconnect-kde) se instalan desde modules/apps/desktop.nix
   # en los 4 hosts: server/vm tenían KDE Connect con el firewall cerrado.
   programs.kdeconnect.enable = true;
 
@@ -126,13 +126,9 @@
     ip6tables -t mangle -D POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1452 || true
   '';
 
-  # ── DNS declarativo (a prueba de DHCP) ─────────────────────────────────────
-  # Nombres de servidor FIJOS: Cloudflare primario, Google fallback. El DHCP del
-  # router ya los anunciaba así, pero ahora NO dependemos de lo que el router
-  # diga: es declarativo y aplica a los 4 hosts.
-  networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
-
-  # DNS cifrado: systemd-resolved como resolvedor local + DoT (DNS-over-TLS) a
+  # ── DNS cifrado ────────────────────────────────────────────────────────────
+  # `networking.nameservers` era config muerta: con `services.resolved` el
+  # /etc/resolv.conf apunta al stub y la fuente real es Resolve.DNS (abajo).
   # Cloudflare y Google. NM delega en resolved; cada query va por TLS (puerto
   # 853), nadie en la red (ni el ISP) puede espiar qué dominios consultamos.
   # `FallbackDNS` cubre el caso de que ambos DoT fallen (ej. red corporativa

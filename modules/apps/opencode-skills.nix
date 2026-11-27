@@ -32,7 +32,7 @@ let
   ];
 
   globalAgents = ''
-    # Reglas globales de agentes (OpenCode y dsh)
+    # Reglas globales de agentes (OpenCode)
 
     ## Ponytail: lazy senior dev
 

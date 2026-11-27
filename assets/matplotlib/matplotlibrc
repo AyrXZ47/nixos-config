@@ -1,7 +1,7 @@
-# Backend QtAgg: Tk (el default) dibuja cursores X11 core que ignoran el
-# tema del cursor (Bibata). Qt en Wayland sí lo respeta. Requiere PySide6
-# en TODOS los pythonEnv que lean este rc (python.nix y omnetpp.nix).
-backend: QtAgg
+# Backend TkAgg: sin PySide6/Qt. Tk dibuja cursores X11 core, pero evita
+# arrastrar ~1 GB de Qt solo para las gráficas. Si se necesita Qt, se cambia
+# a QtAgg en un entorno de proyecto que incluya PySide6.
+backend: TkAgg
 
 # from seaborn dark
 legend.frameon: False

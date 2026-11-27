@@ -1,18 +1,6 @@
 { config, pkgs, lib, ... }:
 
-let
-  # Contrasena inicial SOLO para el primer boot (creacion del usuario). Ya NO esta
-  # hardcodeada en el repo publico: se lee de un archivo local (solo root) que
-  # ./bootstrap.sh crea en la primera instalacion. Si el archivo no existe, no se
-  # define initialPassword (el usuario se crea sin password y en una maquina ya
-  # instalada no cambia nada, pues /etc/shadow conserva la real).
-  # Nota: la lectura es impura, asi que el rebuild va con `nixos-rebuild --impure`.
-  passwordFile = "/etc/nixos-secrets/yovick-password";
-  initialPassword =
-    if builtins.pathExists passwordFile
-    then lib.trim (builtins.readFile passwordFile)
-    else null;
-in {
+{
   nixpkgs.config.allowUnfree = true;
   # El update completo (nixpkgs 2026-11-03) marca EOL a estos paquetes que el
   # repo sigue usando a proposito: pybars3 por kikit (KiCad) y gtk2 por el
@@ -50,16 +38,14 @@ in {
       # etiqueta como la del pc para que ambos lados queden declarados.
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIFfYnctaaFb4U6oKOBF/XwXA2pOclCV1H7PVq43j046 yovick@nixos-pc"
     ];
-    # Solo se aplica si el usuario aun no existe (primer boot); cambiala despues con `passwd`
-    initialPassword = lib.mkIf (initialPassword != null) initialPassword;
+    # El password inicial lo pone ./bootstrap.sh con `chpasswd` después del
+    # primer switch. Así la evaluación del flake queda pura: no se lee ningún
+    # archivo fuera del store y `nixos-rebuild` ya no necesita `--impure`.
   };
 
   environment.pathsToLink = [ "/share/applications" "/share/xdg-desktop-portal" ];
 
   home-manager.backupFileExtension = "bak";
 
-  security.sudo = {
-    wheelNeedsPassword = true;
-    extraRules = [];
-  };
+  security.sudo.wheelNeedsPassword = true;
 }

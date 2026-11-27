@@ -156,7 +156,7 @@ in
     environment.systemPackages = with pkgs; [
       mpvpaper
       cliphist
-      (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
+      # sddm-astronaut ya vive en sddm.extraPackages; no se duplica acá.
       # wayle fuera: el shell es Caelestia (modules/desktop/caelestia.nix).
       # El lock/idle tambien son de Caelestia, no hyprlock/hypridle.
       wl-clipboard
@@ -196,15 +196,12 @@ in
 
     xdg.portal = {
       enable = true;
-      wlr.enable = true;
+      # Hyprland tiene su propio portal; wlr sobra y solo duplica D-Bus.
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+      config.hyprland.default = [ "hyprland" "gtk" ];
     };
 
-    fonts.packages = with pkgs; [
-      jetbrains-mono
-      nerd-fonts.jetbrains-mono
-      nerd-fonts.symbols-only
-    ];
+    # Las fuentes viven en modules/theming/theme-base.nix; no se duplican acá.
 
     # El agente polkit corre via exec-once en hyprland-home.nix; este servicio
     # nunca arrancaba (graphical-session.target inactivo con systemd.enable=false).

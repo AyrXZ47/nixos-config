@@ -40,12 +40,11 @@
     # (btrfs commit, NVMe, amdgpu, CPU). Si un boot requiere reintroducirlo,
     # documentar por qué.
     "split_lock_detect=off"
-    # CPU: driver pstate activo y sin mitigaciones (elección de rendimiento).
-    # `processor.max_cstate=1` vivia en amd-desktop.nix y se elimino: capar los
-    # C-states le quita residencia al boost. La laptop nunca lo tuvo (necesita
-    # C-states profundos para reposar y ahorrar bateria).
+    # CPU: driver pstate activo. Las mitigaciones de CPU quedan en su default
+    # del kernel: el costo en Zen3 es bajo y estas máquinas ejecutan agentes,
+    # navegador y repos de terceros. Si alguna vez se necesita max FPS puro,
+    # `mitigations=off` es una línea, pero no es el default.
     "amd_pstate=active"
-    "mitigations=off"
     # GPU: desbloquea todo el rango de clocks/OC/fan vía /sys (no cambia nada solo)
     "amdgpu.ppfeaturemask=0xffffffff"
     # NVMe sin DRAM: el APST apagado (nvme_core.default_ps_max_latency_us=0) y el
@@ -63,18 +62,10 @@
     "kernel.softlockup_all_cpu_backtrace" = 1;
   };
 
-  # ZRAM
+  # ZRAM: 33 % alcanza para absorber picos sin inflar el arranque ni el
+  # consumo de CPU en compresión. El OOM queda con earlyoom (nix-optimization).
   zramSwap.enable = true;
-  zramSwap.memoryPercent = 50;
-
-  # earlyoom: sin esto el OOM global del kernel elige victimas por oom_score y
-  # mato `systemd --user` (score 100) antes que al proceso que llenaba la RAM;
-  # al morir el user manager se cerro la sesion entera (laptop, 2026-11-21:
-  # Vivado con 11 synth en paralelo + Firefox llenaron 14G de RAM y 7.2G de
-  # zram, y se llevaron puesta la sesion aunque los synth terminaron bien).
-  # earlyoom pesa oom_score x RSS, asi que mata al cerdo (Vivado) y no al
-  # gerente de sesion. Umbrales por defecto: 10% de RAM y 10% de swap libres.
-  services.earlyoom.enable = true;
+  zramSwap.memoryPercent = 33;
 
   # TRIM: la politica vive en modules/core/nix-optimization.nix (manual, sin
   # timer). No re-activar services.fstrim aca: era un `enable = true` redundante

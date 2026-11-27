@@ -19,7 +19,7 @@ let
   # OpenCode Browse: MCP server + extensión de Chromium. Upstream publica un
   # standalone de Bun por plataforma en npm; se parchea el intérprete para
   # NixOS y se apaga el auto-update (el store es de solo lectura). La extensión
-  # se instala por política de Brave en common-packages.nix; el pairing sigue
+  # se instala por política de Brave en desktop.nix; el pairing sigue
   # siendo manual (`browse pair`) porque es un consentimiento del navegador.
   browseUnwrapped = pkgs.stdenvNoCC.mkDerivation rec {
     pname = "opencode-browse";
@@ -96,7 +96,7 @@ let
           };
         };
         # Navegador real (Brave) con las sesiones del usuario. La extensión
-        # se instala por política en common-packages.nix; el pairing es
+        # se instala por política en desktop.nix; el pairing es
         # manual la primera vez (`browse pair`).
         browse = {
           type = "local";
@@ -123,9 +123,7 @@ let
     };
   });
 
-  # Chime del evento "done". Ambos harnesses comparten el generador
-  # (chimes.nix); el de OpenCode es ascendente y el de dsh descendente, para
-  # saber de cual viene la notificacion sin mirar la pantalla.
+  # Chime del evento "done". DSH se retiró; queda el generador de OpenCode.
   chimes = import ./chimes.nix { inherit pkgs; };
 
   cliSeed = pkgs.writeText "opencode-cli.json" (builtins.toJSON {
@@ -193,6 +191,11 @@ in
   # limpian las entradas viejas del opencode.json en ensureOpencodeConfig.
   home.activation.removeHindsight = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     rm -rf "$HOME/.hindsight"
+  '';
+
+  # DSH se retiró (2026-11-27): no se usa. Se limpia el estado/config local.
+  home.activation.removeDsh = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    rm -rf "$HOME/.dsh" "$HOME/.dsh-tui"
   '';
 
   # Basic Memory se retiro (2026-11-04): rompia en cada release (0.18.5 cambio
