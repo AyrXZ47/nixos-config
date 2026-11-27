@@ -54,9 +54,10 @@ flake.nix              # Entry point — hosts & shared modules
 ## Software
 
 ### Desktop
-- **Hyprland** — dwindle layout, 5px/10px gaps, 12px rounding, blur solo en kitty
-  y Caelestia (ventanas sólidas por regla), overshoot/bounce animations, animated
-  gradient borders; `SUPER+B` alterna blur + neón.
+- **Hyprland** — dwindle layout, 5px/10px gaps, 12px rounding. Todas las
+  ventanas nacen sólidas y sin blur (regla catch-all `solid-global`); el vidrio
+  queda solo en kitty y Caelestia. `SUPER+B` apaga/restaura todo: blur,
+  transparencia de kitty/Caelestia, glow, sombra y borde neón.
 - **SDDM** — Wayland, `sddm-astronaut` "cyberpunk" theme.
 - **Caelestia** — shell Quickshell (Qt6/QML): barra lateral izquierda con
   workspaces, clock, notificaciones, batería, clipboard, emoji, launcher,

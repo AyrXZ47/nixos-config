@@ -92,12 +92,16 @@ in
 
         decoration = {
           rounding = 12,
-          -- Ventanas sólidas SIEMPRE: la regla catch-all `solid-global` fuerza
-          -- opacity 1 en toda app. El blur queda solo para kitty (transparencia
-          -- nativa) y las capas de Caelestia. 4/2: menos blur pedido por el
-          -- dueño (antes 8/2; 12/3 costaba ~4 W con Obsidian repintando, medido
-          -- 2026-11-26). SUPER+B alterna el blur de kitty/Caelestia y el neon;
-          -- no vuelve translúcida ninguna ventana.
+          -- Default (Cyberpunk ON): TODAS las ventanas nacen sólidas y sin
+          -- blur por la regla catch-all `solid-global`. El vidrio queda SOLO
+          -- en kitty (transparencia nativa + blur) y en las capas de
+          -- Caelestia (transparency.enabled + layer_rule). `blur.enabled=true`
+          -- es requisito de Hyprland para difuminar cualquier ventana/capa; el
+          -- catch-all apaga el blur en todas las demás. 4/2: menos blur pedido
+          -- por el dueño (antes 8/2; 12/3 costaba ~4 W con Obsidian
+          -- repintando, medido 2026-11-26). SUPER+B OFF deja blur 0, opacidad
+          -- 1, sin glow/shadow, kitty opaca y Caelestia sin transparencia; ON
+          -- restaura este default.
           active_opacity = 1.0,
           inactive_opacity = 1.0,
           blur = {
@@ -212,14 +216,14 @@ in
       -----------------------
       ---- WINDOW RULES -----
       -----------------------
-      -- Blur y transparencia SOLO en kitty y en las capas de Caelestia. El
-      -- catch-all va PRIMERO y fija las dos cosas para toda ventana:
-      -- `no_blur` apaga el blur global (que sigue enabled=true para kitty y
-      -- los layer_rule) y `opacity = "1 override"` impide que cualquier
-      -- decoration:active_opacity/inactive_opacity vuelva translúcida a una
-      -- app sin regla propia (Mixxx, Krita, Blender, OnlyOffice...). La
-      -- excepción de kitty va después y reenciende solo el blur; su
-      -- transparencia es nativa (background_opacity), no del compositor.
+      -- Política global: TODAS las ventanas nacen sólidas y sin blur (estado
+      -- Hyprland stock). El catch-all va PRIMERO y fija las dos cosas:
+      -- `no_blur=true` + `opacity="1 override"` cubren cualquier app sin regla
+      -- propia (Mixxx, Krita, Blender, OnlyOffice...) incluso si un
+      -- decoration:active_opacity/inactive_opacity quedara alto. Las ÚNICAS
+      -- excepciones son kitty y las capas de Caelestia: kitty tiene
+      -- transparencia nativa y reenciende su blur; Caelestia usa layer_rule y
+      -- su propio transparency.enabled.
       hl.window_rule({ name = "solid-global", match = { class = ".*" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
@@ -240,13 +244,19 @@ in
       hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication", no_initial_focus = true, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "obsidian-solid", match = { class = "md\\.obsidian\\.Obsidian" }, no_blur = true, opacity = "1 override" })
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
-      -- transparencia nativa (background_opacity 0.9) + blur del compositor
-      -- (ignore_opacity=true). La transparencia la aporta kitty, no Hyprland:
-      -- `opacity = "1 override"` evita que el compositor apile la suya encima
-      -- y mantiene el texto nítido. no_blur=false reenciende el blur que
-      -- apaga el catch-all `solid-global` de arriba. El match es de cadena
-      -- COMPLETA.
+      -- ÚNICA ventana con vidrio. Transparencia nativa (background_opacity
+      -- 0.9) + blur del compositor (ignore_opacity=true). La transparencia la
+      -- aporta kitty, no Hyprland: `opacity="1 override"` evita que el
+      -- compositor apile la suya encima y mantiene el texto nítido.
+      -- no_blur=false reenciende el blur que apaga el catch-all
+      -- `solid-global` de arriba. El match es de cadena COMPLETA.
       hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, no_blur = false, opacity = "1 override" })
+      -- Regla DESHABILITADA por defecto. Cyberpunk OFF la enciende para que
+      -- kitty sea 100% opaca: `force_rgbx` ignora el alpha nativo de
+      -- background_opacity (y además apaga su blur). Se togglea en vivo con
+      -- hl.window_rule({ name = 'kitty-opaque-off', enabled = true|false })
+      -- desde toggle-frost.sh; new windows heredan el estado.
+      hl.window_rule({ name = "kitty-opaque-off", match = { class = "kitty" }, force_rgbx = true, enabled = false })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
@@ -387,9 +397,10 @@ in
       -- una tty autenticada (ver unlock-crashed.sh y README). Un bind con
       -- `locked = true` dejaria la sesion accesible a cualquiera que este
       -- frente al teclado si el cliente del lock se cae.
-      -- Cyberpunk ON/OFF: alterna el blur de kitty/Caelestia y el neón con
-      -- notificación. No toca la opacidad de las ventanas (siempre sólidas por
-      -- la regla `solid-global`); ver toggle-frost.sh.
+      -- Cyberpunk ON/OFF: OFF deja blur 0, opacidad 1.0, sin glow/shadow y
+      -- apaga también el vidrio nativo de kitty (force_rgbx) y Caelestia
+      -- (shell.json); ON restaura el default: vidrio SOLO en kitty/Caelestia
+      -- y neón. Ver toggle-frost.sh.
       hl.bind("SUPER + B", hl.dsp.exec_cmd("${config.xdg.configHome}/hypr/scripts/toggle-frost.sh"))
 
       -- Screenshots (región / ventana / pantalla)
@@ -1101,6 +1112,12 @@ in
         # El visualizer de CavaProvider se apaga en battery antes de arrancar.
         [ -x "$HOME/.config/hypr/scripts/visualizer-power.sh" ] && \
           "$HOME/.config/hypr/scripts/visualizer-power.sh" auto || true
+        # Reaplica Cyberpunk ON/OFF antes de que el shell lea shell.json: el
+        # marcador de la sesion manda (OFF apaga tambien la transparencia de
+        # Caelestia; ON la restaura). Sin esto, un shell reiniciado tras un
+        # OFF volveria a nacer transparente.
+        [ -x "$HOME/.config/hypr/scripts/toggle-frost.sh" ] && \
+          "$HOME/.config/hypr/scripts/toggle-frost.sh" apply || true
         exec caelestia shell -d
       '';
     };
@@ -1449,33 +1466,67 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
       executable = true;
       text = ''
         #!/usr/bin/env bash
-        # Alterna de un saque el blur (solo kitty y capas de Caelestia) y el
-        # neon del marco. NO vuelve translúcida ninguna ventana: deja la
-        # opacidad global en 1.0 y el catch-all `solid-global` la fuerza en
-        # toda app. La unica transparencia es la nativa de kitty y la de
-        # Caelestia. El estado vive en un marcador bajo XDG_RUNTIME_DIR (se
-        # limpia al cerrar sesión, volviendo al default del config). Con config
-        # Lua "hyprctl keyword" no funciona: los cambios se aplican con
-        # "hyprctl eval".
+        # Cyberpunk ON/OFF (SUPER+B). Politica del repo:
+        #   - ON (default): TODAS las ventanas solidas y sin blur por la regla
+        #     `solid-global`. Vidrio SOLO en kitty (background_opacity 0.9 +
+        #     blur del compositor) y en las capas de Caelestia
+        #     (transparency.enabled + layer_rule).
+        #   - OFF: blur 0, active/inactive_opacity 1.0, sin glow/shadow y borde
+        #     plano. Ademas kitty queda 100% opaca (`force_rgbx`) y Caelestia
+        #     sin transparencia (se escribe shell.json; el shell lo recarga en
+        #     caliente). Cero transparencia en todo el escritorio.
+        #   - ON restaura exactamente el default anterior.
+        # El estado vive en un marcador bajo XDG_RUNTIME_DIR (se limpia al
+        # cerrar sesion -> proximo login ON). `apply` reaplica el estado sin
+        # notificar; lo usa caelestia-start.sh para que el shell nuevo nazca
+        # con el mismo estado. Con config Lua "hyprctl keyword" no funciona:
+        # los cambios se aplican con "hyprctl eval".
         #
         # El "neon" son TRES cosas: el gradiente de 3 colores del borde activo
         # (45 grados, 4px), el shadow exterior y el glow interior, los tres con
         # el mismo gradiente (definidos en el config de este mismo archivo).
         # Apagado queda un borde liso gris-azulado SIN sombra ni glow: se sigue
         # viendo cual esta enfocada, sin nada de neon.
-        state="$XDG_RUNTIME_DIR/frost-off"
+        state="$XDG_RUNTIME_DIR/cyberpunk-off"
         NEON='{ "rgba(ed1044ff)", "rgba(9900ffff)", "rgba(00aaffff)" }'
         FLAT='{ "rgba(3a3a5aff)", "rgba(3a3a5aff)", "rgba(3a3a5aff)" }'
 
-        if [ -f "$state" ]; then
-          # apagado -> cyberpunk (blur de kitty/Caelestia + neon)
+        # Escribe SOLO appearance.transparency.enabled en shell.json, en sitio
+        # (mismo inodo) para que el QFileSystemWatcher de Caelestia lo recargue.
+        set_caelestia_transparency() {
+          local f="$HOME/.config/caelestia/shell.json" tmp
+          [ -f "$f" ] || return 0
+          tmp=$(mktemp) || return 0
+          if ${pkgs.jq}/bin/jq --argjson v "$1" '.appearance.transparency.enabled = $v' "$f" > "$tmp"; then
+            cat "$tmp" > "$f"
+          fi
+          rm -f "$tmp"
+        }
+
+        apply_on() {
+          hyprctl eval "hl.config({ decoration = { blur = { enabled = true }, active_opacity = 1.0, inactive_opacity = 1.0, shadow = { enabled = true }, glow = { enabled = true } }, general = { col = { active_border = { colors = $NEON, angle = 45 } } } })" >/dev/null
+          hyprctl eval "hl.window_rule({ name = 'kitty-opaque-off', enabled = false })" >/dev/null
+          set_caelestia_transparency true
+        }
+
+        apply_off() {
+          hyprctl eval "hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0, shadow = { enabled = false }, glow = { enabled = false } }, general = { col = { active_border = { colors = $FLAT, angle = 45 } } } })" >/dev/null
+          hyprctl eval "hl.window_rule({ name = 'kitty-opaque-off', enabled = true })" >/dev/null
+          set_caelestia_transparency false
+        }
+
+        if [ "$1" = "apply" ]; then
+          # Sin notificacion: lo invoca caelestia-start.sh al arrancar/reiniciar.
+          if [ -f "$state" ]; then apply_off; else apply_on; fi
+        elif [ -f "$state" ]; then
+          # apagado -> cyberpunk (vidrio de kitty/Caelestia + neon)
           rm -f "$state"
-          hyprctl eval "hl.config({ decoration = { blur = { enabled = true }, active_opacity = 1.0, inactive_opacity = 1.0, shadow = { enabled = true }, glow = { enabled = true } }, general = { col = { active_border = { colors = $NEON, angle = 45 } } } })"
+          apply_on
           notify-send -t 2000 -a hyprland -u low "Cyberpunk ON"
         else
-          # cyberpunk -> apagado (sin blur ni neon; ventanas ya solidas)
+          # cyberpunk -> apagado (cero blur y cero transparencia en todo)
           touch "$state"
-          hyprctl eval "hl.config({ decoration = { blur = { enabled = false }, active_opacity = 1.0, inactive_opacity = 1.0, shadow = { enabled = false }, glow = { enabled = false } }, general = { col = { active_border = { colors = $FLAT, angle = 45 } } } })"
+          apply_off
           notify-send -t 2000 -a hyprland -u low "Cyberpunk OFF"
         fi
       '';

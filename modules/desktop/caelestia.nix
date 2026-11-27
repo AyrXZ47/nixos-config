@@ -57,7 +57,10 @@ let
       anim.durations.scale = 1;
       # El marco (#9AA6B5) es vidrio: `base` deja la barra/paneles
       # translúcidos para el blur. `layers = 1.0` mantiene opacos los tokens
-      # de capa 1 (pills #5050fa) para que el texto se lea.
+      # de capa 1 (pills #5050fa) para que el texto se lea. Este archivo es el
+      # default ON; el toggle Cyberpunk (SUPER+B) escribe SOLO este `enabled`
+      # en ~/.config/caelestia/shell.json (jq, en caliente) para el OFF, y
+      # caelestia-start.sh reaplica el estado del marcador al arrancar.
       transparency = {
         enabled = true;
         base = 0.34;
