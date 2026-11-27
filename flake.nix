@@ -743,7 +743,7 @@ PYEOF
             surfaceBright 2a2a44
             surfaceContainerLowest 14143a
             surfaceContainerLow 1a1a44
-            surfaceContainer 1f1f51
+            surfaceContainer 222282
             surfaceContainerHigh 222259
             surfaceContainerHighest 28286a
             onSurface d4d4f0
