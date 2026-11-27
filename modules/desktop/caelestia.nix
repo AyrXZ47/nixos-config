@@ -60,7 +60,7 @@ let
       # de capa 1 (pills #5050fa) para que el texto se lea.
       transparency = {
         enabled = true;
-        base = 0.40;
+        base = 0.32;
         layers = 1.0;
       };
     };

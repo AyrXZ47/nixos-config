@@ -709,6 +709,10 @@ PYEOF
               --replace-fail \
             'color: Colours.tPalette.m3surfaceContainer' \
             'color: "#5050fa"'
+            substituteInPlace modules/bar/components/StatusIcons.qml \
+              --replace-fail \
+            'property color colour: Colours.palette.m3secondary' \
+            'property color colour: "#ABF4FF"'
             substituteInPlace modules/bar/components/OsIcon.qml \
               --replace-fail \
             'color: Colours.tPalette.m3surfaceContainer' \
@@ -733,6 +737,20 @@ PYEOF
             for f in $(grep -rl 'Colours\.tPalette\.m3surfaceContainer' modules components); do
               sed -i -E 's/Colours\.tPalette\.m3surfaceContainer([^A-Za-z.]|$)/"#5050fa"\1/g' "$f"
             done
+
+            # Notificaciones del sidebar: cada grupo era #5050fa+7 (invisible
+            # sobre el fondo). Tarjeta oscura con borde sutil y mas aire entre
+            # grupos para que se vea donde empieza y termina cada uno.
+            substituteInPlace modules/sidebar/NotifGroup.qml \
+              --replace-fail \
+            'color: Colours.layer(Colours.palette.m3surfaceContainer, 2)' \
+            'color: Qt.alpha("#0a0a12", 0.30)
+    border.width: 1
+    border.color: Qt.alpha("#ffffff", 0.12)'
+            substituteInPlace modules/sidebar/NotifDockList.qml \
+              --replace-fail \
+            'spacing: Tokens.spacing.small' \
+            'spacing: Tokens.spacing.medium'
 
             # Paneles de Caelestia: el blob usa `surface` (el marco #AFC2DB).
             # La tarjeta interna del sidebar va #5050fa, como el resto de
@@ -795,12 +813,12 @@ PYEOF
             shadow 000000
             scrim 000000
             surfaceTint ed1044
-            primary ffffff
-            onPrimary 1a1030
+            primary ed1044
+            onPrimary ffffff
             primaryContainer 222259
             onPrimaryContainer ffb3c9
-            inversePrimary ffffff
-            secondary abf4ff
+            inversePrimary ed1044
+            secondary 00aaff
             onSecondary 001a2e
             secondaryContainer 0d2b44
             onSecondaryContainer b3e0ff
@@ -817,7 +835,7 @@ PYEOF
             onPrimaryFixed 3a0018
             onPrimaryFixedVariant 90083a
             secondaryFixed b3e0ff
-            secondaryFixedDim abf4ff
+            secondaryFixedDim 00aaff
             onSecondaryFixed 001a2e
             onSecondaryFixedVariant 005a8a
             tertiaryFixed b3ffd6
