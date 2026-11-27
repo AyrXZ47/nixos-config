@@ -830,10 +830,15 @@ in
           # nombre ya coincide, así que se borra el estado para forzar la
           # reescritura cuando cambia la paleta del overlay.
           cli=${pkgs.caelestia-cli}/bin/caelestia
-          if [ -x "$cli" ]; then
-            state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
+          state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
+          marker="$HOME/.local/state/caelestia/.scheme-cli"
+          # Solo re-aplicar si cambió el CLI (rebuild) o falta el estado. En un
+          # boot normal se evita el `caelestia scheme set` (~3 s de activación).
+          if [ -x "$cli" ] && { [ "$(cat "$marker" 2>/dev/null)" != "$cli" ] || [ ! -f "$state" ]; }; then
+            mkdir -p "$(dirname "$state")" "$(dirname "$marker")"
             rm -f "$state"
             "$cli" scheme set -n cyberpunk >/dev/null 2>&1 || true
+            printf '%s\n' "$cli" > "$marker"
           fi
         '';
       };

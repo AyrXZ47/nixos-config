@@ -1761,8 +1761,14 @@ EOF
     # NINGUN .desktop (las apps entran via <DefaultAppDirs/> del menu; Plasma lo
     # encuentra porque su sesion pone XDG_MENU_PREFIX=plasma-, Hyprland no) y
     # ksycoca queda con 0 servicios -> Dolphin pregunta "abrir con" para todo.
-    rm -f "$HOME/.cache/ksycoca6_"*
-    "${pkgs.kdePackages.kservice}/bin/kbuildsycoca6" --noincremental >/dev/null 2>&1 || true
+    marker="$HOME/.cache/ksycoca6.mimeapps"
+    current="$(sha256sum "$f" | cut -d' ' -f1):$(readlink /run/current-system)"
+    if [ "$(cat "$marker" 2>/dev/null)" != "$current" ]; then
+      rm -f "$HOME/.cache/ksycoca6_"*
+      "${pkgs.kdePackages.kservice}/bin/kbuildsycoca6" --noincremental >/dev/null 2>&1 || true
+      mkdir -p "$(dirname "$marker")"
+      printf '%s\n' "$current" > "$marker"
+    fi
   '';
 
   # Previews de Dolphin para todo tipo de archivo (imágenes, vídeo, audio, pdfs...):
