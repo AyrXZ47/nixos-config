@@ -5,16 +5,66 @@
 # al vuelo. Las claves del flake mandan; el resto del archivo se conserva.
 let
   # CLI de dotpm: habla con la API local del plugin (Obsidian desktop abierto)
-  # y expone sus tools por stdio para OpenCode. PATH propio porque el server
-  # MCP puede arrancar desde un lanzador sin el perfil de home-manager.
-  # Sin pin: `dlx` resuelve la ultima release (con el retraso de 24 h de
-  # minimumReleaseAge) para no arrastrar versiones viejas.
-  dotpm = pkgs.writeShellScriptBin "dotpm" ''
-    export PATH=${
-      lib.makeBinPath [ pkgs.nodejs pkgs.coreutils pkgs.bash pkgs.findutils ]
-    }:"$PATH"
-    exec ${pkgs.pnpm}/bin/pnpm --reporter=append-only dlx "@dotpm/cli" "$@"
-  '';
+  # y expone sus tools por stdio para OpenCode. El paquete 0.2.0 es un bundle
+  # ESM autocontenido (sin dependencias npm), así que se empaqueta directo y
+  # no hay `pnpm dlx` ni red en runtime.
+  dotpm = pkgs.stdenvNoCC.mkDerivation rec {
+    pname = "dotpm";
+    version = "0.2.0";
+
+    src = pkgs.fetchurl {
+      url = "https://registry.npmjs.org/@dotpm/cli/-/cli-${version}.tgz";
+      hash = "sha256-KEe1CzN5HFHWJ/NKgUf0iUgQ14OBcwu9e7tGCuWzlDU=";
+    };
+
+    sourceRoot = "package";
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out/lib/dotpm $out/bin
+      cp -r build package.json $out/lib/dotpm/
+      makeWrapper ${pkgs.nodejs}/bin/node $out/bin/dotpm \
+        --add-flags "$out/lib/dotpm/build/dotpm.js"
+      runHook postInstall
+    '';
+
+    meta = {
+      description = "CLI for the dotpm project-manager board";
+      homepage = "https://github.com/dotpm";
+      license = lib.licenses.mit;
+      mainProgram = "dotpm";
+    };
+  };
+
+  # DuckDuckGo MCP: paquete Python real (0.1.2) en vez de `uvx` contra PyPI.
+  # Dependencias en nixpkgs: beautifulsoup4, httpx y mcp[cli].
+  duckduckgo-mcp = pkgs.python3Packages.buildPythonApplication rec {
+    pname = "duckduckgo-mcp-server";
+    version = "0.1.2";
+    pyproject = true;
+
+    src = pkgs.fetchurl {
+      # PyPI sirve el sdist con guion bajo; `fetchPypi` arma guiones y da 404.
+      url = "https://files.pythonhosted.org/packages/cf/23/d176f8910d55d270c1ceb9035e2c63e06df99237376e46444819acf78ae0/duckduckgo_mcp_server-0.1.2.tar.gz";
+      hash = "sha256-mq8YiIii2M8utJAgXR7CFZUkKHeq0HDxrddQeVv+3S4=";
+    };
+
+    build-system = [ pkgs.python3Packages.hatchling ];
+    dependencies = with pkgs.python3Packages; [
+      beautifulsoup4
+      httpx
+      # 0.1.2 importa `mcp.server.fastmcp` (API v1); `mcp` 2.x lo renombró.
+      mcp_1
+      typer
+      rich
+      click
+      python-dotenv
+    ];
+
+    doCheck = false;
+    meta.mainProgram = "duckduckgo-mcp-server";
+  };
 
   # OpenCode Browse: MCP server + extensión de Chromium. Upstream publica un
   # standalone de Bun por plataforma en npm; se parchea el intérprete para
@@ -81,16 +131,7 @@ let
         };
         duckduckgo = {
           type = "local";
-          # --python: sin esto uv baja un CPython "managed" a ~/.local/share/uv
-          # que en NixOS solo corre con nix-ld. Si nix-ld no esta, /lib64 apunta
-          # a stub-ld y el MCP muere con exit 127. El paquete sigue viniendo de
-          # PyPI (uvx), pero el interprete es el de nixpkgs.
-          command = [
-            "${pkgs.uv}/bin/uvx"
-            "--python"
-            "${pkgs.python3}/bin/python3"
-            "duckduckgo-mcp-server"
-          ];
+          command = [ "${duckduckgo-mcp}/bin/duckduckgo-mcp-server" ];
           timeout = {
             startup = 120000;
           };
@@ -180,7 +221,7 @@ in
 {
   imports = [ ./opencode-skills.nix ];
 
-  home.packages = [ pkgs.opencode pkgs.uv dotpm browse ];
+  home.packages = [ pkgs.opencode dotpm duckduckgo-mcp browse ];
 
   # Chime de fin de sesion. El archivo queda en una ruta estable para que la
   # config de OpenCode no dependa de un store path.

@@ -23,7 +23,7 @@
     ../../modules/apps/media.nix
     ../../modules/apps/dev.nix
     ../../modules/apps/gaming.nix
-    ../../modules/apps/podman.nix
+    ../../modules/apps/docker.nix
   ];
 
   modules.desktop.hyprland = {

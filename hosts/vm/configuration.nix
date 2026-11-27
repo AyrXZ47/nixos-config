@@ -12,7 +12,7 @@
     ../../modules/theming/plymouth.nix
     ../../modules/apps/common-cli.nix
     ../../modules/apps/desktop.nix
-    ../../modules/apps/podman.nix
+    ../../modules/apps/docker.nix
   ];
 
   modules.desktop.hyprland.enable = true;

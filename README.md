@@ -198,9 +198,9 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
   `~/.config/opencode/skills/`. Se actualizan cambiando el `rev` y el `hash`;
   no se clonan en cada repo. También instala los comandos `/ponytail*`.
 - **MCPs livianos**: `context7` (docs de librerías) y `gh_grep` (búsqueda de
-  código en GitHub) por HTTP, sin proceso local; `duckduckgo` local vía `uvx`
-  para búsqueda web y fetch sin API key ni costo. `websearch` nativo queda
-  apagado para no pedir un proveedor pago.
+  código en GitHub) por HTTP, sin proceso local; `duckduckgo` local empaquetado
+  en Nix (sin `uvx` en runtime) para búsqueda web y fetch sin API key ni costo.
+  `websearch` nativo queda apagado para no pedir un proveedor pago.
 - **Browse (navegador real)**: `browse` es un MCP local que maneja Brave con
   las sesiones del usuario. La extensión se instala por política de Brave en
   `desktop.nix`; el pairing es una vez por host con `browse pair`.
@@ -217,7 +217,7 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
   borra de `mcp.servers`.
 - **Tablero de trabajo (dotpm)**: el plugin `project-manager` de Obsidian
   guarda proyectos y tareas como Markdown en `~/Sync/Notes/Projects`. El CLI
-  `@dotpm/cli` (wrapper `dotpm` en `opencode.nix`, última release vía `dlx`) habla con
+  `@dotpm/cli` (paquete `dotpm` 0.2.0 en `opencode.nix`, sin `dlx` ni red) habla con
   la Local API del plugin en `127.0.0.1:27201` y se expone como MCP: el agente
   lee y actualiza el kanban en vivo. Requiere Obsidian desktop abierto con
   Settings > Local API activa; el celular no tiene API. La convención de
@@ -456,8 +456,8 @@ atajo de teclado a propósito: un lock muerto no tiene UI de contraseña, y un
 bind dejaría la sesión accesible a cualquiera que esté frente al teclado.
 
 ### Boot
-- **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (`ironman`
-  theme from `adi1090x-plymouth-themes`); quiet boot.
+- **systemd-boot** on every host; `boot.initrd.systemd` + Plymouth (solo el
+  tema `ironman`, extraído de `adi1090x-plymouth-themes`); quiet boot.
 - `fwupd` does not start at boot (it cost 38.9s on the laptop): the unit is
   dbus-activatable, so `fwupdmgr` starts it on demand.
 - PipeWire (ALSA/Pulse/JACK) + rtkit for pro audio; ZRAM swap.

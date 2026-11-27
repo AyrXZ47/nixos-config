@@ -3,5 +3,5 @@
 # contenedores rootless. No importar desktop/engineering/media/dev.
 { ... }:
 {
-  imports = [ ./podman.nix ];
+  imports = [ ./docker.nix ];
 }
