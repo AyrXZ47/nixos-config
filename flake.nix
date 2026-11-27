@@ -752,7 +752,7 @@ PYEOF
             'spacing: Tokens.spacing.small' \
             'spacing: Tokens.spacing.medium'
 
-            # Paneles de Caelestia: el blob usa `surface` (el marco #A8B0BA).
+            # Paneles de Caelestia: el blob usa `surface` (el marco #9AA6B5).
             # La tarjeta interna del sidebar va #5050fa, como el resto de
             # paneles/pills; el texto blanco se lee sobre ese azul.
             cind='    '
@@ -795,7 +795,7 @@ PYEOF
             neutral_variant_paletteKeyColor 1e1e3a
             background 0a0a12
             onBackground d4d4f0
-            surface a8b0ba
+            surface 9aa6b5
             surfaceDim 0a0a12
             surfaceBright 2a2a44
             surfaceContainerLowest 14143a

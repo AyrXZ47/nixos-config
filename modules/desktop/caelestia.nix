@@ -55,12 +55,12 @@ let
         workspaces = "Rubik";
       };
       anim.durations.scale = 1;
-      # El marco (#A8B0BA) es vidrio: `base` deja la barra/paneles
+      # El marco (#9AA6B5) es vidrio: `base` deja la barra/paneles
       # translúcidos para el blur. `layers = 1.0` mantiene opacos los tokens
       # de capa 1 (pills #5050fa) para que el texto se lea.
       transparency = {
         enabled = true;
-        base = 0.32;
+        base = 0.34;
         layers = 1.0;
       };
     };

@@ -25,9 +25,9 @@
       # tamaño/estado no aporta: se desactiva.
       remember_window_size = "no";
       # Tema cyberpunk restaurado (fondo #120B10). Caelestia ya no toca las
-      # terminales (enableTerm=false). 0.8: más opaco, el dueño lee mejor con
+      # terminales (enableTerm=false). 0.9: más opaco, el dueño lee mejor con
       # menos transparencia; el blur real lo pone Hyprland (size 5).
-      background_opacity = "0.8";
+      background_opacity = "0.9";
       background_blur = "16";
       dynamic_background_opacity = "yes";
       # Smear cursor (nativo de kitty)

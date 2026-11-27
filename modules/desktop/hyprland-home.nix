@@ -93,7 +93,7 @@ in
         decoration = {
           rounding = 12,
           -- Apps sólidas (opacity 1.0) y con no_blur; el blur queda solo para
-          -- kitty (transparencia nativa) y las capas de Caelestia. 5/2: menos
+          -- kitty (transparencia nativa) y las capas de Caelestia. 4/2: menos
           -- blur pedido por el dueño (antes 8/2; 12/3 costaba ~4 W con
           -- Obsidian repintando, medido 2026-11-26). SUPER+B sigue siendo el
           -- modo vidrio manual.
@@ -101,7 +101,7 @@ in
           inactive_opacity = 1.0,
           blur = {
             enabled = true,
-            size = 5,
+            size = 4,
             passes = 2,
             ignore_opacity = true,
           },
@@ -230,7 +230,7 @@ in
       hl.window_rule({ name = "ferdium-communication", match = { class = "ferdium" }, workspace = "special:communication", no_initial_focus = true, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "obsidian-solid", match = { class = "md\\.obsidian\\.Obsidian" }, no_blur = true, opacity = "1 override" })
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
-      -- transparencia nativa (background_opacity 0.8) + blur del compositor
+      -- transparencia nativa (background_opacity 0.9) + blur del compositor
       -- (ignore_opacity=true). opacity 1.0 evita que Hyprland apile la suya
       -- encima y mantiene el texto nítido. El match es de cadena COMPLETA.
       hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, opacity = "1 override" })
