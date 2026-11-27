@@ -7,12 +7,8 @@
     ../../modules/core/networking.nix
     ../../modules/core/tailscale.nix
     ../../modules/hardware/amd-common.nix
-    ../../modules/hardware/fingerprint.nix
-    ../../modules/hardware/sdr.nix
-    ../../modules/apps/common-packages.nix
-    ../../modules/apps/rust-dev.nix
-    ../../modules/apps/syncthing.nix
-    ../../modules/apps/docker.nix
+    ../../modules/apps/common-cli.nix
+    ../../modules/apps/server.nix
   ];
 
   # Loader, openssh, zona, locale e identidad de git: modules/core/common-host.nix.
@@ -20,8 +16,14 @@
 
   networking.hostName = "nixos-server";
 
-  modules.hardware.fingerprint.enable = true;
-  modules.hardware.sdr.enable = true;
+  # amd-common habilita Mesa 32-bit para los hosts con escritorio; el server no
+  # corre apps de 32 bits (ni GUI), así que la apaga. mkForce porque amd-common
+  # ya define la opción en true.
+  hardware.graphics.enable32Bit = lib.mkForce false;
+
+  # Boot: sin GUI ni escritorio, no hay nada que espere "conectividad" para
+  # arrancar. NetworkManager-wait-online solo sumaba segundos a la cadena.
+  systemd.services.NetworkManager-wait-online.enable = false;
 
   # Preserva el comportamiento que heredaba de amd-common antes de mover el
   # tuneado de rendimiento a amd-desktop.nix (server sigue a tope).

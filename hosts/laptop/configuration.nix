@@ -15,31 +15,28 @@
     ../../modules/hardware/amd-laptop.nix
     ../../modules/hardware/nvme-dramless.nix
     ../../modules/hardware/fingerprint.nix
+    ../../modules/hardware/mtp.nix
     ../../modules/hardware/sdr.nix
-    ../../modules/apps/common-packages.nix
+    ../../modules/apps/common-cli.nix
+    ../../modules/apps/desktop.nix
+    ../../modules/apps/engineering.nix
+    ../../modules/apps/media.nix
+    ../../modules/apps/dev.nix
     ../../modules/apps/gaming.nix
-    ../../modules/apps/rust-dev.nix
-    ../../modules/apps/packettracer.nix
-    ../../modules/apps/vivado.nix
-    ../../modules/apps/syncthing.nix
-    ../../modules/apps/docker.nix
+    ../../modules/apps/podman.nix
   ];
-
-  # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.
-  modules.apps.packetTracer.enable = true;
-
-  # Vivado (FPGA/Arquitectura de computadoras): wrapper FHS en el PATH; la
-  # instalación vive en ~/opt/Xilinx (hecha a mano con xsetup, cuenta AMD).
-  modules.apps.vivado.enable = true;
 
   modules.desktop.hyprland.enable = true;
   modules.desktop.caelestia.enable = true;
 
   # KVM/QEMU + libvirt para virt-manager (el paquete ya viene de
-  # common-packages.nix; esto habilita el daemon que el cliente necesita).
+  # modules/apps/desktop.nix; esto habilita el daemon que el cliente necesita).
   modules.desktop.virtualisation.enable = true;
 
   modules.hardware.fingerprint.enable = true;
+
+  # MTP: acceso a Android/tabletas en Dolphin (mismo módulo que la pc).
+  modules.hardware.mtp.enable = true;
 
   # Dongle RTL-SDR (Realtek RTL2838 DVB-T): blacklist de los módulos DVB,
   # grupo plugdev y CLI rtl_*; pyrtlsdr va en el python global.
@@ -66,10 +63,10 @@
   # (compartido por los 4 hosts).
 
   # Miracast (gnome-network-displays -> Smart View de TVs Samsung): el paquete
-  # y el dnsmasq del DHCP-P2P viven en modules/apps/miracast.nix (home, los 4
-  # hosts) y los puertos 67/123/7236 en modules/core/networking.nix. No se
-  # duplican aca: tenerlos solo en este host era justamente el bug que dejaba
-  # al pc con GND roto.
+  # y el dnsmasq del DHCP-P2P viven en modules/apps/desktop.nix (home,
+  # pc/laptop/vm) y los puertos 67/123/7236 en modules/core/networking.nix. No
+  # se duplican aca: tenerlos solo en este host era justamente el bug que
+  # dejaba al pc con GND roto.
   # ponytail: GND 0.99 tiene SIGABRTs conocidos (gitlab #466, flathub #89);
   # si vuelve a tirar, correr con debug y comparar con los issues de upstream:
   #   G_MESSAGES_DEBUG=all gnome-network-displays > gnd.log 2>&1

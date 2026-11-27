@@ -4,24 +4,19 @@ let
   vivadoNvimSeed = import ../modules/apps/vivado-nvim-seed.nix { inherit pkgs; };
 in
 {
+  # Solo lo común a los 4 hosts. Lo de escritorio vive en modules/apps/desktop.nix
+  # (pc/laptop/vm) y lo de Mixxx en modules/apps/media.nix (pc/laptop).
   imports = [
     ../modules/apps/shell.nix
     ../modules/apps/tts.nix
     ../modules/apps/kitty.nix
-    ../modules/apps/pantalla.nix
     ../modules/apps/neovim.nix
     ../modules/apps/fastfetch.nix
     ../modules/apps/git.nix
-    ../modules/apps/mpd.nix
     ../modules/apps/pi.nix
     ../modules/apps/opencode.nix
-    ../modules/apps/deepseek-harness.nix
-    ../modules/apps/dolphin.nix
-    ../modules/apps/gtkwave.nix
-    ../modules/apps/miracast.nix
     ../modules/apps/deploy.nix
     ../modules/apps/fleet.nix
-    ../modules/apps/mixxx-mpris.nix
   ];
 
   home.username = "yovick";
@@ -84,19 +79,12 @@ in
     _1password-cli
     btop
     cava
-    ffmpeg
     fd
-    fzf
     gh
     # `gio` (glib) es el comando que usa Electron para mandar a la papelera en
     # Linux fuera de KDE/GNOME. Sin él, Obsidian falla con "Failed to move to
     # the system trash". gvfs no hace falta para el trash local de /home.
     glib
-    libnotify
-    # Obsidian con el electron del canal (43.8.3): verificado 2026-11-05, la
-    # ventana renderiza bien. Sin override para no arrastrar electron_42 (EOL).
-    obsidian
-    pi-coding-agent
     ripgrep
     unzip
     wget

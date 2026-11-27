@@ -10,24 +10,13 @@
     ../../modules/desktop/caelestia.nix
     ../../modules/theming/theme-base.nix
     ../../modules/theming/plymouth.nix
-    ../../modules/hardware/fingerprint.nix
-    ../../modules/hardware/sdr.nix
-    ../../modules/apps/common-packages.nix
-    ../../modules/apps/gaming.nix
-    ../../modules/apps/rust-dev.nix
-    ../../modules/apps/packettracer.nix
-    ../../modules/apps/syncthing.nix
-    ../../modules/apps/docker.nix
+    ../../modules/apps/common-cli.nix
+    ../../modules/apps/desktop.nix
+    ../../modules/apps/podman.nix
   ];
-
-  # Packet Tracer (universidad): el .deb se baja solo (Archive.org) en el rebuild.
-  modules.apps.packetTracer.enable = true;
 
   modules.desktop.hyprland.enable = true;
   modules.desktop.caelestia.enable = true;
-
-  modules.hardware.fingerprint.enable = true;
-  modules.hardware.sdr.enable = true;
 
   # Loader, timeout, openssh, zona, locale e identidad de git:
   # modules/core/common-host.nix + modules/core/nix-optimization.nix.
@@ -40,14 +29,16 @@
 
   services.qemuGuest.enable = true;
   services.spice-vdagentd.enable = true;
-  virtualisation.vmware.guest.enable = true;
 
   services.xserver.videoDrivers = [ "modesetting" ];
+
+  # Boot: la VM no tiene servicios que esperen "conectividad" para arrancar.
+  systemd.services.NetworkManager-wait-online.enable = false;
 
   # pipewire/rtkit: modules/core/audio.nix (igual que los hosts fisicos).
 
   systemd.tmpfiles.rules = [
-    "d /nix/var/nix/profiles/per-user/yovick 1777 root root"
+    "d /nix/var/nix/profiles/per-user/yovick 0755 yovick users"
   ];
 
 }
