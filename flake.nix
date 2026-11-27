@@ -345,11 +345,11 @@ PYEOF
       # en el mismo workspace muestran N veces el mismo icono. Wayle deduplicaba
       # por clase; aqui se reimplementa: agrupar por `class` de la ventana y
       # quedarse con una ventana por grupo antes del slice.
-      # ponytail: parche de una expresion sobre el tarball del release (rev
-      # 24aa15e == version 2.4.0 de nixpkgs). Si upstream lo hace nativo o sube
-      # la version, el substitute falla ruidosamente en el build -> borrar este
-      # overlay y el `enable` de caelestia.nix. Cambio de comportamiento 100%
-      # visual; no toca servicios ni datos.
+      # ponytail: parche de una expresion sobre el tarball del release
+      # (nixpkgs 2.5.0, ultima release al 2026-11-27). Si upstream lo hace
+      # nativo o cambia el QML, el substitute falla ruidosamente en el build ->
+      # actualizar los parches. Cambio de comportamiento 100% visual; no toca
+      # servicios ni datos.
       caelestiaDedupeOverlay = final: prev: {
         caelestia-shell = prev.caelestia-shell.overrideAttrs (old: {
           postPatch = (old.postPatch or "") + ''

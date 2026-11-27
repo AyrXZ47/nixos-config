@@ -1,7 +1,7 @@
 # Migración Wayle → Caelestia: inventario real
 
-Notas verificadas leyendo el código fuente de `caelestia-shell` v2.4.0,
-`caelestia-cli` v1.1.2 (ambos de nixpkgs), los dots oficiales
+Notas verificadas leyendo el código fuente de `caelestia-shell` v2.5.0,
+`caelestia-cli` v1.1.3 (ambos de nixpkgs), los dots oficiales
 (`caelestia-dots/caelestia`) y la config Wayle actual del repo.
 
 ## Arquitectura
@@ -107,7 +107,7 @@ esquema dinámico de Caelestia para la UI.
 4. **hyprdev**: `app-icons-dedupe` → `bar.workspaces.windowIcons` regex.
 5. **Cava de barra** y **bounce SCSS**: sin equivalente (se portan a
    `background.visualiser` o se pierden).
-6. **Nix**: `caelestia-shell` 2.4.0 y `caelestia-cli` 1.1.2 ya en nixpkgs (no
+6. **Nix**: `caelestia-shell` 2.5.0 y `caelestia-cli` 1.1.3 ya en nixpkgs (no
    hace falta el flake externo). El CLI escribe config dinámica en
    `~/.config/caelestia/` y `~/.config/hypr/scheme/` en runtime. Los estáticos
    van por `xdg.configFile` de Home Manager.

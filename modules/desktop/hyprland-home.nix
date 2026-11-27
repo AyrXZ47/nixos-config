@@ -1076,6 +1076,11 @@ in
           cp "$d" "$f"
           chmod u+w "$f"
         fi
+        # Sincroniza el wallpaper que lee el lock (path.txt) con el fondo real.
+        # Sin esto, tras un rebuild el shell nuevo arranca con el path.txt
+        # viejo hasta el proximo cambio de fondo o relogin.
+        srcfile="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/wallpaper-source.txt"
+        [ -f "$srcfile" ] && "$HOME/.config/hypr/scripts/caelestia-wallpaper.sh" >/dev/null 2>&1 || true
         pkill -f 'quickshell.*caelestia-shell' 2>/dev/null
         sleep 0.5
         # El arranque (espera de bus/PipeWire + exports) vive en un solo script.
@@ -1111,6 +1116,33 @@ in
         # El fondo real es el ORIGEN (video o imagen), no el frame del esquema.
         wall="''${src:-$img}"
         [ -n "$wall" ] && [ -f "$wall" ] || exit 0
+
+        # Estado que LEE el shell: services/Wallpapers.qml toma
+        # ''${Paths.state}/wallpaper/path.txt y el lock (useWallpaper=true) pinta
+        # `Wallpapers.current`, NO una captura de pantalla. Como este repo
+        # cambia el fondo sin pasar por `caelestia wallpaper` (para no
+        # recalcular el esquema), el CLI nunca escribía path.txt y el lock
+        # mostraba el frame de la última vez que se usó el CLI (o el asset de
+        # fábrica): un wallpaper viejo/seed distinto al del escritorio.
+        # Para video se guarda el PRIMER FRAME cacheado: el lock queda estático
+        # (no decodifica video mientras está bloqueado) y coincide con lo que
+        # mpvpaper muestra pausado.
+        state="''${XDG_STATE_HOME:-$HOME/.local/state}/caelestia"
+        lockwall="$wall"
+        case "$wall" in
+          *.mp4 | *.webm | *.mkv)
+            h=$(sha1sum "$wall" | cut -d' ' -f1)
+            frame="''${XDG_CACHE_HOME:-$HOME/.cache}/caelestia/wallpaper-frame/$h.png"
+            if [ ! -s "$frame" ]; then
+              mkdir -p "$(dirname "$frame")"
+              ${pkgs.ffmpeg}/bin/ffmpeg -y -v error -i "$wall" -frames:v 1 "$frame" 2>/dev/null || true
+            fi
+            [ -s "$frame" ] && lockwall="$frame"
+            ;;
+        esac
+        mkdir -p "$state/wallpaper"
+        printf '%s' "$lockwall" > "$state/wallpaper/path.txt"
+        ln -sfn "$lockwall" "$state/wallpaper/current"
 
         # Idempotencia: si ya corre mpvpaper con ESTE mismo wallpaper, no hacer
         # nada. El CLI dispara el postHook varias veces por cambio; sin esta
