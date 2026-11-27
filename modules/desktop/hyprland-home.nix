@@ -93,15 +93,15 @@ in
         decoration = {
           rounding = 12,
           -- Apps sólidas (opacity 1.0) y con no_blur; el blur queda solo para
-          -- kitty (transparencia nativa) y las capas de Caelestia. 8/2 en vez
-          -- del 12/3 anterior: con Obsidian repintando, el blur 12/3 costaba
-          -- ~4 W en la Vega 7 (medido 2026-11-26). SUPER+B sigue siendo el
+          -- kitty (transparencia nativa) y las capas de Caelestia. 6/2: menos
+          -- blur pedido por el dueño (antes 8/2; 12/3 costaba ~4 W con
+          -- Obsidian repintando, medido 2026-11-26). SUPER+B sigue siendo el
           -- modo vidrio manual.
           active_opacity = 1.0,
           inactive_opacity = 1.0,
           blur = {
             enabled = true,
-            size = 8,
+            size = 6,
             passes = 2,
             ignore_opacity = true,
           },

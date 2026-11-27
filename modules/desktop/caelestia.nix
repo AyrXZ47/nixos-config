@@ -55,12 +55,12 @@ let
         workspaces = "Rubik";
       };
       anim.durations.scale = 1;
-      # Solo el marco (#6594a8) es vidrio: `base` deja la barra translúcida
-      # para el blur. `layers = 1.0` hace opacos los paneles/pills, que vuelven
-      # al negro original y no se tiñen de azul por detrás.
+      # El marco (#AFC2DB) es vidrio: `base` deja la barra/paneles
+      # translúcidos para el blur. `layers = 1.0` mantiene opacos los tokens
+      # de capa 1 (pills #5050fa) para que el texto se lea.
       transparency = {
         enabled = true;
-        base = 0.55;
+        base = 0.40;
         layers = 1.0;
       };
     };

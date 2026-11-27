@@ -24,11 +24,11 @@
       # maximizada encima de todo. Hyprland tilea toda kitty, así que recordar
       # tamaño/estado no aporta: se desactiva.
       remember_window_size = "no";
-      # Biselado de kitty (0.8) con el fondo negro del tema. Caelestia ya no
-      # toca las terminales (enableTerm=false), así que nadie le mete su
-      # paleta; el blur/transparencia es el nativo del compositor.
-      background_opacity = "0.8";
-      background_blur = "32";
+      # Tema cyberpunk restaurado (fondo #120B10). Caelestia ya no toca las
+      # terminales (enableTerm=false). Más transparencia (0.7) y menos blur:
+      # el blur real lo pone Hyprland (size 6).
+      background_opacity = "0.7";
+      background_blur = "16";
       dynamic_background_opacity = "yes";
       # Smear cursor (nativo de kitty)
       cursor_trail = "1";

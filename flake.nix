@@ -712,7 +712,11 @@ PYEOF
             substituteInPlace modules/bar/components/OsIcon.qml \
               --replace-fail \
             'color: Colours.tPalette.m3surfaceContainer' \
-            'color: "#5050fa"'
+            'color: "#ED1044"'
+            substituteInPlace modules/bar/components/OsIcon.qml \
+              --replace-fail \
+            'colour: "#5277c3"' \
+            'colour: "#ffffff"'
             substituteInPlace modules/bar/components/Clock.qml \
               --replace-fail \
             'color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)' \
@@ -722,10 +726,17 @@ PYEOF
             'color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer.a : 0)' \
             'color: (Config.bar.tray.background && items.count > 0) ? "#5050fa" : "transparent"'
 
-            # Paneles de Caelestia: el blob usa `surface` (el marco #6594a8),
-            # pero launcher y sidebar no tenían fondo propio y quedaban azules.
-            # Fondo surfaceContainer opaco (negro) para que el azul quede SOLO
-            # en el marco/barra.
+            # Todos los paneles de Caelestia (popouts, notificaciones, file
+            # dialog, dashboard, sidebar, utilities) que usaban el token
+            # tintado van a #5050fa literal: el dueno quiere el mismo color en
+            # TODOS los paneles, sin que el wallpaper lo mueva.
+            for f in $(grep -rl 'Colours\.tPalette\.m3surfaceContainer' modules components); do
+              sed -i -E 's/Colours\.tPalette\.m3surfaceContainer([^A-Za-z.]|$)/"#5050fa"\1/g' "$f"
+            done
+
+            # Paneles de Caelestia: el blob usa `surface` (el marco #AFC2DB).
+            # La tarjeta interna del sidebar va #5050fa, como el resto de
+            # paneles/pills; el texto blanco se lee sobre ese azul.
             cind='    '
             substituteInPlace modules/sidebar/Content.qml \
               --replace-fail \
@@ -734,7 +745,7 @@ PYEOF
 ''${cind}    anchors.fill: parent
 ''${cind}    z: -1
 ''${cind}    radius: Tokens.rounding.large
-''${cind}    color: Colours.palette.m3surfaceContainer
+''${cind}    color: \"#5050fa\"
 ''${cind}}
 
 ''${cind}ColumnLayout {"
@@ -766,7 +777,7 @@ PYEOF
             neutral_variant_paletteKeyColor 1e1e3a
             background 0a0a12
             onBackground d4d4f0
-            surface 5a4f6e
+            surface afc2db
             surfaceDim 0a0a12
             surfaceBright 2a2a44
             surfaceContainerLowest 14143a
@@ -774,13 +785,13 @@ PYEOF
             surfaceContainer 1a1a44
             surfaceContainerHigh 222259
             surfaceContainerHighest 28286a
-            onSurface d4d4f0
+            onSurface ffffff
             surfaceVariant 222259
-            onSurfaceVariant 8888aa
+            onSurfaceVariant e8eeff
             inverseSurface d4d4f0
             inverseOnSurface 141428
-            outline 8888aa
-            outlineVariant 1e1e3a
+            outline a9b8d8
+            outlineVariant a9b8d8
             shadow 000000
             scrim 000000
             surfaceTint ed1044
@@ -789,7 +800,7 @@ PYEOF
             primaryContainer 222259
             onPrimaryContainer ffb3c9
             inversePrimary ed1044
-            secondary 00aaff
+            secondary abf4ff
             onSecondary 001a2e
             secondaryContainer 0d2b44
             onSecondaryContainer b3e0ff
@@ -806,7 +817,7 @@ PYEOF
             onPrimaryFixed 3a0018
             onPrimaryFixedVariant 90083a
             secondaryFixed b3e0ff
-            secondaryFixedDim 00aaff
+            secondaryFixedDim abf4ff
             onSecondaryFixed 001a2e
             onSecondaryFixedVariant 005a8a
             tertiaryFixed b3ffd6
