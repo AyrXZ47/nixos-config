@@ -49,6 +49,15 @@ let
         ${pkgs.iw}/bin/iw dev "$iface" set power_save off 2>/dev/null || true
       fi
     done
+    # Visualizer de Caelestia: off en batería, on en AC. Corre como yovick
+    # porque shell.json es suyo; Caelestia lo recarga en caliente.
+    if [ -x /home/yovick/.config/hypr/scripts/visualizer-power.sh ]; then
+      mode=on
+      on_battery && mode=off
+      ${pkgs.util-linux}/bin/runuser -u yovick -- env HOME=/home/yovick \
+        /home/yovick/.config/hypr/scripts/visualizer-power.sh "$mode" \
+        >/dev/null 2>&1 || true
+    fi
   '';
 in
 {

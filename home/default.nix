@@ -78,7 +78,6 @@ in
   home.packages = with pkgs; [
     _1password-cli
     btop
-    cava
     fd
     gh
     # `gio` (glib) es el comando que usa Electron para mandar a la papelera en

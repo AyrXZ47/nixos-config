@@ -1041,6 +1041,44 @@ in
     # Quickshell 0.3.2 conecta a D-Bus/PipeWire UNA sola vez (no reintenta). Sin
     # esta espera el shell nacía sin volumen, sin MPRIS, sin notificaciones y
     # sin bandeja (visto 2026-11-22 17:03:57, 8 s antes del user manager).
+    "hypr/scripts/visualizer-power.sh" = {
+      executable = true;
+      text = ''
+        #!/usr/bin/env bash
+        # Estado del visualizer de Caelestia: on/off/auto. `auto` mira el
+        # supply de sistema (batería descargando = off). No toca cava; el
+        # visualizer es CavaProvider de Quickshell.
+        set -euo pipefail
+        state="''${1:-auto}"
+        f="$HOME/.config/caelestia/shell.json"
+        [ -f "$f" ] || exit 0
+        case "$state" in
+          on) enabled=true ;;
+          off) enabled=false ;;
+          auto)
+            enabled=true
+            for s in /sys/class/power_supply/*/status; do
+              [ -f "$s" ] || continue
+              sc="''${s%/status}/scope"
+              { [ ! -f "$sc" ] || [ "$(cat "$sc" 2>/dev/null)" = System ]; } || continue
+              if [ "$(cat "$s" 2>/dev/null)" = Discharging ]; then
+                enabled=false
+                break
+              fi
+            done
+            ;;
+          *)
+            echo "uso: visualizer-power.sh {on|off|auto}" >&2
+            exit 2
+            ;;
+        esac
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$f.XXXXXX")"
+        ${pkgs.jq}/bin/jq --argjson v "$enabled" \
+          '.background.visualiser.enabled = $v' "$f" > "$tmp"
+        ${pkgs.coreutils}/bin/mv "$tmp" "$f"
+      '';
+    };
+
     "hypr/scripts/caelestia-start.sh" = {
       executable = true;
       text = ''
@@ -1056,6 +1094,9 @@ in
         export QS_PIPEWIRE_IMMEDIATE_RECONNECT=1
         # La sesión viva no hereda sessionVariables hasta el próximo login.
         export CAELESTIA_XKB_RULES_PATH="${pkgs.xkeyboard-config}/share/X11/xkb/rules/base.lst"
+        # El visualizer de CavaProvider se apaga en battery antes de arrancar.
+        [ -x "$HOME/.config/hypr/scripts/visualizer-power.sh" ] && \
+          "$HOME/.config/hypr/scripts/visualizer-power.sh" auto || true
         exec caelestia shell -d
       '';
     };
