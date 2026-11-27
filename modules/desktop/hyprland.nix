@@ -2,6 +2,11 @@
 
 let
   cfg = config.modules.desktop.hyprland;
+
+  # Una sola derivación para los dos usos: environment.systemPackages la
+  # enlaza en /run/current-system/sw/share/sddm y extraPackages le da a SDDM
+  # el entorno QML/Qt del tema.
+  sddmTheme = pkgs.sddm-astronaut.override { embeddedTheme = "cyberpunk"; };
 in
 {
   options.modules.desktop.hyprland = {
@@ -85,9 +90,7 @@ in
       enable = true;
       wayland.enable = true;
       theme = "sddm-astronaut-theme";
-      extraPackages = with pkgs; [
-        (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
-      ];
+      extraPackages = [ sddmTheme ];
       # Con autologin activo (el pc sin monitor), un logout o la muerte del
       # compositor dejan la maquina en el greeter invisible: nadie puede
       # volver a entrar. Con relogin SDDM autologuea otra vez. Solo aplica
@@ -160,7 +163,7 @@ in
       # [ "/share/sddm" ]` lo enlace en /run/current-system/sw/share/sddm.
       # `extraPackages` solo lo mete en el entorno de SDDM: sin esto, SDDM
       # reporta "theme doesn't exist" y cae al tema embedded.
-      (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
+      sddmTheme
       # wayle fuera: el shell es Caelestia (modules/desktop/caelestia.nix).
       # El lock/idle tambien son de Caelestia, no hyprlock/hypridle.
       wl-clipboard
