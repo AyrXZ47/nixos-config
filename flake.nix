@@ -795,16 +795,16 @@ PYEOF
             shadow 000000
             scrim 000000
             surfaceTint ed1044
-            primary ed1044
-            onPrimary ffffff
+            primary ffffff
+            onPrimary 1a1030
             primaryContainer 222259
             onPrimaryContainer ffb3c9
-            inversePrimary ed1044
+            inversePrimary ffffff
             secondary abf4ff
             onSecondary 001a2e
             secondaryContainer 0d2b44
             onSecondaryContainer b3e0ff
-            tertiary 00ff88
+            tertiary abf4ff
             onTertiary 002e18
             tertiaryContainer 0d4430
             onTertiaryContainer b3ffd6
