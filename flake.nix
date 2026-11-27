@@ -694,6 +694,30 @@ PYEOF
             'captureSource: root.screen' \
             "captureSource: root.screen?.name ? root.screen : null${"\n"}            live: false"
 
+            # Menú de sesión sin Hibernate: no hay swap en disco (solo zram),
+            # así que el botón no puede funcionar. Se quita el bloque y se
+            # recablea el foco de shutdown/reboot.
+            ind='    '
+            substituteInPlace modules/session/Content.qml \
+              --replace-fail \
+            "''${ind}SessionButton {
+''${ind}    id: hibernate
+
+''${ind}    icon: Config.session.icons.hibernate
+''${ind}    command: Config.session.commands.hibernate
+
+''${ind}    KeyNavigation.up: shutdown
+''${ind}    KeyNavigation.down: reboot
+''${ind}}" \
+            ""
+            substituteInPlace modules/session/Content.qml \
+              --replace-fail \
+            '        KeyNavigation.down: hibernate' \
+            '        KeyNavigation.down: reboot' \
+              --replace-fail \
+            '        KeyNavigation.up: hibernate' \
+            '        KeyNavigation.up: shutdown'
+
             # Pills de Caelestia (busqueda del launcher y barra): el tinte del
             # wallpaper cambia el color en cada arranque aunque el raw sea el
             # mismo. El dueno las quiere exactas: #5050fa fijo, sin tinte.

@@ -9,10 +9,10 @@ let
   cfg = config.modules.desktop.caelestia;
 
   # Fuentes que las plantillas del shell piden (Sass/Qt QML resuelven por
-  # fontconfig; Material Symbols es la de los iconos, Rubik la de la UI).
+  # fontconfig; Material Symbols es la de los iconos). Rubik (UI/reloj) ya la
+  # instala theme-base: no se duplica acá.
   fonts = with pkgs; [
     material-symbols
-    rubik
     nerd-fonts.caskaydia-cove
   ];
 
@@ -147,6 +147,9 @@ let
         };
       };
       visualiser = {
+        # Siempre encendido: no hay lógica de batería que lo apague (y no se
+        # agrega). autoHide solo lo oculta cuando una ventana tileada cubre el
+        # escritorio, igual que hacía cava; en batería sigue igual.
         enabled = true;
         autoHide = true;
         blur = false;
@@ -568,7 +571,6 @@ let
       icons = {
         logout = "logout";
         shutdown = "power_settings_new";
-        hibernate = "downloading";
         reboot = "cached";
       };
       # Shutdown/Reboot van por `power-with-rgb` (igual que las acciones del
@@ -584,10 +586,15 @@ let
       # no es ejecutable, el apagado NO se pierde (vuelve al `poweroff` pelado
       # del baseline). Sin esto, un ~/.config dañado dejaba el menu de sesion
       # incapaz de apagar el equipo (hallazgo R3-001).
+      #
+      # Hibernate FUERA: la maquina no tiene swap. OJO: Caelestia 2.5.0 pinta
+      # ese boton hardcodeado en modules/session/Content.qml (lee
+      # Config.session.commands.hibernate); omitir la clave solo deja el
+      # default del shell, asi que el boton sigue visible. Ocultarlo del todo
+      # requiere el patch QML en flake.nix (fuera de este módulo).
       commands = {
         logout = [ "logout" ];
         shutdown = [ "sh" "-c" "/home/yovick/.config/hypr/scripts/power-with-rgb poweroff || poweroff" ];
-        hibernate = [ "hibernate" ];
         reboot = [ "sh" "-c" "/home/yovick/.config/hypr/scripts/power-with-rgb reboot || reboot" ];
       };
     };

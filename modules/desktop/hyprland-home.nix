@@ -211,6 +211,14 @@ in
       -----------------------
       ---- WINDOW RULES -----
       -----------------------
+      -- Blur SOLO en kitty y en las capas de Caelestia. El blur global queda
+      -- enabled=true (lo usan la excepción de kitty y los layer_rule de
+      -- Caelestia), y acá se apaga para toda ventana: catch-all PRIMERO y la
+      -- excepción de kitty después. Las window rules se aplican en orden de
+      -- registro y la última que matchea gana (m_noBlur.set con la misma
+      -- prioridad sobreescribe), así que no_blur=false en kitty vuelve a
+      -- encenderlo; el resto de las apps queda sólido sin blur.
+      hl.window_rule({ name = "no-blur-global", match = { class = ".*" }, no_blur = true })
       hl.window_rule({ name = "pavucontrol-float", match = { class = "pavucontrol" }, float = true, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "blueberry-float", match = { class = "blueberry" }, float = true })
       hl.window_rule({ name = "volume-float", match = { title = "Volume Control" }, float = true })
@@ -232,8 +240,10 @@ in
       -- kitty (incluye las ventanas de `hyprdev`/`netrunner`, misma clase):
       -- transparencia nativa (background_opacity 0.9) + blur del compositor
       -- (ignore_opacity=true). opacity 1.0 evita que Hyprland apile la suya
-      -- encima y mantiene el texto nítido. El match es de cadena COMPLETA.
-      hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, opacity = "1 override" })
+      -- encima y mantiene el texto nítido. no_blur=false reenciende el blur
+      -- que apaga el catch-all `no-blur-global` de arriba. El match es de
+      -- cadena COMPLETA.
+      hl.window_rule({ name = "kitty-glass", match = { class = "kitty" }, no_blur = false, opacity = "1 override" })
       -- steam: exento de blur y transparencia (opacidad total).
       hl.window_rule({ name = "steam-solid", match = { class = "steam" }, no_blur = true, opacity = "1 override" })
       hl.window_rule({ name = "steam-app-solid", match = { class = "steam_app_.*" }, no_blur = true, opacity = "1 override" })
@@ -579,22 +589,6 @@ in
     Install = { WantedBy = [ "graphical-session.target" ]; };
   };
 
-  # Watchdog de la sesion (ver session-watchdog.sh): si el compositor se cuelga,
-  # muere con la sesion cuando SDDM la reinicia.
-  systemd.user.services.hyprland-watchdog = {
-    Unit = {
-      Description = "Watchdog de Hyprland (reinicia la sesion si el IPC no responde)";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${config.xdg.configHome}/hypr/scripts/session-watchdog.sh";
-      Restart = "on-failure";
-      RestartSec = 5;
-    };
-    Install = { WantedBy = [ "graphical-session.target" ]; };
-  };
-
   # Sunshine: descartado para la TV (Moonlight es una app aparte, con cuenta y
   # PIN: no es transparente como Cast/Miracast). SI se usa en el pc para que la
   # laptop haga de monitor, ver hosts/pc/configuration.nix.
@@ -771,41 +765,6 @@ in
       '';
     };
 
-    "hypr/scripts/session-watchdog.sh" = {
-      executable = true;
-      text = ''
-        #!/usr/bin/env bash
-        # Vigila el IPC de Hyprland y SOLO LO REGISTRA: no mata nada. Un kill
-        # automatico tira la sesion con todo lo abierto (2026-11-22: se llevo el
-        # trabajo del humano), y el costo de un falso positivo es mucho mayor que
-        # el de una sesion colgada que se recupera a mano.
-        # Recuperacion manual (cierra la sesion y SDDM autologuea):
-        #   pkill -f "^Hyprland --watchdog"; pkill -f "bin/start-hyprland"
-        # Dos fallos seguidos de 3s, cada 10s.
-        set -uo pipefail
-        hyprctl=/run/current-system/sw/bin/hyprctl
-        runtime="''${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-        fails=0
-        while sleep 10; do
-          # La instancia se descubre por el directorio del socket: el proceso se
-          # llama ".Hyprland-wrapp" (no "Hyprland") y el servicio puede arrancar
-          # antes del import-environment de la sesion.
-          sig=$(ls -t "$runtime/hypr" 2>/dev/null | head -1)
-          [ -n "$sig" ] || exit 0
-          if HYPRLAND_INSTANCE_SIGNATURE="$sig" timeout 3 "$hyprctl" monitors -j >/dev/null 2>&1; then
-            fails=0
-            continue
-          fi
-          fails=$((fails + 1))
-          [ "$fails" -ge 2 ] || continue
-          logger -t hypr-watchdog "IPC sin responder 2 veces: la sesion parece congelada (no la toco)"
-          fails=0
-          # Cada 2 min como maximo: el log no se llena de ruido.
-          sleep 120
-        done
-      '';
-    };
-
     # Coalescer del brillo para el knob (SUPER + perilla de volumen).
 
     # Escritorios numerados SOLO en el monitor principal; cada secundario recibe
@@ -899,15 +858,40 @@ in
     # opaca lo tape. Con las apps ya sólidas no queda nada que ver a través de
     # ellas, así que se pausa si hay batería o si el workspace activo tiene
     # alguna ventana mapeada (incluye pinned y el especial visible).
-    # ponytail: poll de 2 s; el listener de socket2 de Hyprland sería más
-    # código para el mismo resultado y el costo del poll es despreciable.
+    # Event-driven: escucha el socket2 de Hyprland (openwindow, closewindow,
+    # workspace, fullscreen, ...) y re-evalúa en cada cambio. La batería no
+    # emite eventos sin udev, así que se revisa cada 30 s; si el socket2 no
+    # está (arranque sin Hyprland), reintenta cada 5 s. Antes era un poll fijo
+    # de 2 s con dos `hyprctl` por vuelta.
     "hypr/scripts/mpvpaper-autopause.sh" = {
       executable = true;
       text = ''
         #!${pkgs.python3}/bin/python3
-        import glob, json, os, socket, subprocess, time
+        import glob, json, os, select, socket, subprocess, time
 
         SOCK = f"/run/user/{os.getuid()}/mpvpaper.sock"
+        HYPR_RUNTIME = f"/run/user/{os.getuid()}/hypr"
+        # Eventos que pueden cambiar si hay una ventana tapando el fondo.
+        EVENTS = {
+            "openwindow", "closewindow", "movewindow", "workspace",
+            "createworkspace", "destroyworkspace", "moveworkspace",
+            "focusedmon", "activespecial", "changefloatingmode", "fullscreen",
+            "pin", "minimized", "maximized", "monitoradded", "monitoraddedv2",
+            "monitorremoved",
+        }
+
+        def hypr_socket2():
+            sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+            if not sig:
+                # session-watchdog.sh ya no existe: el dir vivo se descubre acá.
+                try:
+                    sig = max(
+                        os.listdir(HYPR_RUNTIME),
+                        key=lambda n: os.path.getmtime(os.path.join(HYPR_RUNTIME, n)),
+                    )
+                except (OSError, ValueError):
+                    return None
+            return os.path.join(HYPR_RUNTIME, sig, ".socket2.sock")
 
         def on_battery():
             for status in glob.glob('/sys/class/power_supply/*/status'):
@@ -944,7 +928,7 @@ in
                     return True
             return False
 
-        while True:
+        def apply():
             want = on_battery() or covered()
             try:
                 s = socket.socket(socket.AF_UNIX)
@@ -954,7 +938,47 @@ in
                 s.close()
             except OSError:
                 pass
-            time.sleep(2)
+
+        while True:
+            apply()
+            path = hypr_socket2()
+            if not path:
+                time.sleep(5)
+                continue
+            ev = socket.socket(socket.AF_UNIX)
+            try:
+                ev.connect(path)
+            except OSError:
+                ev.close()
+                time.sleep(5)
+                continue
+            ev.setblocking(False)
+            # La batería se re-evalúa cada 30 s aunque no llegue ningún evento.
+            deadline = time.monotonic() + 30
+            buf = ""
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                try:
+                    ready, _, _ = select.select([ev], [], [], remaining)
+                except OSError:
+                    break
+                if not ready:
+                    break
+                try:
+                    data = ev.recv(4096)
+                except OSError:
+                    break
+                if not data:
+                    break
+                # Un recv puede cortar una línea al medio: el resto queda en buf.
+                buf += data.decode(errors="replace")
+                *lines, buf = buf.split("\n")
+                names = {line.split(">>", 1)[0] for line in lines}
+                if names & EVENTS:
+                    apply()
+            ev.close()
       '';
     };
     "hypr/scripts/touchpad-toggle.sh" = {
@@ -1102,9 +1126,9 @@ in
         # Sin esto el fondo animado costaba ~274% de CPU en la laptop. -p pausa el
         # video cuando lo tapa una ventana (ahorra CPU/batería).
         # deband: los walls son HEVC 8-bit; el gradiente de cielo/humo hacia bandas
-        # sin esto. Lanczos en scale/dscale/cscale: mpv estira con bilinear por
-        # defecto y en un monitor externo (1440p/4K) se nota. En el panel 1080p no
-        # hay escalado, así que no cuesta nada.
+        # sin esto. scale/dscale/cscale=bilinear: es el default barato de mpv y
+        # sobra para un fondo que casi siempre está tapado o pausado; lanczos
+        # gastaba GPU en cada frame escalado sin diferencia visible.
         # pause=yes + input-ipc-server: el wallpaper nace congelado (primer
         # frame) y queda a la escucha del IPC. mpvpaper-autopause.sh lo reanuda
         # solo si hay AC y el escritorio esta vacio; en bateria NUNCA descodifica
@@ -1116,9 +1140,9 @@ loop-file=inf
 hwdec=vaapi
 pause=yes
 deband=yes
-scale=lanczos
-dscale=lanczos
-cscale=lanczos
+scale=bilinear
+dscale=bilinear
+cscale=bilinear
 input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         # Bateria = un supply de SISTEMA (scope=System, excluye ratones/teclados
         # inalambricos) descargandose. Un desktop sin bateria (o tras UPS) no la
@@ -1243,8 +1267,9 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
     #      KeepassXC) y quedaban en claro en ~/.cache/cliphist.
     #   2) OpenRGB: al bloquear se apaga el perfil y al volver se restaura.
     # El "after" ya no puede ser un `wait`: el IPC de Caelestia no bloquea.
-    # Se sondea `lock isLocked` en segundo plano (patron ya usado en hyprdev
-    # para no depender de sleeps ciegos).
+    # Caelestia no emite un evento de desbloqueo, asi que se sondea `lock
+    # isLocked` en segundo plano cada 10 s (antes 2 s): imperceptible para
+    # restaurar RGB y 5x menos IPC mientras el lock dura horas.
     "hypr/scripts/lock.sh" = {
       executable = true;
       text = ''
@@ -1292,9 +1317,9 @@ input-ipc-server=/run/user/$(id -u)/mpvpaper.sock" ALL "$wall"
         # veces seguidas (el shell murio/reinicia), no ante un fallo aislado.
         (
           miss=0
-          while sleep 2; do
-            # Binario nativo (no el CLI Python): el sondeo corre cada 2 s
-            # mientras dure el lock y no vale la pena arrancar un interprete.
+          while sleep 10; do
+            # Binario nativo (no el CLI Python): el sondeo corre mientras dure
+            # el lock y no vale la pena arrancar un interprete cada 10 s.
             locked=$(${pkgs.caelestia-shell}/bin/caelestia-shell ipc call lock isLocked 2>/dev/null || echo "")
             if [ -z "$locked" ]; then
               miss=$((miss + 1))
@@ -1700,7 +1725,7 @@ EOF
     # instante (el kbuildsycoca6 headless no necesita display).
     #
     # El rebuild SOLO produce servicios si existe /etc/xdg/menus/applications.menu
-    # (se provee en common-packages): sin el archivo, kbuildsycoca6 no indexa
+    # (se provee en desktop.nix): sin el archivo, kbuildsycoca6 no indexa
     # NINGUN .desktop (las apps entran via <DefaultAppDirs/> del menu; Plasma lo
     # encuentra porque su sesion pone XDG_MENU_PREFIX=plasma-, Hyprland no) y
     # ksycoca queda con 0 servicios -> Dolphin pregunta "abrir con" para todo.
@@ -1709,7 +1734,7 @@ EOF
   '';
 
   # Previews de Dolphin para todo tipo de archivo (imágenes, vídeo, audio, pdfs...):
-  # se siembra [PreviewSettings] la primera vez. ffmpegthumbs (common-packages)
+  # se siembra [PreviewSettings] la primera vez. ffmpegthumbs (media.nix)
   # aporta el preview de vídeo; sin él, Dolphin no muestra miniaturas de vídeo
   # (ni siquiera del móvil por MTP).
   #
@@ -1722,7 +1747,7 @@ EOF
   # con `size > MaximumRemoteSize`, y el default de MaximumRemoteSize es 0 ->
   # sin previews de nada en mtp://. Se siembra 256 GiB (cubre videos 4K/8K
   # largos del celular) + EnableRemoteFolderThumbnail. El costo de generar es
-  # bajo: Dolphin usa kio-fuse (common-packages) que monta el archivo remoto
+  # bajo: Dolphin usa kio-fuse (desktop.nix) que monta el archivo remoto
   # via FUSE y el thumbnailer solo lee los primeros frames; sin kio-fuse el
   # fallback descarga el archivo completo (lento para videos de GBs).
   home.activation.materializeDolphinPreview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

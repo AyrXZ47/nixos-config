@@ -18,7 +18,7 @@ let
   #
   # ponytail: techo conocido = heuristica de PipeWire + scraping del titulo de
   # ventana. El estado se deduce del state del nodo Stream/Output/Audio cuyo
-  # nombre contenga "mixxx" (el wrapper de common-packages lo expone como
+  # nombre contenga "mixxx" (el wrapper de media.nix lo expone como
   # "PipeWire ALSA [.mixxx-wrapped]"); el titulo solo aparece cuando Mixxx lo
   # actualiza (pista cargada/reproduciendose). Los metodos de control son no-op
   # porque Mixxx 2.5.6 no tiene API remota. Solo lectura (pw-dump + hyprctl);
@@ -329,10 +329,11 @@ let
 
 
     def hyprland_signature():
-        # El unit arranca en graphical-session.target; tras un relogin de SDDM
-        # puede hacerlo antes de que el user manager importe
-        # HYPRLAND_INSTANCE_SIGNATURE (visto 2026-11-22). Mismo fallback que
-        # session-watchdog.sh: buscar el dir vivo bajo $XDG_RUNTIME_DIR/hypr.
+        # El servicio NO arranca en graphical-session.target: lo levanta el
+        # wrapper de Mixxx (modules/apps/media.nix) para que solo exista
+        # mientras hay un reproductor vivo. Tras un relogin de SDDM el user
+        # manager puede no tener HYPRLAND_INSTANCE_SIGNATURE importada:
+        # fallback = buscar el dir vivo bajo $XDG_RUNTIME_DIR/hypr.
         sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
         if sig:
             return sig
@@ -533,9 +534,14 @@ in
     Service = {
       ExecStart = "${mixxxMpris}/bin/mixxx-mpris";
       Environment = [ "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt" ];
-      Restart = "always";
+      # Solo se reinicia si falla: lo arranca/para el wrapper de Mixxx, así que
+      # no debe quedar vivo tras cerrar Mixxx ni resucitar solo al inicio.
+      Restart = "on-failure";
       RestartSec = 5;
     };
-    Install.WantedBy = [ "graphical-session.target" ];
+    # Sin Install.WantedBy: NO se habilita en graphical-session.target. El
+    # wrapper de Mixxx (modules/apps/media.nix) hace `systemctl --user
+    # start/stop mixxx-mpris.service` junto con el reproductor.
+    Install.WantedBy = [ ];
   };
 }

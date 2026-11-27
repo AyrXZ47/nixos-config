@@ -16,21 +16,14 @@
       ];
     };
 
+    # autosuggestions/syntax-highlighting NO van acá: los booleanos
+    # `autosuggestion.enable` y `syntaxHighlighting.enable` de arriba ya las
+    # cargan; declararlas de nuevo las sourceaba dos veces.
     plugins = [
       {
         name = "powerlevel10k";
         src = pkgs.zsh-powerlevel10k;
         file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-      }
-      {
-        name = "zsh-autosuggestions";
-        src = pkgs.zsh-autosuggestions;
-        file = "share/zsh-autosuggestions/zsh-autosuggestions.zsh";
-      }
-      {
-        name = "zsh-syntax-highlighting";
-        src = pkgs.zsh-syntax-highlighting;
-        file = "share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh";
       }
     ];
 
@@ -70,61 +63,45 @@
       [ -f /usr/share/fzf/shell/completion.zsh ] && source /usr/share/fzf/shell/completion.zsh
       [ -f /usr/share/fzf/shell/key-bindings.zsh ] && source /usr/share/fzf/shell/key-bindings.zsh
 
-      # Solo si está instalado: el celular (nix-on-droid) no trae fastfetch.
-      command -v fastfetch >/dev/null && fastfetch
+      # fastfetch: UNA vez por ventana NUEVA de kitty. El marker vive en
+      # XDG_RUNTIME_DIR y lleva KITTY_PID + KITTY_WINDOW_ID: los shells anidados
+      # de la misma ventana no lo repiten, y los ids de ventana de kitty son
+      # por OS-window (dos kitty distintas pueden repetir id), así que el PID
+      # desambigua. Se limpia solo al cerrar sesión. hyprdev y netrunner
+      # exportan FASTFETCH_SKIP=1 en las ventanas que abren: ahí el banner
+      # taparía la geometría de trabajo. Fuera de kitty (nix-on-droid) no hay
+      # window id estable: se muestra una vez por shell, como antes.
+      if [[ -z $FASTFETCH_SKIP ]] && command -v fastfetch >/dev/null; then
+        if [[ -z $KITTY_WINDOW_ID ]]; then
+          fastfetch
+        else
+          _ff_marker="''${XDG_RUNTIME_DIR:-/tmp}/fastfetch-kitty-$KITTY_PID-$KITTY_WINDOW_ID"
+          if [[ ! -e $_ff_marker ]]; then
+            touch "$_ff_marker"
+            fastfetch
+          fi
+          unset _ff_marker
+        fi
+      fi
 
-      # netrunner: btop y nvtop en 2 ventanas kitty INDEPENDIENTES, btop en
-      # ESTA terminal (se reutiliza con `exec`) y nvtop en una nueva, SIEMPRE
-      # al lado (nunca debajo): `preselect r` es un override de un solo uso del
-      # layout dwindle que fuerza que la próxima ventana tileada se abra a la
-      # derecha. nvtop se lanza ANTES del exec. El flag de directorio de la
-      # versión anterior no existe en kitty 0.48 (kitty salía al instante):
-      # ahora `-d`. Cierre en cadena: las 2 ventanas se rastrean por la address
-      # de ESTA ventana (capturada antes del exec btop) y el título
-      # `netrunner-nvtop`; armadas las 2, si cae cualquiera se cierra la otra.
+      # netrunner: btop en ESTA terminal (se reutiliza con `exec`) y nvtop en
+      # una kitty nueva, SIEMPRE al lado (nunca debajo): `preselect r` es un
+      # override de un solo uso del layout dwindle que fuerza que la próxima
+      # ventana tileada se abra a la derecha. nvtop se lanza ANTES del exec.
+      # `-d` es el flag de directorio de kitty 0.48+ (el viejo `--directory`
+      # no existe: kitty salía al instante). Sin watchers ni PID tracking: el
+      # usuario cierra las dos ventanas a mano. FASTFETCH_SKIP=1: la ventana
+      # nueva es de trabajo, el banner taparía nvtop.
       netrunner() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
           echo "Error: Se requiere sesión Hyprland activa."
           return 1
         fi
         local repo="''${1:-$PWD}"
-        local runid="$(date +%s)$RANDOM"
-        local pidfile="/tmp/netrunner-pids-$runid"
-        : > "$pidfile"
-        # Address y pid de ESTA ventana ANTES del exec btop: tras el exec su
-        # título ya no es rastreable, pero address/pid no cambian.
-        local inv_info inv_addr inv_pid
-        inv_info="$(hyprctl -j activewindow 2>/dev/null)"
-        inv_addr="$(grep -oE '0x[0-9a-f]+' <<<"$inv_info" | head -1)"
-        inv_pid="$(grep -oE '"pid": [0-9]+' <<<"$inv_info" | head -1 | grep -oE '[0-9]+')"
-        [[ -n "$KITTY_PID" ]] && inv_pid="$KITTY_PID"
         hyprctl dispatch 'hl.dsp.layout("preselect r")' >/dev/null 2>&1
-        # El wrapper apunta su pid ANTES del exec kitty (sin carreras de
-        # captura) y setsid le da sesión propia: sobrevive a esta shell.
-        setsid zsh -c 'pidf=$1; dir=$2; print -r -- $$ >> "$pidf"; exec kitty -d "$dir" -T netrunner-nvtop zsh -ic nvtop' \
-          netrunner-spawn "$pidfile" "$repo" >/dev/null 2>&1 &
-        # Watcher en sesión propia ANTES del exec: sobrevive a esta shell. Se
-        # arma con las 2 arriba y, al bajar de 2, cierra la que siga por PID
-        # (nunca `closewindow` por selector: cae a la ventana activa si no
-        # matchea). Timeout de arranque ~30 s por si nvtop nunca aparece.
-        setsid zsh -f -c '
-          inv=$1; invpid=$2; pidfile=$3; armed=0; n=0
-          while :; do
-            sleep 1
-            out=$(hyprctl -j clients 2>/dev/null)
-            a=0
-            if grep -q "\"address\": \"$inv\"" <<<"$out"; then a=$((a+1)); fi
-            if grep -q "\"title\": \"netrunner-nvtop\"" <<<"$out"; then a=$((a+1)); fi
-            if (( a == 2 )); then
-              armed=1
-            elif (( armed == 1 )); then
-              kill $(cat "$pidfile" 2>/dev/null) $invpid 2>/dev/null
-              exit 0
-            elif (( ++n > 30 )); then
-              exit 0
-            fi
-          done
-        ' netrunner-watch "$inv_addr" "$inv_pid" "$pidfile" >/dev/null 2>&1 &
+        # setsid: la ventana nueva sobrevive a esta shell (el `exec btop` de
+        # abajo reemplaza este proceso).
+        setsid env FASTFETCH_SKIP=1 kitty -d "$repo" -T netrunner-nvtop zsh -ic nvtop >/dev/null 2>&1 &
         exec btop
       }
 
@@ -152,59 +129,19 @@
       # nuevas (nvim, shell libre). OpenCode va en la ventana
       # INVOCADORA porque al tilear es la que casi no se redimensiona: la TUI
       # necesita ancho para el sidebar y el composer. Clase por defecto
-      # `kitty` para que el dedupe de Caelestia las colapse a UN icono. Cierre
-      # en cadena tipo IDE: las 3 se rastrean por título
-      # `hyprdev-<runid>-<rol>` (-T) más la address de ESTA ventana capturada
-      # antes del exec de OpenCode; armadas las 3, si cae cualquiera se cierran
-      # las demás.
+      # `kitty` para que el dedupe de Caelestia las colapse a UN icono. Sin
+      # watchers ni PID tracking: el usuario cierra las ventanas a mano.
+      # FASTFETCH_SKIP=1 en las ventanas nuevas: son de trabajo.
       hyprdev() {
         if [[ -z "$HYPRLAND_INSTANCE_SIGNATURE" ]]; then
           echo "Error: Se requiere sesión Hyprland activa."
           return 1
         fi
         local repo="''${1:-$PWD}"
-        local runid="$(date +%s)$RANDOM"
-        local pidfile="/tmp/hyprdev-pids-$runid"
-        : > "$pidfile"
-        # Address y pid de ESTA ventana ANTES del exec de OpenCode: tras el
-        # exec su título ya no es rastreable, pero address/pid no cambian.
-        local inv_info inv_addr inv_pid
-        inv_info="$(hyprctl -j activewindow 2>/dev/null)"
-        inv_addr="$(grep -oE '0x[0-9a-f]+' <<<"$inv_info" | head -1)"
-        inv_pid="$(grep -oE '"pid": [0-9]+' <<<"$inv_info" | head -1 | grep -oE '[0-9]+')"
-        [[ -n "$KITTY_PID" ]] && inv_pid="$KITTY_PID"
-        # El wrapper apunta su pid ANTES del exec kitty (sin carreras de
-        # captura) y setsid le da sesión propia: sobrevive a esta shell.
-        spawn() {
-          local role="$1"; shift
-          setsid zsh -c 'pidf=$1; dir=$2; title=$3; shift 3; print -r -- $$ >> "$pidf"; exec kitty -d "$dir" -T "$title" "$@"' \
-            hyprdev-spawn "$pidfile" "$repo" "hyprdev-$runid-$role" "$@" >/dev/null 2>&1 &
-        }
-        spawn nvim zsh -ic nvim
-        spawn free zsh
-        # Watcher en sesión propia ANTES del exec: sobrevive a esta shell. Se
-        # arma con las 3 arriba y, al bajar de 3, cierra las que sigan.
-        # `hyprctl dispatch closewindow address:<a>` (legacy) ya no se parsea
-        # con la config Lua, y `hl.dsp.window.close` con selector cae a la
-        # ventana ACTIVA cuando no matchea (footgun). Por eso se matan los PID
-        # kitty propios: exactos y sin tocar ninguna ventana ajena.
-        setsid zsh -f -c '
-          run=$1; inv=$2; invpid=$3; pidfile=$4; armed=0; n=0
-          while :; do
-            sleep 1
-            out=$(hyprctl -j clients 2>/dev/null)
-            a=$(grep -c "\"title\": \"hyprdev-$run-" <<<"$out")
-            if grep -q "\"address\": \"$inv\"" <<<"$out"; then a=$((a+1)); fi
-            if (( a == 3 )); then
-              armed=1
-            elif (( armed == 1 )); then
-              kill $(cat "$pidfile" 2>/dev/null) $invpid 2>/dev/null
-              exit 0
-            elif (( ++n > 30 )); then
-              exit 0
-            fi
-          done
-        ' hyprdev-watch "$runid" "$inv_addr" "$inv_pid" "$pidfile" >/dev/null 2>&1 &
+        # setsid: las ventanas nuevas sobreviven a esta shell (el `exec
+        # opencode` de abajo reemplaza este proceso).
+        setsid env FASTFETCH_SKIP=1 kitty -d "$repo" -T hyprdev-nvim zsh -ic nvim >/dev/null 2>&1 &
+        setsid env FASTFETCH_SKIP=1 kitty -d "$repo" -T hyprdev-shell zsh >/dev/null 2>&1 &
         cd "$repo" || return 1
         exec opencode --auto
       }
@@ -327,21 +264,28 @@
         echo "Listo: $OUT ($(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT")s)"
       }
 
-      # ONE-SHOT de actualización: flake update + build seco + switch, con
-      # guardas. Regla del repo: nunca rebuild sin commit previo y nunca dejar
-      # trabajo sin commitear. Con el ISP lento, el build seco avisa ANTES de
-      # tocar el sistema si hay descargas gigantes o paquetes rotos.
+      # ONE-SHOT de actualización: flake update (TODOS los inputs) + check de
+      # evaluación + build seco + switch, con guardas. Regla del repo: nunca
+      # rebuild sin commit previo y nunca dejar trabajo sin commitear. Con el
+      # ISP lento, el build seco avisa ANTES de tocar el sistema si hay
+      # descargas gigantes o paquetes rotos.
       update-nixos() {
         local HOST="$1"
         if [ -z "$HOST" ]; then HOST="$(hostname -s | tr -d '0-9')"; fi
         if [ "$HOST" = "nixos" ]; then HOST="pc"; fi
+        # Todo se evalúa/construye contra el repo, no contra el CWD de quien
+        # invoca la función (antes un `update-nixos` desde otra carpeta
+        # actualizaba un flake que no era).
+        cd ~/workspaces/nixos-config || return 1
         echo "==> Host: $HOST"
-        if [ -n "$(git -C ~/workspaces/nixos-config status --porcelain)" ]; then
+        if [ -n "$(git status --porcelain)" ]; then
           echo "Error: working tree sucio — commit o stash antes de actualizar."
           return 1
         fi
-        echo "==> nix flake update..."
-        nix flake update nixpkgs || return 1
+        echo "==> nix flake update (todos los inputs)..."
+        nix flake update || return 1
+        echo "==> nix flake check (solo evaluación, sin construir)..."
+        nix flake check --no-build || return 1
         echo "==> Build seco (sin tocar el sistema)..."
         sudo nix build --no-link .#nixosConfigurations."$HOST".config.system.build.toplevel \
           || return 1
