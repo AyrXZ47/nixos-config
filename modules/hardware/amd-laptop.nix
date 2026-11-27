@@ -37,6 +37,18 @@ let
     if [ -w /sys/firmware/acpi/platform_profile ]; then
       echo "$profile" > /sys/firmware/acpi/platform_profile 2>/dev/null || true
     fi
+    # Wi-Fi powersave: ON en batería, OFF en AC. Es por-interfaz (iw), no
+    # perfil de NM, así que se reaplica al cambiar el cargador y cuando NM
+    # activa/desactiva la conexión (dispatcher de abajo).
+    for dev in /sys/class/net/*; do
+      [ -d "$dev/wireless" ] || continue
+      iface="''${dev##*/}"
+      if on_battery; then
+        ${pkgs.iw}/bin/iw dev "$iface" set power_save on 2>/dev/null || true
+      else
+        ${pkgs.iw}/bin/iw dev "$iface" set power_save off 2>/dev/null || true
+      fi
+    done
   '';
 in
 {
@@ -115,6 +127,20 @@ in
   services.udev.extraRules = ''
     SUBSYSTEM=="power_supply", ACTION=="change", RUN+="${eppSwitch}"
   '';
+
+  # NetworkManager puede aplicar `wifi.powersave = true` al activar el perfil;
+  # este dispatcher reaplica el estado real (AC = off, batería = on) después de
+  # cada up/down/DHCP.
+  networking.networkmanager.dispatcherScripts = [
+    {
+      type = "basic";
+      source = pkgs.writeShellScript "nm-power-profile" ''
+        case "$2" in
+          up|down|dhcp4-change|dhcp6-change) exec ${eppSwitch} ;;
+        esac
+      '';
+    }
+  ];
 
   # Salud de la bateria: umbrales 85/90.
   # El EC venia en 95/100 de fabrica: la bateria viviendo entre 95 y 100% es el

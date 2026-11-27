@@ -26,12 +26,10 @@
   networking.networkmanager.enable = true;
   networking.firewall.enable = true;
 
-  # Wi-Fi (MT7921 del laptop): con powersave el firmware duerme la radio entre
-  # paquetes y mete latencia y desconexiones (se medían hasta 200 ms a la
-  # tablet en la misma LAN). Se desactiva; el costo es batería en el laptop.
-  # NM: 2 = disable, 3 = enable (NMSettingWirelessPowersave); el booleano
-  # `false` de nixpkgs mapea a 2.
-  networking.networkmanager.wifi.powersave = false;
+  # Wi-Fi (MT7921 del laptop): el default es powersave ON (batería). En AC,
+  # `eppSwitch` (amd-laptop.nix) lo apaga después de que NM activa la conexión
+  # para conservar la latencia baja. NM: true = enable, false = disable.
+  networking.networkmanager.wifi.powersave = true;
 
   # ── TCP: BBR + fq ──────────────────────────────────────────────────────────
   # cubic (default) baja el throughput ante cualquier pérdida; BBR modela el
