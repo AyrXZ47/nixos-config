@@ -156,7 +156,11 @@ in
     environment.systemPackages = with pkgs; [
       mpvpaper
       cliphist
-      # sddm-astronaut ya vive en sddm.extraPackages; no se duplica acá.
+      # El tema debe estar en systemPackages para que `pathsToLink =
+      # [ "/share/sddm" ]` lo enlace en /run/current-system/sw/share/sddm.
+      # `extraPackages` solo lo mete en el entorno de SDDM: sin esto, SDDM
+      # reporta "theme doesn't exist" y cae al tema embedded.
+      (sddm-astronaut.override { embeddedTheme = "cyberpunk"; })
       # wayle fuera: el shell es Caelestia (modules/desktop/caelestia.nix).
       # El lock/idle tambien son de Caelestia, no hyprlock/hypridle.
       wl-clipboard

@@ -7,5 +7,12 @@
   virtualisation.docker.rootless = {
     enable = true;
     setSocketVariable = true;
+    # `nft` no está en el PATH del daemon; sin esto avisa al iniciar que no
+    # puede limpiar las reglas IPv6 de nftables.
+    extraPackages = [ pkgs.nftables ];
   };
+
+  # El módulo crea el servicio para todo usuario no-root, incluido el greeter
+  # `sddm` (uid 175), que no tiene subuid y falla. Solo yovick lo corre.
+  systemd.user.services.docker.unitConfig.ConditionUser = lib.mkForce "yovick";
 }
