@@ -694,6 +694,34 @@ PYEOF
             'captureSource: root.screen' \
             "captureSource: root.screen?.name ? root.screen : null${"\n"}            live: false"
 
+            # Pills de Caelestia (busqueda del launcher y barra): el tinte del
+            # wallpaper cambia el color en cada arranque aunque el raw sea el
+            # mismo. El dueno las quiere exactas: #5050fa fijo, sin tinte.
+            substituteInPlace components/controls/SearchBar.qml \
+              --replace-fail \
+            'color: Colours.tPalette.m3surfaceContainer' \
+            'color: "#5050fa"'
+            substituteInPlace modules/bar/components/workspaces/Workspaces.qml \
+              --replace-fail \
+            'color: Colours.tPalette.m3surfaceContainer' \
+            'color: "#5050fa"'
+            substituteInPlace modules/bar/components/StatusIcons.qml \
+              --replace-fail \
+            'color: Colours.tPalette.m3surfaceContainer' \
+            'color: "#5050fa"'
+            substituteInPlace modules/bar/components/OsIcon.qml \
+              --replace-fail \
+            'color: Colours.tPalette.m3surfaceContainer' \
+            'color: "#5050fa"'
+            substituteInPlace modules/bar/components/Clock.qml \
+              --replace-fail \
+            'color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)' \
+            'color: Config.bar.clock.background ? "#5050fa" : "transparent"'
+            substituteInPlace modules/bar/components/Tray.qml \
+              --replace-fail \
+            'color: Qt.alpha(Colours.tPalette.m3surfaceContainer, (Config.bar.tray.background && items.count > 0) ? Colours.tPalette.m3surfaceContainer.a : 0)' \
+            'color: (Config.bar.tray.background && items.count > 0) ? "#5050fa" : "transparent"'
+
             # Paneles de Caelestia: el blob usa `surface` (el marco #6594a8),
             # pero launcher y sidebar no tenían fondo propio y quedaban azules.
             # Fondo surfaceContainer opaco (negro) para que el azul quede SOLO
@@ -743,7 +771,7 @@ PYEOF
             surfaceBright 2a2a44
             surfaceContainerLowest 14143a
             surfaceContainerLow 1a1a44
-            surfaceContainer 222282
+            surfaceContainer 1a1a44
             surfaceContainerHigh 222259
             surfaceContainerHighest 28286a
             onSurface d4d4f0
