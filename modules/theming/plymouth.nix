@@ -1,10 +1,19 @@
 { config, pkgs, lib, ... }:
 
+let
+  # Del paquete de adi1090x solo usamos Ironman. Copiar el tema a un paquete
+  # propio evita arrastrar el catálogo completo de temas al initrd.
+  ironmanPlymouth = pkgs.runCommand "plymouth-theme-ironman" { } ''
+    mkdir -p $out/share/plymouth/themes
+    cp -r ${pkgs.adi1090x-plymouth-themes}/share/plymouth/themes/ironman \
+      $out/share/plymouth/themes/ironman
+  '';
+in
 {
   boot.plymouth = {
     enable = true;
     theme = lib.mkForce "ironman";
-    themePackages = lib.mkForce [ pkgs.adi1090x-plymouth-themes ];
+    themePackages = lib.mkForce [ ironmanPlymouth ];
   };
 
   # initrd con systemd es obligatorio desde que nixpkgs saco el stage 1 scripted

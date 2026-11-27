@@ -22,7 +22,10 @@
     nerd-fonts.jetbrains-mono
     nerd-fonts.symbols-only
     inter
-    noto-fonts
+    # Noto sin CJK: LGC+ cubre latino/griego/cirílico; el bloque CJK pesaba
+    # ~120 MB y no se usa. Color Emoji sí se conserva.
+    noto-fonts-lgc-plus
+    noto-fonts-color-emoji
     lato
     quicksand
     rubik

@@ -79,69 +79,6 @@
       # Gentle-AI: retirado (2026-10-30). OpenCode es el harness por defecto y
       # Pi queda pelado; no se mantiene overlay ni binario de gentle.
 
-      # nixpkgs congela openrocket en 23.09 (formato de fichero viejo, 3D roto
-      # en NixOS: JOGL sin libGL en LD_LIBRARY_PATH) mientras upstream distribuye
-      # 24.12 como jar autocontenido (trae sus JOGL natives, ya no compila:
-      # 24.12 migro de Ant a Gradle). Overlay con el jar oficial de la release
-      # + wrapper con las libs GL/X11 que JOGL no encuentra en NixOS.
-      # ponytail: techo conocido — si nixpkgs sube a 24.12+, borrar el override.
-      openrocketOverlay = final: prev: let
-        # Icono oficial del repo upstream (el jar no trae icono de app).
-        openrocketIcon = final.fetchurl {
-          url = "https://raw.githubusercontent.com/openrocket/openrocket/release-24.12/snap/gui/openrocket.png";
-          hash = "sha256-lI07IUsnvWep7mdfz2392aRPW1qpe5kT7SmR48x4fE8=";
-        };
-      in {
-        openrocket = final.stdenvNoCC.mkDerivation {
-          pname = "openrocket";
-          version = "24.12";
-          src = final.fetchurl {
-            url = "https://github.com/openrocket/openrocket/releases/download/release-24.12/OpenRocket-24.12.jar";
-            hash = "sha256-SVm3L1L19geUHpciq7t7fwxKOOu7+EIEoynbnzHE+Jc=";
-          };
-          dontUnpack = true;
-          nativeBuildInputs = [ final.makeWrapper final.unzip ];
-          installPhase = ''
-            install -Dm644 $src $out/share/openrocket/OpenRocket.jar
-            install -Dm644 ${openrocketIcon} $out/share/icons/hicolor/256x256/apps/openrocket.png
-            mkdir -p $out/share/applications
-            cat > $out/share/applications/openrocket.desktop <<EOF
-            [Desktop Entry]
-            Type=Application
-            Name=OpenRocket
-            Comment=Model-rocketry aerodynamics and trajectory simulation
-            Exec=openrocket
-            Icon=openrocket
-            Terminal=false
-            Categories=Science;Education;Engineering;
-            EOF
-            # NixOS no es FHS y el loader de JogAmp (JOGL) lo exige dos veces:
-            # 1) su exec-test escribe un script con shebang FIJO "#!/usr/bin/true"
-            #    y lo ejecuta para validar el temp dir; sin /usr/bin/true falla en
-            #    todo candidato y el TempJarCache no puede extraer las natives.
-            # 2) tras ese fallo, el loader CAE a buscar lib<native>.so en
-            #    java.library.path (heredado de LD_LIBRARY_PATH). Fix: extraer
-            #    las natives del jar al store y sumarlas al LD_LIBRARY_PATH —
-            #    el 3D funciona sin tocar nada del sistema.
-            # ponytail: si gluegen upstream arregla su exec-test para no-FHS,
-            # borrar la extraccion (el LD_LIBRARY_PATH de GL/X11 se queda).
-            unzip -q -o $src 'natives/linux-amd64/*' -d $out/share/openrocket
-            # Deps del linker dinamico que JOGL dlopen-ea: libGL.so.1 (glvnd, NO
-            # vive en /run/opengl-driver — ahi solo estan los vendors mesa) y las
-            # X11 que piden jogl_desktop/nativewindow/newt (ldd sobre las natives).
-            makeWrapper ${final.jdk17}/bin/java $out/bin/openrocket \
-              --add-flags "-jar $out/share/openrocket/OpenRocket.jar" \
-              --suffix LD_LIBRARY_PATH : /run/opengl-driver/lib:${final.libGL}/lib:${final.libx11}/lib:${final.libxext}/lib:${final.libxi}/lib:${final.libxxf86vm}/lib:${final.libxrender}/lib:${final.libxrandr}/lib:${final.libxcursor}/lib:$out/share/openrocket/natives/linux-amd64
-          '';
-          meta = {
-            description = "Model-rocketry aerodynamics and trajectory simulation software (jar oficial 24.12)";
-            homepage = "https://openrocket.info";
-            license = final.lib.licenses.gpl3Plus;
-            platforms = final.lib.platforms.linux;
-          };
-        };
-      };
-
       # Librería SPICE de la comunidad (~50k modelos) como paquete de datos:
       # copia el repo a $out/share/kicad-spice-library y empaqueta los buscador
       # `spice-find` (buscar) y `spice-get` (buscar + extraer al proyecto). El
@@ -931,7 +868,7 @@ PYEOF
         inherit system;
         modules = [
           # Overlay visible en todos los modulos y en home-manager (useGlobalPkgs=true).
-          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay openrocketOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay ]; }
+          { nixpkgs.overlays = [ kdeconnectRemoteInputOverlay spiceLibraryOverlay bibataCursorOverlay caelestiaDedupeOverlay caelestiaCyberpunkSchemeOverlay ]; }
           home-manager.nixosModules.home-manager
           {
             home-manager = {
@@ -958,7 +895,8 @@ PYEOF
       };
     in
     {
-      packages.x86_64-linux.openrocket = (import nixpkgs { inherit system; overlays = [ openrocketOverlay ]; }).openrocket;
+      # OpenRocket stock de nixpkgs (24.12): sin overlay propio.
+      packages.x86_64-linux.openrocket = (import nixpkgs { inherit system; }).openrocket;
 
       # Pi suelto: `nix build .#pi` verifica la misma derivacion que usan los
       # hosts (pkgs.pi-coding-agent del canal, con binario en cache).
