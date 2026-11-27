@@ -113,7 +113,7 @@ let
     model = {
       providerID = "opencode-go";
       model = "deepseek-v4.1-flash";
-      variant = "max";
+      variant = "high";
     };
     websearch = false;
     experimental = {
