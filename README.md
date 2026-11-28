@@ -261,8 +261,7 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 
 ### Applications
 Productivity: OnlyOffice, Obsidian, KeePassXC, Syncthing, Brave (navegador
-default, incluye ventana privada con Tor y Obsidian Web Clipper instalado por
-política), Ferdium (mensajería, arranca con
+default, incluye ventana privada con Tor), Ferdium (mensajería, arranca con
 `SUPER W` en el workspace especial `communication`); se muestra con `SUPER CTRL C`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.

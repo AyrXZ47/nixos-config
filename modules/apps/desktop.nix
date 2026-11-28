@@ -51,11 +51,12 @@
     </Menu>
   '';
 
-  # Extensiones de Brave instaladas por política:
+  # Extensiones de Brave por política:
   # - OpenCode Browse: `normal_installed` la instala sola pero deja
   #   desactivarla; el pairing (`browse pair`) sigue siendo un consentimiento
   #   del navegador. El CLI/MCP vive en modules/apps/opencode.nix.
-  # - Obsidian Web Clipper: oficial, guarda la página como nota del vault.
+  # - Obsidian Web Clipper: descartado por el usuario el 2026-11-27. `removed`
+  #   lo desinstala en el próximo rebuild y evita que se reinstale.
   environment.etc."brave/policies/managed/extensions.json".text =
     builtins.toJSON {
       ExtensionSettings = {
@@ -64,16 +65,15 @@
           update_url = "https://clients2.google.com/service/update2/crx";
         };
         "cnjifjpddelmedmihgijeibhnjfabmlf" = {
-          installation_mode = "normal_installed";
-          update_url = "https://clients2.google.com/service/update2/crx";
+          installation_mode = "removed";
         };
       };
     };
 
   # Defaults de Brave: sin política a propósito. El navegador arranca con lo
-  # que tenga el perfil y el usuario elige todo desde la UI. La única policy
-  # que queda es la de opencode-browse (instala la extensión de browse, no
-  # cambia preferencias del navegador).
+  # que tenga el perfil y el usuario elige todo desde la UI. La policy de
+  # extensions.json solo instala browse y retira el clipper; no cambia
+  # preferencias del navegador.
 
   environment.systemPackages = with pkgs; [
     # Navegador único. Brave incluye "Private Window with Tor" (no es el Tor
