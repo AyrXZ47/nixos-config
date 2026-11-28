@@ -22,6 +22,17 @@ let
     hash = "sha256-MkCOANBAqCc1WmNf7S8PsyAphGJAIzEXGyCm8RrCR9M=";
   };
 
+  # Skills oficiales de Obsidian. Solo las de formato: `obsidian-cli`,
+  # `obsidian-headless`, `defuddle` y `knap` necesitan CLIs que no están
+  # instalados. La skill local `vault` sigue aportando el mapa del vault y las
+  # reglas de dotpm, que estas skills genéricas no conocen.
+  obsidianSkills = pkgs.fetchFromGitHub {
+    owner = "obsidianmd";
+    repo = "obsidian-skills";
+    rev = "9c9560a870fd490b0e1a847f2c8401a50e2d931d";
+    hash = "sha256-OBqGXILvtpMiwe7ErNVeY71j2FCO2mSwNomu0T+4ngU=";
+  };
+
   ponytailCommands = [
     "ponytail"
     "ponytail-audit"
@@ -161,6 +172,9 @@ in
     ".config/opencode/skills/security-audit".source = "${securityAudit}/skills/security-audit";
     ".config/opencode/skills/ponytail".source = "${ponytail}/skills/ponytail";
     ".config/opencode/skills/frontend-design".source = "${anthropicSkills}/skills/frontend-design";
+    ".config/opencode/skills/obsidian-markdown".source = "${obsidianSkills}/plugins/obsidian/skills/obsidian-markdown";
+    ".config/opencode/skills/obsidian-bases".source = "${obsidianSkills}/plugins/obsidian/skills/obsidian-bases";
+    ".config/opencode/skills/json-canvas".source = "${obsidianSkills}/plugins/obsidian/skills/json-canvas";
     ".config/opencode/skills/dotpm".source = ./opencode-skills/dotpm;
     ".config/opencode/skills/vault".source = ./opencode-skills/vault;
     ".config/opencode/AGENTS.md".text = globalAgents;

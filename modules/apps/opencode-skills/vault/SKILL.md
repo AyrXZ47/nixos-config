@@ -54,6 +54,13 @@ Antes de escribir, buscá también: si la nota existe, se edita, no se duplica.
 - **Una decisión, un lugar.** Si ya está en `PC & AI/Nix.md`, no la repitas en
   `Topics/`; enlazala.
 
+## Sintaxis
+
+El formato lo cubren las skills oficiales: `obsidian-markdown` (wikilinks,
+embeds, callouts, propiedades), `obsidian-bases` (`.base`) y `json-canvas`
+(`.canvas`). Esta skill solo aporta lo propio de este vault: mapa, búsqueda y
+reglas de escritura.
+
 ## Nunca tocar
 
 `.obsidian/` (incluye `copilot-index-*.json`), `.smart-env/`, `LocalLlmHub/`,

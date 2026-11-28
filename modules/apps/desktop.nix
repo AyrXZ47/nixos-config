@@ -51,14 +51,19 @@
     </Menu>
   '';
 
-  # OpenCode Browse: instala la extensión de Chromium en Brave sin click
-  # manual. `normal_installed` la instala sola pero deja desactivarla; el
-  # pairing (`browse pair`) sigue siendo un consentimiento del navegador.
-  # El CLI/MCP vive en modules/apps/opencode.nix.
-  environment.etc."brave/policies/managed/opencode-browse.json".text =
+  # Extensiones de Brave instaladas por política:
+  # - OpenCode Browse: `normal_installed` la instala sola pero deja
+  #   desactivarla; el pairing (`browse pair`) sigue siendo un consentimiento
+  #   del navegador. El CLI/MCP vive en modules/apps/opencode.nix.
+  # - Obsidian Web Clipper: oficial, guarda la página como nota del vault.
+  environment.etc."brave/policies/managed/extensions.json".text =
     builtins.toJSON {
       ExtensionSettings = {
         "mfnicocicmmlkpjnaffgihfjhdgjkdjg" = {
+          installation_mode = "normal_installed";
+          update_url = "https://clients2.google.com/service/update2/crx";
+        };
+        "cnjifjpddelmedmihgijeibhnjfabmlf" = {
           installation_mode = "normal_installed";
           update_url = "https://clients2.google.com/service/update2/crx";
         };

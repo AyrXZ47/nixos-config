@@ -194,8 +194,9 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
   `sound_pack` y `volume: 1`, con un WAV generado en build para `done` y
   `subagent_done`; `common-cli.nix` crea `/usr/bin/pw-play` para que el audio
   no dependa del PATH.
-- **Skills globales**: `security-audit` (Cloudflare), `ponytail` y
-  `frontend-design` (Anthropic) se bajan de upstream con `fetchFromGitHub` en
+- **Skills globales**: `security-audit` (Cloudflare), `ponytail`,
+  `frontend-design` (Anthropic) y `obsidian-markdown`, `obsidian-bases`,
+  `json-canvas` (Obsidian) se bajan de upstream con `fetchFromGitHub` en
   `modules/apps/opencode-skills.nix` y se enlazan en
   `~/.config/opencode/skills/`. Se actualizan cambiando el `rev` y el `hash`;
   no se clonan en cada repo. También instala los comandos `/ponytail*`.
@@ -260,7 +261,8 @@ Los originales sin procesar quedan fuera de git en `~/Videos/wallpapers-src`.
 
 ### Applications
 Productivity: OnlyOffice, Obsidian, KeePassXC, Syncthing, Brave (navegador
-default, incluye ventana privada con Tor), Ferdium (mensajería, arranca con
+default, incluye ventana privada con Tor y Obsidian Web Clipper instalado por
+política), Ferdium (mensajería, arranca con
 `SUPER W` en el workspace especial `communication`); se muestra con `SUPER CTRL C`.
 Creative: Blender, Krita, GIMP, Inkscape, Audacity, Mixxx, Shotcut, OBS Studio,
 VLC.
